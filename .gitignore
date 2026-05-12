@@ -5,6 +5,7 @@ dist/
 .DS_Store
 .gstack/
 
-# Logo design exploration — only logos/final/ is canonical
+# Logo design exploration — only logos/final/ and logos/Techsider logo/ are canonical
 logos/concepts/
+logos/explore/
 logos/preview.html
