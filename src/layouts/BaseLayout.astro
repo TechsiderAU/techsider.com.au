@@ -1,0 +1,55 @@
+---
+import "../styles/global.css";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Techsider — Enterprise AI for Australian business",
+  description = "Techsider builds production LLM platforms, retrieval systems, and AI agents for Australian businesses. Enterprise-grade, sovereign, vendor-neutral.",
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Techsider",
+  url: "https://techsider.com.au",
+  email: "admin@techsider.com.au",
+  areaServed: "AU",
+  description,
+  knowsAbout: ["LLM Ops", "Retrieval-Augmented Generation", "AI Agents"],
+};
+---
+
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Techsider" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body class="bg-bg text-text font-sans antialiased">
+    <slot />
+    <Footer />
+  </body>
+</html>
