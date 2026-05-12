@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "@fontsource/eb-garamond/400.css";
+@import "@fontsource/eb-garamond/400-italic.css";
+@import "@fontsource/eb-garamond/500.css";
+
+@theme {
+  /* Surfaces */
+  --color-bg: #0b1424;
+  --color-bg-elev: #101c34;
+  --color-bg-deep: #07101e;
+
+  /* Text */
+  --color-text: #f4f6fa;
+  --color-text-mute: #a7b1c4;
+  --color-text-dim: #8893a8;
+
+  /* Accent */
+  --color-accent: #6da9ff;
+  --color-accent-ink: #0b1424;
+
+  /* Borders */
+  --color-border: #1f2a40;
+  --color-border-soft: #2a3650;
+
+  /* Fonts */
+  --font-serif: "EB Garamond", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter Variable", "Inter", system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--color-bg);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
