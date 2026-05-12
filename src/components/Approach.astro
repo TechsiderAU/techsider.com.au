@@ -1,0 +1,36 @@
+---
+const steps = [
+  {
+    num: "i.",
+    title: "Discovery",
+    body: "Two-week paid discovery. We scope the problem, your data, and the success criteria. You get an architecture and a quote.",
+  },
+  {
+    num: "ii.",
+    title: "Build",
+    body: "Fixed-scope engagements. Source code is yours. We instrument it for evaluation as we build it.",
+  },
+  {
+    num: "iii.",
+    title: "Operate",
+    body: "Optional ongoing operations: model upgrades, eval drift monitoring, incident response.",
+  },
+];
+---
+<section id="approach" class="px-6 py-24 md:py-32 border-b border-border">
+  <div class="max-w-6xl mx-auto">
+    <p class="text-xs uppercase tracking-[0.2em] text-accent font-medium mb-4">How we work</p>
+    <h2 class="font-serif font-normal text-3xl md:text-4xl leading-[1.15] text-text max-w-[28ch] mb-12">
+      From conversation to operations in three steps.
+    </h2>
+    <div class="grid gap-10 md:grid-cols-3">
+      {steps.map((s) => (
+        <div>
+          <p class="font-serif italic text-accent text-4xl mb-3 leading-none">{s.num}</p>
+          <h3 class="text-text font-semibold text-base mb-2">{s.title}</h3>
+          <p class="text-text-dim text-sm leading-relaxed">{s.body}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
