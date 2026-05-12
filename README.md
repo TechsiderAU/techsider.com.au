@@ -22,7 +22,12 @@ npm run preview  # serves dist/ locally
 
 Push to `main`. The workflow in `.github/workflows/deploy.yml` builds and publishes to GitHub Pages automatically.
 
-The custom domain is configured via `public/CNAME`. After enabling GitHub Pages (Settings → Pages → Source: GitHub Actions), make sure DNS points the apex `techsider.com.au` record to GitHub Pages and "Enforce HTTPS" is on.
+The custom domain is configured via `public/CNAME`. After enabling GitHub Pages (Settings → Pages → Source: GitHub Actions), point DNS at your registrar:
+
+- Apex `techsider.com.au` → ALIAS/ANAME `techsiderau.github.io`, or A records to `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+- Optional `www.techsider.com.au` → CNAME `techsiderau.github.io`
+
+Then enable "Enforce HTTPS" once the cert provisions.
 
 ## Structure
 
