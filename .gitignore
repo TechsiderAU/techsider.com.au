@@ -3,3 +3,8 @@ node_modules/
 dist/
 .astro/
 .DS_Store
+.gstack/
+
+# Logo design exploration — only logos/final/ is canonical
+logos/concepts/
+logos/preview.html
