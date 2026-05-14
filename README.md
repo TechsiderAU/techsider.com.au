@@ -4,8 +4,9 @@ Marketing landing page for Techsider — enterprise AI services for Australian b
 
 ## Stack
 
-- [Astro 5](https://astro.build/) (static output, zero JS hydration)
+- [Astro 5](https://astro.build/) (static output, no framework hydration)
 - [Tailwind CSS v4](https://tailwindcss.com/) via `@tailwindcss/vite`
+- [Three.js](https://threejs.org/) — interactive WebGL hero animation (`HeroScene.astro`), loaded as a deferred client script
 - Fonts: EB Garamond (serif headlines), Inter Variable (body) — both self-hosted via fontsource
 - Hosted on GitHub Pages at https://techsider.com.au
 
