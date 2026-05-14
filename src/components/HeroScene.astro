@@ -1,0 +1,898 @@
+---
+---
+<div class="hero-scene absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+  <canvas id="hero-canvas" class="block h-full w-full"></canvas>
+</div>
+
+<style>
+  #hero-canvas {
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  #hero-canvas.is-ready {
+    opacity: 0.55;
+  }
+  @media (min-width: 768px) {
+    #hero-canvas.is-ready {
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  import * as THREE from "three";
+
+  const canvas = document.getElementById("hero-canvas") as HTMLCanvasElement | null;
+  const wrap = canvas?.parentElement ?? null;
+
+  if (canvas && wrap) {
+    try {
+      initHeroScene(canvas, wrap);
+    } catch (err) {
+      console.warn("Hero scene disabled:", err);
+      canvas.style.display = "none";
+    }
+  }
+
+  function initHeroScene(canvas: HTMLCanvasElement, wrap: HTMLElement) {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const section = (canvas.closest("section") as HTMLElement | null) ?? wrap;
+
+    const ACCENT = 0x6da9ff;
+    const ACCENT_SOFT = 0x9cc5ff;
+    const ACCENT_DIM = 0x3f6dad;
+    const ACCENT_BRIGHT = 0xcfe3ff;
+    const BASE_TILT = -0.14;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    camera.position.set(0, 0, 16);
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+      powerPreference: "high-performance",
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const root = new THREE.Group();
+    root.rotation.x = BASE_TILT;
+    scene.add(root);
+
+    // ---------- shared textures ----------
+    function makeGlowTexture() {
+      const c = document.createElement("canvas");
+      c.width = c.height = 128;
+      const g = c.getContext("2d")!;
+      const grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+      grd.addColorStop(0, "rgba(157,197,255,0.95)");
+      grd.addColorStop(0.3, "rgba(109,169,255,0.4)");
+      grd.addColorStop(1, "rgba(109,169,255,0)");
+      g.fillStyle = grd;
+      g.fillRect(0, 0, 128, 128);
+      return new THREE.CanvasTexture(c);
+    }
+    function makeDocTexture() {
+      const c = document.createElement("canvas");
+      c.width = 132;
+      c.height = 164;
+      const g = c.getContext("2d")!;
+      g.fillStyle = "#e9effb";
+      g.fillRect(0, 0, 132, 164);
+      g.fillStyle = "#93b0e2";
+      g.fillRect(14, 16, 104, 12);
+      g.fillStyle = "#adbfdc";
+      for (let i = 0; i < 8; i++) {
+        g.fillRect(14, 42 + i * 14, i % 3 === 2 ? 58 : 104, 6);
+      }
+      return new THREE.CanvasTexture(c);
+    }
+    function makeLabel(text: string) {
+      const c = document.createElement("canvas");
+      c.width = 512;
+      c.height = 128;
+      const g = c.getContext("2d")!;
+      g.font = "600 56px Inter, system-ui, -apple-system, sans-serif";
+      g.fillStyle = "rgba(157,197,255,0.95)";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.fillText(text.split("").join(" "), 256, 70);
+      const sprite = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: new THREE.CanvasTexture(c),
+          transparent: true,
+          opacity: 0.42,
+          depthWrite: false,
+        })
+      );
+      sprite.scale.set(2.0, 0.5, 1);
+      return sprite;
+    }
+    const glowTex = makeGlowTexture();
+    const docTex = makeDocTexture();
+
+    // ---------- ambient: outer boundary + dust ----------
+    const boundary = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(9, 1),
+      new THREE.MeshBasicMaterial({
+        color: ACCENT_DIM,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.05,
+      })
+    );
+    root.add(boundary);
+
+    const DUST_N = 140;
+    const dustArr = new Float32Array(DUST_N * 3);
+    for (let i = 0; i < DUST_N; i++) {
+      dustArr[i * 3] = (Math.random() - 0.5) * 30;
+      dustArr[i * 3 + 1] = (Math.random() - 0.5) * 18;
+      dustArr[i * 3 + 2] = (Math.random() - 0.5) * 14 - 2;
+    }
+    const dustGeo = new THREE.BufferGeometry();
+    dustGeo.setAttribute("position", new THREE.BufferAttribute(dustArr, 3));
+    const dust = new THREE.Points(
+      dustGeo,
+      new THREE.PointsMaterial({ color: ACCENT_SOFT, size: 0.05, transparent: true, opacity: 0.4 })
+    );
+    scene.add(dust);
+
+    // ================= NEURAL NETWORK (the LLM) =================
+    const netGroup = new THREE.Group();
+    netGroup.position.set(0.4, 0.4, 0);
+    netGroup.rotation.set(0.1, -0.34, 0);
+    root.add(netGroup);
+
+    const LAYERS = [4, 6, 7, 6, 4];
+    const NUM_L = LAYERS.length;
+    const LAYER_GAP = 1.05;
+    const NODE_GAP = 0.62;
+
+    type NetNode = {
+      mesh: THREE.Mesh;
+      layer: number;
+      pos: THREE.Vector3;
+      extraGlow: number;
+    };
+    const netNodes: NetNode[] = [];
+    const nodeGeo = new THREE.SphereGeometry(0.12, 10, 10);
+    const NODE_DIM = new THREE.Color(0x2d4f86);
+    const NODE_BRIGHT = new THREE.Color(0xdcebff);
+
+    for (let L = 0; L < NUM_L; L++) {
+      const count = LAYERS[L];
+      const x = -((NUM_L - 1) * LAYER_GAP) / 2 + L * LAYER_GAP;
+      for (let n = 0; n < count; n++) {
+        const y = -((count - 1) * NODE_GAP) / 2 + n * NODE_GAP;
+        const mesh = new THREE.Mesh(
+          nodeGeo,
+          new THREE.MeshBasicMaterial({ color: NODE_DIM.clone() })
+        );
+        mesh.position.set(x, y, 0);
+        netGroup.add(mesh);
+        netNodes.push({ mesh, layer: L, pos: new THREE.Vector3(x, y, 0), extraGlow: 0 });
+      }
+    }
+    const inputNodes = netNodes.filter((n) => n.layer === 0);
+    const outputNodes = netNodes.filter((n) => n.layer === NUM_L - 1);
+
+    // edges between adjacent layers
+    type Edge = { a: NetNode; b: NetNode; lo: number };
+    const edges: Edge[] = [];
+    for (let L = 0; L < NUM_L - 1; L++) {
+      const from = netNodes.filter((n) => n.layer === L);
+      const to = netNodes.filter((n) => n.layer === L + 1);
+      for (const a of from) for (const b of to) edges.push({ a, b, lo: L });
+    }
+    const edgePos = new Float32Array(edges.length * 2 * 3);
+    const edgeCol = new Float32Array(edges.length * 2 * 3);
+    for (let i = 0; i < edges.length; i++) {
+      const e = edges[i];
+      edgePos[i * 6] = e.a.pos.x;
+      edgePos[i * 6 + 1] = e.a.pos.y;
+      edgePos[i * 6 + 2] = e.a.pos.z;
+      edgePos[i * 6 + 3] = e.b.pos.x;
+      edgePos[i * 6 + 4] = e.b.pos.y;
+      edgePos[i * 6 + 5] = e.b.pos.z;
+    }
+    const edgeGeo = new THREE.BufferGeometry();
+    edgeGeo.setAttribute("position", new THREE.BufferAttribute(edgePos, 3));
+    edgeGeo.setAttribute("color", new THREE.BufferAttribute(edgeCol, 3));
+    const netEdges = new THREE.LineSegments(
+      edgeGeo,
+      new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.6 })
+    );
+    netGroup.add(netEdges);
+    const EDGE_DIM = new THREE.Color(0x18335c);
+    const EDGE_BRIGHT = new THREE.Color(0xbcd6ff);
+    const _ecol = new THREE.Color();
+
+    // soft glow behind the network + an "ops" halo ring
+    const netGlow = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map: glowTex,
+        transparent: true,
+        opacity: 0.55,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
+    );
+    netGlow.scale.set(9, 7, 1);
+    netGroup.add(netGlow);
+
+    const opsRing = new THREE.Mesh(
+      new THREE.TorusGeometry(3.5, 0.018, 8, 110),
+      new THREE.MeshBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.22 })
+    );
+    netGroup.add(opsRing);
+
+    // invisible hit box for raycasting the whole model
+    const netHit = new THREE.Mesh(
+      new THREE.BoxGeometry((NUM_L - 1) * LAYER_GAP + 1.4, 5.0, 1.6),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+    );
+    netHit.userData = { type: "core" };
+    netGroup.add(netHit);
+
+    netGroup.add(makeLabel("LLM").translateY(2.7));
+
+    // root-space position of a network node (netGroup has rotation, no scale)
+    const _q = netGroup.quaternion;
+    function netNodeRoot(node: NetNode, target: THREE.Vector3) {
+      return target.copy(node.pos).applyQuaternion(_q).add(netGroup.position);
+    }
+    const netCenterRoot = netGroup.position.clone();
+
+    // ================= RAG: knowledge base =================
+    const ragGroup = new THREE.Group();
+    ragGroup.position.set(-2.5, -3.0, 0.6);
+    root.add(ragGroup);
+
+    type Doc = { mesh: THREE.Mesh; flash: number };
+    const docs: Doc[] = [];
+    const docGeo = new THREE.PlaneGeometry(0.5, 0.62);
+    const DC = 4;
+    const DR = 3;
+    for (let x = 0; x < DC; x++) {
+      for (let y = 0; y < DR; y++) {
+        const mesh = new THREE.Mesh(
+          docGeo,
+          new THREE.MeshBasicMaterial({
+            map: docTex,
+            transparent: true,
+            opacity: 0.85,
+            side: THREE.DoubleSide,
+          })
+        );
+        mesh.position.set((x - (DC - 1) / 2) * 0.66, (y - (DR - 1) / 2) * 0.78, 0);
+        mesh.rotation.y = -0.3;
+        docs.push({ mesh, flash: 0 });
+        ragGroup.add(mesh);
+      }
+    }
+    const ragFrame = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(3.0, 2.7, 0.7)),
+      new THREE.LineBasicMaterial({ color: ACCENT_DIM, transparent: true, opacity: 0.4 })
+    );
+    ragGroup.add(ragFrame);
+    ragGroup.add(makeLabel("RAG").translateY(1.85));
+
+    // ================= AGENTS =================
+    const AGENT_N = 7;
+    const agentGeo = new THREE.OctahedronGeometry(0.3, 0);
+    const hitGeo = new THREE.SphereGeometry(0.7, 8, 8);
+    const raycastTargets: THREE.Object3D[] = [netHit];
+
+    type Agent = {
+      mesh: THREE.Mesh;
+      radius: number;
+      speed: number;
+      phase: number;
+      q: THREE.Quaternion;
+      spin: number;
+      nextDispatch: number;
+      scale: number;
+      glow: number;
+      pos: THREE.Vector3;
+    };
+    const agents: Agent[] = [];
+    for (let i = 0; i < AGENT_N; i++) {
+      const mesh = new THREE.Mesh(agentGeo, new THREE.MeshBasicMaterial({ color: ACCENT }));
+      const shell = new THREE.Mesh(
+        agentGeo,
+        new THREE.MeshBasicMaterial({
+          color: ACCENT_SOFT,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.6,
+        })
+      );
+      shell.scale.setScalar(1.45);
+      mesh.add(shell);
+      const hit = new THREE.Mesh(
+        hitGeo,
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+      );
+      hit.userData = { type: "agent", i };
+      mesh.add(hit);
+      raycastTargets.push(hit);
+      root.add(mesh);
+      agents.push({
+        mesh,
+        radius: 3.2 + Math.random() * 2.0,
+        speed: (0.1 + Math.random() * 0.2) * (Math.random() < 0.5 ? -1 : 1),
+        phase: Math.random() * Math.PI * 2,
+        q: new THREE.Quaternion().setFromEuler(
+          new THREE.Euler((Math.random() - 0.5) * 1.2, Math.random() * Math.PI, 0)
+        ),
+        spin: 0.5 + Math.random() * 0.8,
+        nextDispatch: 1 + Math.random() * 4,
+        scale: 1,
+        glow: 0,
+        pos: new THREE.Vector3(),
+      });
+    }
+
+    // agent -> model lines (vertex coloured)
+    const aLinePos = new Float32Array(AGENT_N * 2 * 3);
+    const aLineCol = new Float32Array(AGENT_N * 2 * 3);
+    const aLineGeo = new THREE.BufferGeometry();
+    aLineGeo.setAttribute("position", new THREE.BufferAttribute(aLinePos, 3));
+    aLineGeo.setAttribute("color", new THREE.BufferAttribute(aLineCol, 3));
+    const agentLines = new THREE.LineSegments(
+      aLineGeo,
+      new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.6 })
+    );
+    root.add(agentLines);
+    const LINE_DIM: [number, number, number] = [0.1, 0.16, 0.28];
+    const LINE_BRIGHT: [number, number, number] = [0.81, 0.89, 1.0];
+    function setLineColor(i: number, t: number) {
+      for (let v = 0; v < 2; v++) {
+        const o = (i * 2 + v) * 3;
+        aLineCol[o] = LINE_DIM[0] + (LINE_BRIGHT[0] - LINE_DIM[0]) * t;
+        aLineCol[o + 1] = LINE_DIM[1] + (LINE_BRIGHT[1] - LINE_DIM[1]) * t;
+        aLineCol[o + 2] = LINE_DIM[2] + (LINE_BRIGHT[2] - LINE_DIM[2]) * t;
+      }
+    }
+
+    // agent <-> agent proximity mesh
+    const MAX_PAIRS = (AGENT_N * (AGENT_N - 1)) / 2;
+    const MESH_DIST = 2.8;
+    const mLinePos = new Float32Array(MAX_PAIRS * 2 * 3);
+    const mLineGeo = new THREE.BufferGeometry();
+    mLineGeo.setAttribute("position", new THREE.BufferAttribute(mLinePos, 3));
+    mLineGeo.setDrawRange(0, 0);
+    const meshLines = new THREE.LineSegments(
+      mLineGeo,
+      new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.16 })
+    );
+    root.add(meshLines);
+
+    const agentsLabel = makeLabel("AGENTS");
+    agentsLabel.position.set(0, 5.0, 0);
+    root.add(agentsLabel);
+
+    // ================= PULSES (queries + retrieved chunks) =================
+    const PULSE_N = 34;
+    const pulseGeo = new THREE.BoxGeometry(0.17, 0.17, 0.17);
+    type Pulse = {
+      mesh: THREE.Mesh;
+      active: boolean;
+      from: THREE.Vector3;
+      to: THREE.Vector3;
+      t: number;
+      dur: number;
+      arc: number;
+      node: NetNode | null;
+    };
+    const pulses: Pulse[] = [];
+    for (let i = 0; i < PULSE_N; i++) {
+      const mesh = new THREE.Mesh(
+        pulseGeo,
+        new THREE.MeshBasicMaterial({ color: ACCENT_SOFT, transparent: true, opacity: 0 })
+      );
+      mesh.visible = false;
+      root.add(mesh);
+      pulses.push({
+        mesh,
+        active: false,
+        from: new THREE.Vector3(),
+        to: new THREE.Vector3(),
+        t: 0,
+        dur: 1,
+        arc: 0,
+        node: null,
+      });
+    }
+    function emitPulse(
+      from: THREE.Vector3,
+      to: THREE.Vector3,
+      dur: number,
+      color: number,
+      node: NetNode | null
+    ) {
+      const p = pulses.find((p) => !p.active);
+      if (!p) return;
+      p.active = true;
+      p.t = 0;
+      p.dur = dur;
+      p.arc = 0.2 + Math.random() * 0.5;
+      p.from.copy(from);
+      p.to.copy(to);
+      p.node = node;
+      (p.mesh.material as THREE.MeshBasicMaterial).color.setHex(color);
+      p.mesh.visible = true;
+    }
+
+    // ================= TOKENS (generated output) =================
+    const TOKEN_N = 22;
+    const tokenGeo = new THREE.PlaneGeometry(0.26, 0.12);
+    type Token = { mesh: THREE.Mesh; active: boolean; t: number; vy: number };
+    const tokens: Token[] = [];
+    for (let i = 0; i < TOKEN_N; i++) {
+      const mesh = new THREE.Mesh(
+        tokenGeo,
+        new THREE.MeshBasicMaterial({ color: ACCENT_BRIGHT, transparent: true, opacity: 0 })
+      );
+      mesh.visible = false;
+      netGroup.add(mesh);
+      tokens.push({ mesh, active: false, t: 0, vy: 0 });
+    }
+    function emitTokens(n: number) {
+      for (let i = 0; i < n; i++) {
+        const tk = tokens.find((t) => !t.active);
+        if (!tk) break;
+        const src = outputNodes[(Math.random() * outputNodes.length) | 0];
+        tk.active = true;
+        tk.t = 0;
+        tk.vy = (Math.random() - 0.5) * 0.6;
+        tk.mesh.position.set(src.pos.x, src.pos.y, src.pos.z);
+        tk.mesh.scale.set(0.6 + Math.random() * 0.9, 1, 1);
+        tk.mesh.visible = true;
+      }
+    }
+
+    // ================= SHOCKWAVES =================
+    const waveGeo = new THREE.TorusGeometry(1, 0.035, 8, 72);
+    const shocks: { mesh: THREE.Mesh; active: boolean; t: number }[] = [];
+    for (let i = 0; i < 3; i++) {
+      const mesh = new THREE.Mesh(
+        waveGeo,
+        new THREE.MeshBasicMaterial({
+          color: ACCENT_SOFT,
+          transparent: true,
+          opacity: 0,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        })
+      );
+      mesh.visible = false;
+      mesh.position.copy(netGroup.position);
+      root.add(mesh);
+      shocks.push({ mesh, active: false, t: 0 });
+    }
+    function emitShock() {
+      const w = shocks.find((w) => !w.active);
+      if (!w) return;
+      w.active = true;
+      w.t = 0;
+      w.mesh.visible = true;
+    }
+
+    // ================= forward passes + scheduling =================
+    const fwd: { pos: number; speed: number }[] = [];
+    const layerAct = new Float32Array(NUM_L);
+    let netFlash = 0;
+
+    function forwardPass() {
+      fwd.push({ pos: -0.7, speed: 2.0 + Math.random() * 0.7 });
+    }
+    function retrieve() {
+      const d = docs[(Math.random() * docs.length) | 0];
+      d.flash = 1;
+      const docRoot = d.mesh.position.clone().add(ragGroup.position);
+      for (let i = 0; i < 3; i++) {
+        const node = inputNodes[(Math.random() * inputNodes.length) | 0];
+        emitPulse(docRoot, netNodeRoot(node, new THREE.Vector3()), 0.8 + Math.random() * 0.25, ACCENT_SOFT, node);
+      }
+    }
+
+    const timers: { t: number; fn: () => void }[] = [];
+    function after(t: number, fn: () => void) {
+      timers.push({ t, fn });
+    }
+    function dispatch(fromPos: THREE.Vector3 | null) {
+      if (fromPos) emitPulse(fromPos, netCenterRoot, 0.65, ACCENT, null);
+      after(0.32, retrieve);
+      after(0.85, forwardPass);
+    }
+    function systemRipple() {
+      emitShock();
+      netFlash = 1.3;
+      dispatch(null);
+      after(0.45, forwardPass);
+      after(1.0, forwardPass);
+      for (let i = 0; i < AGENT_N; i++) agents[i].glow = 1;
+    }
+
+    // ================= layout / resize =================
+    function resize() {
+      const r = wrap.getBoundingClientRect();
+      const w = Math.max(r.width, 1);
+      const h = Math.max(r.height, 1);
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      const wide = w > 860;
+      root.position.x = wide ? 3.0 : 1.6;
+      root.position.y = wide ? 0.1 : 0.4;
+      root.position.z = wide ? 0 : -2.2;
+      root.scale.setScalar(wide ? 1.05 : 0.66);
+    }
+
+    // ================= pointer =================
+    const ndc = new THREE.Vector2(999, 999);
+    const raycaster = new THREE.Raycaster();
+    let pmx = 0;
+    let pmy = 0;
+    let hovered: { type: string; i?: number } | null = null;
+    let dragging = false;
+    let dragOffX = 0;
+    let dragOffY = 0;
+    let dragPrevX = 0;
+    let dragPrevY = 0;
+    let downX = 0;
+    let downY = 0;
+    let downT = 0;
+    let downValid = false;
+    let moved = false;
+
+    function setPointer(e: PointerEvent) {
+      const r = canvas.getBoundingClientRect();
+      ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+      ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+      pmx = e.clientX / window.innerWidth - 0.5;
+      pmy = e.clientY / window.innerHeight - 0.5;
+    }
+    function pickAt(): { type: string; i?: number } | null {
+      raycaster.setFromCamera(ndc, camera);
+      const hits = raycaster.intersectObjects(raycastTargets, false);
+      return hits.length ? (hits[0].object.userData as { type: string; i?: number }) : null;
+    }
+
+    if (!reduceMotion) {
+      window.addEventListener(
+        "pointermove",
+        (e) => {
+          setPointer(e);
+          if (dragging) {
+            dragOffX += (e.clientX - dragPrevX) * 0.006;
+            dragOffY = THREE.MathUtils.clamp(dragOffY + (e.clientY - dragPrevY) * 0.004, -0.6, 0.6);
+            dragPrevX = e.clientX;
+            dragPrevY = e.clientY;
+            if (Math.abs(e.clientX - downX) > 6 || Math.abs(e.clientY - downY) > 6) moved = true;
+          }
+        },
+        { passive: true }
+      );
+
+      section.addEventListener("pointerdown", (e) => {
+        if ((e.target as HTMLElement).closest("a, button, input, textarea, select")) return;
+        downValid = true;
+        moved = false;
+        downX = e.clientX;
+        downY = e.clientY;
+        downT = performance.now();
+        dragPrevX = e.clientX;
+        dragPrevY = e.clientY;
+        if (e.pointerType === "mouse") {
+          dragging = true;
+          e.preventDefault();
+        }
+      });
+
+      window.addEventListener("pointerup", (e) => {
+        dragging = false;
+        if (!downValid) return;
+        downValid = false;
+        const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
+        if (!moved && dist < 7 && performance.now() - downT < 500) {
+          setPointer(e);
+          const hit = pickAt();
+          if (hit?.type === "agent" && hit.i !== undefined) {
+            agents[hit.i].glow = 1;
+            dispatch(agents[hit.i].pos);
+          } else {
+            systemRipple();
+          }
+        }
+      });
+
+      window.addEventListener("pointercancel", () => {
+        dragging = false;
+        downValid = false;
+      });
+    }
+
+    // ================= frame loop =================
+    const tmpA = new THREE.Vector3();
+    let raf = 0;
+    let running = false;
+    let last = 0;
+    let elapsed = 0;
+    let nextDispatch = 1.5;
+
+    function updateAgents(time: number) {
+      for (let i = 0; i < AGENT_N; i++) {
+        const a = agents[i];
+        const ang = a.phase + time * a.speed;
+        tmpA.set(Math.cos(ang) * a.radius, 0, Math.sin(ang) * a.radius).applyQuaternion(a.q);
+        tmpA.add(netCenterRoot);
+        a.pos.copy(tmpA);
+        a.mesh.position.copy(tmpA);
+        aLinePos[i * 6] = tmpA.x;
+        aLinePos[i * 6 + 1] = tmpA.y;
+        aLinePos[i * 6 + 2] = tmpA.z;
+        aLinePos[i * 6 + 3] = netCenterRoot.x;
+        aLinePos[i * 6 + 4] = netCenterRoot.y;
+        aLinePos[i * 6 + 5] = netCenterRoot.z;
+      }
+      aLineGeo.attributes.position.needsUpdate = true;
+    }
+
+    function updateProximityMesh() {
+      let seg = 0;
+      for (let i = 0; i < AGENT_N; i++) {
+        for (let j = i + 1; j < AGENT_N; j++) {
+          if (agents[i].pos.distanceTo(agents[j].pos) < MESH_DIST) {
+            const o = seg * 6;
+            mLinePos[o] = agents[i].pos.x;
+            mLinePos[o + 1] = agents[i].pos.y;
+            mLinePos[o + 2] = agents[i].pos.z;
+            mLinePos[o + 3] = agents[j].pos.x;
+            mLinePos[o + 4] = agents[j].pos.y;
+            mLinePos[o + 5] = agents[j].pos.z;
+            seg++;
+          }
+        }
+      }
+      mLineGeo.setDrawRange(0, seg * 2);
+      mLineGeo.attributes.position.needsUpdate = true;
+    }
+
+    function updateNetwork(dt: number) {
+      // advance forward-pass waves
+      for (let i = fwd.length - 1; i >= 0; i--) {
+        fwd[i].pos += dt * fwd[i].speed;
+        if (fwd[i].pos > NUM_L - 1 + 0.6) {
+          emitTokens(3 + ((Math.random() * 3) | 0));
+          netFlash = Math.max(netFlash, 0.8);
+          fwd.splice(i, 1);
+        }
+      }
+      // layer activation from waves
+      for (let L = 0; L < NUM_L; L++) {
+        let a = 0;
+        for (const w of fwd) a = Math.max(a, 1 - Math.min(Math.abs(w.pos - L), 1));
+        layerAct[L] = a;
+      }
+      const netHover = hovered?.type === "core" ? 0.35 : 0;
+      // nodes
+      for (const node of netNodes) {
+        node.extraGlow = Math.max(0, node.extraGlow - dt * 1.8);
+        const g = Math.min(1, Math.max(layerAct[node.layer], node.extraGlow) + netHover);
+        (node.mesh.material as THREE.MeshBasicMaterial).color
+          .copy(NODE_DIM)
+          .lerp(NODE_BRIGHT, 0.25 + g * 0.75);
+        node.mesh.scale.setScalar(1 + g * 0.9);
+      }
+      // edges
+      for (let i = 0; i < edges.length; i++) {
+        const e = edges[i];
+        let b = 0;
+        for (const w of fwd) b = Math.max(b, 1 - Math.min(Math.abs(w.pos - (e.lo + 0.5)) * 1.7, 1));
+        b = Math.max(b * 0.95 + netHover, 0.08);
+        _ecol.copy(EDGE_DIM).lerp(EDGE_BRIGHT, Math.min(b, 1));
+        for (let v = 0; v < 2; v++) {
+          const o = (i * 2 + v) * 3;
+          edgeCol[o] = _ecol.r;
+          edgeCol[o + 1] = _ecol.g;
+          edgeCol[o + 2] = _ecol.b;
+        }
+      }
+      edgeGeo.attributes.color.needsUpdate = true;
+      // glow + halo
+      netFlash = Math.max(0, netFlash - dt * 1.9);
+      (netGlow.material as THREE.SpriteMaterial).opacity =
+        0.4 + Math.sin(elapsed * 1.4) * 0.06 + netFlash * 0.5 + netHover * 0.5;
+      opsRing.rotation.z += dt * 0.25;
+      opsRing.rotation.x += dt * 0.12;
+      (opsRing.material as THREE.MeshBasicMaterial).opacity = 0.2 + netFlash * 0.4;
+    }
+
+    function render() {
+      renderer.render(scene, camera);
+    }
+
+    function frame(now: number) {
+      if (!running) return;
+      raf = requestAnimationFrame(frame);
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      elapsed += dt;
+
+      // timers
+      for (let i = timers.length - 1; i >= 0; i--) {
+        timers[i].t -= dt;
+        if (timers[i].t <= 0) {
+          const fn = timers[i].fn;
+          timers.splice(i, 1);
+          fn();
+        }
+      }
+
+      // hover
+      if (!dragging) hovered = pickAt();
+      section.style.cursor = dragging ? "grabbing" : hovered ? "pointer" : "";
+
+      // network
+      updateNetwork(dt);
+      netGroup.rotation.y = -0.34 + Math.sin(elapsed * 0.25) * 0.06;
+
+      // agents
+      updateAgents(elapsed);
+      for (let i = 0; i < AGENT_N; i++) {
+        const a = agents[i];
+        a.mesh.rotation.x += dt * a.spin;
+        a.mesh.rotation.y += dt * a.spin * 0.7;
+        const isHover = hovered?.type === "agent" && hovered.i === i;
+        const target = isHover ? 1.8 : 1;
+        a.scale += (target - a.scale) * Math.min(dt * 10, 1);
+        a.mesh.scale.setScalar(a.scale);
+        a.glow = Math.max(isHover ? 0.7 : 0, a.glow - dt * 1.5);
+        a.nextDispatch -= dt;
+        if (a.nextDispatch <= 0) {
+          a.nextDispatch = 4 + Math.random() * 5;
+          a.glow = Math.max(a.glow, 0.7);
+          dispatch(a.pos);
+        }
+        setLineColor(i, Math.min(1, 0.18 + a.glow));
+      }
+      aLineGeo.attributes.color.needsUpdate = true;
+      updateProximityMesh();
+
+      // ambient dispatch cadence
+      nextDispatch -= dt;
+      if (nextDispatch <= 0) {
+        nextDispatch = 1.6 + Math.random() * 2.2;
+        const a = agents[(Math.random() * AGENT_N) | 0];
+        a.glow = Math.max(a.glow, 0.7);
+        dispatch(a.pos);
+      }
+
+      // docs
+      for (const d of docs) {
+        d.flash = Math.max(0, d.flash - dt * 1.6);
+        const m = d.mesh.material as THREE.MeshBasicMaterial;
+        m.opacity = 0.7 + d.flash * 0.3;
+        d.mesh.scale.setScalar(1 + d.flash * 0.4);
+      }
+
+      // pulses
+      for (const p of pulses) {
+        if (!p.active) continue;
+        p.t += dt / p.dur;
+        if (p.t >= 1) {
+          p.active = false;
+          p.mesh.visible = false;
+          if (p.node) p.node.extraGlow = 1;
+          netFlash = Math.max(netFlash, 0.5);
+          continue;
+        }
+        const tt = p.t;
+        p.mesh.position.lerpVectors(p.from, p.to, tt);
+        p.mesh.position.y += Math.sin(tt * Math.PI) * p.arc;
+        p.mesh.rotation.x += dt * 3;
+        p.mesh.rotation.y += dt * 4;
+        const al = Math.sin(tt * Math.PI);
+        (p.mesh.material as THREE.MeshBasicMaterial).opacity = al;
+        p.mesh.scale.setScalar(0.5 + al * 0.7);
+      }
+
+      // tokens stream out of the output layer
+      for (const tk of tokens) {
+        if (!tk.active) continue;
+        tk.t += dt / 1.3;
+        if (tk.t >= 1) {
+          tk.active = false;
+          tk.mesh.visible = false;
+          continue;
+        }
+        tk.mesh.position.x += dt * 1.7;
+        tk.mesh.position.y += dt * tk.vy;
+        (tk.mesh.material as THREE.MeshBasicMaterial).opacity =
+          Math.min(1, tk.t * 5) * (1 - tk.t) * 0.95;
+      }
+
+      // shockwaves
+      for (const w of shocks) {
+        if (!w.active) continue;
+        w.t += dt / 0.9;
+        if (w.t >= 1) {
+          w.active = false;
+          w.mesh.visible = false;
+          continue;
+        }
+        w.mesh.scale.setScalar(0.3 + w.t * 7.5);
+        (w.mesh.material as THREE.MeshBasicMaterial).opacity = (1 - w.t) * 0.8;
+      }
+
+      // drift + drag + parallax
+      boundary.rotation.y += dt * 0.015;
+      boundary.rotation.x += dt * 0.006;
+      dust.rotation.y += dt * 0.01;
+      if (!dragging) {
+        const ease = Math.min(dt * 0.5, 1);
+        dragOffX += (0 - dragOffX) * ease;
+        dragOffY += (0 - dragOffY) * ease;
+      }
+      root.rotation.y = Math.sin(elapsed * 0.06) * 0.18 + dragOffX;
+      root.rotation.x = BASE_TILT + dragOffY;
+      camera.position.x += (pmx * 1.8 - camera.position.x) * 0.04;
+      camera.position.y += (-pmy * 1.1 - camera.position.y) * 0.04;
+      camera.lookAt(root.position.x * 0.55, root.position.y, 0);
+
+      render();
+    }
+
+    function start() {
+      if (running || reduceMotion) return;
+      running = true;
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
+    function stop() {
+      running = false;
+      cancelAnimationFrame(raf);
+    }
+
+    // static composition for first paint + reduced-motion mode
+    function staticPass() {
+      updateAgents(0);
+      for (let i = 0; i < AGENT_N; i++) setLineColor(i, 0.18);
+      aLineGeo.attributes.color.needsUpdate = true;
+      updateProximityMesh();
+      updateNetwork(0);
+      camera.lookAt(root.position.x * 0.55, root.position.y, 0);
+      render();
+    }
+
+    resize();
+    window.addEventListener("resize", () => {
+      resize();
+      if (reduceMotion) staticPass();
+    });
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) start();
+          else stop();
+        }
+      },
+      { threshold: 0 }
+    );
+    io.observe(wrap);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stop();
+      else start();
+    });
+
+    staticPass();
+    requestAnimationFrame(() => canvas.classList.add("is-ready"));
+    if (!reduceMotion) start();
+  }
+</script>
