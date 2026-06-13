@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Nav from "../../components/Nav.astro";
+import { getCollection } from "astro:content";
+import { readingMinutes } from "../../lib/readingTime";
+
+const posts = (await getCollection("insights", ({ data }) => data.draft !== true)).sort(
+  (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
+);
+const fmt = (d: Date) =>
+  d.toLocaleDateString("en-AU", { year: "numeric", month: "long", day: "numeric" });
+---
+<BaseLayout
+  title="Insights — Techsider"
+  description="Field notes on production LLM systems, RAG, agents, and AI data sovereignty for Australian regulated industries."
+>
+  <Nav />
+  <section class="px-6 py-16 md:py-24">
+    <div class="max-w-3xl mx-auto">
+      <p class="text-xs uppercase tracking-[0.2em] text-accent font-medium mb-4">Insights</p>
+      <h1 class="font-serif font-normal text-4xl md:text-5xl leading-[1.1] tracking-tight text-text mb-4">
+        Notes from the build.
+      </h1>
+      <p class="text-text-mute text-base leading-relaxed max-w-[54ch] mb-12">
+        How we engineer production AI for regulated industries — evals, retrieval, agents, and sovereignty. Written for the people who'll run it.
+      </p>
+      <ul class="border-t border-border">
+        {posts.map((post) => (
+          <li class="border-b border-border py-7">
+            <a href={`/insights/${post.id}`} class="group block">
+              <p class="text-[11px] uppercase tracking-[0.18em] text-text-dim mb-2">
+                {post.data.pillar} · {fmt(post.data.publishDate)} · {readingMinutes(post.body)} min read
+              </p>
+              <h2 class="font-serif font-normal text-xl md:text-2xl text-text leading-snug mb-2 group-hover:text-accent transition-colors">
+                {post.data.title}
+              </h2>
+              <p class="text-text-dim text-sm leading-relaxed">{post.data.description}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
