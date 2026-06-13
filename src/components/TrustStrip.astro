@@ -1,0 +1,15 @@
+---
+const platforms = ["Anthropic", "OpenAI", "AWS Bedrock", "Azure", "Self-hosted"];
+---
+<section class="px-6 py-7 border-b border-border bg-bg-deep/40">
+  <div class="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+    <p class="text-[11px] uppercase tracking-[0.18em] text-text-dim font-medium shrink-0">
+      Vendor-neutral. We build on:
+    </p>
+    <ul class="flex flex-wrap items-center gap-x-6 gap-y-2">
+      {platforms.map((p) => (
+        <li class="text-sm text-text-mute font-medium">{p}</li>
+      ))}
+    </ul>
+  </div>
+</section>
