@@ -1,0 +1,39 @@
+---
+const sectors = [
+  {
+    name: "Financial services",
+    body: "APRA CPS 230 and CPS 234. Operational-risk controls, incident-notification timeframes, and grounded answers your risk and compliance teams can audit.",
+  },
+  {
+    name: "Government & public sector",
+    body: "ISM- and IRAP-aligned deployments with data-classification handling — AI for agencies that can't send data offshore.",
+  },
+  {
+    name: "Healthcare & life sciences",
+    body: "Privacy Act and My Health Record obligations. Citable retrieval over clinical and policy documents, with a refusal path instead of a guess.",
+  },
+  {
+    name: "Resources, energy & utilities",
+    body: "SOCI critical-infrastructure obligations. Operational AI over the document-heavy, safety-critical workflows these sectors run on.",
+  },
+];
+---
+<section id="industries" class="px-6 py-24 md:py-32 border-b border-border">
+  <div class="max-w-6xl mx-auto">
+    <p class="text-xs uppercase tracking-[0.2em] text-accent font-medium mb-4">Who we work with</p>
+    <h2 class="font-serif font-normal text-3xl md:text-4xl leading-[1.15] text-text max-w-[24ch] mb-4">
+      Built for Australia's regulated sectors.
+    </h2>
+    <p class="text-text-mute text-base leading-relaxed max-w-[54ch] mb-12">
+      We speak the compliance language of the industries we serve — not just the model APIs.
+    </p>
+    <div class="grid gap-6 md:grid-cols-2">
+      {sectors.map((s) => (
+        <article class="bg-bg-elev border border-border rounded-xl p-6 md:p-7">
+          <h3 class="text-text font-semibold text-base mb-2">{s.name}</h3>
+          <p class="text-text-dim text-sm leading-relaxed">{s.body}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
