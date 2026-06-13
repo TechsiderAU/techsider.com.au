@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from "astro:content";
+import PostLayout from "../../layouts/PostLayout.astro";
+import { readingMinutes } from "../../lib/readingTime";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("insights", ({ data }) => data.draft !== true);
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const minutes = readingMinutes(post.body);
+---
+<PostLayout
+  title={post.data.title}
+  description={post.data.description}
+  publishDate={post.data.publishDate}
+  updatedDate={post.data.updatedDate}
+  pillar={post.data.pillar}
+  minutes={minutes}
+>
+  <Content />
+</PostLayout>

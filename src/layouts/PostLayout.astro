@@ -1,0 +1,120 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Nav from "../components/Nav.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  publishDate: Date;
+  updatedDate?: Date;
+  pillar: string;
+  minutes: number;
+}
+
+const { title, description, publishDate, updatedDate, pillar, minutes } = Astro.props;
+const fmt = (d: Date) =>
+  d.toLocaleDateString("en-AU", { year: "numeric", month: "long", day: "numeric" });
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const articleJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: title,
+  description,
+  datePublished: publishDate.toISOString(),
+  ...(updatedDate ? { dateModified: updatedDate.toISOString() } : {}),
+  author: { "@type": "Organization", name: "Techsider" },
+  publisher: { "@type": "Organization", name: "Techsider" },
+  mainEntityOfPage: canonical,
+};
+---
+<BaseLayout title={`${title} — Techsider`} description={description}>
+  <Nav />
+  <article class="px-6 py-16 md:py-24">
+    <div class="max-w-2xl mx-auto">
+      <a href="/insights" class="text-xs uppercase tracking-[0.16em] text-accent hover:opacity-80 transition-opacity">
+        ← Insights
+      </a>
+      <p class="mt-6 text-[11px] uppercase tracking-[0.18em] text-text-dim">{pillar}</p>
+      <h1 class="font-serif font-normal text-3xl md:text-5xl leading-[1.1] tracking-tight text-text mt-3 mb-4">
+        {title}
+      </h1>
+      <p class="text-sm text-text-dim">{fmt(publishDate)} · {minutes} min read</p>
+      <div class="post-prose mt-10 text-text-mute">
+        <slot />
+      </div>
+      <hr class="my-12 border-border" />
+      <p class="text-sm text-text-mute">
+        Want this on your own corpus and infrastructure? Our paid two-week discovery scopes it.
+        <a href="mailto:admin@techsider.com.au" class="text-accent hover:opacity-90 transition-opacity whitespace-nowrap">Scope your AI build →</a>
+      </p>
+    </div>
+  </article>
+  <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+</BaseLayout>
+
+<style>
+  .post-prose :global(h2) {
+    font-family: var(--font-serif);
+    color: var(--color-text);
+    font-size: 1.6rem;
+    line-height: 1.25;
+    margin: 2.2rem 0 0.75rem;
+  }
+  .post-prose :global(h3) {
+    color: var(--color-text);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin: 1.8rem 0 0.5rem;
+  }
+  .post-prose :global(p) { margin: 0 0 1.1rem; line-height: 1.75; }
+  .post-prose :global(ul),
+  .post-prose :global(ol) { margin: 0 0 1.1rem 1.25rem; line-height: 1.75; }
+  .post-prose :global(ul) { list-style: disc; }
+  .post-prose :global(ol) { list-style: decimal; }
+  .post-prose :global(li) { margin: 0.3rem 0; }
+  .post-prose :global(strong) { color: var(--color-text); font-weight: 600; }
+  .post-prose :global(em) { font-style: italic; }
+  .post-prose :global(a) {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .post-prose :global(blockquote) {
+    border-left: 2px solid var(--color-accent);
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    color: var(--color-text-dim);
+    font-style: italic;
+  }
+  .post-prose :global(code) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85em;
+    background: var(--color-bg-elev);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    color: var(--color-text);
+  }
+  .post-prose :global(pre) {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .post-prose :global(pre code) { background: none; padding: 0; }
+  .post-prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+  }
+  .post-prose :global(th),
+  .post-prose :global(td) {
+    border: 1px solid var(--color-border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  .post-prose :global(th) { color: var(--color-text); font-weight: 600; }
+</style>
