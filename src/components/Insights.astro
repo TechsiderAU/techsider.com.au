@@ -1,0 +1,42 @@
+---
+import { getCollection } from "astro:content";
+import { readingMinutes } from "../lib/readingTime";
+
+const posts = (await getCollection("insights", ({ data }) => data.draft !== true))
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .slice(0, 3);
+const fmt = (d: Date) =>
+  d.toLocaleDateString("en-AU", { year: "numeric", month: "long", day: "numeric" });
+---
+<section id="insights" class="px-6 py-24 md:py-32 border-b border-border">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex items-end justify-between gap-6 mb-12">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-accent font-medium mb-4">Insights</p>
+        <h2 class="font-serif font-normal text-3xl md:text-4xl leading-[1.15] text-text max-w-[22ch]">
+          How we think about production AI.
+        </h2>
+      </div>
+      <a href="/insights" class="hidden sm:inline text-sm text-text-mute hover:text-text transition-colors whitespace-nowrap">
+        All insights →
+      </a>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      {posts.map((post) => (
+        <a href={`/insights/${post.id}`} class="group bg-bg-elev border border-border rounded-xl p-6 md:p-7 block">
+          <p class="text-[11px] uppercase tracking-[0.16em] text-text-dim mb-3">
+            {post.data.pillar}
+          </p>
+          <h3 class="text-text font-semibold text-base leading-snug mb-3 group-hover:text-accent transition-colors">
+            {post.data.title}
+          </h3>
+          <p class="text-text-dim text-sm leading-relaxed mb-4">{post.data.description}</p>
+          <p class="text-[11px] text-text-dim">{fmt(post.data.publishDate)} · {readingMinutes(post.body)} min read</p>
+        </a>
+      ))}
+    </div>
+    <a href="/insights" class="sm:hidden inline-block mt-8 text-sm text-text-mute hover:text-text transition-colors">
+      All insights →
+    </a>
+  </div>
+</section>
