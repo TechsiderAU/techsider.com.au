@@ -5,18 +5,21 @@ const services = [
     tag: "LLM OPS",
     title: "Production LLM platforms",
     body: "Evaluation harnesses, prompt versioning, observability, cost controls, model gateways. Whatever takes your AI from prototype to operations.",
+    mechanism: "Every release passes an offline eval suite and a regression gate before it reaches production.",
   },
   {
     num: "02",
     tag: "RAG",
     title: "Retrieval systems",
     body: "Document ingestion, embedding pipelines, hybrid retrieval, grounded answers with citations. Built for your data, your privacy boundary.",
+    mechanism: "Grounded answers your compliance team can audit — every claim traceable to a cited source.",
   },
   {
     num: "03",
     tag: "AGENTS",
     title: "Agentic workflows",
     body: "Tool-using agents for internal operations, customer service, and analyst-grade research. Designed with eval gates and human-in-the-loop.",
+    mechanism: "Eval-gated and human-in-the-loop, scoped to refuse rather than guess.",
   },
 ];
 ---
@@ -34,6 +37,9 @@ const services = [
           </p>
           <h3 class="text-text font-semibold text-base mb-2">{s.title}</h3>
           <p class="text-text-dim text-sm leading-relaxed">{s.body}</p>
+          <p class="mt-4 pt-4 border-t border-border text-[13px] text-text-mute leading-relaxed">
+            <span class="text-accent" aria-hidden="true">▸ </span>{s.mechanism}
+          </p>
         </article>
       ))}
     </div>
