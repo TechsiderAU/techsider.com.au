@@ -1,0 +1,51 @@
+---
+const faqs = [
+  {
+    q: "Where does our data go?",
+    a: "Into your own environment. We deploy inside your sovereign boundary — AU-hosted or self-hosted — and we don't train models on your data.",
+  },
+  {
+    q: "Are we locked in — to you, or to a model vendor?",
+    a: "Neither. You own the source code and can run it without us, and we're vendor-neutral across Anthropic, OpenAI, AWS Bedrock, Azure, and self-hosted models.",
+  },
+  {
+    q: "You're a new firm — why should we trust you?",
+    a: "Start with the paid two-week discovery: a fixed-price, low-commitment way to judge our work before any build. Every engineer is senior, and you keep everything we produce.",
+  },
+  {
+    q: "How do you keep an AI system reliable?",
+    a: "Offline eval suites, request tracing, and regression gates before every promotion to production — the same discipline whether it's a retrieval pipeline or an agent.",
+  },
+  {
+    q: "How long does it take, and what does it cost?",
+    a: "Engagements open with a fixed-price two-week discovery that produces an architecture and a quote. Builds are fixed-scope from there, so you know the cost before we start.",
+  },
+];
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+---
+<section id="faq" class="px-6 py-24 md:py-32 border-b border-border">
+  <div class="max-w-3xl mx-auto">
+    <p class="text-xs uppercase tracking-[0.2em] text-accent font-medium mb-4">Questions</p>
+    <h2 class="font-serif font-normal text-3xl md:text-4xl leading-[1.15] text-text mb-12">
+      The things enterprise buyers ask first.
+    </h2>
+    <dl class="border-t border-border">
+      {faqs.map((f) => (
+        <div class="py-6 border-b border-border">
+          <dt class="text-text font-semibold text-base mb-2">{f.q}</dt>
+          <dd class="text-text-dim text-sm leading-relaxed">{f.a}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+</section>
