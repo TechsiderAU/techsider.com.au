@@ -20,21 +20,52 @@
 </style>
 
 <script>
-  import * as THREE from "three";
+  type ThreeModule = typeof import("../scripts/hero-three");
 
   const canvas = document.getElementById("hero-canvas") as HTMLCanvasElement | null;
   const wrap = canvas?.parentElement ?? null;
 
-  if (canvas && wrap) {
+  if (canvas && wrap && shouldLoadScene()) {
+    void loadScene(canvas, wrap);
+  }
+
+  // Decide BEFORE downloading ~130 KB of Three.js whether this visitor will
+  // ever benefit from it. Respect motion/data preferences and WebGL support.
+  function shouldLoadScene(): boolean {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const saveData =
+      (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+    if (reduceMotion || saveData) return false;
+    return hasWebGL();
+  }
+
+  function hasWebGL(): boolean {
     try {
-      initHeroScene(canvas, wrap);
+      const test = document.createElement("canvas");
+      return !!(test.getContext("webgl2") || test.getContext("webgl"));
+    } catch {
+      return false;
+    }
+  }
+
+  async function loadScene(canvas: HTMLCanvasElement, wrap: HTMLElement) {
+    // Defer the heavy import to idle so it never competes with first paint.
+    await new Promise<void>((resolve) => {
+      const ric = (window as Window & { requestIdleCallback?: (cb: () => void) => void })
+        .requestIdleCallback;
+      if (ric) ric(() => resolve());
+      else setTimeout(resolve, 200);
+    });
+    try {
+      const THREE = await import("../scripts/hero-three");
+      initHeroScene(THREE, canvas, wrap);
     } catch (err) {
       console.warn("Hero scene disabled:", err);
       canvas.style.display = "none";
     }
   }
 
-  function initHeroScene(canvas: HTMLCanvasElement, wrap: HTMLElement) {
+  function initHeroScene(THREE: ThreeModule, canvas: HTMLCanvasElement, wrap: HTMLElement) {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const section = (canvas.closest("section") as HTMLElement | null) ?? wrap;
 
