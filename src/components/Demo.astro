@@ -98,3 +98,57 @@ const transcript = [main, abstain];
     </div>
   </div>
 </section>
+
+<script>
+  import { initDemo } from "../scripts/demo";
+  initDemo();
+</script>
+
+<style>
+  :global([data-demo-stage] .demo-turn) { margin-bottom: 1.5rem; }
+  :global([data-demo-stage] .demo-role) {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text-dim);
+    margin-bottom: 0.25rem;
+  }
+  :global([data-demo-stage] .demo-q) { color: var(--color-text); font-weight: 500; margin-bottom: 0.75rem; }
+  :global([data-demo-stage] .demo-a) { color: var(--color-text-mute); font-size: 0.875rem; line-height: 1.7; }
+  :global([data-demo-stage] .demo-retrieve) {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.9rem;
+    background: var(--color-bg-deep);
+  }
+  :global([data-demo-stage] .demo-chunk) {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+  }
+  :global([data-demo-stage] .demo-chunk-score) {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-accent);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  :global([data-demo-stage] .demo-chunk-text) { color: var(--color-text-dim); }
+  :global(.demo-cite) {
+    color: var(--color-accent);
+    font-size: 10px;
+    vertical-align: super;
+    margin-left: 1px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  :global(.demo-cite:hover) { text-decoration: underline; }
+  :global([data-demo-src].demo-src-active) {
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    box-shadow: inset 2px 0 0 var(--color-accent);
+  }
+</style>
