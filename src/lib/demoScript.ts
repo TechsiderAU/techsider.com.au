@@ -81,7 +81,7 @@ export const demoScript: DemoScript = {
         { text: ". " },
         {
           text:
-            ""Critical operations" here means processes that, if disrupted beyond tolerance levels, would have a material adverse impact on your depositors, policyholders or other customers, or on your role in the financial system",
+            "“Critical operations” here means processes that, if disrupted beyond tolerance levels, would have a material adverse impact on your depositors, policyholders or other customers, or on your role in the financial system",
           cite: 2,
         },
         { text: "." },
