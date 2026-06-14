@@ -27,7 +27,7 @@ A single case looks like this:
 ```yaml
 - input: "What are our incident-notification timeframes under CPS 230?"
   must_cite: true
-  must_contain: ["business day"]
+  must_contain: ["72 hours"]
   must_not: ["I think", "probably", "as an AI"]
 ```
 
