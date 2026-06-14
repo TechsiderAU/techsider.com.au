@@ -1,0 +1,100 @@
+---
+import { demoScript } from "../lib/demoScript";
+const [main, abstain] = demoScript.turns;
+const transcript = [main, abstain];
+---
+<section id="demo" class="px-6 py-24 md:py-32 border-b border-border">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-xs uppercase tracking-[0.2em] text-accent font-medium mb-4">See it work</p>
+    <h2 class="font-serif font-normal text-3xl md:text-4xl leading-[1.15] text-text max-w-[26ch] mb-4">
+      Production RAG, doing the unglamorous part.
+    </h2>
+    <p class="text-text-mute text-base leading-relaxed max-w-[58ch] mb-6">
+      A recorded walkthrough of a retrieval system answering a regulated question — with citations you can open, a visible trace, and an honest refusal when the answer isn't in the source.
+    </p>
+
+    <p class="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-text-dim border border-border rounded-full px-3 py-1.5 mb-6">
+      <span class="w-1.5 h-1.5 rounded-full bg-accent" aria-hidden="true"></span>
+      Recorded illustrative demo — runs entirely in your browser, no live model or backend
+    </p>
+
+    <div class="rounded-xl border border-border bg-bg-elev overflow-hidden" data-demo-root>
+      <div class="px-4 py-2.5 border-b border-border text-[11px] text-text-dim bg-bg-deep/40">
+        Source corpus: {demoScript.doc}
+      </div>
+
+      <div class="grid md:grid-cols-[1fr_18rem]">
+        <div class="p-5 md:p-6 min-h-[18rem]">
+          <div data-demo-static>
+            {transcript.map((turn) => (
+              <div class="mb-6 last:mb-0">
+                <p class="text-[11px] uppercase tracking-[0.14em] text-text-dim mb-1">Analyst</p>
+                <p class="text-text font-medium mb-3">{turn.question}</p>
+                <p class="text-[11px] uppercase tracking-[0.14em] text-text-dim mb-1">
+                  {turn.abstained ? "Assistant — abstained" : "Assistant"}
+                </p>
+                <p class="text-text-mute text-sm leading-relaxed">
+                  {turn.answer.map((seg) => (
+                    <Fragment>
+                      {seg.text}
+                      {seg.cite ? (
+                        <a href={`#demo-src-${seg.cite}`} class="text-accent align-super text-[10px] no-underline ml-0.5">[{seg.cite}]</a>
+                      ) : null}
+                    </Fragment>
+                  ))}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div data-demo-stage hidden aria-live="polite"></div>
+
+          <div class="mt-5">
+            <button type="button" data-demo-replay hidden
+              class="text-xs font-semibold bg-accent text-accent-ink px-3 py-1.5 rounded hover:opacity-90 transition-opacity">
+              ▶ Replay
+            </button>
+          </div>
+        </div>
+
+        <aside class="border-t md:border-t-0 md:border-l border-border p-5 md:p-6 bg-bg-deep/30" data-demo-sources>
+          <p class="text-[11px] uppercase tracking-[0.14em] text-text-dim mb-3">Sources</p>
+          {main.sources.map((s) => (
+            <div id={`demo-src-${s.cite}`} data-demo-src={s.cite} class="mb-4 last:mb-0 scroll-mt-24 rounded-md -mx-2 px-2 py-1.5 transition-colors">
+              <p class="text-[11px] text-accent font-semibold mb-1">[{s.cite}] {s.label}</p>
+              <p class="text-text-dim text-xs leading-relaxed">{s.text}</p>
+            </div>
+          ))}
+          <p class="text-[10px] text-text-dim/70 mt-4 leading-relaxed">
+            Public reference data. Your engagement runs on your own corpus and infrastructure.
+          </p>
+        </aside>
+      </div>
+
+      <details class="border-t border-border px-5 md:px-6 py-3" data-demo-trace>
+        <summary class="cursor-pointer text-text-mute text-xs uppercase tracking-[0.14em]">Trace &amp; evals</summary>
+        <div class="mt-3 grid sm:grid-cols-2 gap-5">
+          <div>
+            <p class="text-[11px] uppercase tracking-[0.14em] text-text-dim mb-2">Pipeline</p>
+            <ul class="space-y-1.5">
+              {main.trace.map((step) => (
+                <li class="text-xs text-text-mute flex justify-between gap-3">
+                  <span><span class="text-text">{step.label}</span> — {step.detail}</span>
+                  <span class="text-text-dim tabular-nums whitespace-nowrap">{step.ms} ms</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p class="text-[11px] uppercase tracking-[0.14em] text-text-dim mb-2">Evals</p>
+            <ul class="space-y-1.5 text-xs text-text-mute">
+              <li>Groundedness: <span class="text-text">{main.evals.groundedness}</span></li>
+              <li>Faithfulness: <span class="text-text">{main.evals.faithfulness}</span></li>
+              <li>Retrieval recall: <span class="text-text">{main.evals.recall}</span></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
