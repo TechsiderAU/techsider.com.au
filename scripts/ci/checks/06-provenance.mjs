@@ -27,16 +27,20 @@ export function metricTokens(s) {
   return kept;
 }
 
-/** Walks JSON: provenance on every object that has it, and every lintable string. */
-function walk(value, path, visit) {
-  if (Array.isArray(value)) value.forEach((v, i) => walk(v, `${path}[${i}]`, visit));
+/**
+ * Walks JSON: provenance on every object that has it, at any depth, and every lintable string.
+ * Under an exempt key only the strings are exempt; objects there still get their provenance
+ * checked, so a measured score nested in a `source` must still cite its run.
+ */
+function walk(value, path, visit, exempt = false) {
+  if (Array.isArray(value)) value.forEach((v, i) => walk(v, `${path}[${i}]`, visit, exempt));
   else if (value && typeof value === "object") {
     visit.object(value, path);
     for (const [k, v] of Object.entries(value)) {
-      if (EXEMPT_KEYS.includes(k) || k === "run") continue; // `run` is a path, not copy
-      walk(v, path ? `${path}.${k}` : k, visit);
+      if (k === "run") continue; // `run` is a path, not copy (visit.object checks it)
+      walk(v, path ? `${path}.${k}` : k, visit, exempt || EXEMPT_KEYS.includes(k));
     }
-  } else if (typeof value === "string" && !/^[a-z][a-z0-9+.-]*:\/\//i.test(value)) visit.string(value, path);
+  } else if (!exempt && typeof value === "string" && !/^[a-z][a-z0-9+.-]*:\/\//i.test(value)) visit.string(value, path);
 }
 
 export async function run({ root, dist }) {

@@ -467,6 +467,28 @@ test("06: metric-shaped numbers in free text fail unless the key is exempt or an
   assert.ok(!excused.errors.some((e) => e.includes("7 / 10")));
 });
 
+test("06: provenance is still checked under exempt keys; only their free text is exempt", async () => {
+  const res = await check(provenance, {
+    "src/data/demos/alpha-fixture.json": {
+      ...demo(),
+      data: {
+        ...demo().data,
+        source: {
+          label: "Fixture Standard ¶32, cited in 3/4 of fixture cases at 0.9 relevance",
+          url: "https://example.com/fixture-standard/32/4",
+          relevance: { value: 0.9, provenance: "measured" },
+          recall: { value: 0.8, provenance: "measured", run: "src/data/runs/fixture-run/" },
+        },
+        answer: [{ text: "Fixture answer", quote: { excerpt: "Fixture recall 95%", score: { value: 1, provenance: "estimated" } } }],
+      },
+    },
+  });
+  assertErrors(res, [
+    /alpha-fixture\.json: data\.source\.relevance: measured, so "run" must be "src\/data\/runs\/<run-id>\/" \(got undefined\)/,
+    /alpha-fixture\.json: data\.answer\[0\]\.quote\.score: "provenance" must be "measured" or "illustrative"/,
+  ]);
+});
+
 test("06: a built element marked illustrative must show its label", async () => {
   const res = await check(provenance, {
     "dist/solutions/alpha-fixture/index.html": page(
