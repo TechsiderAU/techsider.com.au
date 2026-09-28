@@ -384,6 +384,30 @@ test("04: near misses pass, and src/fixtures/ is not scanned", async () => {
   assertErrors(hit, [/"working with" \(implied clients/]);
 });
 
+test("04: .js, .mjs, .jsx, .mdx and .yml sources, and the text of built XML (RSS, sitemaps), are scanned", async () => {
+  const res = await check(banned, {
+    "src/pages/rss.xml.js": 'export const channel = { description: "Fixture notes, trusted by fixture banks" };\n',
+    "src/scripts/fixture.mjs": 'export const note = "A world-class fixture";\n',
+    "src/components/Fixture.jsx": "export const F = () => <p>A seamless fixture</p>;\n",
+    "src/content/insights/fixture-note.mdx": "---\ntitle: Fixture note\n---\n\nOur clients like this fixture.\n",
+    "src/data/fixture.yml": "note: A cutting-edge fixture\n",
+    "dist/rss.xml": `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Fixture feed</title>
+      <description>Award-winning fixture notes &amp; more</description>
+      <item><title>Fixture post</title><link>https://example.com/case-study-fixture/</link>
+      <description><![CDATA[A fixture <b>accredited</b> by nobody]]></description></item></channel></rss>`,
+    "dist/sitemap-0.xml": `<?xml version="1.0"?><urlset><url><loc>https://example.com/our-clients/</loc></url></urlset>`,
+  });
+  assertErrors(res, [
+    /src\/pages\/rss\.xml\.js:1: "trusted by"/,
+    /src\/scripts\/fixture\.mjs:1: "world-class"/,
+    /src\/components\/Fixture\.jsx:1: "seamless"/,
+    /src\/content\/insights\/fixture-note\.mdx:5: "Our clients"/,
+    /src\/data\/fixture\.yml:1: "cutting-edge"/,
+    /dist\/rss\.xml: "Award-winning"/,
+    /dist\/rss\.xml: "accredited"/, // CDATA text is copy too
+  ]); // URLs (<link>, <loc>) are addresses, not copy: "case-study" and "our-clients" there pass
+});
+
 test("04: WARN phrases are reported as warnings, not errors", async () => {
   const res = await check(banned, { "src/components/Hero.astro": "<p>Onshore, not sovereign; assurance is a warning word.</p>" });
   assertErrors(res, []);

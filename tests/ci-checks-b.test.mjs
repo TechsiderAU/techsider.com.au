@@ -70,13 +70,21 @@ test("07: the same markers are errors in gate mode", async () => {
   assert.deepEqual(r.warnings, []);
 });
 
+test("07: layouts and lib hold copy too (BaseLayout's site-wide text, demoScript's demo copy)", async () => {
+  const t = tree({
+    "src/layouts/FixtureLayout.astro": "<footer>Fixture footer ⚑ check the ABN</footer>\n",
+    "src/lib/fixtureScript.ts": 'export const line = "Fixture demo line";\nexport const note = "VERIFY the Fixture figure";\n',
+  });
+  const r = await verifyMarkers({ ...t, mode: "gate" });
+  assert.deepEqual(sorted(r.errors), ["src/layouts/FixtureLayout.astro:1: open ⚑ marker", "src/lib/fixtureScript.ts:2: open VERIFY marker"]);
+});
+
 test("07: lower-case verify, longer words, the exception lists and files outside the scopes pass", async () => {
   const t = tree({
     "src/content/insights/fixture-post.md": "We verify every Fixture figure. Unverified claims are cut. VERIFYING is another word.\n",
     "src/data/banned-phrase-exceptions.json": '[{ "file": "dist", "phrase": "VERIFY", "reason": "Fixture ⚑" }]\n',
     "src/data/metric-exceptions.json": '[{ "file": "dist", "token": "VERIFY", "reason": "Fixture ⚑" }]\n',
     "src/fixtures/fixture.ts": 'export const note = "VERIFY ⚑";\n',
-    "src/lib/fixture.ts": "// VERIFY ⚑\n",
     "src/styles/fixture.css": "/* VERIFY ⚑ */\n",
   });
   const clean = { name: "07-verify-markers", errors: [], warnings: [] };

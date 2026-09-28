@@ -1,5 +1,6 @@
 // Spec §11.5 check 4: the §3.5 banned phrases, over src/ and the visible text of
-// every built page. FAIL phrases are errors; WARN phrases are printed as warnings.
+// every built page and built XML file (the RSS feed's channel and item copy, the sitemaps).
+// FAIL phrases are errors; WARN phrases are printed as warnings.
 // Matching is case-insensitive, whole phrase (\b at both ends), hyphen ≡ space.
 import { join, resolve } from "node:path";
 import {
@@ -106,12 +107,23 @@ export const WARN_PHRASES = group("warn", [
   "sovereign",
 ]);
 
-/** src/ files in scope: content, components, data and pages, minus fixtures and the exceptions file itself. */
+/** Source files that can hold copy: Astro, JS/TS in every flavour (src/pages/rss.xml.js is public), Markdown/MDX, YAML, JSON. */
+export const SOURCE_FILE = /\.(astro|m?[jt]sx?|mdx?|ya?ml|json)$/;
+
+/** src/ files in scope: every copy-bearing source, minus fixtures and the exceptions file itself. */
 export function sourceFiles(root) {
   return listFiles(
     join(root, "src"),
-    (rel) => /\.(astro|ts|md|yaml|json)$/.test(rel) && !rel.startsWith("fixtures/") && `src/${rel}` !== EXCEPTIONS_FILE,
+    (rel) => SOURCE_FILE.test(rel) && !rel.startsWith("fixtures/") && `src/${rel}` !== EXCEPTIONS_FILE,
   );
+}
+
+/**
+ * The copy in a built XML file: CDATA unwrapped, tags stripped, entities decoded (as visibleText
+ * does for pages), and URLs dropped, since a <link> or <loc> is an address, not copy.
+ */
+export function xmlText(xml) {
+  return visibleText(xml.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")).replace(/\bhttps?:\/\/\S+/g, " ");
 }
 
 /**
@@ -141,5 +153,6 @@ export async function run({ root, dist }) {
   const pages = htmlFiles(out);
   if (pages.length === 0) r.add("error", `${dist}: no built HTML found (run the build first)`);
   for (const file of pages) both(visibleText(readText(file)), `dist/${relPath(out, file)}`, false);
+  for (const file of listFiles(out, (rel) => rel.endsWith(".xml"))) both(xmlText(readText(file)), `dist/${relPath(out, file)}`, false);
   return { name: NAME, errors: r.errors, warnings: r.warnings };
 }
