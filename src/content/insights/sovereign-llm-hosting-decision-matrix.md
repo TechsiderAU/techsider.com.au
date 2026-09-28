@@ -2,8 +2,9 @@
 title: "Self-hosted vs Bedrock vs Azure OpenAI for sovereign workloads in Australia"
 description: "A practical decision framework for where your model actually runs when data residency and sovereignty are hard constraints — and how to keep the choice reversible."
 publishDate: 2026-06-14
-pillar: "Vendor-neutral platform"
-sectors: ["Government & public sector", "Financial services"]
+type: article
+industries: [] # Phase C: [government, financial-services]
+solutions: []
 draft: false
 ---
 

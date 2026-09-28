@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import { readingMinutes } from "../lib/readingTime";
+import { INSIGHT_TYPE_LABEL } from "../content/schemas";
 
 const posts = (await getCollection("insights", ({ data }) => data.draft !== true))
   .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
@@ -24,8 +25,8 @@ const fmt = (d: Date) =>
     <div class="grid gap-6 md:grid-cols-3">
       {posts.map((post) => (
         <a href={`/insights/${post.id}`} class="group bg-bg-elev border border-border rounded-xl p-6 md:p-7 block">
-          <p class="text-[11px] uppercase tracking-[0.16em] text-text-dim mb-3">
-            {post.data.pillar}
+          <p class="font-mono text-xs text-muted mb-3">
+            <span aria-hidden="true">[</span>{INSIGHT_TYPE_LABEL[post.data.type].toLowerCase()}<span aria-hidden="true">]</span>
           </p>
           <h3 class="text-text font-semibold text-base leading-snug mb-3 group-hover:text-accent transition-colors">
             {post.data.title}

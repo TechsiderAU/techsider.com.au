@@ -2,8 +2,9 @@
 title: "Shipping a RAG system that stands up to APRA scrutiny"
 description: "Grounding, inline citations, retrieval evals, and a refusal path — the engineering that makes a retrieval system answer to an auditor, not just a demo."
 publishDate: 2026-06-12
-pillar: "RAG & retrieval"
-sectors: ["Financial services"]
+type: article
+industries: [] # Phase C: [financial-services]
+solutions: []
 draft: false
 ---
 

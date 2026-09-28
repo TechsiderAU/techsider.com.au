@@ -2,7 +2,9 @@
 title: "Evals before vibes: the gates we run on every LLM release"
 description: "How we stop 'looked good in the demo' from reaching production — the offline eval suite, the regression gate, and the tracing we wire in from day one."
 publishDate: 2026-06-09
-pillar: "LLMOps & reliability"
+type: article
+industries: []
+solutions: []
 draft: false
 ---
 

@@ -1,16 +1,17 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
+import { INSIGHT_TYPE_LABEL } from "../content/schemas";
 
 interface Props {
   title: string;
   description: string;
   publishDate: Date;
   updatedDate?: Date;
-  pillar: string;
+  type: keyof typeof INSIGHT_TYPE_LABEL;
   minutes: number;
 }
 
-const { title, description, publishDate, updatedDate, pillar, minutes } = Astro.props;
+const { title, description, publishDate, updatedDate, type, minutes } = Astro.props;
 const fmt = (d: Date) =>
   d.toLocaleDateString("en-AU", { year: "numeric", month: "long", day: "numeric" });
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
@@ -32,7 +33,7 @@ const articleJsonLd = {
       <a href="/insights" class="text-xs uppercase tracking-[0.16em] text-accent hover:opacity-80 transition-opacity">
         ← Insights
       </a>
-      <p class="mt-6 text-[11px] uppercase tracking-[0.18em] text-text-dim">{pillar}</p>
+      <p class="mt-6 font-mono text-xs text-muted"><span aria-hidden="true">[</span>{INSIGHT_TYPE_LABEL[type].toLowerCase()}<span aria-hidden="true">]</span></p>
       <h1 class="font-serif font-normal text-3xl md:text-5xl leading-[1.1] tracking-tight text-text mt-3 mb-4">
         {title}
       </h1>
