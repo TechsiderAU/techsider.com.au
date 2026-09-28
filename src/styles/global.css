@@ -2,6 +2,9 @@
 @import "@fontsource-variable/archivo/wdth.css";
 @import "@fontsource-variable/jetbrains-mono";
 
+/* Test files name utilities as strings; don't ship CSS for them. */
+@source not "../../tests";
+
 @theme {
   /* Acid Signal palette — spec §6.1. Acid is never text or an icon on bone. */
   --color-carbon: #0b0b0c;
@@ -40,50 +43,56 @@
   --font-serif: "Archivo Variable", system-ui, sans-serif;
 }
 
-html {
-  background: var(--color-carbon);
-  color-scheme: dark;
-}
-
-@media (prefers-reduced-motion: no-preference) {
+/* Base element styles. Layered so any utility on the same element (e.g. a
+   focus-visible:outline-* override) wins over them, as Tailwind's own preflight does. */
+@layer base {
   html {
-    scroll-behavior: smooth;
+    background: var(--color-carbon);
+    color-scheme: dark;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-bone);
+    background: var(--color-carbon);
+  }
+
+  ::selection {
+    background: var(--color-acid);
+    color: var(--color-carbon);
+  }
+
+  /* 2px lime ring with offset on carbon/graphite; surface-bone swaps it to carbon. */
+  :focus-visible {
+    outline: 2px solid var(--color-acid);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-body {
-  font-family: var(--font-sans);
-  color: var(--color-bone);
-  background: var(--color-carbon);
-}
-
-::selection {
-  background: var(--color-acid);
+/* Bone surface: carbon text and a carbon focus ring. background-color (not the
+   background shorthand) so bg-* and scanlines on the same element still apply. */
+@utility surface-bone {
+  background-color: var(--color-bone);
   color: var(--color-carbon);
-}
-
-:focus-visible {
-  outline: 2px solid var(--color-acid);
-  outline-offset: 2px;
-}
-
-.surface-bone {
-  background: var(--color-bone);
-  color: var(--color-carbon);
-}
-
-.surface-bone :focus-visible {
-  outline-color: var(--color-carbon);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  & :focus-visible {
+    outline-color: var(--color-carbon);
   }
 }
 
