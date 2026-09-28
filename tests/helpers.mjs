@@ -1,14 +1,22 @@
-// Helpers for tests that assert against the built site in dist/.
-// Run `npm run build` before `npm test`.
+// Helpers for tests that assert against the built site: dist/ (production) and
+// dist-preview/ (TECHSIDER_NAV_PREVIEW=1, which adds the /preview/ template gallery).
+// Run `npm run build && npm run build:preview` before `npm test`.
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
+const DIST_PREVIEW = fileURLToPath(new URL("../dist-preview/", import.meta.url));
 
 export function readDist(rel) {
   const p = join(DIST, rel);
   if (!existsSync(p)) throw new Error(`dist/${rel} is missing — run \`npm run build\` first`);
+  return readFileSync(p, "utf8");
+}
+
+export function readPreviewDist(rel) {
+  const p = join(DIST_PREVIEW, rel);
+  if (!existsSync(p)) throw new Error(`dist-preview/${rel} is missing — run \`npm run build:preview\` first`);
   return readFileSync(p, "utf8");
 }
 

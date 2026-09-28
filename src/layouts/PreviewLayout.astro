@@ -1,0 +1,31 @@
+---
+// Layout for the template-preview gallery only. Every page it wraps renders fictional
+// fixture data, so it is noindex and opens with a banner saying so.
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+<BaseLayout
+  title={`${title} | Template preview | Techsider`}
+  description="Internal template preview. Every name, figure and document on this page is fictional fixture data."
+  noindex
+>
+  <p class="preview-banner" data-fixture>Template preview — fictional fixture data</p>
+  <slot />
+</BaseLayout>
+
+<style>
+  .preview-banner {
+    margin: 0;
+    padding: 0.625rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    text-align: center;
+    color: var(--color-bone);
+    background: var(--color-graphite);
+  }
+</style>

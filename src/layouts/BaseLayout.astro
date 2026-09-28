@@ -7,11 +7,14 @@ import SiteFooter from "../components/site/SiteFooter.astro";
 interface Props {
   title?: string;
   description?: string;
+  /** Adds <meta name="robots" content="noindex"> (template previews; later, the 404). */
+  noindex?: boolean;
 }
 
 const {
   title = "Techsider — Enterprise AI for Australian business",
   description = "Techsider builds production LLM platforms, retrieval systems, and AI agents for Australia's regulated industries — vendor-neutral, sovereign by default, and you own the code.",
+  noindex = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
@@ -44,6 +47,7 @@ const jsonLd = {
 
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />

@@ -13,3 +13,4 @@ export * from "./trace.ts";
 export * from "./demo.ts";
 export * from "./report.ts";
 export * from "./mock-panel.ts";
+export * from "./preview-pages.ts";
