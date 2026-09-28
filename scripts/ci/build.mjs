@@ -5,7 +5,7 @@
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadAllow, runGated } from "./build-lib.mjs";
+import { gateExit, loadAllow, runGated } from "./build-lib.mjs";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const ALLOW_FILE = fileURLToPath(new URL("./build-allow.json", import.meta.url));
@@ -30,8 +30,5 @@ if (failures.length) {
   for (const line of failures) console.error(`  ${line}`);
 }
 if (code !== 0) console.error(`\nbuild gate: astro build exited with code ${code}`);
-if (code !== 0 || failures.length) {
-  process.exitCode = code || 1; // not process.exit(): let piped output flush first
-} else {
-  console.log("\nbuild gate: clean (no unexpected [WARN]/[ERROR] lines)");
-}
+process.exitCode = gateExit({ code, failures }); // not process.exit(): let piped output flush first
+if (process.exitCode === 0) console.log("\nbuild gate: clean (no unexpected [WARN]/[ERROR] lines)");

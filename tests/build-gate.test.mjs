@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { classifyLine, loadAllow, runGated, stripAnsi } from "../scripts/ci/build-lib.mjs";
+import { classifyLine, gateExit, loadAllow, runGated, stripAnsi } from "../scripts/ci/build-lib.mjs";
 
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const ALLOW_FILE = fileURLToPath(new URL("../scripts/ci/build-allow.json", import.meta.url));
@@ -107,6 +107,25 @@ test("runGated classifies a last line that has no trailing newline", async () =>
 test("runGated passes a non-zero exit code back, and reports a signal kill as 1", async () => {
   assert.equal((await gate("process.exit(3)")).code, 3);
   assert.equal((await gate('process.kill(process.pid, "SIGTERM")')).code, 1);
+});
+
+// The verdict every `npm run build` rests on (Review Focus #1): astro's exit code alone is not enough.
+test("gateExit fails a flagged line even when astro exits 0, passes astro's own failure code through, and passes a clean run", () => {
+  const WARN = stripAnsi(COLOURED_WARN);
+  assert.equal(gateExit({ code: 0, failures: [WARN] }), 1, "a [WARN] line with exit code 0 fails");
+  assert.equal(gateExit({ code: 0, failures: [WARN, REF_ERROR] }), 1);
+  assert.equal(gateExit({ code: 3, failures: [] }), 3, "astro's non-zero code passes through");
+  assert.equal(gateExit({ code: 3, failures: [WARN] }), 3, "and wins over the line count");
+  assert.equal(gateExit({ code: 1, failures: [] }), 1, "a signal kill (reported as 1) fails");
+  assert.equal(gateExit({ code: 0, failures: [] }), 0, "clean");
+});
+
+test("build.mjs sets its exit code from gateExit and nothing else", () => {
+  const src = readFileSync(new URL("../scripts/ci/build.mjs", import.meta.url), "utf8");
+  assert.match(src, /import \{[^}]*\bgateExit\b[^}]*\} from "\.\/build-lib\.mjs"/);
+  assert.match(src, /process\.exitCode = gateExit\(\{ code, failures \}\)/);
+  assert.equal(src.match(/process\.exitCode\s*=(?!=)/g).length, 1, "one place sets the exit code");
+  assert.doesNotMatch(src.replace(/\/\/.*$/gm, ""), /process\.exit\(/, "no immediate exit: piped output must flush first");
 });
 
 // A pristine build has no type diagnostics at all: astro check exits 0 on warnings and hints

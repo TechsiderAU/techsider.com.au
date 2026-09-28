@@ -51,6 +51,18 @@ export function loadAllow(path) {
 }
 
 /**
+ * The gate's verdict, as a process exit code. Astro's own non-zero code passes through
+ * (it also wins over any flagged lines); a clean exit with any flagged line fails with 1,
+ * because Astro 7 exits 0 even when it logs [ERROR]; otherwise 0.
+ * @param {{ code: number, failures: string[] }} run what runGated returned
+ * @returns {number}
+ */
+export function gateExit({ code, failures }) {
+  if (code !== 0) return code;
+  return failures.length > 0 ? 1 : 0;
+}
+
+/**
  * Runs `command ...args`, streams its stdout and stderr through line by line,
  * and classifies every line.
  * @param {string} command
