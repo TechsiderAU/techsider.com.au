@@ -126,7 +126,7 @@ export const demoScript: DemoScript = {
           cite: 2,
           label: "CPS 230 · Business continuity plan · ¶41",
           text:
-            "An APRA-regulated entity must notify APRA as soon as possible, and not later than 24 hours after, if it has suffered a disruption to a critical operation outside tolerance. The notification must cover the nature of the disruption, the action taken, the likely impact on the entity's business operations and the timeframe for returning to normal operations.",
+            "An APRA-regulated entity must notify APRA as soon as possible, and not later than 24 hours after, if it has suffered a disruption to a critical operation outside tolerance. The notification must cover the nature of the disruption, the action taken, the likely impact on the entity’s business operations and the timeframe for returning to normal operations.",
         },
         {
           cite: 3,

@@ -23,6 +23,7 @@ test("answer covers the 24-hour disruption notice (¶41)", () => {
   assert.match(home, /CPS 230 · Business continuity plan · ¶41/);
   assert.match(home, /no later than 24 hours/);
   assert.match(home, /not later than 24 hours after, if it has suffered a disruption to a critical operation outside tolerance/);
+  assert.match(home, /the entity’s business operations/);  // U+2019 right single quotation mark
 });
 
 test("service-provider notice (¶60) is mentioned as a separate obligation", () => {
