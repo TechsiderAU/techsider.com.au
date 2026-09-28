@@ -1,0 +1,115 @@
+---
+// A group of <TabPanel>s (spec §8.12). Without JavaScript the panels are stacked sections.
+// src/scripts/tabs.ts enhances the group: WAI-ARIA tabs from 768px, an accordion below.
+// The tablist and accordion buttons are built by the script, so their styles are :global().
+interface Props {
+  id: string;
+  label: string;
+}
+
+const { id, label } = Astro.props;
+---
+<div class="tabs" id={id} data-tabs data-tabs-label={label}>
+  <slot />
+</div>
+
+<style>
+  .tabs {
+    display: grid;
+    gap: 2.5rem;
+  }
+  .tabs[data-tabs-mode] {
+    gap: 0;
+  }
+
+  /* Tabs (768px and up). */
+  .tabs :global(.tab-list) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-graphite);
+  }
+  .tabs :global(.tab) {
+    min-height: 2.75rem;
+    margin-bottom: -1px;
+    padding: 0 1rem;
+    border-bottom: 3px solid transparent;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-muted);
+    cursor: pointer;
+  }
+  .tabs :global(.tab:hover) {
+    color: var(--color-bone);
+  }
+  /* Selected: weight and the bar are the non-colour cues (spec §6.1). */
+  .tabs :global(.tab[aria-selected="true"]) {
+    color: var(--color-bone);
+    font-weight: 700;
+    border-bottom-color: var(--color-acid);
+  }
+  /* A hash scroll (the browser's own, or tabs.ts reveal()) lands on a tab panel: leave room above
+     it for the tablist and its 1.5rem margin, so the selected tab shows too. tabs.ts keeps
+     --tab-list-block at the tablist's height; 2.75rem is one row of tabs. */
+  .tabs[data-tabs-mode="tabs"] :global(.tab-panel) {
+    scroll-margin-top: calc(var(--tab-list-block, 2.75rem) + 1.5rem);
+  }
+
+  /* Accordion (below 768px). */
+  .tabs[data-tabs-mode="accordion"] :global(.tab-panel) {
+    border-top: 1px solid var(--color-graphite);
+  }
+  .tabs[data-tabs-mode="accordion"] :global(.tab-panel:last-child) {
+    border-bottom: 1px solid var(--color-graphite);
+  }
+  .tabs[data-tabs-mode="accordion"] :global(.tab-panel-heading) {
+    margin: 0;
+  }
+  .tabs[data-tabs-mode="accordion"] :global(.tab-panel-body) {
+    padding-bottom: 1.25rem;
+  }
+  .tabs :global(.tab-toggle) {
+    display: flex;
+    width: 100%;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.625rem 0;
+    text-align: left;
+    cursor: pointer;
+  }
+  .tabs :global(.tab-toggle-icon) {
+    flex: none;
+    font-family: var(--font-mono);
+    font-weight: 400;
+  }
+  .tabs :global(.tab-toggle-icon)::before {
+    content: "+";
+  }
+  .tabs :global(.tab-toggle[aria-expanded="true"] .tab-toggle-icon)::before {
+    content: "−";
+  }
+
+  /* On bone: carbon and muted-dark text, bone-line hairlines, an acid-deep bar. */
+  :global(.surface-bone) .tabs :global(.tab-list),
+  :global(.surface-bone) .tabs[data-tabs-mode="accordion"] :global(.tab-panel) {
+    border-color: var(--color-bone-line);
+  }
+  :global(.surface-bone) .tabs :global(.tab) {
+    color: var(--color-muted-dark);
+  }
+  :global(.surface-bone) .tabs :global(.tab:hover),
+  :global(.surface-bone) .tabs :global(.tab[aria-selected="true"]) {
+    color: var(--color-carbon);
+  }
+  :global(.surface-bone) .tabs :global(.tab[aria-selected="true"]) {
+    border-bottom-color: var(--color-acid-deep);
+  }
+</style>
+
+<script>
+  import { initTabs } from "../../scripts/tabs";
+  initTabs();
+</script>
