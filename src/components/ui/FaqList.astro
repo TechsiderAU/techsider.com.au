@@ -2,13 +2,15 @@
 // FAQ as native <details> disclosures (they work without JS) plus FAQPage JSON-LD
 // (spec §11.3). The +/− indicator is aria-hidden: <details> exposes its own expanded state.
 // Render at most once per page, so the page carries one FAQPage.
+import { jsonLd } from "../../lib/json-ld";
+
 interface Props {
   items: { q: string; a: string }[];
   id?: string;
 }
 
 const { items, id } = Astro.props;
-const jsonLd = {
+const faqPage = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   mainEntity: items.map((item) => ({
@@ -17,8 +19,6 @@ const jsonLd = {
     acceptedAnswer: { "@type": "Answer", text: item.a },
   })),
 };
-// Escape "<" so no string can close the script element early.
-const json = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 ---
 <div class="faq" id={id}>
   {items.map((item) => (
@@ -28,7 +28,7 @@ const json = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
     </details>
   ))}
 </div>
-<script type="application/ld+json" set:html={json} />
+<script type="application/ld+json" set:html={jsonLd(faqPage)} />
 
 <style>
   .faq {

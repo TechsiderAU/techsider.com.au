@@ -1,4 +1,6 @@
 ---
+import { jsonLd } from "../lib/json-ld";
+
 const faqs = [
   {
     q: "Where does our data go?",
@@ -47,5 +49,5 @@ const faqJsonLd = {
       ))}
     </dl>
   </div>
-  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  <script type="application/ld+json" set:html={jsonLd(faqJsonLd)} />
 </section>

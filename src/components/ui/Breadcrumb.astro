@@ -1,13 +1,15 @@
 ---
 // Breadcrumb trail (WAI-ARIA APG breadcrumb pattern) plus BreadcrumbList JSON-LD (spec §11.3).
 // The last item is the current page: text with aria-current, not a link. Render once per page.
+import { jsonLd } from "../../lib/json-ld";
+
 interface Props {
   items: { label: string; href: string }[];
 }
 
 const { items } = Astro.props;
 const site = Astro.site ?? Astro.url;
-const jsonLd = {
+const breadcrumbList = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: items.map((item, i) => ({
@@ -17,8 +19,6 @@ const jsonLd = {
     item: new URL(item.href, site).href,
   })),
 };
-// Escape "<" so no string can close the script element early.
-const json = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 ---
 <nav aria-label="Breadcrumb" class="breadcrumb">
   <ol>
@@ -30,7 +30,7 @@ const json = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
     ))}
   </ol>
 </nav>
-<script type="application/ld+json" set:html={json} />
+<script type="application/ld+json" set:html={jsonLd(breadcrumbList)} />
 
 <style>
   .breadcrumb ol {
