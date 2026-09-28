@@ -1,40 +1,125 @@
 @import "tailwindcss";
-@import "@fontsource-variable/inter";
-@import "@fontsource/eb-garamond/400.css";
-@import "@fontsource/eb-garamond/400-italic.css";
-@import "@fontsource/eb-garamond/500.css";
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource-variable/jetbrains-mono";
 
 @theme {
-  /* Surfaces */
-  --color-bg: #0b1424;
-  --color-bg-elev: #101c34;
-  --color-bg-deep: #07101e;
+  /* Acid Signal palette — spec §6.1. Acid is never text or an icon on bone. */
+  --color-carbon: #0b0b0c;
+  --color-bone: #f2f1ec;
+  --color-acid: #c8ff2e;
+  --color-acid-deep: #4a6200;
+  --color-graphite: #2a2b2e;
+  --color-muted: #9a9a94;
+  --color-muted-dark: #5c5b55;
+  --color-bone-line: #d6d4cc;
 
-  /* Text */
-  --color-text: #f4f6fa;
-  --color-text-mute: #a7b1c4;
-  --color-text-dim: #8893a8;
+  /* Status colours: always paired with text, never colour alone. */
+  --color-ok: #c8ff2e;
+  --color-review: #ffc247;
+  --color-blocked: #ff7a7a;
+  --color-ok-deep: #3f5400;
+  --color-review-deep: #7a4e00;
+  --color-blocked-deep: #a3261c;
 
-  /* Accent */
-  --color-accent: #6da9ff;
-  --color-accent-ink: #0b1424;
+  --font-sans: "Archivo Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Archivo Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Borders */
-  --color-border: #1f2a40;
-  --color-border-soft: #2a3650;
-
-  /* Fonts */
-  --font-serif: "EB Garamond", Georgia, "Times New Roman", serif;
-  --font-sans: "Inter Variable", "Inter", system-ui, -apple-system, sans-serif;
+  /* LEGACY aliases: let pre-rebuild sections render in the new palette.
+     Remove in Phase B when those sections are replaced. */
+  --color-bg: #0b0b0c;
+  --color-bg-elev: #2a2b2e;
+  --color-bg-deep: #0b0b0c;
+  --color-text: #f2f1ec;
+  --color-text-mute: #9a9a94;
+  --color-text-dim: #9a9a94;
+  --color-accent: #c8ff2e;
+  --color-accent-ink: #0b0b0c;
+  --color-border: #2a2b2e;
+  --color-border-soft: #2a2b2e;
+  --font-serif: "Archivo Variable", system-ui, sans-serif;
 }
 
 html {
-  scroll-behavior: smooth;
-  background: var(--color-bg);
+  background: var(--color-carbon);
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
   font-family: var(--font-sans);
-  color: var(--color-text);
-  background: var(--color-bg);
+  color: var(--color-bone);
+  background: var(--color-carbon);
+}
+
+::selection {
+  background: var(--color-acid);
+  color: var(--color-carbon);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-acid);
+  outline-offset: 2px;
+}
+
+.surface-bone {
+  background: var(--color-bone);
+  color: var(--color-carbon);
+}
+
+.surface-bone :focus-visible {
+  outline-color: var(--color-carbon);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Display type: Archivo Expanded caps (spec §6.2). */
+@utility type-display {
+  font-family: var(--font-display);
+  font-stretch: 125%;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+}
+
+/* Scan-line texture on carbon; lines are never lighter than graphite (spec §6.1). */
+@utility scanlines {
+  background-image: repeating-linear-gradient(0deg, rgb(42 43 46 / 0.6) 0 1px, transparent 1px 4px);
+}
+
+/* The lime highlight block: carbon text on acid, one word per headline. */
+@utility hl {
+  background: var(--color-acid);
+  color: var(--color-carbon);
+  padding-inline: 0.15em;
+}
+
+@utility skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-acid);
+  color: var(--color-carbon);
+  font-weight: 600;
+  border-radius: 4px;
+  &:focus {
+    top: 0.75rem;
+  }
 }
