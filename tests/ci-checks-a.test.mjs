@@ -104,8 +104,9 @@ const home = (ids = HOME_IDS) => page(`
   <!-- <a href="/commented-out/">old link</a> -->`);
 const MOCK = `<figure class="mock-panel" data-mock-panel data-astro-cid-x><div class="mock-window"><p>Fixture panel</p></div>
   <figcaption class="mock-caption" data-astro-cid-x>Illustrative interface, fictional data</figcaption></figure>`;
-const REPORT = `<article class="sample-report" data-sample-report><header><h2>Sample evaluation report</h2>
-  <p class="sample-caption" data-sample-caption>Sample report: Techsider testing its own demo system, so not independent.</p></header>
+const REPORT = `<article class="sample-report" data-sample-report data-provenance="illustrative"><header><h2>Sample evaluation report</h2>
+  <p class="sample-caption" data-sample-caption>Sample report: Techsider testing its own demo system, so not independent.</p>
+  <p><span aria-hidden="true">[</span><span data-provenance-label>Illustrative sample: not a real test run</span><span aria-hidden="true">]</span></p></header>
   <p>Fixture system, laid out like an Independent Evaluation Report.</p></article>`;
 const TRACE = `<figure class="trace-panel" data-trace-panel data-provenance="illustrative"><figcaption>Fixture trace
   <span data-provenance-label>Illustrative trace</span></figcaption><ol><li>00:00:01 retrieve</li></ol></figure>`;
@@ -490,10 +491,16 @@ test("06: provenance is still checked under exempt keys; only their free text is
 });
 
 test("06: a built element marked illustrative must show its label", async () => {
+  const unlabelledReport = REPORT.replace(/<p><span aria-hidden="true">\[[\s\S]*?<\/p>/, "");
+  assert.notEqual(unlabelledReport, REPORT);
   const res = await check(provenance, {
     "dist/solutions/alpha-fixture/index.html": page(
-      `${TRACE}<figure data-trace-panel data-provenance="illustrative"><ol><li>00:00:01 retrieve</li></ol></figure><div data-provenance="made-up">x</div>`,
+      `${TRACE}${REPORT}<figure data-trace-panel data-provenance="illustrative"><ol><li>00:00:01 retrieve</li></ol></figure><div data-provenance="made-up">x</div>${unlabelledReport}`,
     ),
   });
-  assertErrors(res, [/<figure data-provenance="illustrative"> renders no visible "Illustrative" label/, /<div data-provenance="made-up"> is neither measured nor illustrative/]);
+  assertErrors(res, [
+    /<figure data-provenance="illustrative"> renders no visible "Illustrative" label/,
+    /<div data-provenance="made-up"> is neither measured nor illustrative/,
+    /<article data-provenance="illustrative"> renders no visible "Illustrative" label/,
+  ]);
 });

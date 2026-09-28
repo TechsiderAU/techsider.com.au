@@ -84,11 +84,14 @@ export const makeDemoSchema = (ref: RefFactory) => z.object({
   provenance, run: z.string().optional(), data: z.unknown(),
 }).refine((d) => d.provenance !== "measured" || !!d.run, { message: "measured demos need a run path" });
 
+// A report dataset declares its provenance like a trace or demo (spec §9.3): the ④ report is
+// measured (a committed harness run); anything else, fixtures included, is illustrative and says so.
 export const sampleReport = z.object({
   system: z.string(), n: z.number().int().positive(), method: z.string(),
+  provenance, run: z.string().optional(),
   thresholds: z.array(z.object({ metric: z.string(), target: metric, result: metric, pass: z.boolean() })).min(1),
   failures: z.array(z.object({ id: z.string(), rating: z.enum(["low", "medium", "high"]), description: z.string() })).min(3),
-});
+}).refine((r) => r.provenance !== "measured" || !!r.run, { message: "measured sample reports need a run path" });
 
 export const makeInsightSchema = (ref: RefFactory) => z.object({
   title: z.string(), description: z.string(), publishDate: z.coerce.date(), updatedDate: z.coerce.date().optional(),

@@ -7,6 +7,12 @@ interface Props {
 }
 
 const { report } = Astro.props;
+// Spec §9.3: an illustrative report says so on the page; a measured one cites its committed run.
+// An in-code measured report without a run fails the build rather than render a bare claim.
+if (report.provenance === "measured" && !report.run) {
+  throw new Error(`SampleReport "${report.system}": provenance is "measured", but no run path is given`);
+}
+const label = report.provenance === "measured" ? `Measured run: ${report.run}` : "Illustrative sample: not a real test run";
 const RATING_LABEL = { low: "Low", medium: "Medium", high: "High" } as const;
 // Targets and results are typed metrics (spec §9.3), shown as value then unit ("90%"), as TracePanel shows its metrics.
 const show = (m: { value: number; unit?: string }) => `${m.value}${m.unit ?? ""}`;
@@ -23,10 +29,11 @@ const thresholdRows = report.thresholds.map((t) => ({
   outcome: t.pass ? "Pass" : "Fail",
 }));
 ---
-<article class="sample-report" data-sample-report>
+<article class="sample-report" data-sample-report data-provenance={report.provenance}>
   <header class="sample-header">
     <h2 class="sample-title">Sample evaluation report</h2>
     <p class="sample-caption" data-sample-caption>Sample report: Techsider testing its own demo system, so not independent.</p>
+    <p class="sample-provenance"><span aria-hidden="true" class="sample-bracket">[</span><span data-provenance-label>{label}</span><span aria-hidden="true" class="sample-bracket">]</span></p>
   </header>
   <dl class="sample-meta">
     <div>
@@ -97,7 +104,19 @@ const thresholdRows = report.thresholds.map((t) => ({
     padding-left: 0.875rem;
     border-left: 3px solid var(--sr-bar);
     font-family: var(--font-mono);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  /* Provenance (spec §9.3), in full-contrast text; only the decorative brackets take the accent. */
+  .sample-provenance {
+    margin: 0;
+    font-family: var(--font-mono);
     font-size: 0.875rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+  .sample-bracket {
+    color: var(--sr-bar);
   }
   .sample-meta {
     display: grid;

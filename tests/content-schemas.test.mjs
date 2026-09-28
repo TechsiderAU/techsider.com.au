@@ -92,7 +92,7 @@ const TRACE = {
 const DEMO = { solution: "test-solution", title: "Test demo", kind: "register", provenance: "illustrative", data: { rows: [] } };
 
 const REPORT = {
-  system: "Test system", n: 40, method: "Test method",
+  system: "Test system", n: 40, method: "Test method", provenance: "illustrative",
   thresholds: [{ metric: "Test metric", target: { value: 90, unit: "%" }, result: { value: 92, unit: "%" }, pass: true }],
   failures: [1, 2, 3].map((n) => ({ id: `F${n}`, rating: "low", description: "Test failure" })),
 };
@@ -251,4 +251,16 @@ test("sample reports need a positive integer n, typed thresholds and at least th
   bad(sampleReport, { ...REPORT, thresholds: [] }, "no thresholds");
   bad(sampleReport, { ...REPORT, n: 0 }, "n = 0");
   bad(sampleReport, { ...REPORT, n: 1.5 }, "fractional n");
+});
+
+test("sample reports declare provenance: illustrative needs no run, measured needs a run path", () => {
+  ok(sampleReport, REPORT, "illustrative sample report");
+  ok(sampleReport, { ...REPORT, provenance: "measured", run: "src/data/runs/test-run/" }, "measured sample report with run");
+  for (const run of [undefined, ""]) {
+    const issues = bad(sampleReport, { ...REPORT, provenance: "measured", run }, `measured sample report with run ${JSON.stringify(run)}`);
+    assert.ok(issues.some((i) => i.message === "measured sample reports need a run path"), JSON.stringify(issues));
+  }
+  const { provenance, ...unmarked } = REPORT;
+  bad(sampleReport, unmarked, "sample report without provenance");
+  bad(sampleReport, { ...REPORT, provenance: "estimated" }, "unknown provenance");
 });

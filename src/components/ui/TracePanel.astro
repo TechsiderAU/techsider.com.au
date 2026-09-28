@@ -6,6 +6,10 @@ interface Props {
 }
 
 const { trace } = Astro.props;
+// An in-code measured trace without a run fails the build rather than render "Measured run: undefined".
+if (trace.provenance === "measured" && !trace.run) {
+  throw new Error(`TracePanel "${trace.title}": provenance is "measured", but no run path is given`);
+}
 const label = trace.provenance === "measured" ? `Measured run: ${trace.run}` : "Illustrative trace";
 ---
 <figure class="trace-panel scanlines bg-carbon" data-trace-panel data-provenance={trace.provenance}>

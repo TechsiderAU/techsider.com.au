@@ -57,19 +57,38 @@ test("MockPanel and TracePanel stay dark islands inside a bone section", async (
 test("every SampleReport has the fixed title and caption and is never titled Independent Evaluation Report", async ({ page }) => {
   await page.goto(PAGE);
   const reports = page.locator("[data-sample-report]");
-  await expect(reports).toHaveCount(2);
+  await expect(reports).toHaveCount(4); // illustrative and measured, on carbon and on bone
   for (const report of await reports.all()) {
     await expect(report.getByRole("heading", { level: 2 })).toHaveText("Sample evaluation report");
-    await expect(report.locator("[data-sample-caption]")).toHaveText(SAMPLE_CAPTION);
-    await expect(report.locator("[data-sample-caption]")).toBeVisible();
+    const caption = report.locator("[data-sample-caption]");
+    await expect(caption).toHaveText(SAMPLE_CAPTION);
+    await expect(caption).toBeVisible();
+    // Body size, not small print (spec §8.12: the caption can't be switched off or shrunk away).
+    expect(await caption.evaluate((el) => getComputedStyle(el).fontSize)).toBe("16px");
   }
   expect(await page.locator("body").textContent()).not.toMatch(/independent evaluation report/i);
+});
+
+test("SampleReport labels its provenance: the illustrative fixture says so, a measured report cites its run", async ({ page }) => {
+  await page.goto(PAGE);
+  for (const section of ["#gallery-sample-report", "#gallery-sample-report-bone"]) {
+    const reports = page.locator(`${section} [data-sample-report]`);
+    await expect(reports).toHaveCount(2);
+    const illustrative = reports.nth(0);
+    await expect(illustrative).toHaveAttribute("data-provenance", sampleReportFixture.provenance);
+    await expect(illustrative.locator("[data-provenance-label]")).toHaveText("Illustrative sample: not a real test run");
+    await expect(illustrative.locator("[data-provenance-label]")).toBeVisible();
+    const measured = reports.nth(1);
+    await expect(measured).toHaveAttribute("data-provenance", "measured");
+    await expect(measured.locator("[data-provenance-label]")).toHaveText("Measured run: src/data/runs/fixture-run/");
+    await expect(measured.locator("[data-provenance-label]")).toBeVisible();
+  }
 });
 
 test("SampleReport shows n, method, typed thresholds, pass/fail as text and every failure with its rating", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(PAGE);
-  const report = page.locator("#gallery-sample-report [data-sample-report]");
+  const report = page.locator("#gallery-sample-report [data-sample-report]").first();
   await expect(report).toContainText(`n = ${sampleReportFixture.n}`);
   await expect(report).toContainText(sampleReportFixture.method);
   const rows = report.locator("table tbody tr");
@@ -114,7 +133,7 @@ for (const width of [1280, 768]) {
   test(`at ${width}px every DataTable is a real table and the cards are not rendered`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(PAGE);
-    await expect(tables(page)).toHaveCount(4); // standalone + inside SampleReport, on carbon and on bone
+    await expect(tables(page)).toHaveCount(6); // standalone + inside both SampleReports, on carbon and on bone
     for (const t of await tables(page).all()) {
       expect(await shown(t.locator("table"))).toBe(true);
       expect(await t.locator(".data-cards").evaluate((el) => getComputedStyle(el).display)).toBe("none");
@@ -130,7 +149,7 @@ for (const width of [767, 390]) {
   test(`at ${width}px every DataTable renders as <dl> cards and the table is not rendered`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(PAGE);
-    await expect(tables(page)).toHaveCount(4);
+    await expect(tables(page)).toHaveCount(6);
     for (const t of await tables(page).all()) {
       expect(await t.locator("table").evaluate((el) => getComputedStyle(el).display)).toBe("none");
       expect(await shown(t.locator(".data-cards"))).toBe(true);

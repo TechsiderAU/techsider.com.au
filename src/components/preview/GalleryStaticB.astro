@@ -18,10 +18,17 @@ interface Props {
 
 const { panel, report, trace, rows } = Astro.props;
 
-// The measured branch of TracePanel needs a measured item; this one exists only on the preview page.
+// The measured branches of TracePanel and SampleReport need measured items; these exist only on
+// the preview page.
 const measuredTrace: TraceData = {
   ...trace,
   title: "Fixture measured trace",
+  provenance: "measured",
+  run: "src/data/runs/fixture-run/",
+};
+const measuredReport: SampleReportData = {
+  ...report,
+  system: "Fixture measured assistant",
   provenance: "measured",
   run: "src/data/runs/fixture-run/",
 };
@@ -54,6 +61,7 @@ const surfaces = [
       <div class="gallery-b-inner">
         <h2 id={`gallery-sample-report${s.suffix}-h`} class="gallery-b-heading">SampleReport {s.label}</h2>
         <SampleReport report={report} />
+        <SampleReport report={measuredReport} />
       </div>
     </section>
     <section id={`gallery-trace-panel${s.suffix}`} class:list={["gallery-b", s.className]} aria-labelledby={`gallery-trace-panel${s.suffix}-h`}>
