@@ -190,6 +190,28 @@ test("index.ts re-exports every fixture module, and every exported fixture is ch
   assert.deepEqual(fixtureNames.sort(), CASES.map(([name]) => name).sort());
 });
 
+// Derived fixtures share nested objects (governmentIndustryFixture spreads industryFixture;
+// every industry holds mockPanelFixture), so an in-place sort or splice in a template or
+// preview page would silently change other specimens. index.ts deep-freezes every export.
+function assertDeepFrozen(value, path, seen = new Set()) {
+  if ((typeof value !== "object" && typeof value !== "function") || value === null || seen.has(value)) return;
+  seen.add(value);
+  assert.ok(Object.isFrozen(value), `${path} is not frozen`);
+  for (const key of Reflect.ownKeys(value)) {
+    const d = Object.getOwnPropertyDescriptor(value, key);
+    if ("value" in d) assertDeepFrozen(d.value, `${path}.${String(key)}`, seen);
+  }
+}
+
+test("every fixture export is deep-frozen, so no page can change a shared specimen", () => {
+  for (const [key, value] of Object.entries(all)) assertDeepFrozen(value, key);
+  assert.throws(() => industryFixture.workflow.sort(), TypeError);
+  assert.throws(() => governmentIndustryFixture.mockPanel.chips.splice(0, 1), TypeError);
+  assert.throws(() => { sampleReportFixture.provenance = "measured"; }, TypeError);
+  assert.equal(industryFixture.workflow[0].id, "fixture-intake");
+  assert.equal(mockPanelFixture.chips.length, 3);
+});
+
 // Any module specifier or glob pattern that reaches src/fixtures/: `import … from` and `export … from`,
 // a side-effect `import "…"`, a dynamic `import("…")`, and `import.meta.glob(…)` (Vite's glob import).
 const FIXTURE_PATH = String.raw`["'\`][^"'\`]*\/fixtures(?:\/[^"'\`]*)?["'\`]`;

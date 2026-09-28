@@ -4,7 +4,34 @@
 //   example.com, so nothing here can pass for a real organisation, client, document or result;
 // - references between fixtures resolve to the *_FIXTURE_ID constants;
 // - only src/pages/preview/ imports fixtures (a dynamic import behind isPreview()), so no
-//   fixture reaches the production dist/.
+//   fixture reaches the production dist/;
+// - every export is deep-frozen (below): derived fixtures share nested objects, so an in-place
+//   sort or splice in a template or preview page would otherwise change other specimens.
+//   Map, filter or spread a fixture to change it.
+import * as solution from "./solution.ts";
+import * as industry from "./industry.ts";
+import * as regulatory from "./regulatory.ts";
+import * as kit from "./kit.ts";
+import * as trace from "./trace.ts";
+import * as demo from "./demo.ts";
+import * as report from "./report.ts";
+import * as mockPanel from "./mock-panel.ts";
+import * as previewPages from "./preview-pages.ts";
+
+function deepFreeze(value: unknown, seen = new Set<unknown>()): void {
+  if ((typeof value !== "object" && typeof value !== "function") || value === null || seen.has(value)) return;
+  seen.add(value);
+  Object.freeze(value);
+  for (const key of Reflect.ownKeys(value)) {
+    const d = Object.getOwnPropertyDescriptor(value, key);
+    if (d && "value" in d) deepFreeze(d.value, seen);
+  }
+}
+
+for (const mod of [solution, industry, regulatory, kit, trace, demo, report, mockPanel, previewPages]) {
+  for (const value of Object.values(mod)) deepFreeze(value);
+}
+
 export * from "./solution.ts";
 export * from "./industry.ts";
 export * from "./regulatory.ts";
