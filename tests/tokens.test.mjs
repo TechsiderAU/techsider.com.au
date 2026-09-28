@@ -1,12 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
-import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { compile } from "tailwindcss";
+import { buildCss, buildShippedCss, globalCss as css } from "./support/tailwind.mjs";
 
-const css = readFileSync(new URL("../src/styles/global.css", import.meta.url), "utf8");
 const theme = css.match(/@theme\s*\{([\s\S]*?)\n\}/)?.[1] ?? "";
 const token = (name) => theme.match(new RegExp(`--color-${name}:\\s*(#[0-9a-fA-F]{6})`))?.[1]?.toLowerCase();
 
@@ -66,21 +63,6 @@ test("the built CSS ships Archivo (width axis) and JetBrains Mono, and no Garamo
   assert.equal(pkg.dependencies["@fontsource/eb-garamond"], undefined);
   assert.equal(pkg.dependencies["@fontsource-variable/inter"], undefined);
 });
-
-// Compile global.css with Tailwind's own compiler for the given class candidates.
-// The @fontsource imports only add @font-face rules, so they load as empty sheets.
-const require = createRequire(import.meta.url);
-async function buildCss(candidates) {
-  const compiler = await compile(css, {
-    base: fileURLToPath(new URL("../src/styles/", import.meta.url)),
-    async loadStylesheet(id, base) {
-      if (id.startsWith("@fontsource")) return { path: id, base, content: "" };
-      const path = id.startsWith(".") ? join(base, id) : require.resolve(id === "tailwindcss" ? "tailwindcss/index.css" : id);
-      return { path, base: dirname(path), content: readFileSync(path, "utf8") };
-    },
-  });
-  return compiler.build(candidates);
-}
 
 // Every block in a stylesheet, in source order, with the preludes enclosing it and its own declarations.
 function blocks(source) {
@@ -163,4 +145,32 @@ test("surface-bone is a layered utility: variants reach it and single-purpose ut
   for (const sel of [".bg-bone-line", ".text-muted-dark", ".scanlines"]) {
     assert.ok(at(".surface-bone") < at(sel), `${sel} comes after .surface-bone`);
   }
+});
+
+test("surface-bone renders native form controls light (color-scheme)", async () => {
+  const bone = blocks(await buildCss(["surface-bone"])).find((b) => b.prelude === ".surface-bone");
+  assert.ok(bone.decls.includes("color-scheme:light"), `.surface-bone decls: ${bone.decls.join("; ")}`);
+});
+
+// A dark island (MockPanel, a trace panel) is a bg-carbon or bg-graphite box inside a bone section.
+// The bone section's carbon ring is invisible on it (WCAG 2.4.7), so its contents get the lime ring back.
+test("dark islands inside surface-bone restore the lime ring and dark controls", async () => {
+  const ISLAND = ":is(.bg-carbon,.bg-graphite)";
+  const squash = (s) => s.replace(/\s+/g, "");
+  const find = (list, prelude, parent) =>
+    list.find((b) => squash(b.prelude) === squash(prelude) && (parent === undefined || b.within.at(-1) === parent));
+
+  // Source form: nested inside the layered utility, after the bone ring.
+  const out = blocks(await buildCss(["surface-bone", "bg-carbon", "bg-graphite"]));
+  assert.deepEqual(find(out, `& ${ISLAND}`, ".surface-bone")?.decls, ["color-scheme:dark"], "island color-scheme");
+  const ring = find(out, `& ${ISLAND} :focus-visible`, ".surface-bone");
+  assert.deepEqual(ring?.decls, ["outline-color:var(--color-acid)"], "island ring");
+  assert.equal(layerOf(ring), "@layer utilities", "island ring is a layered utility rule");
+
+  // Shipped form, flattened as a production build does. The island selector carries one more class
+  // than `.surface-bone :focus-visible` (0,3,0 vs 0,2,0), so it wins wherever the two overlap.
+  const shipped = blocks(await buildShippedCss(["surface-bone", "bg-carbon", "bg-graphite"]));
+  assert.deepEqual(find(shipped, ".surface-bone :focus-visible")?.decls, ["outline-color:var(--color-carbon)"]);
+  assert.deepEqual(find(shipped, `.surface-bone ${ISLAND}`)?.decls, ["color-scheme:dark"]);
+  assert.deepEqual(find(shipped, `.surface-bone ${ISLAND} :focus-visible`)?.decls, ["outline-color:var(--color-acid)"]);
 });

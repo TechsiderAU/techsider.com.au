@@ -86,13 +86,26 @@
   }
 }
 
-/* Bone surface: carbon text and a carbon focus ring. background-color (not the
-   background shorthand) so bg-* and scanlines on the same element still apply. */
+/* Bone surface: carbon text, a carbon focus ring and light native form controls.
+   background-color (not the background shorthand) so bg-* and scanlines on the same
+   element still apply.
+   Dark islands: a bg-carbon or bg-graphite box inside a bone section (MockPanel, trace
+   panels) is a dark surface again, so its contents get the lime ring and dark controls
+   back (a carbon ring is invisible there, WCAG 2.4.7). The island selector is one class
+   more specific than the bone ring, so it wins regardless of order. The island element
+   itself keeps the carbon ring: its outline is drawn outside it, on the bone. */
 @utility surface-bone {
   background-color: var(--color-bone);
   color: var(--color-carbon);
+  color-scheme: light;
   & :focus-visible {
     outline-color: var(--color-carbon);
+  }
+  & :is(.bg-carbon, .bg-graphite) {
+    color-scheme: dark;
+  }
+  & :is(.bg-carbon, .bg-graphite) :focus-visible {
+    outline-color: var(--color-acid);
   }
 }
 
