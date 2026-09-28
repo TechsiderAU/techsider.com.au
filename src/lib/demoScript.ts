@@ -1,6 +1,9 @@
-// Scripted transcript for the canned RAG demo. The source text is transcribed
-// verbatim from APRA's public Prudential Standard CPS 230 (handbook.apra.gov.au).
-// This is illustrative reference data — not a record of client work.
+// Scripted transcript for the canned RAG demo. Source text is transcribed verbatim
+// from APRA's public Prudential Standard CPS 230 (https://www.apra.gov.au/standards/cps-230,
+// the version commencing 1 July 2026; paragraph numbers and headings checked 28 Sep 2026).
+// Scores, latencies and eval values are illustrative: a scripted demo, not a measured run.
+// This is reference data, not a record of client work.
+
 
 export interface Chunk {
   /** citation number this chunk maps to, or 0 for an uncited (distractor) candidate */
@@ -51,7 +54,7 @@ export interface DemoScript {
 }
 
 export const demoScript: DemoScript = {
-  doc: "Prudential Standard CPS 230 — Operational Risk Management · APRA (public reference data)",
+  doc: "Prudential Standard CPS 230 — Operational Risk Management (version commencing 1 July 2026) · APRA (public reference data)",
   turns: [
     {
       question: "What are our incident-notification timeframes under CPS 230?",
@@ -64,25 +67,51 @@ export const demoScript: DemoScript = {
         },
         {
           cite: 2,
+          score: 0.86,
+          snippet:
+            "…must notify APRA as soon as possible, and not later than 24 hours after, if it has suffered a disruption to a critical operation outside tolerance…",
+        },
+        {
+          cite: 3,
           score: 0.74,
           snippet:
             "Critical operations are processes…which, if disrupted beyond tolerance levels, would have a material adverse impact…",
         },
-        { cite: 0, score: 0.39, snippet: "(business continuity — tolerance levels for critical operations)" },
+        {
+          cite: 4,
+          score: 0.58,
+          snippet:
+            "…not more than 20 business days after entering into or materially changing an agreement for the provision of a service…",
+        },
         { cite: 0, score: 0.31, snippet: "(roles and responsibilities of the Board)" },
       ],
       answer: [
-        { text: "Under CPS 230, an operational risk incident must be notified to APRA " },
         {
           text:
-            "as soon as possible, and no later than 72 hours, after you become aware of it — where the incident is likely to have a material financial impact or a material impact on your ability to maintain critical operations",
+            "CPS 230 sets two notification clocks, plus a separate rule for service providers. An operational risk incident must be notified to APRA ",
+        },
+        {
+          text:
+            "as soon as possible, and no later than 72 hours after you become aware of it, where it is likely to have a material financial impact or a material impact on your ability to maintain critical operations",
           cite: 1,
+        },
+        { text: ". A disruption to a critical operation outside tolerance has a shorter clock: " },
+        {
+          text:
+            "notify APRA as soon as possible, and no later than 24 hours after, covering the nature of the disruption, the action taken, the likely impact and the timeframe for returning to normal operations",
+          cite: 2,
         },
         { text: ". " },
         {
           text:
-            "“Critical operations” here means processes that, if disrupted beyond tolerance levels, would have a material adverse impact on your depositors, policyholders or other customers, or on your role in the financial system",
-          cite: 2,
+            "\u201cCritical operations\u201d means processes that, if disrupted beyond tolerance levels, would have a material adverse impact on your depositors, policyholders, beneficiaries or other customers, or on your role in the financial system",
+          cite: 3,
+        },
+        { text: ". Separately, service-provider arrangements have their own notice: " },
+        {
+          text:
+            "within 20 business days of entering into or materially changing an agreement for a service a critical operation relies on",
+          cite: 4,
         },
         { text: "." },
       ],
@@ -95,20 +124,32 @@ export const demoScript: DemoScript = {
         },
         {
           cite: 2,
-          label: "CPS 230 · Definitions · ¶37",
+          label: "CPS 230 · Business continuity plan · ¶41",
+          text:
+            "An APRA-regulated entity must notify APRA as soon as possible, and not later than 24 hours after, if it has suffered a disruption to a critical operation outside tolerance. The notification must cover the nature of the disruption, the action taken, the likely impact on the entity's business operations and the timeframe for returning to normal operations.",
+        },
+        {
+          cite: 3,
+          label: "CPS 230 · Critical operations and tolerance levels · ¶34",
           text:
             "Critical operations are processes undertaken by an APRA-regulated entity or its service provider which, if disrupted beyond tolerance levels, would have a material adverse impact on its depositors, policyholders, beneficiaries or other customers, or its role in the financial system.",
         },
+        {
+          cite: 4,
+          label: "CPS 230 · Monitoring, notifications and review · ¶60(a)",
+          text:
+            "An APRA-regulated entity must notify APRA: (a) as soon as possible and not more than 20 business days after entering into or materially changing an agreement for the provision of a service on which the entity relies to undertake a critical operation; …",
+        },
       ],
       trace: [
-        { label: "Retrieve", detail: "hybrid (BM25 + dense), k=4, reciprocal-rank fusion", ms: 38 },
-        { label: "Rerank", detail: "cross-encoder, keep top 2", ms: 21 },
-        { label: "Generate", detail: "grounded prompt, cite-as-you-write", ms: 1180 },
+        { label: "Retrieve", detail: "hybrid (BM25 + dense), k=5, reciprocal-rank fusion", ms: 41 },
+        { label: "Rerank", detail: "cross-encoder, keep top 4", ms: 24 },
+        { label: "Generate", detail: "grounded prompt, cite-as-you-write", ms: 1420 },
       ],
       evals: {
         groundedness: "pass — every claim carries a citation",
-        faithfulness: "0.98",
-        recall: "2 / 2 relevant clauses in top-k",
+        faithfulness: "0.97",
+        recall: "4 / 4 relevant clauses in top-k",
       },
     },
     {
