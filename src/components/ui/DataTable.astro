@@ -1,0 +1,135 @@
+---
+interface Props {
+  caption: string;
+  columns: { key: string; label: string }[];
+  rows: Record<string, string>[];
+  rowHeader: string;
+}
+
+const { caption, columns, rows, rowHeader } = Astro.props;
+if (!columns.some((c) => c.key === rowHeader)) {
+  throw new Error(`DataTable "${caption}": rowHeader "${rowHeader}" is not a column key`);
+}
+const details = columns.filter((c) => c.key !== rowHeader);
+---
+<div class="data-table" data-data-table>
+  <table class="dt-table">
+    <caption>{caption}</caption>
+    <thead>
+      <tr>
+        {columns.map((c) => <th scope="col">{c.label}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row) => (
+        <tr>
+          {columns.map((c) => (c.key === rowHeader ? <th scope="row">{row[c.key]}</th> : <td>{row[c.key]}</td>))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <div class="data-cards">
+    <p class="dt-cards-caption">{caption}</p>
+    <ul class="dt-cards">
+      {rows.map((row) => (
+        <li class="dt-card">
+          <p class="dt-card-heading">{row[rowHeader]}</p>
+          <dl>
+            {details.map((c) => (
+              <div>
+                <dt>{c.label}</dt>
+                <dd>{row[c.key]}</dd>
+              </div>
+            ))}
+          </dl>
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+
+<style>
+  /* Hairlines are graphite on carbon and bone-line on bone (spec §6.1); rows only, no cell grid (§6.4). */
+  .data-table {
+    --dt-line: var(--color-graphite);
+    --dt-muted: var(--color-muted);
+  }
+  :global(.surface-bone) .data-table {
+    --dt-line: var(--color-bone-line);
+    --dt-muted: var(--color-muted-dark);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .data-table {
+    --dt-line: var(--color-graphite);
+    --dt-muted: var(--color-muted);
+  }
+  /* Below 768px only the cards render; display:none keeps the other variant out of the
+     accessibility tree, so screen readers never hear the data twice. */
+  .dt-table {
+    display: none;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .dt-table caption,
+  .dt-cards-caption {
+    margin: 0;
+    padding-bottom: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    text-align: left;
+    color: var(--dt-muted);
+  }
+  .dt-table th,
+  .dt-table td {
+    padding: 0.75rem 1rem 0.75rem 0;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--dt-line);
+    overflow-wrap: anywhere;
+  }
+  .dt-table thead th {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--dt-muted);
+  }
+  .dt-table tbody th {
+    font-weight: 600;
+  }
+  .dt-card {
+    padding-block: 1rem;
+    border-top: 1px solid var(--dt-line);
+  }
+  .dt-card:last-child {
+    border-bottom: 1px solid var(--dt-line);
+  }
+  .dt-card-heading {
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .dt-card dl {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+  }
+  .dt-card dt {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--dt-muted);
+  }
+  .dt-card dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 48rem) {
+    .dt-table {
+      display: table;
+    }
+    .data-cards {
+      display: none;
+    }
+  }
+</style>

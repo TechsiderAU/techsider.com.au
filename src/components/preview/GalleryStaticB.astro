@@ -1,0 +1,97 @@
+---
+// Preview-only gallery for MockPanel, SampleReport, TracePanel and DataTable, each on carbon and on bone.
+// Rendered by src/pages/preview/[...slug].astro on /preview/components/ and never in production.
+// It imports no fixtures: only the preview route may load src/fixtures/ (Task 4's import guard),
+// so the route passes the fixture data in as props.
+import type { MockPanelData, SampleReportData, TraceData } from "../../content/schemas";
+import MockPanel from "../ui/MockPanel.astro";
+import SampleReport from "../ui/SampleReport.astro";
+import TracePanel from "../ui/TracePanel.astro";
+import DataTable from "../ui/DataTable.astro";
+
+interface Props {
+  panel: MockPanelData;
+  report: SampleReportData;
+  trace: TraceData;
+  rows: { obligation: string; meaning: string; design: string; evidence: string }[];
+}
+
+const { panel, report, trace, rows } = Astro.props;
+
+// The measured branch of TracePanel needs a measured item; this one exists only on the preview page.
+const measuredTrace: TraceData = {
+  ...trace,
+  title: "Fixture measured trace",
+  provenance: "measured",
+  run: "src/data/runs/fixture-run/",
+};
+const tableColumns = [
+  { key: "obligation", label: "Obligation" },
+  { key: "meaning", label: "What it means" },
+  { key: "design", label: "How we design for it" },
+  { key: "evidence", label: "Evidence you get" },
+];
+const tableRows = rows.map((r) => ({
+  obligation: r.obligation,
+  meaning: r.meaning,
+  design: r.design,
+  evidence: r.evidence,
+}));
+const surfaces = [
+  { suffix: "", label: "on carbon", className: "" },
+  { suffix: "-bone", label: "on bone", className: "surface-bone" },
+];
+---
+{surfaces.map((s) => (
+  <>
+    <section id={`gallery-mock-panel${s.suffix}`} class:list={["gallery-b", s.className]} aria-labelledby={`gallery-mock-panel${s.suffix}-h`}>
+      <div class="gallery-b-inner">
+        <h2 id={`gallery-mock-panel${s.suffix}-h`} class="gallery-b-heading">MockPanel {s.label}</h2>
+        <MockPanel panel={panel} />
+      </div>
+    </section>
+    <section id={`gallery-sample-report${s.suffix}`} class:list={["gallery-b", s.className]} aria-labelledby={`gallery-sample-report${s.suffix}-h`}>
+      <div class="gallery-b-inner">
+        <h2 id={`gallery-sample-report${s.suffix}-h`} class="gallery-b-heading">SampleReport {s.label}</h2>
+        <SampleReport report={report} />
+      </div>
+    </section>
+    <section id={`gallery-trace-panel${s.suffix}`} class:list={["gallery-b", s.className]} aria-labelledby={`gallery-trace-panel${s.suffix}-h`}>
+      <div class="gallery-b-inner">
+        <h2 id={`gallery-trace-panel${s.suffix}-h`} class="gallery-b-heading">TracePanel {s.label}</h2>
+        <TracePanel trace={trace} />
+        <TracePanel trace={measuredTrace} />
+      </div>
+    </section>
+    <section id={`gallery-data-table${s.suffix}`} class:list={["gallery-b", s.className]} aria-labelledby={`gallery-data-table${s.suffix}-h`}>
+      <div class="gallery-b-inner">
+        <h2 id={`gallery-data-table${s.suffix}-h`} class="gallery-b-heading">DataTable {s.label}</h2>
+        <DataTable caption="Fixture obligations register" columns={tableColumns} rows={tableRows} rowHeader="obligation" />
+      </div>
+    </section>
+  </>
+))}
+
+<style>
+  .gallery-b {
+    padding-block: 3rem;
+  }
+  .gallery-b-inner {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 40rem) {
+    .gallery-b-inner {
+      padding-inline: 1.5rem;
+    }
+  }
+  .gallery-b-heading {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+import type { TraceData } from "../../content/schemas";
+
+interface Props {
+  trace: TraceData;
+}
+
+const { trace } = Astro.props;
+const label = trace.provenance === "measured" ? `Measured run: ${trace.run}` : "Illustrative trace";
+---
+<figure class="trace-panel scanlines bg-carbon" data-trace-panel data-provenance={trace.provenance}>
+  <figcaption class="trace-caption">
+    <span class="trace-title">{trace.title}</span>{" "}
+    <span class="trace-provenance"><span aria-hidden="true" class="trace-bracket">[</span><span data-provenance-label>{label}</span><span aria-hidden="true" class="trace-bracket">]</span></span>
+  </figcaption>
+  <ol class="trace-lines">
+    {trace.lines.map((line) => (
+      <li class="trace-line">
+        <span class="trace-t">{line.t}</span>{" "}
+        <span class="trace-op">{line.op}</span>{" "}
+        <span class="trace-detail">{line.detail}</span>
+        {line.metric && (
+          <>
+            {" "}<span class="trace-metric" data-metric>{line.metric.value}{line.metric.unit}</span>
+          </>
+        )}
+      </li>
+    ))}
+  </ol>
+</figure>
+
+<style>
+  /* Always a carbon island: on bone it keeps bone text and the lime ring (global.css surface-bone rule). */
+  .trace-panel {
+    margin: 0;
+    max-width: 48rem;
+    color: var(--color-bone);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px var(--color-graphite);
+    overflow: hidden;
+  }
+  .trace-caption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding: 0.625rem 1rem;
+    background: var(--color-graphite);
+  }
+  .trace-title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .trace-provenance {
+    color: var(--color-muted);
+    overflow-wrap: anywhere;
+  }
+  .trace-bracket {
+    color: var(--color-acid);
+  }
+  .trace-lines {
+    display: grid;
+    gap: 0.25rem;
+    padding: 1rem;
+  }
+  .trace-line {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 1ch;
+  }
+  .trace-t {
+    color: var(--color-muted);
+  }
+  .trace-op {
+    color: var(--color-acid);
+  }
+  .trace-detail {
+    flex: 1 1 18ch;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .trace-metric {
+    color: var(--color-acid);
+    font-weight: 700;
+  }
+</style>

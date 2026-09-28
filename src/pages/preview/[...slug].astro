@@ -6,6 +6,7 @@
 import type { GetStaticPaths } from "astro";
 import PreviewLayout from "../../layouts/PreviewLayout.astro";
 import GalleryStaticA from "../../components/preview/GalleryStaticA.astro";
+import GalleryStaticB from "../../components/preview/GalleryStaticB.astro";
 import { isPreview } from "../../data/nav";
 import type { PreviewPage } from "../../fixtures/preview-pages";
 
@@ -66,10 +67,20 @@ const surfaces = [
       <div class="preview-wrap">
         <h2 id={`surface-${surface.id}-heading`} class="preview-surface-heading">{surface.label}</h2>
         <GalleryStaticA surface={surface.id} faq={surface.bone ? fx.solutionFixture.faq : fx.industryFixture.faq} />
-        {/* Tasks 6 and 7 add one specimen per component here. */}
+        {/* Components A render above, once in each surface section. Components B render after
+            both sections: GalleryStaticB draws its own carbon and bone sections. */}
       </div>
     </section>
   ))}
+
+  {page.kind === "components" && (
+    <GalleryStaticB
+      panel={fx.mockPanelFixture}
+      report={fx.sampleReportFixture}
+      trace={fx.traceFixture}
+      rows={fx.regulatoryFixture.rows}
+    />
+  )}
 
   {page.kind === "tabs" && (
     <section id="tab-groups" class="preview-surface" aria-labelledby="tab-groups-heading" data-preview-surface="tabs">

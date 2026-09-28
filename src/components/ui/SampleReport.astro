@@ -1,0 +1,158 @@
+---
+import type { SampleReportData } from "../../content/schemas";
+import DataTable from "./DataTable.astro";
+
+interface Props {
+  report: SampleReportData;
+}
+
+const { report } = Astro.props;
+const RATING_LABEL = { low: "Low", medium: "Medium", high: "High" } as const;
+// Targets and results are typed metrics (spec §9.3), shown as value then unit ("90%"), as TracePanel shows its metrics.
+const show = (m: { value: number; unit?: string }) => `${m.value}${m.unit ?? ""}`;
+const thresholdColumns = [
+  { key: "metric", label: "Metric" },
+  { key: "target", label: "Target" },
+  { key: "result", label: "Result" },
+  { key: "outcome", label: "Outcome" },
+];
+const thresholdRows = report.thresholds.map((t) => ({
+  metric: t.metric,
+  target: show(t.target),
+  result: show(t.result),
+  outcome: t.pass ? "Pass" : "Fail",
+}));
+---
+<article class="sample-report" data-sample-report>
+  <header class="sample-header">
+    <h2 class="sample-title">Sample evaluation report</h2>
+    <p class="sample-caption" data-sample-caption>Sample report: Techsider testing its own demo system, so not independent.</p>
+  </header>
+  <dl class="sample-meta">
+    <div>
+      <dt>System</dt>
+      <dd>{report.system}</dd>
+    </div>
+    <div>
+      <dt>Sample size</dt>
+      <dd>n = {report.n}</dd>
+    </div>
+    <div>
+      <dt>Method</dt>
+      <dd>{report.method}</dd>
+    </div>
+  </dl>
+  <section class="sample-section">
+    <h3 class="sample-subhead">Thresholds</h3>
+    <DataTable caption="Each threshold, its target and the result" columns={thresholdColumns} rows={thresholdRows} rowHeader="metric" />
+  </section>
+  <section class="sample-section">
+    <h3 class="sample-subhead">Failures found</h3>
+    <ol class="sample-failures">
+      {report.failures.map((f) => (
+        <li class="sample-failure" data-rating={f.rating}>
+          <p class="sample-failure-head">
+            <span class="sample-failure-id">{f.id}</span>{" "}
+            <span class="sample-failure-rating">Rating: {RATING_LABEL[f.rating]}</span>
+          </p>
+          <p>{f.description}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+</article>
+
+<style>
+  .sample-report {
+    --sr-muted: var(--color-muted);
+    --sr-line: var(--color-graphite);
+    --sr-bar: var(--color-acid);
+    display: grid;
+    gap: 2rem;
+    max-width: 56rem;
+  }
+  :global(.surface-bone) .sample-report {
+    --sr-muted: var(--color-muted-dark);
+    --sr-line: var(--color-bone-line);
+    --sr-bar: var(--color-acid-deep);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .sample-report {
+    --sr-muted: var(--color-muted);
+    --sr-line: var(--color-graphite);
+    --sr-bar: var(--color-acid);
+  }
+  .sample-header {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .sample-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.25rem + 1.25vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  /* The caption is part of the report, not small print: body size, full-contrast text. */
+  .sample-caption {
+    margin: 0;
+    padding-left: 0.875rem;
+    border-left: 3px solid var(--sr-bar);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .sample-meta {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+  @media (min-width: 48rem) {
+    .sample-meta {
+      grid-template-columns: 1fr 1fr 2fr;
+    }
+  }
+  .sample-meta div {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--sr-line);
+  }
+  .sample-meta dt,
+  .sample-failure-id,
+  .sample-failure-rating {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--sr-muted);
+  }
+  .sample-meta dd {
+    margin: 0.25rem 0 0;
+    overflow-wrap: anywhere;
+  }
+  .sample-section {
+    display: grid;
+    gap: 1rem;
+  }
+  .sample-subhead {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+  .sample-failures {
+    display: grid;
+  }
+  .sample-failure {
+    display: grid;
+    gap: 0.25rem;
+    padding-block: 0.875rem;
+    border-top: 1px solid var(--sr-line);
+  }
+  .sample-failure p {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .sample-failure-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+  .sample-failure-rating {
+    font-weight: 700;
+    color: inherit;
+  }
+</style>
