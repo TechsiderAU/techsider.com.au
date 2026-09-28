@@ -8,6 +8,10 @@ const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
 const pages = allHtmlFiles().filter((f) => f.endsWith("index.html"));
 const home = readDist("index.html");
 const region = (html, tag) => html.slice(html.indexOf(`<${tag}`), html.indexOf(`</${tag}>`) + tag.length + 3);
+// True only for an attribute *name* on the tag. Quoted values are blanked first, so a `hidden` or
+// `lg:hidden` class can't pass for the attribute, and `data-menu-open-panel` isn't `data-menu-open`.
+const hasAttr = (tag, name) =>
+  new RegExp(`\\s${name}(?=[\\s=/>])`).test(tag.replace(/"[^"]*"|'[^']*'/g, '""'));
 
 test("every page has the skip link, header, main and footer in order", () => {
   for (const f of pages) {
@@ -56,14 +60,28 @@ test("every header and footer link resolves to a built page", () => {
 
 test("disclosure toggles and the menu button ship hidden (JS reveals them)", () => {
   const header = region(home, "header");
-  const toggles = [...header.matchAll(/<button[^>]*data-nav-toggle[^>]*>/g)].map((m) => m[0]);
+  const buttons = [...header.matchAll(/<button\b[^>]*>/g)].map((m) => m[0]);
+  const toggles = buttons.filter((b) => hasAttr(b, "data-nav-toggle"));
   assert.ok(toggles.length > 0);
   for (const t of toggles) {
-    assert.match(t, /\bhidden\b/);
+    assert.ok(hasAttr(t, "hidden"), `toggle ships without the hidden attribute: ${t}`);
     const id = t.match(/aria-controls="([^"]+)"/)[1];
     assert.match(header, new RegExp(`id="${id}"`));
   }
-  assert.match(header.match(/<button[^>]*data-menu-open[^>]*>/)[0], /\bhidden\b/);
+  const menuOpen = buttons.filter((b) => hasAttr(b, "data-menu-open"));
+  assert.equal(menuOpen.length, 1, "expected exactly one data-menu-open button");
+  assert.ok(hasAttr(menuOpen[0], "hidden"), `menu button ships without the hidden attribute: ${menuOpen[0]}`);
+});
+
+test("the attribute check ignores hidden classes and longer attribute names", () => {
+  assert.ok(!hasAttr('<button class="menu-toggle lg:hidden" data-menu-open>', "hidden"));
+  assert.ok(!hasAttr('<button class="nav-toggle hidden lg:inline-flex" data-nav-toggle>', "hidden"));
+  assert.ok(!hasAttr('<button aria-label="hidden" data-nav-toggle>', "hidden"));
+  assert.ok(hasAttr('<button class="menu-toggle lg:hidden" hidden data-menu-open>', "hidden"));
+  assert.ok(hasAttr('<button hidden="" data-nav-toggle>', "hidden"));
+  assert.ok(hasAttr('<button class="x" hidden>', "hidden"));
+  assert.ok(!hasAttr('<button class="menu-row" data-menu-open-panel="resources">', "data-menu-open"));
+  assert.ok(hasAttr('<button hidden data-menu-open data-astro-cid-x>', "data-menu-open"));
 });
 
 test("the header uses the new wordmark and the no-JS row lists Insights", () => {
