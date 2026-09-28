@@ -18,10 +18,6 @@
     "@fontsource/eb-garamond": "^5.1.0",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.5",
-    "tailwindcss": "^4.3.3",
-    "three": "^0.184.0"
-  },
-  "devDependencies": {
-    "@types/three": "^0.184.1"
+    "tailwindcss": "^4.3.3"
   }
 }
