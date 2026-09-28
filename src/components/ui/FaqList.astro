@@ -87,4 +87,16 @@ const faqPage = {
   :global(.surface-bone) .faq-answer {
     color: var(--color-muted-dark);
   }
+
+  /* A dark island (bg-carbon / bg-graphite) inside a bone section is a dark surface again. */
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .faq,
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .faq-item {
+    border-color: var(--color-graphite);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .faq-indicator {
+    color: var(--color-acid);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .faq-answer {
+    color: var(--color-muted);
+  }
 </style>

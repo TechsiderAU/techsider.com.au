@@ -70,6 +70,46 @@ test("acid is never text on bone; brackets, carets and indicators follow the sur
   }
 });
 
+// B2 places these components inside dark blocks on bone (e.g. the §8.5 carbon scenario block).
+// Wrap the bone gallery's SectionHeader, Breadcrumb and FaqList in a bg-graphite island, as
+// .gallery-island does for a chip: each must take its carbon-surface colours back.
+test("inside a dark island on bone, SectionHeader, Breadcrumb and FaqList use their carbon colours", async ({ page }) => {
+  await page.goto(PAGE);
+  await page.evaluate((selector) => {
+    const g = document.querySelector(selector);
+    const targets = [g.querySelector(".section-lede").closest("[data-section-header]"), g.querySelector('nav[aria-label="Breadcrumb"]'), g.querySelector(".faq")];
+    for (const el of targets) {
+      const island = document.createElement("div");
+      island.className = "bg-graphite";
+      island.style.color = "var(--color-bone)";
+      island.dataset.testIsland = "";
+      el.before(island);
+      island.append(el);
+    }
+  }, on("bone"));
+  const styles = (scope) =>
+    page.evaluate((scope) => {
+      const q = (sel) => getComputedStyle(document.querySelector(`${scope} ${sel}`));
+      return {
+        prompt: q(".section-prompt").color,
+        caret: q(".section-prompt-caret").color,
+        lede: q(".section-lede").color,
+        separator: q(".breadcrumb-sep").color,
+        current: q('.breadcrumb [aria-current="page"]').color,
+        underline: q(".breadcrumb a").textDecorationColor,
+        faqRule: q(".faq").borderTopColor,
+        itemRule: q(".faq-item").borderBottomColor,
+        indicator: q(".faq-indicator").color,
+        answer: q(".faq-answer").color,
+      };
+    }, scope);
+  const carbon = await styles(on("carbon"));
+  expect(carbon.caret).toBe(ACID);
+  expect(await styles(`${on("bone")} [data-test-island]`)).toEqual(carbon);
+  const axeIsland = await new AxeBuilder({ page }).include("[data-test-island]").withTags(TAGS).analyze();
+  expect(axeIsland.violations).toEqual([]);
+});
+
 test("focus rings follow the surface: lime on carbon, carbon on bone, lime in the PromptBlock island", async ({ page, browserName }) => {
   await page.goto(PAGE);
   await page.keyboard.press(focusKeys(browserName).next); // keyboard modality, so programmatic focus shows :focus-visible

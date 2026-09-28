@@ -84,4 +84,18 @@ const breadcrumbList = {
   :global(.surface-bone) .breadcrumb-sep {
     color: var(--color-muted-dark);
   }
+
+  /* A dark island (bg-carbon / bg-graphite) inside a bone section is a dark surface again. */
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .breadcrumb a {
+    text-decoration-color: var(--color-muted);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .breadcrumb a:hover {
+    color: var(--color-acid);
+    text-decoration-color: currentColor;
+    text-decoration-thickness: auto;
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .breadcrumb [aria-current="page"],
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .breadcrumb-sep {
+    color: var(--color-muted);
+  }
 </style>

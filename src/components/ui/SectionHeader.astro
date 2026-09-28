@@ -60,4 +60,13 @@ const { title, prompt, level = 2, lede, id } = Astro.props;
   :global(.surface-bone) .section-prompt-caret {
     color: var(--color-acid-deep);
   }
+
+  /* A dark island (bg-carbon / bg-graphite) inside a bone section is a dark surface again. */
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .section-prompt,
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .section-lede {
+    color: var(--color-muted);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .section-prompt-caret {
+    color: var(--color-acid);
+  }
 </style>
