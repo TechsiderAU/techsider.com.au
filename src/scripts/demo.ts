@@ -135,8 +135,11 @@ export function initDemo(): void {
 
     stage!.removeAttribute("aria-hidden");
     stage!.querySelectorAll<HTMLButtonElement>(".demo-cite").forEach((b) => (b.tabIndex = 0));
+    // Disabling a focused button drops keyboard focus to <body>; hand it to Replay (always enabled).
+    const hadFocus = document.activeElement === pauseBtn || document.activeElement === skipBtn;
     pauseBtn!.disabled = true;
     skipBtn!.disabled = true;
+    if (hadFocus) replay!.focus();
     setPauseLabel(false);
     if (trace && !REDUCED) trace.open = true;
     announce("Demo finished. The full transcript and its sources are shown.");

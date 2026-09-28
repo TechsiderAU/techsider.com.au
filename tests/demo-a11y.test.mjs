@@ -119,6 +119,9 @@ class FakeElement {
   click() {
     for (const fn of this.listeners) fn({ preventDefault() {} });
   }
+  focus() {
+    if (!this.disabled) globalThis.document.activeElement = this;
+  }
   scrollIntoView() {}
   *descendants() {
     for (const n of this.childNodes) {
@@ -174,6 +177,7 @@ function mountFakeDemo() {
   );
   const body = h("body", {}, root);
   globalThis.document = {
+    activeElement: body,
     createElement: (tag) => new FakeElement(tag),
     createTextNode: (data) => new FakeText(data),
     querySelector: (sel) => body.querySelector(sel),
@@ -181,11 +185,12 @@ function mountFakeDemo() {
   return root;
 }
 
-test("Replay pressed between turns restarts cleanly (no stale turn from the old run)", async (t) => {
+// Mounts a fresh fake demo, starts it (Node has no IntersectionObserver, so it starts at
+// once) and returns helpers that advance the mocked clock.
+async function startFakeDemo(t) {
   t.mock.timers.enable({ apis: ["setTimeout"] });
   const root = mountFakeDemo();
   const { initDemo } = await import("../src/scripts/demo.ts");
-  const { demoScript } = await import("../src/lib/demoScript.ts");
   const q = (sel) => root.querySelector(sel);
   const until = async (cond, what) => {
     for (let ms = 0; ms < 60_000; ms++) {
@@ -195,8 +200,20 @@ test("Replay pressed between turns restarts cleanly (no stale turn from the old 
     }
     assert.fail(`timed out waiting for ${what}`);
   };
+  initDemo();
+  return { q, until };
+}
 
-  initDemo(); // Node has no IntersectionObserver, so the demo starts at once
+// Names the focused element by its first attribute (e.g. "data-demo-replay"), or its tag.
+const focused = () => {
+  const a = document.activeElement;
+  return a.attributes.keys().next().value ?? a.tagName;
+};
+
+test("Replay pressed between turns restarts cleanly (no stale turn from the old run)", async (t) => {
+  const { q, until } = await startFakeDemo(t);
+  const { demoScript } = await import("../src/lib/demoScript.ts");
+
   await until(() => q("[data-demo-status]").textContent === "Answer 1 of 2 shown.", "turn 1 to finish");
   q("[data-demo-replay]").click(); // lands in the pause before turn 2 starts
   await until(() => q("[data-demo-pause]").disabled, "the replayed run to finish");
@@ -205,4 +222,33 @@ test("Replay pressed between turns restarts cleanly (no stale turn from the old 
     .querySelectorAll(".demo-turn")
     .map((turn) => turn.querySelector(".demo-q").textContent);
   assert.deepEqual(questions, demoScript.turns.map((turn) => turn.question));
+});
+
+test("activating Skip from the keyboard moves focus to Replay (not a disabled button)", async (t) => {
+  const { q, until } = await startFakeDemo(t);
+  await until(() => q("[data-demo-stage]").textContent.length > 10, "typing to start");
+
+  q("[data-demo-skip]").focus();
+  assert.equal(focused(), "data-demo-skip");
+  q("[data-demo-skip]").click();
+  await until(() => q("[data-demo-skip]").disabled, "the skipped run to finish");
+
+  assert.equal(focused(), "data-demo-replay");
+});
+
+test("Pause focused when the run finishes naturally hands focus to Replay", async (t) => {
+  const { q, until } = await startFakeDemo(t);
+  q("[data-demo-pause]").focus();
+  assert.equal(focused(), "data-demo-pause");
+  await until(() => q("[data-demo-pause]").disabled, "the run to finish");
+
+  assert.equal(focused(), "data-demo-replay");
+});
+
+test("finishing the run does not steal focus from elsewhere on the page", async (t) => {
+  const { q, until } = await startFakeDemo(t);
+  assert.equal(focused(), "BODY");
+  await until(() => q("[data-demo-pause]").disabled, "the run to finish");
+
+  assert.equal(focused(), "BODY");
 });
