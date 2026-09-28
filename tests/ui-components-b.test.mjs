@@ -62,11 +62,10 @@ test("no data field can carry a caption or title into the components", () => {
     assert.ok(!(key in sampleReport.shape), `sampleReport has a ${key} field`);
   }
   assert.ok(!("caption" in mockPanel.shape), "mockPanel has a caption field");
-  const report = sampleReport.parse({ ...sampleReportFixture, title: "Independent Evaluation Report", caption: "x" });
-  assert.equal("title" in report, false);
-  assert.equal("caption" in report, false);
-  const panel = mockPanel.parse({ ...mockPanelFixture, caption: "x" });
-  assert.equal("caption" in panel, false);
+  // The schemas are strict, so a stray caption or title is rejected outright, not silently dropped.
+  assert.throws(() => sampleReport.parse({ ...sampleReportFixture, title: "Independent Evaluation Report" }), /title/);
+  assert.throws(() => sampleReport.parse({ ...sampleReportFixture, caption: "x" }), /caption/);
+  assert.throws(() => mockPanel.parse({ ...mockPanelFixture, caption: "x" }), /caption/);
 });
 
 test("the fixtures these components render are valid and exercise every branch", () => {

@@ -116,19 +116,64 @@ test("jurisdiction is exactly cth, nsw, vic, qld, local", () => {
   bad(jurisdiction, "wa", "wa");
 });
 
-test("insight frontmatter: type is required, refs default to [] and legacy pillar/sectors are dropped", () => {
-  const data = ok(insightSchema, { ...INSIGHT, pillar: "RAG & retrieval", sectors: ["Financial services"] }, "legacy post");
+test("insight frontmatter: type is required, refs default to [] and legacy pillar/sectors are rejected", () => {
+  const data = ok(insightSchema, INSIGHT, "post");
   assert.ok(data.publishDate instanceof Date);
   assert.deepEqual(data.industries, []);
   assert.deepEqual(data.solutions, []);
   assert.equal(data.illustrative, false);
   assert.equal(data.draft, false);
-  assert.ok(!("pillar" in data) && !("sectors" in data), "unknown legacy keys must not survive parsing");
+  // Strict: a leftover or misspelt key fails the build instead of vanishing.
+  bad(insightSchema, { ...INSIGHT, pillar: "RAG & retrieval", sectors: ["Financial services"] }, "legacy post");
   ok(insightSchema, { ...INSIGHT, type: "reference-scenario", illustrative: true, industries: ["financial-services"], solutions: ["knowledge-assistant"] }, "reference scenario");
   const { type, ...untyped } = INSIGHT;
   bad(insightSchema, untyped, "post without type");
   bad(insightSchema, { ...INSIGHT, type: "case-study" }, "unknown type");
   bad(insightSchema, { ...INSIGHT, industries: ["Financial services"] }, "industry given as a display name");
+});
+
+test("a reference scenario must be marked illustrative (spec §9.3)", () => {
+  const scenario = { ...INSIGHT, type: "reference-scenario" };
+  for (const [value, label] of [[scenario, "illustrative left to default"], [{ ...scenario, illustrative: false }, "illustrative: false"]]) {
+    const issues = bad(insightSchema, value, `reference scenario with ${label}`);
+    assert.ok(issues.some((i) => i.message === "reference scenarios must set illustrative: true"), JSON.stringify(issues));
+  }
+  // The review's probe: a typo used to parse as illustrative: false and pass.
+  bad(insightSchema, { ...scenario, illustative: true }, "reference scenario with a misspelt illustrative");
+  ok(insightSchema, { ...scenario, illustrative: true }, "reference scenario marked illustrative");
+});
+
+test("every content schema rejects unknown keys, at the top level and nested", () => {
+  const cases = [
+    [insightSchema, { ...INSIGHT, drafts: true }, "insight"],
+    [solutionSchema, { ...SOLUTION, jobb: "Test" }, "solution"],
+    [solutionSchema, { ...SOLUTION, howWeTest: { ...SOLUTION.howWeTest, bulets: [] } }, "solution.howWeTest"],
+    [solutionSchema, { ...SOLUTION, packages: [{ ...LAUNCH, onshor: true }] }, "solution.packages[0] (launch)"],
+    [solutionSchema, { ...SOLUTION, packages: [{ ...ON_REQUEST, oneliner: "Test" }] }, "solution.packages[0] (on request)"],
+    [solutionSchema, { ...SOLUTION, faq: [...faq(2), { ...faq(1)[0], answer: "Test" }] }, "solution.faq[2]"],
+    [industrySchema, { ...INDUSTRY, faqs: [] }, "industry"],
+    [industrySchema, { ...INDUSTRY, scenario: { ...INDUSTRY.scenario, trce: "test-trace" } }, "industry.scenario"],
+    [industrySchema, { ...INDUSTRY, problem: { ...INDUSTRY.problem, source: { ...SOURCE, date: "2026-09-01" } } }, "industry.problem.source"],
+    [industrySchema, { ...INDUSTRY, workflow: INDUSTRY.workflow.map((w) => ({ ...w, usecases: [] })) }, "industry.workflow[]"],
+    [kitSchema, { ...KIT, lawyerReviewed: "2026-09-01" }, "kit"],
+    [regulatoryFile, { rows: [{ ...ROW, lastReview: "2026-09-01" }] }, "regulatory row"],
+    [regulatoryFile, { rows: [ROW], note: "Test" }, "regulatory file"],
+    [traceFile, { ...TRACE, provenace: "measured" }, "trace"],
+    [traceFile, { ...TRACE, lines: [{ t: "00:00:01", op: "Test", detail: "Test", metrc: { value: 1 } }] }, "trace line"],
+    [traceFile, { ...TRACE, lines: [{ t: "00:00:01", op: "Test", detail: "Test", metric: { value: 1, units: "ms" } }] }, "trace metric"],
+    [demoSchema, { ...DEMO, runn: "src/data/runs/test-run/" }, "demo"],
+    [sampleReport, { ...REPORT, title: "Test" }, "sample report"],
+    [sampleReport, { ...REPORT, thresholds: [{ ...REPORT.thresholds[0], pas: true }] }, "sample report threshold"],
+    [sampleReport, { ...REPORT, failures: REPORT.failures.map((f) => ({ ...f, severity: "low" })) }, "sample report failure"],
+    [mockPanel, { ...MOCK_PANEL, fields: [{ label: "Test", value: "Test", redact: true }] }, "mock panel field"],
+    [mockPanel, { ...MOCK_PANEL, decision: { ...MOCK_PANEL.decision, escalate: "Test" } }, "mock panel decision"],
+  ];
+  for (const [schema, value, label] of cases) {
+    const issues = bad(schema, value, `${label} with an unknown key`);
+    assert.ok(issues.some((i) => i.code === "unrecognized_keys"), `${label}: ${JSON.stringify(issues)}`);
+  }
+  // A demo's `data` is free-form until each demo kind gets its own schema.
+  ok(demoSchema, { ...DEMO, data: { rows: [], anyKey: true } }, "demo data with its own keys");
 });
 
 test("INSIGHT_TYPE_LABEL labels every insight type", () => {
