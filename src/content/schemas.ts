@@ -6,7 +6,7 @@ export const plainRef: RefFactory = () => z.string().regex(/^[a-z0-9-]+$/);
 export const slug = z.string().regex(/^[a-z0-9-]+$/);
 export const jurisdiction = z.enum(["cth", "nsw", "vic", "qld", "local"]);
 export const faqItem = z.object({ q: z.string().min(5), a: z.string().min(20) });
-export const sourceRef = z.object({ label: z.string().min(3), url: z.string().url(), asAt: z.coerce.date() });
+export const sourceRef = z.object({ label: z.string().min(3), url: z.url(), asAt: z.coerce.date() });
 export const metric = z.object({ value: z.number(), unit: z.string().optional() });
 export const provenance = z.enum(["measured", "illustrative"]);
 
@@ -26,7 +26,7 @@ export const mockPanel = z.object({
   title: z.string(),
   fields: z.array(z.object({ label: z.string(), value: z.string(), redacted: z.boolean().optional() })).min(1),
   chips: z.array(z.object({ status: z.enum(["ok", "review", "blocked"]), text: z.string() })),
-  citations: z.array(z.object({ source: z.string(), clause: z.string(), href: z.string().url().optional() })),
+  citations: z.array(z.object({ source: z.string(), clause: z.string(), href: z.url().optional() })),
   decision: z.object({ approve: z.string(), reject: z.string() }).optional(),
 });
 
@@ -64,7 +64,7 @@ export const makeIndustrySchema = (ref: RefFactory) => z.object({
 
 export const regulatoryRow = z.object({
   id: slug, obligation: z.string(), meaning: z.string(), design: z.string(), evidence: z.string(),
-  source: z.string().url(), asAt: z.coerce.date(), lastReviewed: z.coerce.date(),
+  source: z.url(), asAt: z.coerce.date(), lastReviewed: z.coerce.date(),
   jurisdictions: z.array(jurisdiction).min(1).optional(),
 });
 export const regulatoryFile = z.object({ rows: z.array(regulatoryRow).min(1) });

@@ -109,10 +109,14 @@ test("runGated passes a non-zero exit code back, and reports a signal kill as 1"
   assert.equal((await gate('process.kill(process.pid, "SIGTERM")')).code, 1);
 });
 
+// A pristine build has no type diagnostics at all: astro check exits 0 on warnings and hints
+// unless told otherwise (a deprecated API is a hint, ts6385).
+const CHECK = "astro check --minimumFailingSeverity hint";
+
 test("package.json runs astro check before the gated build, and gates the preview build", () => {
-  assert.equal(pkg.scripts.check, "astro check");
+  assert.equal(pkg.scripts.check, CHECK);
   assert.ok(
-    pkg.scripts.build.startsWith("astro check && node scripts/ci/build.mjs"),
+    pkg.scripts.build.startsWith(`${CHECK} && node scripts/ci/build.mjs`),
     `build script: ${pkg.scripts.build}`,
   );
   assert.doesNotMatch(pkg.scripts.build, /(^|&&\s*)astro build/, "build must go through scripts/ci/build.mjs");

@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
-  plainRef, slug, jurisdiction, launchPackage, solutionPackage, mockPanel,
+  plainRef, slug, jurisdiction, sourceRef, launchPackage, solutionPackage, mockPanel,
   makeSolutionSchema, makeIndustrySchema, regulatoryFile, makeKitSchema, traceFile,
   makeDemoSchema, sampleReport, makeInsightSchema, INSIGHT_TYPE_LABEL,
 } from "../src/content/schemas.ts";
@@ -185,6 +186,17 @@ test("industry schema accepts a complete entry and rejects the gaps", () => {
   bad(industrySchema, { ...INDUSTRY, problem: { ...INDUSTRY.problem, source: { ...SOURCE, url: "not a url" } } }, "problem source without a URL");
   bad(industrySchema, { ...INDUSTRY, scenario: { ...INDUSTRY.scenario, trace: "Test Trace" } }, "scenario trace that is not a slug");
   bad(industrySchema, { ...INDUSTRY, jurisdictions: ["wa"] }, "unknown jurisdiction");
+});
+
+test("URL fields use z.url(), not the deprecated z.string().url() (a ts6385 hint in every astro check)", () => {
+  const src = readFileSync(new URL("../src/content/schemas.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(src, /z\.string\(\)\.url\(/);
+  assert.equal(src.match(/\bz\.url\(\)/g)?.length, 3, "sourceRef.url, mockPanel citation href and regulatoryRow.source");
+  for (const [schema, value, label] of [
+    [sourceRef, { ...SOURCE, url: "not a url" }, "source ref"],
+    [mockPanel, { ...MOCK_PANEL, citations: [{ source: "Test", clause: "Test", href: "example.com/clause" }] }, "citation href"],
+    [regulatoryFile, { rows: [{ ...ROW, source: "not a url" }] }, "regulatory source"],
+  ]) bad(schema, value, `${label} that is not a URL`);
 });
 
 test("mock panel needs fields and known chip statuses", () => {

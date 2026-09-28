@@ -416,6 +416,6 @@ test("run-all refuses a dist folder that does not exist", () => {
 });
 
 test("npm run build ends with the checks, and npm run verify runs them on their own", () => {
-  assert.equal(pkg.scripts.build, "astro check && node scripts/ci/build.mjs && node scripts/ci/run-all.mjs");
+  assert.equal(pkg.scripts.build, "astro check --minimumFailingSeverity hint && node scripts/ci/build.mjs && node scripts/ci/run-all.mjs");
   assert.equal(pkg.scripts.verify, "node scripts/ci/run-all.mjs");
 });

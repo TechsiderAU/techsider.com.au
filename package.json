@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "check": "astro check",
-    "build": "astro check && node scripts/ci/build.mjs && node scripts/ci/run-all.mjs",
+    "check": "astro check --minimumFailingSeverity hint",
+    "build": "astro check --minimumFailingSeverity hint && node scripts/ci/build.mjs && node scripts/ci/run-all.mjs",
     "verify": "node scripts/ci/run-all.mjs",
     "preview": "astro preview",
     "astro": "astro",
