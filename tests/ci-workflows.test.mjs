@@ -38,6 +38,17 @@ test("Playwright runs the preview specs in three engines and prod-* specs agains
   );
 });
 
+test("a failed e2e test keeps its trace for the CI artifact, and retries stay off", async () => {
+  // Firefox and Linux WebKit first run in CI: a failure there must leave more than a screenshot.
+  const { default: config } = await import("../playwright.config.mjs");
+  assert.equal(config.use.trace, "retain-on-failure");
+  assert.equal(config.use.screenshot, "only-on-failure");
+  assert.equal(config.retries ?? 0, 0, "a flaky test must fail, not pass on a retry");
+  for (const p of config.projects) assert.equal(p.retries, undefined, p.name);
+  const upload = workflow("ci.yml").jobs.test.steps.find((s) => s.uses === "actions/upload-artifact@v7");
+  assert.equal(upload.with.path, "test-results/", "the traces live in test-results/");
+});
+
 test("CI runs on every branch push and every pull request", () => {
   const ci = workflow("ci.yml");
   assert.deepEqual(ci.on.push, { branches: ["**"] });

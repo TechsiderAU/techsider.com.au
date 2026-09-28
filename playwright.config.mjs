@@ -14,7 +14,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   reporter: [["list"]],
-  use: { screenshot: "only-on-failure" },
+  // Keep a trace of every failed test: Firefox and Linux WebKit first run in CI, which uploads
+  // test-results/, so a failure there leaves the trace as well as the screenshot. No retries.
+  use: { screenshot: "only-on-failure", trace: "retain-on-failure" },
   webServer: [
     { command: "node tests/support/static-server.mjs dist-preview 4322", url: `${PREVIEW}/`, reuseExistingServer: false, timeout: 30_000 },
     { command: "node tests/support/static-server.mjs dist 4323", url: `${PROD}/`, reuseExistingServer: false, timeout: 30_000 },
