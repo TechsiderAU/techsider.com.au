@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
-import Nav from "../components/Nav.astro";
 
 interface Props {
   title: string;
@@ -28,7 +27,6 @@ const articleJsonLd = {
 };
 ---
 <BaseLayout title={`${title} — Techsider`} description={description}>
-  <Nav />
   <article class="px-6 py-16 md:py-24">
     <div class="max-w-2xl mx-auto">
       <a href="/insights" class="text-xs uppercase tracking-[0.16em] text-accent hover:opacity-80 transition-opacity">

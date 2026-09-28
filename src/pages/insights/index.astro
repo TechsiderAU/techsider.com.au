@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import Nav from "../../components/Nav.astro";
 import { getCollection } from "astro:content";
 import { readingMinutes } from "../../lib/readingTime";
 
@@ -14,7 +13,6 @@ const fmt = (d: Date) =>
   title="Insights — Techsider"
   description="Field notes on production LLM systems, RAG, agents, and AI data sovereignty for Australian regulated industries."
 >
-  <Nav />
   <section class="px-6 py-16 md:py-24">
     <div class="max-w-3xl mx-auto">
       <p class="text-xs uppercase tracking-[0.2em] text-accent font-medium mb-4">Insights</p>

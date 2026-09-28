@@ -1,0 +1,55 @@
+---
+import { footerColumns, legalLinks, resolveCta, CTAS, SITE, isPreview } from "../../data/nav";
+
+const preview = isPreview();
+const columns = footerColumns(preview);
+const legal = legalLinks(preview);
+const talk = resolveCta(CTAS.talk, preview);
+const year = new Date().getFullYear();
+const path = Astro.url.pathname;
+const current = path.endsWith("/") ? path : `${path}/`;
+---
+<footer class="border-t border-graphite bg-carbon">
+  <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+    <div class="grid gap-10 lg:grid-cols-[1.4fr_repeat(5,1fr)]">
+      <div>
+        <img src="/logo.svg" alt="Techsider" width="160" height="25" class="h-6 w-auto" />
+        <p class="mt-5 font-mono text-sm text-bone">{SITE.slogan} <span class="text-muted">{SITE.proofLine}</span></p>
+        <p class="mt-3 text-sm"><a href={`mailto:${SITE.email}`} class="footer-link">{SITE.email}</a></p>
+        <a href={talk.href} class="btn btn-primary mt-5">{talk.label}</a>
+      </div>
+      {columns.map((col) => (
+        <nav aria-label={col.title}>
+          <h2 class="font-mono text-xs text-muted"><span aria-hidden="true">[</span>{col.title.toLowerCase()}<span aria-hidden="true">]</span></h2>
+          <ul class="mt-4 grid gap-2 text-sm">
+            {col.links.map((l) => (
+              <li><a href={l.href} class="footer-link" aria-current={l.href === current ? "page" : undefined}>{l.label}</a></li>
+            ))}
+          </ul>
+        </nav>
+      ))}
+    </div>
+    <div class="mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-graphite pt-6 text-xs text-muted">
+      {legal.map((l) => <a href={l.href} class="footer-link">{l.label}</a>)}
+      <span>© {year} {SITE.legalName}</span>
+      <span>Australia</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer-link {
+    color: var(--color-bone);
+    text-decoration: none;
+  }
+  .footer-link:hover {
+    color: var(--color-acid);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .footer-link[aria-current="page"] {
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>
