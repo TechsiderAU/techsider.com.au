@@ -149,8 +149,15 @@ test.describe("768px and up: tabs", () => {
     await expect(tabs.nth(0)).toBeFocused(); // wrapped from the last to the first
     await page.keyboard.press("End");
     await expect(tabs.nth(3)).toBeFocused();
+    await expect(tabs.nth(3)).toHaveAttribute("aria-selected", "false"); // End moves focus only
+    await expect(tabs.nth(0)).toHaveAttribute("aria-selected", "true");
+    await expectOnlyVisible(page, WORKFLOW, WORKFLOW[0]);
+    await page.keyboard.press("ArrowLeft"); // off the first tab, so Home has somewhere to jump from
     await page.keyboard.press("Home");
     await expect(tabs.nth(0)).toBeFocused();
+    await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "false"); // Home moves focus only
+    await expect(tabs.nth(0)).toHaveAttribute("aria-selected", "true");
+    await expectOnlyVisible(page, WORKFLOW, WORKFLOW[0]);
 
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("Enter");
@@ -238,6 +245,19 @@ test.describe("768px and up: tabs", () => {
     await expectOnlyVisible(page, WORKFLOW, WORKFLOW[2]);
   });
 
+  test("activating an in-panel link from the keyboard hands focus to the panel it selects, not to <body>", async ({ page }) => {
+    await page.goto(PAGE);
+    await tabsIn(page, "fixture-workflow").nth(1).click();
+    const next = page.locator(`#${WORKFLOW[1]}`).getByRole("link", { name: /^Next stage:/ });
+    await next.focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(new RegExp(`#${WORKFLOW[2]}$`));
+    await expectOnlyVisible(page, WORKFLOW, WORKFLOW[2]);
+    // The link's own panel is hidden now, so focus moves into the panel the link selected.
+    await expect(page.locator(`#${WORKFLOW[2]}`)).toBeFocused();
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe(WORKFLOW[2]);
+  });
+
   test("tabs are at least 44px tall and show a visible focus ring on carbon and on bone", async ({ page, browserName }) => {
     await page.goto(PAGE);
     const heights = await page.getByRole("tab").evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
@@ -294,6 +314,38 @@ test.describe("below 768px: accordion", () => {
     await expect(page.locator(`#${WORKFLOW[2]}-heading > button`)).toHaveAttribute("aria-expanded", "true");
     await expect(page.locator(`#${WORKFLOW[0]}-heading > button`)).toHaveAttribute("aria-expanded", "false");
     await expect(page.locator(`#${PACKAGES[0]}-heading > button`)).toHaveAttribute("aria-expanded", "true");
+  });
+
+  test("an in-page link to another item opens it (hashchange) and focus lands on that item's button", async ({ page }) => {
+    await page.goto(PAGE);
+    await page.locator(`#${WORKFLOW[0]}`).getByRole("link", { name: /^Next stage:/ }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(new RegExp(`#${WORKFLOW[1]}$`));
+    await expect(page.locator(`#${WORKFLOW[1]}-heading > button`)).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator(`#${WORKFLOW[1]}-body`)).toBeVisible();
+    await expect(page.locator(`#${WORKFLOW[0]}-body`)).toBeVisible(); // opening one never closes another
+    // The target item's body was hidden, so the browser dropped focus; it goes to the item's button.
+    await expect(page.locator(`#${WORKFLOW[1]}-heading > button`)).toBeFocused();
+  });
+
+  test("closing the current item moves the hash to the item that is still open, so its link works again", async ({ page }) => {
+    await page.goto(PAGE);
+    const toggles = togglesIn(page, "fixture-workflow");
+    await toggles.nth(1).click(); // opens the second item: the hash names it
+    await expect(page).toHaveURL(new RegExp(`#${WORKFLOW[1]}$`));
+    await toggles.nth(1).click(); // closes it: the first item, still open, is current again
+    await expect(toggles.nth(1)).toHaveAttribute("aria-expanded", "false");
+    await expect(page).toHaveURL(new RegExp(`#${WORKFLOW[0]}$`));
+    // The first item's "Next stage" link points at the closed second item. With a stale hash
+    // naming that item, the click changed nothing (no hashchange); now it opens the item again.
+    await page.locator(`#${WORKFLOW[0]}`).getByRole("link", { name: /^Next stage:/ }).click();
+    await expect(page).toHaveURL(new RegExp(`#${WORKFLOW[1]}$`));
+    await expect(toggles.nth(1)).toHaveAttribute("aria-expanded", "true");
+    // And a reload opens what the hash names: the current item, not a closed one.
+    await toggles.nth(1).click();
+    await page.reload();
+    await expect(page.locator(`#${WORKFLOW[0]}-heading > button`)).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator(`#${WORKFLOW[1]}-heading > button`)).toHaveAttribute("aria-expanded", "false");
   });
 
   test("accordion buttons are at least 44px tall and show a visible focus ring", async ({ page }) => {
@@ -358,6 +410,22 @@ test("crossing 768px rebuilds the other mode without duplicates, keeping the sel
     await expect(tabs.nth(2)).toBeFocused();
     await expectOnlyVisible(page, WORKFLOW, WORKFLOW[2]);
   }
+});
+
+test("crossing 768px with focus on a tab panel keeps focus on that panel's control, both ways", async ({ page, browserName }) => {
+  await page.setViewportSize({ width: 768, height: 800 });
+  await page.goto(PAGE);
+  const tabs = tabsIn(page, "fixture-workflow");
+  await tabs.nth(1).click();
+  await tabs.nth(1).focus();
+  await page.keyboard.press(focusKeys(browserName).next); // on to the selected panel (tabindex 0)
+  await expect(page.locator(`#${WORKFLOW[1]}`)).toBeFocused();
+  await page.setViewportSize({ width: 767, height: 800 });
+  await expect(page.locator(`#${WORKFLOW[1]}-heading > button`)).toBeFocused();
+  await expect(page.locator(`#${WORKFLOW[1]}-heading > button`)).toHaveAttribute("aria-expanded", "true");
+  await page.setViewportSize({ width: 768, height: 800 });
+  await expect(tabs.nth(1)).toBeFocused();
+  await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
 });
 
 test("growing past 768px with focus inside an open item selects that item's tab and keeps focus", async ({ page }) => {

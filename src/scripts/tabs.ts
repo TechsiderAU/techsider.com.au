@@ -9,10 +9,11 @@
 // panel on load and on hashchange, and scrolls it into view (on load, once the page and its
 // fonts have settled). In tab mode each panel keeps a scroll margin as tall as its tablist,
 // so the browser's own hash scroll, which lands after the load event, shows the selected tab
-// too. Closing the current accordion
-// item hands the selection to the open item opened most recently. Crossing the breakpoint
-// tears the current mode down and builds the other, keeping the selected panel and the
-// focused control.
+// too. Closing the current accordion item hands the selection (and the URL hash) to the open
+// item opened most recently. Crossing the breakpoint tears the current mode down and builds
+// the other, keeping the selected panel and the focused control (focus on a tab panel counts
+// as focus on its control). When a hash change hides the element that had focus (an in-panel
+// link to another tab), focus moves to the newly selected panel instead of dropping to <body>.
 
 type Mode = "tabs" | "accordion";
 
@@ -128,6 +129,11 @@ function setExpanded(p: Panel, open: boolean): void {
   p.opened = open ? ++openings : 0;
 }
 
+// True when `el` sits in a tab panel, or an accordion body, that is hidden now.
+function lostToHidden(g: Group, el: HTMLElement): boolean {
+  return g.panels.some((q) => (q.el.hidden && q.el.contains(el)) || (q.body.hidden && q.body.contains(el)));
+}
+
 // The open accordion item opened most recently, if any.
 function lastOpened(g: Group): Panel | undefined {
   return g.panels.reduce<Panel | undefined>((best, q) => (q.opened > (best?.opened ?? 0) ? q : best), undefined);
@@ -216,8 +222,10 @@ function buildAccordion(g: Group): void {
         writeHash(p);
       } else if (g.current === p) {
         // The current item closed: the selection moves to what is still showing, so growing
-        // past 768px selects that tab (the first one when every item is closed).
+        // past 768px selects that tab (the first one when every item is closed). The hash
+        // follows, so a reload doesn't reopen the closed item and a link to it works again.
         g.current = lastOpened(g) ?? g.panels[0];
+        writeHash(g.current);
       }
     });
     p.heading.replaceChildren(toggle);
@@ -252,10 +260,12 @@ function apply(g: Group, mode: Mode): void {
   if (g.mode === mode) return;
   const active = document.activeElement;
   // Focus inside a panel's content keeps that panel shown; focus on a tab or accordion
-  // button moves to the same panel's control in the new mode.
+  // button, or on a tab panel itself (tabindex 0 in tab mode, but not focusable once torn
+  // down), moves to the same panel's control in the new mode.
   const inside = g.panels.find((p) => p.body.contains(active));
   if (inside) g.current = inside;
-  const focused = g.panels.find((p) => p.tab === active || p.toggle === active);
+  const focused = g.panels.find((p) => p.tab === active || p.toggle === active || p.el === active);
+  if (focused?.el === active) g.current = focused;
   teardown(g);
   if (mode === "tabs") buildTabs(g);
   else buildAccordion(g);
@@ -292,7 +302,14 @@ export function initTabs(root: ParentNode = document): void {
     for (const g of groups) {
       const p = panelHolding(g, target);
       if (!p || !target) continue;
+      const active = document.activeElement;
       select(g, p);
+      // Focus must not drop to <body>. A link to a hidden panel loses it before this event: the
+      // browser can't focus the hidden target, so it blurs the link. And selecting a tab hides
+      // the panel that held an in-panel link. Either way, hand focus to the panel just selected
+      // (tabindex 0 in tab mode) or, in the accordion, to its button.
+      const dropped = !active || active === document.body || (active instanceof HTMLElement && lostToHidden(g, active));
+      if (dropped) (g.mode === "tabs" ? p.el : (p.toggle ?? p.el)).focus({ preventScroll: true });
       // The target was hidden when the browser tried to scroll to it.
       reveal(g, p, target);
     }
