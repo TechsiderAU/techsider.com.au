@@ -13,3 +13,7 @@ logos/preview.html
 # Internal specs & plans stay local (repo is public) — decided 2026-09-28.
 # Files already tracked under docs/superpowers/ remain tracked.
 docs/superpowers/
+dist-preview/
+test-results/
+playwright-report/
+blob-report/
