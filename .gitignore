@@ -9,3 +9,7 @@ dist/
 logos/concepts/
 logos/explore/
 logos/preview.html
+
+# Internal specs & plans stay local (repo is public) — decided 2026-09-28.
+# Files already tracked under docs/superpowers/ remain tracked.
+docs/superpowers/
