@@ -1,9 +1,24 @@
-.superpowers/
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+dist-preview/
 .astro/
+
+# Test output
+test-results/
+playwright-report/
+blob-report/
+
+# Python cache (scripts/generate_brand.py)
+__pycache__/
+*.py[cod]
+
+# OS and tooling
 .DS_Store
 .gstack/
+.superpowers/
 
 # Logo design exploration — only logos/final/ and logos/Techsider logo/ are canonical
 logos/concepts/
@@ -13,7 +28,3 @@ logos/preview.html
 # Internal specs & plans stay local (repo is public) — decided 2026-09-28.
 # Files already tracked under docs/superpowers/ remain tracked.
 docs/superpowers/
-dist-preview/
-test-results/
-playwright-report/
-blob-report/

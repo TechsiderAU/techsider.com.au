@@ -8,6 +8,13 @@ test("astro is on major version 7", () => {
   assert.equal(Number(pkg.version.split(".")[0]), 7, `installed astro ${pkg.version}`);
 });
 
+test("package.json pins Node >=22.18 (Astro 7 needs >=22.12; tests import .ts via default-on type stripping)", () => {
+  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  assert.deepEqual(pkg.engines, { node: ">=22.18.0" });
+  const lock = JSON.parse(readFileSync(new URL("../package-lock.json", import.meta.url), "utf8"));
+  assert.deepEqual(lock.packages[""].engines, pkg.engines, "package-lock.json root engines matches package.json");
+});
+
 test("exactly one vite version is installed (Astro and Tailwind share it)", () => {
   let json;
   try {
