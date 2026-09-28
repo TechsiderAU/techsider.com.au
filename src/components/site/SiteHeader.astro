@@ -166,6 +166,14 @@ const isCurrent = (href: string) => (href === current ? "page" : undefined);
   .nav-panel-wide {
     width: 38rem;
   }
+  /* B2: the 4th and 5th groups (Resources, About) sit near the right edge, so their panels hang
+     from the group's right edge instead: left-aligned, About reaches x=1024 at a 1024px window and
+     overflows once a classic scrollbar narrows the layout. Chosen by position, not "last two": in
+     production Resources is the only group, and right-aligning it would push its panel off the left. */
+  [data-nav-group]:nth-child(n + 4) .nav-panel {
+    left: auto;
+    right: 0;
+  }
   .nav-item {
     display: flex;
     flex-direction: column;

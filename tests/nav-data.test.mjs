@@ -21,6 +21,50 @@ const EXPECTED = [
   "/contact/", "/contact/sent/",
 ];
 
+// Spec §7.2 `group`: the section a page belongs to (breadcrumbs, BreadcrumbList, CI check 1).
+// Hubs carry their own group. Demos, Legal and Contact head their own sections even though the
+// nav lists them under Resources and About; the demo pages, the legal children and Sent follow them.
+const GROUP_OF = {
+  "/": "home",
+  "/404": "system",
+  "/solutions/": "solutions",
+  "/solutions/document-registers/": "solutions",
+  "/solutions/knowledge-assistant/": "solutions",
+  "/solutions/draft-for-approval/": "solutions",
+  "/solutions/ai-evaluation/": "solutions",
+  "/solutions/ai-switch-on/": "solutions",
+  "/industries/": "industries",
+  "/industries/government/": "industries",
+  "/industries/financial-services/": "industries",
+  "/industries/accounting/": "industries",
+  "/industries/education/": "industries",
+  "/industries/manufacturing/": "industries",
+  "/industries/real-estate/": "industries",
+  "/industries/healthcare/": "industries",
+  "/industries/resources-and-energy/": "industries",
+  "/industries/legal-and-professional/": "industries",
+  "/services/": "services",
+  "/services/evaluation-partner/": "services",
+  "/resources/": "resources",
+  "/resources/safe-use-kits/": "resources",
+  "/resources/what-you-already-pay-for/": "resources",
+  "/resources/evaluation-method/": "resources",
+  "/insights/": "resources",
+  "/demos/": "demos",
+  "/demos/document-registers/": "demos",
+  "/demos/knowledge-assistant/": "demos",
+  "/demos/draft-for-approval/": "demos",
+  "/demos/ai-evaluation/": "demos",
+  "/demos/ai-switch-on/": "demos",
+  "/about/": "about",
+  "/trust/": "about",
+  "/legal/": "legal",
+  "/legal/privacy/": "legal",
+  "/legal/website-terms/": "legal",
+  "/contact/": "contact",
+  "/contact/sent/": "contact",
+};
+
 test("slugify maps &, hyphens and punctuation per spec §7.2", () => {
   assert.equal(slugify("Legal & professional"), "legal-and-professional");
   assert.equal(slugify("Resources & energy"), "resources-and-energy");
@@ -53,6 +97,14 @@ test("nav groups are the five spec groups in order, with 5 solutions and 9 indus
 test("'All …' labels are plain text; the header draws the arrow as decoration", () => {
   assert.deepEqual(NAV_GROUPS.map((g) => g.allLabel), ["All solutions", "All industries", "How we work", "All resources", "About Techsider"]);
   for (const g of NAV_GROUPS) assert.doesNotMatch(g.allLabel, /[→›»]|->/, `${g.id}: a screen reader would read the arrow`);
+});
+
+test("every page declares its group (spec §7.2)", () => {
+  assert.deepEqual(Object.fromEntries(PAGES.map((p) => [p.path, p.group])), GROUP_OF);
+});
+
+test("each nav group's hub page carries that group's id", () => {
+  for (const g of NAV_GROUPS) assert.equal(g.hub.group, g.id, g.id);
 });
 
 test("industry footer labels read 'AI for {short name}'", () => {

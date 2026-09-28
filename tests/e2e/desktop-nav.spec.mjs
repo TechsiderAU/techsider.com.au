@@ -87,6 +87,26 @@ test("each panel's 'All …' link is named without the arrow, which still shows"
   }
 });
 
+// B2: at the narrowest desktop width no panel may leave the viewport. Headless browsers draw
+// overlay scrollbars, so also leave room for a classic one (17px on Windows), which narrows the
+// layout viewport while the 1024px media query still matches.
+test("at 1024px every panel stays inside the viewport, with room for a classic scrollbar", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.goto("/");
+  for (const [id, section] of ALL) {
+    await page.getByRole("button", { name: `${section} menu` }).click();
+    const panel = page.locator(`#nav-panel-${id}`);
+    await expect(panel).toBeVisible();
+    const edges = await panel.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { left: r.left, right: r.right, clientWidth: document.documentElement.clientWidth, innerWidth: window.innerWidth };
+    });
+    expect(edges.left, `${id} panel left edge`).toBeGreaterThanOrEqual(0);
+    expect(edges.right, `${id} panel right edge`).toBeLessThanOrEqual(edges.clientWidth);
+    expect(edges.right, `${id} panel right edge, with a 17px classic scrollbar`).toBeLessThanOrEqual(edges.innerWidth - 17);
+  }
+});
+
 test("top-level labels are real links to their hubs", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("[data-site-nav]").getByRole("link", { name: "Solutions", exact: true })).toHaveAttribute("href", "/solutions/");

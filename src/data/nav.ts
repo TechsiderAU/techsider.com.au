@@ -5,12 +5,21 @@
 
 export type Status = "live" | "planned";
 
+/**
+ * The section a page belongs to (spec §7.2), for breadcrumbs, BreadcrumbList and CI check 1.
+ * Hubs carry their own group. It is declared, not read off the nav: Demos sits in the Resources
+ * panel and Legal and Contact in the About panel, but each heads its own section, and pages
+ * outside the nav (demo pages, legal children, Sent, 404) still need one.
+ */
+export type Group = "home" | "solutions" | "industries" | "services" | "resources" | "demos" | "about" | "legal" | "contact" | "system";
+
 export interface PageEntry {
   shortName: string;
   fullName: string;
   /** Directory the slug is appended to, e.g. "/solutions/". */
   base: string;
   path: string;
+  group: Group;
   status: Status;
   oneLiner?: string;
 }
@@ -75,67 +84,67 @@ export function slugify(name: string): string {
     .replace(/[\s-]+/g, "-");
 }
 
-function page(shortName: string, base: string, path: string, status: Status, fullName?: string, oneLiner?: string): PageEntry {
-  const entry: PageEntry = { shortName, fullName: fullName ?? shortName, base, path, status };
+function page(group: Group, shortName: string, base: string, path: string, status: Status, fullName?: string, oneLiner?: string): PageEntry {
+  const entry: PageEntry = { shortName, fullName: fullName ?? shortName, base, path, group, status };
   if (oneLiner) entry.oneLiner = oneLiner;
   return entry;
 }
 
-const HOME = page("Home", "/", "/", "live", "Techsider");
-const NOT_FOUND = page("Not found", "/", "/404", "planned");
+const HOME = page("home", "Home", "/", "/", "live", "Techsider");
+const NOT_FOUND = page("system", "Not found", "/", "/404", "planned");
 
-const SOLUTIONS_HUB = page("Solutions", "/", "/solutions/", "planned");
+const SOLUTIONS_HUB = page("solutions", "Solutions", "/", "/solutions/", "planned");
 const SOLUTIONS = [
-  page("Document Registers", "/solutions/", "/solutions/document-registers/", "planned", "Document Registers & Evidence Packs",
+  page("solutions", "Document Registers", "/solutions/", "/solutions/document-registers/", "planned", "Document Registers & Evidence Packs",
     "PDFs your team reads by hand, turned into a register you can check."),
-  page("Knowledge Assistant", "/solutions/", "/solutions/knowledge-assistant/", "planned", "Cited Knowledge Assistant",
+  page("solutions", "Knowledge Assistant", "/solutions/", "/solutions/knowledge-assistant/", "planned", "Cited Knowledge Assistant",
     "Answers from your own manuals, with the page it used."),
-  page("Draft-for-Approval", "/solutions/", "/solutions/draft-for-approval/", "planned", "Draft-for-Approval Automation",
+  page("solutions", "Draft-for-Approval", "/solutions/", "/solutions/draft-for-approval/", "planned", "Draft-for-Approval Automation",
     "One back-office job, drafted for a person to approve."),
-  page("AI Evaluation", "/solutions/", "/solutions/ai-evaluation/", "planned", "Independent AI Evaluation",
+  page("solutions", "AI Evaluation", "/solutions/", "/solutions/ai-evaluation/", "planned", "Independent AI Evaluation",
     "Independent tests of AI you bought or had built elsewhere."),
-  page("AI Switch-On", "/solutions/", "/solutions/ai-switch-on/", "planned", "AI Switch-On & Safe Use",
+  page("solutions", "AI Switch-On", "/solutions/", "/solutions/ai-switch-on/", "planned", "AI Switch-On & Safe Use",
     "Value from the AI already inside software you pay for."),
 ];
 
-const INDUSTRIES_HUB = page("Industries", "/", "/industries/", "planned");
+const INDUSTRIES_HUB = page("industries", "Industries", "/", "/industries/", "planned");
 const INDUSTRIES = [
-  page("Government", "/industries/", "/industries/government/", "planned", "Government & public sector"),
-  page("Financial services", "/industries/", "/industries/financial-services/", "planned"),
-  page("Accounting", "/industries/", "/industries/accounting/", "planned"),
-  page("Education", "/industries/", "/industries/education/", "planned"),
-  page("Manufacturing", "/industries/", "/industries/manufacturing/", "planned"),
-  page("Real estate", "/industries/", "/industries/real-estate/", "planned", "Real estate & property"),
-  page("Healthcare", "/industries/", "/industries/healthcare/", "planned", "Healthcare & life sciences"),
-  page("Resources & energy", "/industries/", "/industries/resources-and-energy/", "planned", "Resources, energy & utilities"),
-  page("Legal & professional", "/industries/", "/industries/legal-and-professional/", "planned", "Legal & professional services"),
+  page("industries", "Government", "/industries/", "/industries/government/", "planned", "Government & public sector"),
+  page("industries", "Financial services", "/industries/", "/industries/financial-services/", "planned"),
+  page("industries", "Accounting", "/industries/", "/industries/accounting/", "planned"),
+  page("industries", "Education", "/industries/", "/industries/education/", "planned"),
+  page("industries", "Manufacturing", "/industries/", "/industries/manufacturing/", "planned"),
+  page("industries", "Real estate", "/industries/", "/industries/real-estate/", "planned", "Real estate & property"),
+  page("industries", "Healthcare", "/industries/", "/industries/healthcare/", "planned", "Healthcare & life sciences"),
+  page("industries", "Resources & energy", "/industries/", "/industries/resources-and-energy/", "planned", "Resources, energy & utilities"),
+  page("industries", "Legal & professional", "/industries/", "/industries/legal-and-professional/", "planned", "Legal & professional services"),
 ];
 
-const SERVICES_HUB = page("Services", "/", "/services/", "planned", "Services",
+const SERVICES_HUB = page("services", "Services", "/", "/services/", "planned", "Services",
   "From first use case to a system your team runs.");
-const EVALUATION_PARTNER = page("Evaluation Partner", "/services/", "/services/evaluation-partner/", "planned", "Evaluation Partner",
+const EVALUATION_PARTNER = page("services", "Evaluation Partner", "/services/", "/services/evaluation-partner/", "planned", "Evaluation Partner",
   "An independent evaluation workstream under your existing prime or adviser.");
 
-const RESOURCES_HUB = page("Resources", "/", "/resources/", "planned");
-const INSIGHTS = page("Insights", "/", "/insights/", "live", "Insights", "Field notes on shipping AI in regulated work.");
-const DEMOS = page("Demos", "/", "/demos/", "planned", "Demos", "Canned replays of each solution. No live model.");
-const SAFE_USE_KITS = page("Safe-Use Kits", "/resources/", "/resources/safe-use-kits/", "planned", "Safe-Use Kits",
+const RESOURCES_HUB = page("resources", "Resources", "/", "/resources/", "planned");
+const INSIGHTS = page("resources", "Insights", "/", "/insights/", "live", "Insights", "Field notes on shipping AI in regulated work.");
+const DEMOS = page("demos", "Demos", "/", "/demos/", "planned", "Demos", "Canned replays of each solution. No live model.");
+const SAFE_USE_KITS = page("resources", "Safe-Use Kits", "/resources/", "/resources/safe-use-kits/", "planned", "Safe-Use Kits",
   "Free starter kits for accounting, legal and property teams.");
-const PAY_FOR = page("What you already pay for", "/resources/", "/resources/what-you-already-pay-for/", "planned", "What you already pay for",
+const PAY_FOR = page("resources", "What you already pay for", "/resources/", "/resources/what-you-already-pay-for/", "planned", "What you already pay for",
   "Check which AI features your software already includes.");
-const EVAL_METHOD = page("Evaluation method", "/resources/", "/resources/evaluation-method/", "planned", "Evaluation method",
+const EVAL_METHOD = page("resources", "Evaluation method", "/resources/", "/resources/evaluation-method/", "planned", "Evaluation method",
   "How we test AI, published so you can re-run it.");
 const RESOURCES_ITEMS = [INSIGHTS, DEMOS, SAFE_USE_KITS, PAY_FOR, EVAL_METHOD];
 
-const ABOUT = page("About", "/", "/about/", "planned");
-const TRUST = page("Trust", "/", "/trust/", "planned");
-const LEGAL = page("Legal", "/", "/legal/", "planned");
-const CONTACT = page("Contact", "/", "/contact/", "planned");
+const ABOUT = page("about", "About", "/", "/about/", "planned");
+const TRUST = page("about", "Trust", "/", "/trust/", "planned");
+const LEGAL = page("legal", "Legal", "/", "/legal/", "planned");
+const CONTACT = page("contact", "Contact", "/", "/contact/", "planned");
 
-const PRIVACY = page("Privacy", "/legal/", "/legal/privacy/", "planned", "Privacy policy");
-const WEBSITE_TERMS = page("Website terms", "/legal/", "/legal/website-terms/", "planned");
-const CONTACT_SENT = page("Sent", "/contact/", "/contact/sent/", "planned", "Message sent");
-const DEMO_PAGES = SOLUTIONS.map((s) => page(s.shortName, "/demos/", `/demos/${slugify(s.shortName)}/`, "planned", `${s.fullName} demo`));
+const PRIVACY = page("legal", "Privacy", "/legal/", "/legal/privacy/", "planned", "Privacy policy");
+const WEBSITE_TERMS = page("legal", "Website terms", "/legal/", "/legal/website-terms/", "planned");
+const CONTACT_SENT = page("contact", "Sent", "/contact/", "/contact/sent/", "planned", "Message sent");
+const DEMO_PAGES = SOLUTIONS.map((s) => page("demos", s.shortName, "/demos/", `/demos/${slugify(s.shortName)}/`, "planned", `${s.fullName} demo`));
 
 export const NAV_GROUPS: NavGroup[] = [
   { id: "solutions", label: "Solutions", hub: SOLUTIONS_HUB, allLabel: "All solutions", layout: "rows", items: SOLUTIONS, anchors: [] },

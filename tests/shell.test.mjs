@@ -4,6 +4,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readDist, allHtmlFiles } from "./helpers.mjs";
+import { footerColumns } from "../src/data/nav.ts";
 
 const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
 const pages = allHtmlFiles().filter((f) => f.endsWith("index.html"));
@@ -145,4 +146,27 @@ test("the footer carries the slogan with its proof line and the email", () => {
   assert.match(footer, /AI that ships\./);
   assert.match(footer, /Measured before it ships\./);
   assert.match(footer, /mailto:admin@techsider\.com\.au/);
+});
+
+test("the footer is one navigation landmark named Footer; its columns are headed lists, not navs (B6)", () => {
+  for (const f of pages) {
+    const footer = region(readDist(f), "footer");
+    const navs = [...footer.matchAll(/<nav\b[^>]*>/g)].map((m) => m[0]);
+    assert.equal(navs.length, 1, `${f}: expected exactly one <nav> in the footer, found ${navs.length}`);
+    assert.match(navs[0], /aria-label="Footer"/, `${f}: the footer nav is not labelled "Footer": ${navs[0]}`);
+    const nav = footer.slice(footer.indexOf(navs[0]), footer.indexOf("</nav>"));
+    assert.equal([...nav.matchAll(/<h2\b/g)].length, footerColumns(false).length, `${f}: expected one <h2> per footer column`);
+  }
+});
+
+test("the positioning line, email and 'Talk to us' CTA sit below the columns (spec §7.3)", () => {
+  const footer = region(home, "footer");
+  const navEnd = footer.indexOf("</nav>");
+  assert.ok(navEnd > 0, "no footer nav");
+  const [columns, after] = [footer.slice(0, navEnd), footer.slice(navEnd)];
+  assert.match(after, /AI that ships\./);
+  assert.match(after, /Measured before it ships\./);
+  assert.match(after, /<a[^>]*href="mailto:admin@techsider\.com\.au"[^>]*>\s*admin@techsider\.com\.au\s*<\/a>/);
+  assert.match(after, /<a[^>]*class="[^"]*\bbtn-primary\b[^"]*"[^>]*>\s*Talk to us\s*<\/a>/);
+  assert.doesNotMatch(columns, /AI that ships|admin@techsider|Talk to us/, "sign-off content appears before the columns");
 });
