@@ -21,6 +21,16 @@ test("the menu opens as a modal dialog, locks scroll and traps focus", async ({ 
     await page.keyboard.press("Shift+Tab");
     expect(await inDialog(page)).toBe(true);
   }
+  // Clicking non-interactive content (the logo) leaves focus on the <dialog> itself;
+  // Tab and Shift+Tab must still wrap inside the menu from there.
+  const logo = page.locator("#site-menu .menu-bar img");
+  for (const key of ["Shift+Tab", "Tab"]) {
+    await logo.click();
+    expect(await page.evaluate(() => document.activeElement.id)).toBe("site-menu");
+    await page.keyboard.press(key);
+    expect(await inDialog(page)).toBe(true);
+    expect(await page.evaluate(() => document.activeElement.id)).not.toBe("site-menu");
+  }
 });
 
 test("Esc closes the menu, unlocks scroll and returns focus to the menu button", async ({ page }) => {

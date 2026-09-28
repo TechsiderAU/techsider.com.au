@@ -52,13 +52,16 @@ export function initSiteMenu(): void {
     back.addEventListener("click", () => showRoot(rowFor(back.dataset.menuBack ?? "")));
   });
 
+  // Clicking non-interactive content inside the menu (the logo, a gap, padding) leaves
+  // focus on the <dialog> itself. Tab from there reaches the first item natively, but
+  // Shift+Tab would leave the modal, so it wraps to the last item like it does from the first.
   dialog.addEventListener("keydown", (e) => {
     if (e.key !== "Tab") return;
     const items = focusables(dialog);
     if (items.length === 0) return;
     const first = items[0];
     const last = items[items.length - 1];
-    if (e.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
       e.preventDefault();
       last.focus();
     } else if (!e.shiftKey && document.activeElement === last) {
