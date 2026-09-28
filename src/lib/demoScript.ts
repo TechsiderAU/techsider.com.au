@@ -92,13 +92,13 @@ export const demoScript: DemoScript = {
         },
         {
           text:
-            "as soon as possible, and no later than 72 hours after you become aware of it, where it is likely to have a material financial impact or a material impact on your ability to maintain critical operations",
+            "as soon as possible, and no later than 72 hours after you become aware of it, where you determine it is likely to have a material financial impact or a material impact on your ability to maintain critical operations",
           cite: 1,
         },
         { text: ". A disruption to a critical operation outside tolerance has a shorter clock: " },
         {
           text:
-            "notify APRA as soon as possible, and no later than 24 hours after, covering the nature of the disruption, the action taken, the likely impact and the timeframe for returning to normal operations",
+            "notify APRA as soon as possible, and within 24 hours, covering the nature of the disruption, the action taken, the likely impact and the timeframe for returning to normal operations",
           cite: 2,
         },
         { text: ". " },

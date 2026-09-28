@@ -17,11 +17,13 @@ test("the ¶37 mislabel is gone", () => {
 test("answer covers the 72-hour incident notice (¶32)", () => {
   assert.match(home, /CPS 230 · Operational risk incidents · ¶32/);
   assert.match(home, /no later than 72 hours/);
+  // APRA's trigger is an incident "that it determines to be likely to have" a material impact.
+  assert.match(home, /where you determine it is likely to have a material financial impact/);
 });
 
 test("answer covers the 24-hour disruption notice (¶41)", () => {
   assert.match(home, /CPS 230 · Business continuity plan · ¶41/);
-  assert.match(home, /no later than 24 hours/);
+  assert.match(home, /as soon as possible, and within 24 hours, covering the nature of the disruption/);
   assert.match(home, /not later than 24 hours after, if it has suffered a disruption to a critical operation outside tolerance/);
   assert.match(home, /the entity’s business operations/);  // U+2019 right single quotation mark
 });

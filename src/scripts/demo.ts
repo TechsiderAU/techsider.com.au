@@ -128,7 +128,7 @@ export function initDemo(): void {
     for (let i = 0; i < total; i++) {
       await renderTurn(demoScript.turns[i], pb);
       if (pb !== current || pb.cancelled) return;
-      announce(`Answer ${i + 1} of ${total} shown.`);
+      announce(`Answer ${i + 1} of ${total} typed. Press Skip to result to read it now.`);
       await pb.wait(380);
     }
     if (pb !== current) return;

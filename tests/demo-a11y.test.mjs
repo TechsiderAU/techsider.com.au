@@ -210,11 +210,41 @@ const focused = () => {
   return a.attributes.keys().next().value ?? a.tagName;
 };
 
+const TURN_1_DONE = "Answer 1 of 2 typed. Press Skip to result to read it now.";
+
+// A finished run (natural or skipped) must hand the transcript to assistive tech and keyboards.
+function assertFinishedState(q) {
+  const stage = q("[data-demo-stage]");
+  assert.equal(stage.getAttribute("aria-hidden"), null, "stage must not stay aria-hidden");
+  const chips = stage.querySelectorAll(".demo-cite");
+  assert.ok(chips.length > 0, "expected citation chips in the transcript");
+  assert.ok(chips.every((c) => c.tabIndex === 0), "every citation chip must be focusable");
+  assert.equal(q("[data-demo-pause]").disabled, true, "Pause disabled");
+  assert.equal(q("[data-demo-skip]").disabled, true, "Skip disabled");
+  assert.equal(q("[data-demo-replay]").disabled, false, "Replay enabled");
+}
+
+test("per-turn status says the answer is typed (still hidden) and how to read it now", async (t) => {
+  const { q, until } = await startFakeDemo(t);
+  await until(() => q("[data-demo-status]").textContent.startsWith("Answer 1 of 2"), "turn 1 to finish");
+
+  assert.equal(q("[data-demo-status]").textContent, TURN_1_DONE);
+  assert.equal(q("[data-demo-stage]").getAttribute("aria-hidden"), "true");
+});
+
+test("a naturally finished run exposes the transcript and leaves only Replay enabled", async (t) => {
+  const { q, until } = await startFakeDemo(t);
+  await until(() => q("[data-demo-pause]").disabled, "the run to finish");
+
+  assertFinishedState(q);
+  assert.equal(q("[data-demo-status]").textContent, "Demo finished. The full transcript and its sources are shown.");
+});
+
 test("Replay pressed between turns restarts cleanly (no stale turn from the old run)", async (t) => {
   const { q, until } = await startFakeDemo(t);
   const { demoScript } = await import("../src/lib/demoScript.ts");
 
-  await until(() => q("[data-demo-status]").textContent === "Answer 1 of 2 shown.", "turn 1 to finish");
+  await until(() => q("[data-demo-status]").textContent === TURN_1_DONE, "turn 1 to finish");
   q("[data-demo-replay]").click(); // lands in the pause before turn 2 starts
   await until(() => q("[data-demo-pause]").disabled, "the replayed run to finish");
 
@@ -234,6 +264,7 @@ test("activating Skip from the keyboard moves focus to Replay (not a disabled bu
   await until(() => q("[data-demo-skip]").disabled, "the skipped run to finish");
 
   assert.equal(focused(), "data-demo-replay");
+  assertFinishedState(q);
 });
 
 test("Pause focused when the run finishes naturally hands focus to Replay", async (t) => {
