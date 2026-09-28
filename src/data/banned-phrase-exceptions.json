@@ -1,0 +1,14 @@
+[
+  { "file": "src/components/Approach.astro", "phrase": "fixed price", "reason": "legacy section, removed in Phase C" },
+  { "file": "src/components/Approach.astro", "phrase": "two-week discovery", "reason": "legacy section, removed in Phase C" },
+  { "file": "src/components/Faq.astro", "phrase": "fixed price", "reason": "legacy section, removed in Phase C" },
+  { "file": "src/components/Faq.astro", "phrase": "two-week discovery", "reason": "legacy section, removed in Phase C" },
+  { "file": "src/components/Industries.astro", "phrase": "we work with", "reason": "legacy section, removed in Phase C" },
+  { "file": "src/components/WhyUs.astro", "phrase": "bench", "reason": "legacy section, removed in Phase C" },
+  { "file": "dist", "phrase": "A fixed-price, two-week discovery", "reason": "legacy section, removed in Phase C (Approach.astro on the Home page)" },
+  { "file": "dist", "phrase": "Fixed scope, fixed price", "reason": "legacy section, removed in Phase C (Approach.astro on the Home page)" },
+  { "file": "dist", "phrase": "the paid two-week discovery: a fixed-price, low-commitment way", "reason": "legacy section, removed in Phase C (Faq.astro on the Home page)" },
+  { "file": "dist", "phrase": "a fixed-price two-week discovery", "reason": "legacy section, removed in Phase C (Faq.astro on the Home page)" },
+  { "file": "dist", "phrase": "Who we work with", "reason": "legacy section, removed in Phase C (Industries.astro on the Home page)" },
+  { "file": "dist", "phrase": "No bench, no offshore handoff", "reason": "legacy section, removed in Phase C (WhyUs.astro on the Home page)" }
+]
