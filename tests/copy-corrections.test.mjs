@@ -14,9 +14,21 @@ test("no post or post footer offers a 'paid two-week discovery'", () => {
   }
 });
 
-test("every post ends with a 'Talk to us' CTA", () => {
+test("every post body ends with its own 'talk to us' CTA", () => {
+  // Look only at the markdown body (PostLayout's post-prose div, up to the <hr> before the
+  // layout's shared footer CTA), so the layout link can't satisfy this for a post.
   for (const f of insightPages) {
-    assert.match(visibleText(readDist(f)), /Talk to us/, f);
+    const html = readDist(f);
+    const start = html.indexOf('class="post-prose');
+    assert.ok(start >= 0, `${f}: post-prose body not found`);
+    const end = html.indexOf("<hr", start);
+    assert.ok(end > start, `${f}: no <hr> after the post body`);
+    const paras = html.slice(start, end).match(/<p\b[^>]*>[\s\S]*?<\/p>/g) ?? [];
+    assert.match(
+      paras.at(-1) ?? "",
+      /<a[^>]*href="mailto:admin@techsider\.com\.au"[^>]*>\s*talk to us\s*<\/a>/i,
+      `${f}: the post's closing paragraph has no 'talk to us' mailto link`,
+    );
   }
 });
 
