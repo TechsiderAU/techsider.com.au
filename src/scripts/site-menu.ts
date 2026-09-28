@@ -70,8 +70,10 @@ export function initSiteMenu(): void {
     }
   });
 
-  // Following a link (including same-page anchors) closes the menu.
+  // Following a link (including same-page anchors) closes the menu. A modifier-key or
+  // non-primary click opens a new tab or window instead, so the menu stays open.
   dialog.addEventListener("click", (e) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if ((e.target as HTMLElement).closest("a[href]")) dialog.close();
   });
 

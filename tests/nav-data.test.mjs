@@ -50,6 +50,11 @@ test("nav groups are the five spec groups in order, with 5 solutions and 9 indus
   assert.equal(NAV_GROUPS[1].layout, "columns");
 });
 
+test("'All …' labels are plain text; the header draws the arrow as decoration", () => {
+  assert.deepEqual(NAV_GROUPS.map((g) => g.allLabel), ["All solutions", "All industries", "How we work", "All resources", "About Techsider"]);
+  for (const g of NAV_GROUPS) assert.doesNotMatch(g.allLabel, /[→›»]|->/, `${g.id}: a screen reader would read the arrow`);
+});
+
 test("industry footer labels read 'AI for {short name}'", () => {
   const legal = NAV_GROUPS[1].items.find((i) => i.path === "/industries/legal-and-professional/");
   assert.equal(footerLabel(legal), "AI for legal & professional");

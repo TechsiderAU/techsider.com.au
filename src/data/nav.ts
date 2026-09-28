@@ -24,6 +24,7 @@ export interface NavGroup {
   id: "solutions" | "industries" | "services" | "resources" | "about";
   label: string;
   hub: PageEntry;
+  /** Plain text: SiteHeader adds the "→" aria-hidden, so screen readers don't read "right arrow". */
   allLabel: string;
   layout: "rows" | "columns";
   items: PageEntry[];
@@ -137,18 +138,18 @@ const CONTACT_SENT = page("Sent", "/contact/", "/contact/sent/", "planned", "Mes
 const DEMO_PAGES = SOLUTIONS.map((s) => page(s.shortName, "/demos/", `/demos/${slugify(s.shortName)}/`, "planned", `${s.fullName} demo`));
 
 export const NAV_GROUPS: NavGroup[] = [
-  { id: "solutions", label: "Solutions", hub: SOLUTIONS_HUB, allLabel: "All solutions →", layout: "rows", items: SOLUTIONS, anchors: [] },
-  { id: "industries", label: "Industries", hub: INDUSTRIES_HUB, allLabel: "All industries →", layout: "columns", items: INDUSTRIES, anchors: [] },
+  { id: "solutions", label: "Solutions", hub: SOLUTIONS_HUB, allLabel: "All solutions", layout: "rows", items: SOLUTIONS, anchors: [] },
+  { id: "industries", label: "Industries", hub: INDUSTRIES_HUB, allLabel: "All industries", layout: "columns", items: INDUSTRIES, anchors: [] },
   {
-    id: "services", label: "Services", hub: SERVICES_HUB, allLabel: "How we work →", layout: "rows", items: [EVALUATION_PARTNER],
+    id: "services", label: "Services", hub: SERVICES_HUB, allLabel: "How we work", layout: "rows", items: [EVALUATION_PARTNER],
     anchors: [
       { label: "Prove", href: "/services/#prove" },
       { label: "Build", href: "/services/#build" },
       { label: "Run", href: "/services/#run" },
     ],
   },
-  { id: "resources", label: "Resources", hub: RESOURCES_HUB, allLabel: "All resources →", layout: "rows", items: RESOURCES_ITEMS, anchors: [] },
-  { id: "about", label: "About", hub: ABOUT, allLabel: "About Techsider →", layout: "rows", items: [TRUST, LEGAL, CONTACT], anchors: [] },
+  { id: "resources", label: "Resources", hub: RESOURCES_HUB, allLabel: "All resources", layout: "rows", items: RESOURCES_ITEMS, anchors: [] },
+  { id: "about", label: "About", hub: ABOUT, allLabel: "About Techsider", layout: "rows", items: [TRUST, LEGAL, CONTACT], anchors: [] },
 ];
 
 export const PAGES: PageEntry[] = [

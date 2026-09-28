@@ -45,7 +45,7 @@ const isCurrent = (href: string) => (href === current ? "page" : undefined);
                   <li><a href={a.href} class="nav-item"><span class="nav-item-name">{a.label}</span></a></li>
                 ))}
               </ul>
-              {g.hubHref && <a href={g.hubHref} class="nav-all">{g.allLabel}</a>}
+              {g.hubHref && <a href={g.hubHref} class="nav-all">{g.allLabel} <span aria-hidden="true">→</span></a>}
             </div>
           </li>
         ))}
@@ -105,7 +105,7 @@ const isCurrent = (href: string) => (href === current ? "page" : undefined);
             <li><a href={a.href} class="menu-row menu-link"><span>{a.label}</span></a></li>
           ))}
         </ul>
-        {g.hubHref && <a href={g.hubHref} class="nav-all">{g.allLabel}</a>}
+        {g.hubHref && <a href={g.hubHref} class="nav-all">{g.allLabel} <span aria-hidden="true">→</span></a>}
       </section>
     ))}
   </dialog>
@@ -200,6 +200,7 @@ const isCurrent = (href: string) => (href === current ? "page" : undefined);
   .nav-all {
     display: flex;
     align-items: center;
+    gap: 1ch; /* the space before the aria-hidden arrow collapses in a flex row */
     min-height: 44px;
     margin-top: 0.5rem;
     padding: 0.5rem 0.625rem;

@@ -31,17 +31,22 @@ export function initSiteNav(): void {
   for (const g of groups) {
     g.btn.hidden = false;
     g.btn.addEventListener("click", () => (g.btn.getAttribute("aria-expanded") === "true" ? close(g) : open(g)));
-    g.el.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !g.panel.hidden) {
-        e.preventDefault();
-        close(g, true);
-      }
-    });
     g.el.addEventListener("focusout", (e) => {
       const next = e.relatedTarget as Node | null;
       if (next && !g.el.contains(next)) close(g);
     });
   }
+
+  // Esc closes the open panel wherever focus is, including <body>: Safari and Firefox leave
+  // focus there after a click. Focus returns to the toggle only if it was inside that group.
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    for (const g of groups) {
+      if (g.panel.hidden) continue;
+      e.preventDefault();
+      close(g, g.el.contains(document.activeElement));
+    }
+  });
 
   document.addEventListener("click", (e) => {
     for (const g of groups) if (!g.el.contains(e.target as Node)) close(g);

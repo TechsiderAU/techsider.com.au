@@ -2,6 +2,15 @@ import { test, expect } from "@playwright/test";
 
 test.use({ viewport: { width: 1280, height: 800 } });
 
+// The "All …" link at the foot of each panel: plain accessible name, arrow drawn aria-hidden.
+const ALL = [
+  ["solutions", "Solutions", "All solutions", "/solutions/"],
+  ["industries", "Industries", "All industries", "/industries/"],
+  ["services", "Services", "How we work", "/services/"],
+  ["resources", "Resources", "All resources", "/resources/"],
+  ["about", "About", "About Techsider", "/about/"],
+];
+
 test("a disclosure opens from the keyboard; Esc closes it and returns focus", async ({ page }) => {
   await page.goto("/");
   const toggle = page.getByRole("button", { name: "Solutions menu" });
@@ -26,7 +35,23 @@ test("Space toggles too, and only one panel is open at a time", async ({ page })
   await page.getByRole("button", { name: "Industries menu" }).click();
   await expect(page.locator("#nav-panel-industries")).toBeVisible();
   await expect(page.locator("#nav-panel-solutions")).toBeHidden();
-  await expect(page.locator("#nav-panel-industries").getByRole("link")).toHaveCount(10); // 9 industries + "All industries →"
+  await expect(page.locator("#nav-panel-industries").getByRole("link")).toHaveCount(10); // 9 industries + "All industries"
+});
+
+test("Esc closes an open panel when focus is on <body> (Safari and Firefox leave it there after a click)", async ({ page }) => {
+  await page.goto("/");
+  const toggle = page.getByRole("button", { name: "Solutions menu" });
+  const panel = page.locator("#nav-panel-solutions");
+  await toggle.click();
+  await expect(panel).toBeVisible();
+  await page.evaluate(() => document.activeElement.blur());
+  expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
+  await expect(panel).toBeVisible(); // blurring to <body> doesn't close it by itself
+  await page.keyboard.press("Escape");
+  await expect(panel).toBeHidden();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  // Focus wasn't inside the group, so Esc doesn't pull it to the toggle.
+  expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
 });
 
 test("an outside click closes the open panel", async ({ page }) => {
@@ -47,6 +72,19 @@ test("focus leaving the panel closes it", async ({ page }) => {
   for (let i = 0; i <= links; i++) await page.keyboard.press("Tab");
   await expect(panel).toBeHidden();
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
+});
+
+test("each panel's 'All …' link is named without the arrow, which still shows", async ({ page }) => {
+  await page.goto("/");
+  for (const [id, section, name, href] of ALL) {
+    await page.getByRole("button", { name: `${section} menu` }).click();
+    const panel = page.locator(`#nav-panel-${id}`);
+    await expect(panel).toBeVisible();
+    const all = panel.getByRole("link", { name, exact: true });
+    await expect(all).toHaveAttribute("href", href);
+    await expect(all).toContainText("→");
+    await expect(panel.getByRole("link", { name: /→/ })).toHaveCount(0);
+  }
 });
 
 test("top-level labels are real links to their hubs", async ({ page }) => {

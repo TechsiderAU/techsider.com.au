@@ -3,6 +3,14 @@ import { test, expect } from "@playwright/test";
 test.use({ viewport: { width: 390, height: 844 } });
 
 const menuButton = (page) => page.getByRole("button", { name: "Menu", exact: true });
+// The "All …" link at the foot of each panel: plain accessible name, arrow drawn aria-hidden.
+const ALL = [
+  ["solutions", "Solutions", "All solutions", "/solutions/"],
+  ["industries", "Industries", "All industries", "/industries/"],
+  ["services", "Services", "How we work", "/services/"],
+  ["resources", "Resources", "All resources", "/resources/"],
+  ["about", "About", "About Techsider", "/about/"],
+];
 const inDialog = (page) => page.evaluate(() => document.getElementById("site-menu").contains(document.activeElement));
 
 test("the menu opens as a modal dialog, locks scroll and traps focus", async ({ page }) => {
@@ -58,11 +66,26 @@ test("drilling down focuses the panel heading; Back returns focus to the row", a
   const panel = page.locator('[data-menu-panel="industries"]');
   await expect(panel).toBeVisible();
   await expect(page.locator("#menu-h-industries")).toBeFocused();
-  await expect(panel.getByRole("link")).toHaveCount(10); // 9 industries + "All industries →"
+  await expect(panel.getByRole("link")).toHaveCount(10); // 9 industries + "All industries"
   await expect(panel.locator(".menu-ctas")).toHaveCount(0); // sub-panels carry no CTAs
   await panel.getByRole("button", { name: /Back to menu/ }).click();
   await expect(panel).toBeHidden();
   await expect(row).toBeFocused();
+});
+
+test("each sub-panel's 'All …' link is named without the arrow, which still shows", async ({ page }) => {
+  await page.goto("/");
+  await menuButton(page).click();
+  for (const [id, , name, href] of ALL) {
+    await page.locator(`[data-menu-open-panel="${id}"]`).click();
+    const panel = page.locator(`[data-menu-panel="${id}"]`);
+    await expect(panel).toBeVisible();
+    const all = panel.getByRole("link", { name, exact: true });
+    await expect(all).toHaveAttribute("href", href);
+    await expect(all).toContainText("→");
+    await expect(panel.getByRole("link", { name: /→/ })).toHaveCount(0);
+    await panel.getByRole("button", { name: "Back to menu" }).click();
+  }
 });
 
 test("on tall viewports the CTAs are pinned to the bottom", async ({ page }) => {
@@ -99,6 +122,26 @@ test("following an in-page link closes the menu", async ({ page }) => {
   await expect(page.locator("#site-menu")).toHaveCount(1);
   await expect(page.locator("#site-menu")).toBeHidden();
   await expect(menuButton(page)).toHaveAttribute("aria-expanded", "false");
+});
+
+test("a modifier-key or middle click on a menu link (a new tab) leaves the menu open", async ({ page }) => {
+  await page.goto("/");
+  // Stop the new tab or download so the test stays on this page.
+  await page.evaluate(() => {
+    for (const type of ["click", "auxclick"]) {
+      document.addEventListener(type, (e) => { if (e.target.closest("a[href]")) e.preventDefault(); }, true);
+    }
+  });
+  await menuButton(page).click();
+  await page.locator('[data-menu-open-panel="solutions"]').click();
+  const link = page.locator('[data-menu-panel="solutions"] a[href="/solutions/document-registers/"]');
+  for (const opts of [{ modifiers: ["ControlOrMeta"] }, { modifiers: ["Shift"] }, { modifiers: ["Alt"] }, { button: "middle" }]) {
+    await link.click(opts);
+    await expect(page.locator("#site-menu"), JSON.stringify(opts)).toBeVisible();
+    await expect(menuButton(page)).toHaveAttribute("aria-expanded", "true");
+  }
+  await link.click(); // a plain click still closes it
+  await expect(page.locator("#site-menu")).toBeHidden();
 });
 
 test("without JavaScript the menu button stays hidden and the basic links show", async ({ browser }) => {
