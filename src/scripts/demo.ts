@@ -1,4 +1,5 @@
 import { demoScript, type Turn } from "../lib/demoScript";
+import { createPlayback, type Playback } from "./playback";
 
 const REDUCED =
   typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -10,19 +11,29 @@ function el(tag: string, cls?: string, text?: string): HTMLElement {
   return n;
 }
 
-const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, REDUCED ? 0 : ms));
-
 export function initDemo(): void {
   const root = document.querySelector<HTMLElement>("[data-demo-root]");
   if (!root) return;
   const stage = root.querySelector<HTMLElement>("[data-demo-stage]");
   const staticEl = root.querySelector<HTMLElement>("[data-demo-static]");
+  const controls = root.querySelector<HTMLElement>("[data-demo-controls]");
+  const pauseBtn = root.querySelector<HTMLButtonElement>("[data-demo-pause]");
+  const skipBtn = root.querySelector<HTMLButtonElement>("[data-demo-skip]");
   const replay = root.querySelector<HTMLButtonElement>("[data-demo-replay]");
+  const status = root.querySelector<HTMLElement>("[data-demo-status]");
   const trace = root.querySelector<HTMLDetailsElement>("[data-demo-trace]");
-  if (!stage || !staticEl || !replay) return;
+  if (!stage || !staticEl || !controls || !pauseBtn || !skipBtn || !replay || !status) return;
 
+  const total = demoScript.turns.length;
   let started = false;
-  let running = false;
+  let current: Playback | null = null;
+
+  const announce = (msg: string) => {
+    status.textContent = msg;
+  };
+  const setPauseLabel = (paused: boolean) => {
+    pauseBtn.textContent = paused ? "Resume" : "Pause";
+  };
 
   const highlightSource = (cite: number) => {
     root.querySelectorAll<HTMLElement>("[data-demo-src]").forEach((s) => {
@@ -40,87 +51,123 @@ export function initDemo(): void {
     });
   });
 
+  // Chips are not focusable while the stage is aria-hidden; they become focusable when the run finishes.
   const citeChip = (cite: number): HTMLButtonElement => {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "demo-cite";
+    b.tabIndex = -1;
     b.textContent = `[${cite}]`;
     b.setAttribute("aria-label", `Show source ${cite}`);
     b.addEventListener("click", () => highlightSource(cite));
     return b;
   };
 
-  async function typeInto(node: HTMLElement, text: string) {
-    if (REDUCED) {
-      node.append(document.createTextNode(text));
-      return;
-    }
+  async function typeInto(node: HTMLElement, text: string, pb: Playback) {
     const tn = document.createTextNode("");
     node.append(tn);
     for (let i = 0; i < text.length; i++) {
+      if (pb.skipped) {
+        tn.textContent += text.slice(i);
+        return;
+      }
       tn.textContent += text[i];
-      if (i % 2 === 0) await wait(11);
+      if (i % 2 === 0) await pb.wait(11);
     }
   }
 
-  async function renderTurn(turn: Turn, animated: boolean) {
+  async function renderTurn(turn: Turn, pb: Playback): Promise<void> {
+    if (pb.cancelled) return; // Replay pressed in the pause between turns: don't append to the new run's stage
     const block = el("div", "demo-turn");
     stage!.append(block);
 
     block.append(el("p", "demo-role", "Analyst"));
     const q = el("p", "demo-q");
     block.append(q);
-    if (animated) await typeInto(q, turn.question);
-    else q.textContent = turn.question;
+    await typeInto(q, turn.question, pb);
+    if (pb.cancelled) return;
 
     const retr = el("div", "demo-retrieve");
-    retr.append(el("p", "demo-role", `Retrieving — k=${turn.retrieved.length}`));
+    retr.append(el("p", "demo-role", `Retrieving — k=${turn.retrieved.length} · illustrative scores`));
     block.append(retr);
-    await wait(animated ? 320 : 0);
+    await pb.wait(320);
     for (const c of turn.retrieved) {
+      if (pb.cancelled) return;
       const row = el("div", "demo-chunk");
       row.append(el("span", "demo-chunk-score", c.score.toFixed(2)));
       row.append(el("span", "demo-chunk-text", c.snippet));
       retr.append(row);
-      await wait(animated ? 160 : 0);
+      await pb.wait(160);
     }
+    if (pb.cancelled) return;
 
     block.append(el("p", "demo-role", turn.abstained ? "Assistant — abstained" : "Assistant"));
     const a = el("p", "demo-a");
     block.append(a);
     for (const seg of turn.answer) {
-      if (animated) await typeInto(a, seg.text);
-      else a.append(document.createTextNode(seg.text));
+      await typeInto(a, seg.text, pb);
+      if (pb.cancelled) return;
       if (seg.cite) a.append(citeChip(seg.cite));
     }
-    await wait(animated ? 240 : 0);
+    await pb.wait(240);
   }
 
-  async function play(animated: boolean) {
-    if (running) return;
-    running = true;
-    replay!.disabled = true;
+  async function play(): Promise<void> {
+    current?.cancel(); // Replay mid-run: abandon the old run; it only touches detached nodes from here on.
+    const pb = createPlayback({ instant: REDUCED });
+    current = pb;
+
     stage!.innerHTML = "";
-    root.querySelectorAll("[data-demo-src]").forEach((s) => s.classList.remove("demo-src-active"));
-    for (const turn of demoScript.turns) {
-      await renderTurn(turn, animated);
-      await wait(animated ? 380 : 0);
+    stage!.setAttribute("aria-hidden", "true"); // typing is visual only; progress goes to the status region
+    root!.querySelectorAll("[data-demo-src]").forEach((s) => s.classList.remove("demo-src-active"));
+    pauseBtn!.disabled = false;
+    skipBtn!.disabled = false;
+    setPauseLabel(false);
+    announce(`Demo playing: ${total} questions. Use Pause or Skip to result at any time.`);
+
+    for (let i = 0; i < total; i++) {
+      await renderTurn(demoScript.turns[i], pb);
+      if (pb !== current || pb.cancelled) return;
+      announce(`Answer ${i + 1} of ${total} shown.`);
+      await pb.wait(380);
     }
-    if (trace && animated) trace.open = true;
-    replay!.disabled = false;
-    running = false;
+    if (pb !== current) return;
+
+    stage!.removeAttribute("aria-hidden");
+    stage!.querySelectorAll<HTMLButtonElement>(".demo-cite").forEach((b) => (b.tabIndex = 0));
+    pauseBtn!.disabled = true;
+    skipBtn!.disabled = true;
+    setPauseLabel(false);
+    if (trace && !REDUCED) trace.open = true;
+    announce("Demo finished. The full transcript and its sources are shown.");
   }
+
+  pauseBtn.addEventListener("click", () => {
+    if (!current || current.skipped) return;
+    if (current.paused) {
+      current.resume();
+      setPauseLabel(false);
+      announce("Demo resumed.");
+    } else {
+      current.pause();
+      setPauseLabel(true);
+      announce("Demo paused.");
+    }
+  });
+  skipBtn.addEventListener("click", () => {
+    current?.skip();
+    setPauseLabel(false);
+  });
+  replay.addEventListener("click", () => void play());
 
   const start = () => {
     if (started) return;
     started = true;
-    staticEl!.hidden = true;
-    stage!.hidden = false;
-    replay!.hidden = false;
-    void play(!REDUCED);
+    staticEl.hidden = true;
+    stage.hidden = false;
+    controls.hidden = false;
+    void play();
   };
-
-  replay.addEventListener("click", () => void play(!REDUCED));
 
   if (typeof IntersectionObserver === "undefined") {
     start();

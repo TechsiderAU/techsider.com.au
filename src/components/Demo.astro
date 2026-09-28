@@ -25,6 +25,21 @@ const transcript = [main, abstain];
 
       <div class="grid md:grid-cols-[1fr_18rem]">
         <div class="p-5 md:p-6 min-h-[18rem]">
+          <div data-demo-controls hidden class="flex flex-wrap gap-2 mb-5">
+            <button type="button" data-demo-pause
+              class="text-xs font-semibold border border-border-soft text-text px-3 py-1.5 rounded hover:border-accent transition-colors disabled:opacity-50">
+              Pause
+            </button>
+            <button type="button" data-demo-skip
+              class="text-xs font-semibold border border-border-soft text-text px-3 py-1.5 rounded hover:border-accent transition-colors disabled:opacity-50">
+              Skip to result
+            </button>
+            <button type="button" data-demo-replay
+              class="text-xs font-semibold bg-accent text-accent-ink px-3 py-1.5 rounded hover:opacity-90 transition-opacity">
+              ▶ Replay
+            </button>
+          </div>
+          <p role="status" data-demo-status class="sr-only"></p>
           <div data-demo-static>
             {transcript.map((turn) => (
               <div class="mb-6 last:mb-0">
@@ -47,14 +62,7 @@ const transcript = [main, abstain];
             ))}
           </div>
 
-          <div data-demo-stage hidden aria-live="polite"></div>
-
-          <div class="mt-5">
-            <button type="button" data-demo-replay hidden
-              class="text-xs font-semibold bg-accent text-accent-ink px-3 py-1.5 rounded hover:opacity-90 transition-opacity">
-              ▶ Replay
-            </button>
-          </div>
+          <div data-demo-stage hidden></div>
         </div>
 
         <aside class="border-t md:border-t-0 md:border-l border-border p-5 md:p-6 bg-bg-deep/30" data-demo-sources>
