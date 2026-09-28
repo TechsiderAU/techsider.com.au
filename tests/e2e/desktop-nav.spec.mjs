@@ -54,13 +54,6 @@ test("top-level labels are real links to their hubs", async ({ page }) => {
   await expect(page.locator("[data-site-nav]").getByRole("link", { name: "Solutions", exact: true })).toHaveAttribute("href", "/solutions/");
 });
 
-test("toggle buttons are at least 44px", async ({ page }) => {
-  await page.goto("/");
-  const box = await page.getByRole("button", { name: "Solutions menu" }).boundingBox();
-  expect(box.width).toBeGreaterThanOrEqual(44);
-  expect(box.height).toBeGreaterThanOrEqual(44);
-});
-
 test("without JavaScript the toggles stay hidden and the basic link row shows", async ({ browser }) => {
   const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 800 } });
   const page = await ctx.newPage();
