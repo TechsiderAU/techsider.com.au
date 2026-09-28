@@ -1,12 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { buildShippedCss } from "../support/tailwind.mjs";
+import { focusKeys } from "../support/keys.mjs";
 
 // No Phase A page uses surface-bone yet, so this renders the production-flattened CSS for a
 // fixture: a bone section holding a graphite island (MockPanel) and a carbon island (trace panel).
 const ACID = "rgb(200, 255, 46)";
 const CARBON = "rgb(11, 11, 12)";
 
-test("focus rings and form controls follow the surface they sit on", async ({ page }) => {
+test("focus rings and form controls follow the surface they sit on", async ({ page, browserName }) => {
   const css = await buildShippedCss(["surface-bone", "bg-carbon", "bg-graphite"]);
   await page.setContent(`<!doctype html><html><head><style>${css}</style></head><body>
     <button id="on-carbon">on carbon</button>
@@ -30,7 +31,7 @@ test("focus rings and form controls follow the surface they sit on", async ({ pa
   };
   const seen = {};
   for (let i = 0; i < Object.keys(expected).length; i++) {
-    await page.keyboard.press("Tab");
+    await page.keyboard.press(focusKeys(browserName).next);
     const { id, visible, color, style } = await page.evaluate(() => {
       const el = document.activeElement;
       const s = getComputedStyle(el);

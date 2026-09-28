@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { focusKeys } from "../support/keys.mjs";
 
 test.use({ viewport: { width: 1280, height: 800 } });
 
@@ -11,7 +12,7 @@ const ALL = [
   ["about", "About", "About Techsider", "/about/"],
 ];
 
-test("a disclosure opens from the keyboard; Esc closes it and returns focus", async ({ page }) => {
+test("a disclosure opens from the keyboard; Esc closes it and returns focus", async ({ page, browserName }) => {
   await page.goto("/");
   const toggle = page.getByRole("button", { name: "Solutions menu" });
   const panel = page.locator("#nav-panel-solutions");
@@ -19,7 +20,7 @@ test("a disclosure opens from the keyboard; Esc closes it and returns focus", as
   await page.keyboard.press("Enter");
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
   await expect(panel).toBeVisible();
-  await page.keyboard.press("Tab");
+  await page.keyboard.press(focusKeys(browserName).next);
   await expect(panel.getByRole("link").first()).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(panel).toBeHidden();
@@ -62,14 +63,14 @@ test("an outside click closes the open panel", async ({ page }) => {
   await expect(page.locator("#nav-panel-resources")).toBeHidden();
 });
 
-test("focus leaving the panel closes it", async ({ page }) => {
+test("focus leaving the panel closes it", async ({ page, browserName }) => {
   await page.goto("/");
   const toggle = page.getByRole("button", { name: "About menu" });
   const panel = page.locator("#nav-panel-about");
   await toggle.focus();
   await page.keyboard.press("Enter");
   const links = await panel.getByRole("link").count();
-  for (let i = 0; i <= links; i++) await page.keyboard.press("Tab");
+  for (let i = 0; i <= links; i++) await page.keyboard.press(focusKeys(browserName).next);
   await expect(panel).toBeHidden();
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
 });

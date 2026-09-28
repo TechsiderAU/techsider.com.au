@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { focusKeys } from "../support/keys.mjs";
 
 // Tabs (spec §8.12) on /preview/tabs/: two independent groups built from the fixtures.
 // "fixture-workflow" (on carbon) has the industry fixture's four workflow stages;
@@ -133,7 +134,7 @@ test.describe("768px and up: tabs", () => {
     }
   });
 
-  test("arrow keys wrap and Home/End jump without selecting; Enter and Space select", async ({ page }) => {
+  test("arrow keys wrap and Home/End jump without selecting; Enter and Space select", async ({ page, browserName }) => {
     await page.goto(PAGE);
     const tabs = tabsIn(page, "fixture-workflow");
     await tabs.first().focus();
@@ -165,9 +166,9 @@ test.describe("768px and up: tabs", () => {
     await expectOnlyVisible(page, WORKFLOW, WORKFLOW[2]);
 
     // Only the selected tab is in the Tab order: Tab moves on to its panel, Shift+Tab comes back.
-    await page.keyboard.press("Tab");
+    await page.keyboard.press(focusKeys(browserName).next);
     await expect(page.locator(`#${WORKFLOW[2]}`)).toBeFocused();
-    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press(focusKeys(browserName).prev);
     await expect(tabs.nth(2)).toBeFocused();
   });
 
@@ -237,7 +238,7 @@ test.describe("768px and up: tabs", () => {
     await expectOnlyVisible(page, WORKFLOW, WORKFLOW[2]);
   });
 
-  test("tabs are at least 44px tall and show a visible focus ring on carbon and on bone", async ({ page }) => {
+  test("tabs are at least 44px tall and show a visible focus ring on carbon and on bone", async ({ page, browserName }) => {
     await page.goto(PAGE);
     const heights = await page.getByRole("tab").evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
     expect(heights).toHaveLength(PANELS);
@@ -245,7 +246,7 @@ test.describe("768px and up: tabs", () => {
     await tabsIn(page, "fixture-workflow").first().focus();
     await page.keyboard.press("ArrowRight");
     await expectFocusRing(page, ACID);
-    await page.keyboard.press("Tab"); // on to the selected tab's panel (tabindex 0)
+    await page.keyboard.press(focusKeys(browserName).next); // on to the selected tab's panel (tabindex 0)
     await expect(page.locator(`#${WORKFLOW[0]}`)).toBeFocused();
     await expectFocusRing(page, ACID);
     await tabsIn(page, "fixture-packages").first().focus();

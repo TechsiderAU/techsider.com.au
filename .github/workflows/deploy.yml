@@ -25,6 +25,9 @@ jobs:
         uses: withastro/action@v6
         with:
           node-version: 22
+        env:
+          # The action runs `npm run build`, CI checks included; launch-gate checks fail the deploy.
+          VERIFY_MODE: gate
 
   deploy:
     needs: build

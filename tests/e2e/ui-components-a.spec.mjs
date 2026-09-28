@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { focusKeys } from "../support/keys.mjs";
 
 // The static components A on /preview/components/, rendered once on carbon and once inside .surface-bone.
 const PAGE = "/preview/components/";
@@ -69,9 +70,9 @@ test("acid is never text on bone; brackets, carets and indicators follow the sur
   }
 });
 
-test("focus rings follow the surface: lime on carbon, carbon on bone, lime in the PromptBlock island", async ({ page }) => {
+test("focus rings follow the surface: lime on carbon, carbon on bone, lime in the PromptBlock island", async ({ page, browserName }) => {
   await page.goto(PAGE);
-  await page.keyboard.press("Tab"); // keyboard modality, so programmatic focus shows :focus-visible
+  await page.keyboard.press(focusKeys(browserName).next); // keyboard modality, so programmatic focus shows :focus-visible
   const ring = async (selector) => {
     const el = page.locator(selector).first();
     await el.focus();

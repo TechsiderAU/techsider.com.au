@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { focusKeys } from "../support/keys.mjs";
 
 // Phase A scope: the site shell only. Legacy page sections are replaced in Phase B.
 const shell = (page) =>
@@ -35,9 +36,9 @@ test("a post page shell has no axe violations", async ({ page }) => {
   expect((await shell(page).analyze()).violations).toEqual([]);
 });
 
-test("the skip link becomes visible on focus and moves focus to main", async ({ page }) => {
+test("the skip link becomes visible on focus and moves focus to main", async ({ page, browserName }) => {
   await page.goto("/");
-  await page.keyboard.press("Tab");
+  await page.keyboard.press(focusKeys(browserName).next);
   const skip = page.locator(".skip-link");
   await expect(skip).toBeFocused();
   const box = await skip.boundingBox();

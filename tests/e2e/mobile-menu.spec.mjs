@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { focusKeys } from "../support/keys.mjs";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
@@ -13,7 +14,8 @@ const ALL = [
 ];
 const inDialog = (page) => page.evaluate(() => document.getElementById("site-menu").contains(document.activeElement));
 
-test("the menu opens as a modal dialog, locks scroll and traps focus", async ({ page }) => {
+test("the menu opens as a modal dialog, locks scroll and traps focus", async ({ page, browserName }) => {
+  const keys = focusKeys(browserName);
   await page.goto("/");
   await expect(page.locator("[data-site-nav]")).toBeHidden();
   await menuButton(page).click();
@@ -22,17 +24,17 @@ test("the menu opens as a modal dialog, locks scroll and traps focus", async ({ 
   await expect(menuButton(page)).toHaveAttribute("aria-expanded", "true");
   expect(await page.evaluate(() => document.documentElement.classList.contains("menu-open"))).toBe(true);
   for (let i = 0; i < 20; i++) {
-    await page.keyboard.press("Tab");
+    await page.keyboard.press(keys.next);
     expect(await inDialog(page)).toBe(true);
   }
   for (let i = 0; i < 20; i++) {
-    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press(keys.prev);
     expect(await inDialog(page)).toBe(true);
   }
   // Clicking non-interactive content (the logo) leaves focus on the <dialog> itself;
   // Tab and Shift+Tab must still wrap inside the menu from there.
   const logo = page.locator("#site-menu .menu-bar img");
-  for (const key of ["Shift+Tab", "Tab"]) {
+  for (const key of [keys.prev, keys.next]) {
     await logo.click();
     expect(await page.evaluate(() => document.activeElement.id)).toBe("site-menu");
     await page.keyboard.press(key);
