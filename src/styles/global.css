@@ -74,6 +74,11 @@
     outline-offset: 2px;
   }
 
+  /* The skip link moves focus to <main tabindex="-1">; don't ring the whole content area. */
+  main[tabindex="-1"]:focus {
+    outline: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -148,6 +153,13 @@
 
 html {
   scroll-padding-top: 5rem; /* in-page anchors clear the sticky header */
+}
+
+/* Without JS the basic link row makes the header two rows (126px, and more when the row
+   wraps at narrow widths), taller than scroll-padding-top allows for. So it scrolls away
+   instead of sticking, and in-page anchors don't land under it. */
+.no-js .site-header {
+  position: static;
 }
 
 html.menu-open {

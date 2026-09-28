@@ -43,7 +43,31 @@ test("the skip link becomes visible on focus and moves focus to main", async ({ 
   const box = await skip.boundingBox();
   expect(box.y).toBeGreaterThanOrEqual(0);
   await page.keyboard.press("Enter");
-  await expect(page.locator("main#main")).toBeFocused();
+  const main = page.locator("main#main");
+  await expect(main).toBeFocused();
+  // Focus lands on the whole content area; it must not draw a ring around all of it.
+  expect(await main.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe("none");
+});
+
+// Without JS the basic link row makes the header two rows (taller still when it wraps at 390px),
+// more than scroll-padding-top allows for, so a sticky header would cover in-page anchor targets.
+for (const vp of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
+  test(`without JavaScript the header is not sticky and anchors land clear of it at ${vp.width}px`, async ({ browser }) => {
+    const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: vp, reducedMotion: "reduce" });
+    const page = await ctx.newPage();
+    await page.goto("/#demo");
+    const header = page.locator("body > header");
+    expect(await header.evaluate((el) => getComputedStyle(el).position)).toBe("static");
+    const headerBox = await header.boundingBox();
+    const target = await page.locator("#demo").boundingBox();
+    expect(headerBox.y + headerBox.height).toBeLessThanOrEqual(target.y);
+    await ctx.close();
+  });
+}
+
+test("with JavaScript the header stays sticky", async ({ page }) => {
+  await page.goto("/");
+  expect(await page.locator("body > header").evaluate((el) => getComputedStyle(el).position)).toBe("sticky");
 });
 
 test("no horizontal scroll at 320px", async ({ page }) => {
