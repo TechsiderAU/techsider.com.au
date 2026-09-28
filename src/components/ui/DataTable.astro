@@ -1,4 +1,6 @@
 ---
+import { pageUniqueId } from "../../lib/page-id";
+
 interface Props {
   caption: string;
   columns: { key: string; label: string }[];
@@ -11,6 +13,8 @@ if (!columns.some((c) => c.key === rowHeader)) {
   throw new Error(`DataTable "${caption}": rowHeader "${rowHeader}" is not a column key`);
 }
 const details = columns.filter((c) => c.key !== rowHeader);
+// The card list is named by its caption, as the table is by <caption> (WCAG 1.3.1).
+const captionId = pageUniqueId(Astro.locals, "dt-caption");
 ---
 <div class="data-table" data-data-table>
   <table class="dt-table">
@@ -29,8 +33,8 @@ const details = columns.filter((c) => c.key !== rowHeader);
     </tbody>
   </table>
   <div class="data-cards">
-    <p class="dt-cards-caption">{caption}</p>
-    <ul class="dt-cards">
+    <p class="dt-cards-caption" id={captionId}>{caption}</p>
+    <ul class="dt-cards" aria-labelledby={captionId}>
       {rows.map((row) => (
         <li class="dt-card">
           <p class="dt-card-heading">{row[rowHeader]}</p>

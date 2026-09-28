@@ -156,6 +156,15 @@ for (const width of [767, 390]) {
     }
     const cards = page.locator("#gallery-data-table .data-cards");
     await expect(cards.locator(".dt-cards-caption")).toHaveText("Fixture obligations register");
+    // The card list is named by its caption, as the table is by <caption>.
+    await expect(cards.getByRole("list", { name: "Fixture obligations register", exact: true })).toHaveCount(1);
+    const wiring = await page.locator("[data-data-table] .data-cards").evaluateAll((els) =>
+      els.map((el) => ({ id: el.querySelector(".dt-cards-caption").id, labelledby: el.querySelector("ul.dt-cards").getAttribute("aria-labelledby") })),
+    );
+    expect(wiring).toHaveLength(6);
+    for (const w of wiring) expect(w.labelledby).toBe(w.id);
+    expect(new Set(wiring.map((w) => w.id)).size, "caption ids are unique on the page").toBe(wiring.length);
+    for (const w of wiring) expect(w.id).toMatch(/^[a-z][a-z0-9-]*$/);
     await expect(cards.locator(".dt-card-heading")).toHaveText(regulatoryFixture.rows.map((r) => r.obligation));
     await expect(cards.locator(".dt-card").first().locator("dl dt")).toHaveText(["What it means", "How we design for it", "Evidence you get"]);
     await expect(cards.locator(".dt-card").first().locator("dl dd").first()).toHaveText(regulatoryFixture.rows[0].meaning);
