@@ -1,0 +1,87 @@
+---
+// Breadcrumb trail (WAI-ARIA APG breadcrumb pattern) plus BreadcrumbList JSON-LD (spec §11.3).
+// The last item is the current page: text with aria-current, not a link. Render once per page.
+interface Props {
+  items: { label: string; href: string }[];
+}
+
+const { items } = Astro.props;
+const site = Astro.site ?? Astro.url;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: items.map((item, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: item.label,
+    item: new URL(item.href, site).href,
+  })),
+};
+// Escape "<" so no string can close the script element early.
+const json = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
+---
+<nav aria-label="Breadcrumb" class="breadcrumb">
+  <ol>
+    {items.map((item, i) => (
+      <li>
+        {i > 0 && <span class="breadcrumb-sep" aria-hidden="true">/</span>}
+        {i === items.length - 1 ? <span aria-current="page">{item.label}</span> : <a href={item.href}>{item.label}</a>}
+      </li>
+    ))}
+  </ol>
+</nav>
+<script type="application/ld+json" set:html={json} />
+
+<style>
+  .breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+  .breadcrumb li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+  }
+  /* 44px tap target (spec §6.6). The padding widens the box and the matching negative
+     margin keeps the text where it was, so a short label like "Home" leaves no visible gap. */
+  .breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding-inline: 0.5rem;
+    margin-inline: -0.5rem;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted);
+    text-underline-offset: 3px;
+  }
+  .breadcrumb a:hover {
+    color: var(--color-acid);
+    text-decoration-color: currentColor;
+  }
+  .breadcrumb [aria-current="page"],
+  .breadcrumb-sep {
+    color: var(--color-muted);
+  }
+
+  /* On bone: carbon links with a muted-dark underline; current page and separators muted-dark. */
+  :global(.surface-bone) .breadcrumb a {
+    text-decoration-color: var(--color-muted-dark);
+  }
+  :global(.surface-bone) .breadcrumb a:hover {
+    color: var(--color-carbon);
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+  :global(.surface-bone) .breadcrumb [aria-current="page"],
+  :global(.surface-bone) .breadcrumb-sep {
+    color: var(--color-muted-dark);
+  }
+</style>

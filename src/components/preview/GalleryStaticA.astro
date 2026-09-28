@@ -1,0 +1,102 @@
+---
+// Template preview only: specimens of the static components A (BracketChip, SectionHeader,
+// PromptBlock, Breadcrumb, FaqList) for one gallery surface. src/pages/preview/[...slug].astro
+// renders it once inside each surface section of /preview/components/ (carbon, then
+// .surface-bone) and passes the fixture FAQ in: only the preview route loads fixtures.
+// Every id ends in `-${surface}`, so the two renders never collide.
+import BracketChip from "../ui/BracketChip.astro";
+import SectionHeader from "../ui/SectionHeader.astro";
+import PromptBlock from "../ui/PromptBlock.astro";
+import Breadcrumb from "../ui/Breadcrumb.astro";
+import FaqList from "../ui/FaqList.astro";
+
+interface Props {
+  surface: string;
+  faq: { q: string; a: string }[];
+}
+
+const { surface, faq } = Astro.props;
+const crumbs = [
+  { label: "Home", href: "/" },
+  { label: "Preview", href: "/preview/" },
+  { label: "Components", href: "/preview/components/" },
+];
+---
+<div class="gallery-a" data-gallery="static-a" data-gallery-surface={surface} data-fixture>
+  <SectionHeader
+    id={`gallery-a-${surface}`}
+    prompt={`preview --components a --surface ${surface}`}
+    title={`Static components A on ${surface}`}
+    lede="Fixture copy: every string in this group is fictional and only exercises the components."
+  />
+
+  <div class="gallery-item">
+    <h3 class="gallery-label">BracketChip</h3>
+    <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+      <BracketChip label="fixture-industry" />
+      <BracketChip label="fixture solution" />
+      <BracketChip label="fixture link chip" href="/preview/" />
+    </div>
+    <div class="gallery-island bg-graphite">
+      <BracketChip label="fixture island chip" />
+    </div>
+  </div>
+
+  <div class="gallery-item gallery-item-loose">
+    <h3 class="gallery-label">SectionHeader</h3>
+    <SectionHeader
+      id={`gallery-a-header-${surface}`}
+      level={3}
+      prompt="fixture --level 3"
+      title="Fixture section header at level three"
+      lede="Fixture lede. The prompt line above the heading is decorative and hidden from assistive tech."
+    />
+    <SectionHeader level={3} title="Fixture title-only header" />
+  </div>
+
+  <div class="gallery-item">
+    <h3 class="gallery-label">PromptBlock</h3>
+    <PromptBlock command="fixture" args="--open preview-index" label="Open the fixture index" href="/preview/" />
+  </div>
+
+  <div class="gallery-item">
+    <h3 class="gallery-label">Breadcrumb</h3>
+    <Breadcrumb items={crumbs} />
+  </div>
+
+  <div class="gallery-item">
+    <h3 class="gallery-label">FaqList</h3>
+    <FaqList id={`gallery-a-faq-${surface}`} items={faq} />
+  </div>
+</div>
+
+<style>
+  .gallery-a {
+    display: grid;
+    gap: 3.5rem;
+    margin-top: 2rem;
+  }
+  .gallery-item {
+    display: grid;
+    gap: 1rem;
+  }
+  .gallery-item-loose {
+    gap: 2.5rem;
+  }
+  /* A dark island (as in MockPanel): on bone it must switch the chip back to carbon colours. */
+  .gallery-island {
+    justify-self: start;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    color: var(--color-bone);
+  }
+  .gallery-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+  :global(.surface-bone) .gallery-label {
+    color: var(--color-muted-dark);
+  }
+</style>

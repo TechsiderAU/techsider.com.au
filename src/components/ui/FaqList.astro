@@ -1,0 +1,90 @@
+---
+// FAQ as native <details> disclosures (they work without JS) plus FAQPage JSON-LD
+// (spec §11.3). The +/− indicator is aria-hidden: <details> exposes its own expanded state.
+// Render at most once per page, so the page carries one FAQPage.
+interface Props {
+  items: { q: string; a: string }[];
+  id?: string;
+}
+
+const { items, id } = Astro.props;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: items.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
+// Escape "<" so no string can close the script element early.
+const json = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
+---
+<div class="faq" id={id}>
+  {items.map((item) => (
+    <details class="faq-item">
+      <summary class="faq-question"><span class="faq-q">{item.q}</span><span class="faq-indicator" aria-hidden="true"><span class="faq-plus">+</span><span class="faq-minus">−</span></span></summary>
+      <div class="faq-answer">{item.a}</div>
+    </details>
+  ))}
+</div>
+<script type="application/ld+json" set:html={json} />
+
+<style>
+  .faq {
+    border-top: 1px solid var(--color-graphite);
+  }
+  .faq-item {
+    border-bottom: 1px solid var(--color-graphite);
+  }
+  /* A block summary with the indicator positioned at the end: flex on <summary> is unreliable in WebKit. */
+  .faq-question {
+    position: relative;
+    display: block;
+    min-height: 44px;
+    padding: 1rem 2.5rem 1rem 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.4;
+    list-style: none;
+    cursor: pointer;
+  }
+  .faq-question::-webkit-details-marker {
+    display: none;
+  }
+  .faq-indicator {
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--color-acid);
+  }
+  .faq-minus,
+  .faq-item[open] .faq-plus {
+    display: none;
+  }
+  .faq-item[open] .faq-minus {
+    display: inline;
+  }
+  .faq-answer {
+    max-width: 65ch;
+    padding: 0 0 1.25rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  /* On bone: bone-line hairlines, an acid-deep indicator, muted-dark answers (spec §6.1). */
+  :global(.surface-bone) .faq,
+  :global(.surface-bone) .faq-item {
+    border-color: var(--color-bone-line);
+  }
+  :global(.surface-bone) .faq-indicator {
+    color: var(--color-acid-deep);
+  }
+  :global(.surface-bone) .faq-answer {
+    color: var(--color-muted-dark);
+  }
+</style>

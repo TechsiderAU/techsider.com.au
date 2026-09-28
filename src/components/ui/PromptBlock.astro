@@ -1,0 +1,47 @@
+---
+// Closing CTA as a terminal prompt (spec §6.4): set inside the content width (48rem, centred),
+// never a full-width band. The prompt line is decorative; the link is the real control.
+// The block is a carbon island (bg-carbon), so on a bone section it keeps the lime focus ring.
+interface Props {
+  command: string;
+  args?: string;
+  label: string;
+  href: string;
+}
+
+const { command, args, label, href } = Astro.props;
+---
+<div class="prompt-block bg-carbon scanlines" data-prompt-block>
+  <p class="prompt-line" aria-hidden="true"><span class="prompt-caret">&gt;</span> {command}{args && <span class="prompt-args"> {args}</span>}</p>
+  <a href={href} class="btn btn-primary">{label}</a>
+</div>
+
+<style>
+  .prompt-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    width: 100%;
+    max-width: 48rem;
+    margin-inline: auto;
+    padding: 1.5rem;
+    color: var(--color-bone);
+    border: 1px solid var(--color-graphite);
+    border-radius: 8px;
+  }
+  .prompt-line {
+    margin: 0;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    overflow-wrap: anywhere;
+  }
+  .prompt-caret {
+    color: var(--color-acid);
+  }
+  .prompt-args {
+    color: var(--color-muted);
+  }
+</style>

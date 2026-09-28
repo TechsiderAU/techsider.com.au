@@ -1,0 +1,74 @@
+---
+// Bracket device (spec §6.3): `[label]` in JetBrains Mono, for industry tags, solution labels
+// and eyebrows. The brackets are aria-hidden, so assistive tech reads only the label.
+// With `href` the chip is a link with a 44px tap target (spec §6.6); without, plain text.
+interface Props {
+  label: string;
+  href?: string;
+}
+
+const { label, href } = Astro.props;
+---
+{href ? (
+  <a href={href} class="bracket-chip" data-bracket-chip><span aria-hidden="true">[</span>{label}<span aria-hidden="true">]</span></a>
+) : (
+  <span class="bracket-chip" data-bracket-chip><span aria-hidden="true">[</span>{label}<span aria-hidden="true">]</span></span>
+)}
+
+<style>
+  .bracket-chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--color-bone);
+  }
+  /* inline-block, so a link chip's underline runs under the label only, not the brackets. */
+  .bracket-chip > span {
+    display: inline-block;
+    color: var(--color-acid);
+  }
+  a.bracket-chip {
+    min-width: 44px;
+    min-height: 44px;
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted);
+    text-underline-offset: 3px;
+  }
+  a.bracket-chip:hover {
+    color: var(--color-acid);
+    text-decoration-color: currentColor;
+  }
+
+  /* On bone, acid is never text (spec §6.1): acid-deep brackets, carbon label. */
+  :global(.surface-bone) .bracket-chip {
+    color: var(--color-carbon);
+  }
+  :global(.surface-bone) .bracket-chip > span {
+    color: var(--color-acid-deep);
+  }
+  :global(.surface-bone) a.bracket-chip {
+    text-decoration-color: var(--color-muted-dark);
+  }
+  :global(.surface-bone) a.bracket-chip:hover {
+    color: var(--color-carbon);
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+
+  /* A dark island (bg-carbon / bg-graphite) inside a bone section is a dark surface again. */
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .bracket-chip {
+    color: var(--color-bone);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .bracket-chip > span {
+    color: var(--color-acid);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) a.bracket-chip {
+    text-decoration-color: var(--color-muted);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) a.bracket-chip:hover {
+    color: var(--color-acid);
+    text-decoration-color: currentColor;
+  }
+</style>

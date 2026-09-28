@@ -1,0 +1,63 @@
+---
+// Section heading. The optional prompt line (`> prompt`) is Techsider's own eyebrow form
+// (spec §6.4) and is decorative (aria-hidden): the heading carries the meaning.
+interface Props {
+  title: string;
+  prompt?: string;
+  level?: 2 | 3;
+  lede?: string;
+  id?: string;
+}
+
+const { title, prompt, level = 2, lede, id } = Astro.props;
+---
+<div class="section-header" data-section-header>
+  {prompt && <p class="section-prompt" aria-hidden="true"><span class="section-prompt-caret">&gt;</span> {prompt}</p>}
+  {level === 3 ? (
+    <h3 id={id} class="section-title section-title-3">{title}</h3>
+  ) : (
+    <h2 id={id} class="section-title section-title-2">{title}</h2>
+  )}
+  {lede && <p class="section-lede">{lede}</p>}
+</div>
+
+<style>
+  .section-prompt {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+  .section-prompt-caret {
+    color: var(--color-acid);
+  }
+  .section-title {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  .section-title-2 {
+    font-size: clamp(1.75rem, 1.25rem + 2vw, 2.75rem);
+  }
+  .section-title-3 {
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  }
+  .section-lede {
+    margin: 1rem 0 0;
+    max-width: 62ch;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  /* On bone: muted-dark secondary text and an acid-deep caret (spec §6.1). */
+  :global(.surface-bone) .section-prompt,
+  :global(.surface-bone) .section-lede {
+    color: var(--color-muted-dark);
+  }
+  :global(.surface-bone) .section-prompt-caret {
+    color: var(--color-acid-deep);
+  }
+</style>
