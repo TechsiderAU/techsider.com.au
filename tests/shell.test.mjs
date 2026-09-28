@@ -1,13 +1,31 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readDist, allHtmlFiles } from "./helpers.mjs";
 
 const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
 const pages = allHtmlFiles().filter((f) => f.endsWith("index.html"));
 const home = readDist("index.html");
-const region = (html, tag) => html.slice(html.indexOf(`<${tag}`), html.indexOf(`</${tag}>`) + tag.length + 3);
+// The site header (the first <header>) or footer (the last <footer>); "" if the page has none.
+const region = (html, tag) => {
+  const start = tag === "footer" ? html.lastIndexOf(`<${tag}`) : html.indexOf(`<${tag}`);
+  const end = start < 0 ? -1 : html.indexOf(`</${tag}>`, start);
+  return end < 0 ? "" : html.slice(start, end + tag.length + 3);
+};
+// The dist file a root-relative path serves, as GitHub Pages resolves it: "/x/" and the
+// extensionless "/x" both serve x/index.html. null unless that is an actual file.
+const distFile = (path) => {
+  let rel = decodeURIComponent(path).slice(1);
+  if (rel === "" || rel.endsWith("/")) rel += "index.html";
+  else if (!extname(rel)) rel += "/index.html";
+  const file = join(DIST, rel);
+  return existsSync(file) && statSync(file).isFile() ? file : null;
+};
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const hasId = (html, id) => new RegExp(`<[a-z][^>]*\\sid="${escapeRe(id)}"[\\s/>]`, "i").test(html);
+const basicRow = (header) => header.match(/<nav\b[^>]*aria-label="Main \(basic\)"[^>]*>[\s\S]*?<\/nav>/)?.[0] ?? "";
 // True only for an attribute *name* on the tag. Quoted values are blanked first, so a `hidden` or
 // `lg:hidden` class can't pass for the attribute, and `data-menu-open-panel` isn't `data-menu-open`.
 const hasAttr = (tag, name) =>
@@ -47,14 +65,41 @@ test("the display font is preloaded and the stylesheet uses the same file", () =
 test("every header and footer link resolves to a built page", () => {
   for (const f of pages) {
     const html = readDist(f);
-    const shell = region(html, "header") + region(html, "footer");
-    for (const [, href] of shell.matchAll(/href="([^"]+)"/g)) {
-      if (href.startsWith("mailto:") || href.startsWith("#")) continue;
-      assert.ok(href.startsWith("/"), `${f}: external link in shell: ${href}`);
-      const path = href.split("#")[0];
-      const file = path.endsWith("/") ? `${path}index.html` : path;
-      assert.ok(existsSync(DIST + file.slice(1)), `${f}: ${href} does not exist in dist`);
+    const header = region(html, "header");
+    const footer = region(html, "footer");
+    assert.match(header, /href="/, `${f}: no site header with links found`);
+    assert.match(footer, /href="/, `${f}: no site footer with links found`);
+    for (const [, href] of (header + footer).matchAll(/href="([^"]+)"/g)) {
+      if (href.startsWith("mailto:")) continue;
+      assert.ok(/^\/(?!\/)|^#/.test(href), `${f}: external link in shell: ${href}`);
+      const [path, fragment] = href.split("#");
+      const file = path === "" ? join(DIST, f) : distFile(path);
+      assert.ok(file, `${f}: ${href} is not a file in dist (extensionless paths resolve to index.html)`);
+      if (fragment) assert.ok(hasId(readFileSync(file, "utf8"), decodeURIComponent(fragment)), `${f}: ${href}: no element with id="${fragment}" on the target page`);
     }
+  }
+});
+
+test("the link resolver maps paths as GitHub Pages serves them", () => {
+  assert.equal(distFile("/"), join(DIST, "index.html"));
+  assert.equal(distFile("/insights/"), join(DIST, "insights/index.html"));
+  assert.equal(distFile("/insights"), join(DIST, "insights/index.html"));
+  assert.equal(distFile("/logo.svg"), join(DIST, "logo.svg"));
+  assert.equal(distFile("/_astro"), null, "a directory without index.html is not a page");
+  assert.equal(distFile("/_astro/"), null);
+  assert.equal(distFile("/no-such-page/"), null);
+  assert.ok(hasId('<section id="demo" class="x">', "demo"));
+  assert.ok(!hasId('<section data-id="demo">', "demo"));
+  assert.ok(!hasId('<section id="demo-2">', "demo"));
+  assert.ok(!hasId('<a href="#demo">', "demo"));
+});
+
+test("production: the no-JS basic link row is in every header and reaches Insights (Review Focus 1)", () => {
+  for (const f of pages) {
+    const row = basicRow(region(readDist(f), "header"));
+    assert.ok(row, `${f}: no <nav aria-label="Main (basic)"> in the header`);
+    assert.match(row.match(/^<nav\b[^>]*>/)[0], /class="[^"]*\bnojs-only\b/, `${f}: the basic row is not no-JS only`);
+    assert.match(row, /<a[^>]*href="\/insights\/"/, `${f}: the basic row has no link to /insights/`);
   }
 });
 
@@ -84,12 +129,10 @@ test("the attribute check ignores hidden classes and longer attribute names", ()
   assert.ok(hasAttr('<button hidden data-menu-open data-astro-cid-x>', "data-menu-open"));
 });
 
-test("the header uses the new wordmark and the no-JS row lists Insights", () => {
+test("the header uses the new wordmark", () => {
   const header = region(home, "header");
   assert.match(header, /src="\/logo\.svg"/);
   assert.doesNotMatch(home, /logo-wordmark\.svg/);
-  const basic = header.slice(header.indexOf("nojs-only"));
-  assert.match(basic, /href="\/insights\/"/);
 });
 
 test("the Insights link is marked current on the insights index", () => {
