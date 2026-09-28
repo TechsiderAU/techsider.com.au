@@ -12,7 +12,7 @@ import { run as verifyMarkers } from "../scripts/ci/checks/07-verify-markers.mjs
 import { run as regulatoryKits } from "../scripts/ci/checks/08-regulatory-kits.mjs";
 import { run as packageStatus } from "../scripts/ci/checks/10-package-status.mjs";
 import { CURRENCY, run as pricing } from "../scripts/ci/checks/11-pricing.mjs";
-import { CHECKS, formatReport, modeFromEnv, runAll } from "../scripts/ci/run-all.mjs";
+import { CHECKS, formatReport, modeFromEnv, parseChecks, runAll } from "../scripts/ci/run-all.mjs";
 import { allHtmlFiles, readDist, visibleText } from "./helpers.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -400,6 +400,45 @@ test("the production build passes every check in report mode", () => {
   assert.match(r.stdout, /^verify: 10 checks against dist \(VERIFY_MODE=report\)$/m);
   for (const id of CHECKS) assert.match(r.stdout, new RegExp(`^ {2}(ok|warn) +${id}\\b`, "m"), id);
   assert.match(r.stdout, /^verify: all 10 checks passed/m);
+});
+
+test("--checks picks checks by number or full id, in CHECKS order, and refuses anything else", () => {
+  assert.deepEqual(parseChecks("03,04,05,06,10,11"), ["03-anchors", "04-banned-phrases", "05-captions", "06-provenance", "10-package-status", "11-pricing"]);
+  assert.deepEqual(parseChecks("11-pricing, 05"), ["05-captions", "11-pricing"]);
+  for (const bad of ["09", "12", "4", "anchors", "03,nope", "", ","]) assert.throws(() => parseChecks(bad), /--checks/, JSON.stringify(bad));
+});
+
+// Every component and every B2 template renders only in dist-preview/, so checks that read
+// built pages must run there too: on the production dist/ they pass vacuously (no SampleReport,
+// no illustrative element, no package tab). 01, 02, 07 and 08 read sources or the production
+// nav and stay with the production build.
+const PREVIEW_PROFILE = "--dist dist-preview --checks 03,04,05,06,10,11";
+
+test("npm run build:preview ends with the preview profile of the checks", () => {
+  assert.equal(pkg.scripts["build:preview"], `TECHSIDER_NAV_PREVIEW=1 node scripts/ci/build.mjs --outDir dist-preview && node scripts/ci/run-all.mjs ${PREVIEW_PROFILE}`);
+});
+
+test("the preview build passes the preview profile, and the profile really reads the gallery", () => {
+  const r = verify(PREVIEW_PROFILE.split(" "));
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /^verify: 6 checks against dist-preview \(VERIFY_MODE=report\)$/m);
+  for (const id of ["03-anchors", "04-banned-phrases", "05-captions", "06-provenance", "10-package-status", "11-pricing"]) {
+    assert.match(r.stdout, new RegExp(`^ {2}(ok|warn) +${id}\\b`, "m"), id);
+  }
+  // Not vacuous: the gallery holds what checks 05, 06(c) and 10 look for.
+  const gallery = readFileSync(join(ROOT, "dist-preview/preview/components/index.html"), "utf8");
+  assert.match(gallery, /data-sample-report/);
+  assert.match(gallery, /data-mock-panel/);
+  assert.match(gallery, /data-provenance="illustrative"/);
+  assert.match(readFileSync(join(ROOT, "dist-preview/preview/tabs/index.html"), "utf8"), /data-package-tab/);
+});
+
+test("run-all --checks with a bad or missing list is a usage error", () => {
+  for (const args of [["--checks"], ["--checks", "09"]]) {
+    const r = verify(args);
+    assert.equal(r.status, 2, r.stdout + r.stderr);
+    assert.match(r.stderr, /usage: node scripts\/ci\/run-all\.mjs \[--dist <dir>\] \[--checks <ids>\]/);
+  }
 });
 
 test("run-all exits 1 and names the check when a built page breaks a rule", () => {

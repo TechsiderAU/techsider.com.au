@@ -39,7 +39,7 @@ jobs:
           # Launch-gate checks (VERIFY markers, regulatory rows, kit review) fail only PRs into main.
           VERIFY_MODE: ${{ github.event_name == 'pull_request' && github.base_ref == 'main' && 'gate' || 'report' }}
 
-      - name: Build preview (every planned page and the template gallery)
+      - name: Build preview (every planned page and the template gallery) and run its CI checks
         run: npm run build:preview
 
       - name: Unit and markup tests

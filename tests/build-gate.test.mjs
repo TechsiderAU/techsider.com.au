@@ -139,7 +139,10 @@ test("package.json runs astro check before the gated build, and gates the previe
     `build script: ${pkg.scripts.build}`,
   );
   assert.doesNotMatch(pkg.scripts.build, /(^|&&\s*)astro build/, "build must go through scripts/ci/build.mjs");
-  assert.equal(pkg.scripts["build:preview"], "TECHSIDER_NAV_PREVIEW=1 node scripts/ci/build.mjs --outDir dist-preview");
+  assert.ok(
+    pkg.scripts["build:preview"].startsWith("TECHSIDER_NAV_PREVIEW=1 node scripts/ci/build.mjs --outDir dist-preview && "),
+    `build:preview script: ${pkg.scripts["build:preview"]}`,
+  );
 });
 
 test("the type-check toolchain is dev-only, on TypeScript 5 (@astrojs/check 0.9 does not support 7)", () => {

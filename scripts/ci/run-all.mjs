@@ -1,5 +1,9 @@
 // Runs the site CI checks (spec §11.5) against a built site:
-//   node scripts/ci/run-all.mjs [--dist <dir>]   (<dir> is relative to the repo root; default: dist)
+//   node scripts/ci/run-all.mjs [--dist <dir>] [--checks <ids>]
+// <dir> is relative to the repo root (default: dist). <ids> is a comma-separated list of check
+// numbers or ids ("03,04" or "03-anchors"); the default is every check. `npm run build:preview`
+// runs the preview profile (03, 04, 05, 06, 10, 11) against dist-preview/, where the components
+// and templates render.
 // Check 9 (type-check and pristine build) is `astro check` plus scripts/ci/build.mjs,
 // and check 12 (axe smoke) is the Playwright suite, so neither runs here.
 // VERIFY_MODE=gate turns the launch gates (07, 08) from warnings into errors; any
@@ -23,6 +27,24 @@ export const CHECKS = [
 ];
 /** Open items here are printed on the branch and fail only the launch PR and the deploy. */
 export const LAUNCH_GATES = ["07-verify-markers", "08-regulatory-kits"];
+
+/**
+ * The checks named by a --checks value, in CHECKS order: each item is a check's number ("03")
+ * or full id ("03-anchors"). Throws on an empty list or an unknown item.
+ * @param {string} value
+ * @returns {string[]}
+ */
+export function parseChecks(value) {
+  const items = String(value ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  if (items.length === 0) throw new Error("--checks needs a comma-separated list of check numbers or ids");
+  const picked = new Set();
+  for (const item of items) {
+    const id = CHECKS.find((c) => c === item || c.split("-")[0] === item);
+    if (!id) throw new Error(`--checks: unknown check "${item}" (known: ${CHECKS.join(", ")})`);
+    picked.add(id);
+  }
+  return CHECKS.filter((c) => picked.has(c));
+}
 
 /** @returns {"gate" | "report"} */
 export function modeFromEnv(env = process.env) {
@@ -75,11 +97,18 @@ export function formatReport({ mode, failed, results }, distLabel) {
   return lines.join("\n");
 }
 
+const USAGE = "usage: node scripts/ci/run-all.mjs [--dist <dir>] [--checks <ids>]";
+
 async function main(args) {
   const at = args.indexOf("--dist");
   const distArg = at === -1 ? "dist" : args[at + 1];
-  if (!distArg) {
-    console.error("usage: node scripts/ci/run-all.mjs [--dist <dir>]");
+  const checksAt = args.indexOf("--checks");
+  let checks = CHECKS;
+  try {
+    if (!distArg) throw new Error("--dist needs a directory");
+    if (checksAt !== -1) checks = parseChecks(args[checksAt + 1]);
+  } catch (e) {
+    console.error(`${e.message}\n${USAGE}`);
     process.exitCode = 2;
     return;
   }
@@ -89,7 +118,7 @@ async function main(args) {
     process.exitCode = 1;
     return;
   }
-  const summary = await runAll({ root: ROOT, dist, mode: modeFromEnv() });
+  const summary = await runAll({ root: ROOT, dist, mode: modeFromEnv(), checks });
   console.log(formatReport(summary, distArg));
   if (summary.failed) process.exitCode = 1; // not process.exit(): let the report flush
 }
