@@ -37,4 +37,4 @@ Whatever you pick first, you will eventually want to change it — a new model l
 
 Not by a partner badge. We run a bake-off on your real workload — capability on your tasks, latency, cost, and residency — and let the evidence decide. Being vendor-neutral isn't a slogan; it's the only honest way to recommend an option when we don't earn a referral fee on any of them.
 
-*Choosing a sovereign AI stack is exactly what our paid two-week discovery is for.*
+*Choosing a sovereign AI stack for your workload? [Talk to us](mailto:admin@techsider.com.au).*

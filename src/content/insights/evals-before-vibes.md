@@ -27,9 +27,11 @@ A single case looks like this:
 ```yaml
 - input: "What are our incident-notification timeframes under CPS 230?"
   must_cite: true
-  must_contain: ["72 hours"]
+  must_contain: ["72 hours", "24 hours"]
   must_not: ["I think", "probably", "as an AI"]
 ```
+
+The second phrase matters. An answer that mentions only the 72-hour rule for operational risk incidents reads as correct, but it is incomplete: CPS 230 also requires notice within 24 hours of a disruption to a critical operation outside tolerance. A check that looks for one phrase would pass the incomplete answer, so the case tests for every clock the question covers.
 
 The suite runs in CI on every change to a prompt, a model, a retrieval setting, or a tool definition.
 
@@ -45,4 +47,4 @@ Every request in production emits a trace: the retrieved context, the assembled 
 
 The eval harness, the CI gate, and tracing go in during the first week of a build — not bolted on after the first incident. It feels slower for a fortnight and then it is permanently faster, because every subsequent change is safe to make. That is the whole point: discipline up front is what lets you move quickly later without breaking the things you can't afford to break.
 
-*This is how we build. If you want it on your own workload, our paid two-week discovery is where we scope it.*
+*This is how we build. If you want it on your own workload, [talk to us](mailto:admin@techsider.com.au).*
