@@ -237,3 +237,40 @@ test("mid-market language: no agents outside statute names, no tenancy, sprint, 
   const edu = text(mainOf(html("education")));
   assert.doesNotMatch(edu, /\bRTOs?\b|\bASQA\b|ChatGPT Edu/, "education: RTOs or an unverified works-alongside system (ruling 5)");
 });
+
+// ---------- the final whole-branch review's fixes (C5-T5) ----------
+
+test("each scenario ships what the page's recommended package offers (C5-T5-F1, C5-T5-F2)", () => {
+  // Manufacturing: the SOP & Work-Instruction Assistant is reached on the web (its onshore note), not in Teams.
+  const sop = solution("knowledge-assistant").packages.find((p) => p.id === "sop-work-instruction-assistant");
+  assert.match(sop.onshoreNote, /\bon the web\b/);
+  const shipped = industry("manufacturing").scenario.shipsFirst;
+  assert.doesNotMatch(shipped, /\bTeams\b|Microsoft 365/);
+  assert.match(shipped, /\bon the web\b/);
+  // Education: the scenario's trial has 40 questions, and go-live follows the go/no-go and the
+  // acceptance test the page's package sets (50–100 questions), not the trial alone.
+  const scenario = industry("education").scenario;
+  assert.match(scenario.approach, /\b40 questions\b/);
+  assert.match(scenario.shipsFirst, /^After the go\/no-go, /);
+  assert.match(scenario.shipsFirst, /\bacceptance-test report\b/);
+});
+
+test("Manufacturing: the Mitti answer claims no source scope for its AI Assistant, and the AI Adopt Centre answer carries its owner marker (C5-T5-F4, C5-T5-F5)", () => {
+  // Research index keep-off list: what the Mitti AI Assistant answers from is unverified.
+  const mitti = industry("manufacturing").faq.find((f) => /SafetyCulture/.test(f.q));
+  assert.doesNotMatch(mitti.a, /\banything stored there\b|\beverything (?:stored|held) (?:there|in)\b/i);
+  assert.match(mitti.a, /^Try its AI Assistant on your own SOP questions first\./);
+  // Whether the AI Adopt Centres still take SMEs is unconfirmed (dossier open item 9), so check 07 holds the answer.
+  const lines = readFileSync(`${ROOT}src/content/industries/manufacturing.yaml`, "utf8").split("\n");
+  const at = lines.findIndex((l) => l.trim() === '- q: "Should we go to an AI Adopt Centre first?"');
+  assert.ok(at > 0, "no AI Adopt Centre FAQ");
+  assert.equal(lines[at - 1].trim(), "# ⚑ owner: confirm the AI Adopt Centres are still taking SMEs (manufacturing dossier, open item 9)");
+});
+
+test("Real estate: the Queensland trust-audit chip uses its row's words (C5-T5-F6)", () => {
+  const row = rowsOf("real-estate").find((r) => r.id === "qld-trust-audit");
+  assert.match(row.obligation, /\bunannounced checks\b/);
+  const chip = industry("real-estate").obligationChips.find((c) => c.row === "qld-trust-audit");
+  assert.equal(chip.label, "Trust audits and unannounced checks, Qld");
+  assert.ok(chip.label.length <= 40);
+});

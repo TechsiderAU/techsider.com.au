@@ -125,7 +125,7 @@ scenario:
   measure:
     - "False answers and false refusals, per language"
     - "Citations to the right page and revision"
-  shipsFirst: "The assistant in Teams for one night-shift group, once it passes."
+  shipsFirst: "The assistant on the web for one night-shift group, once it passes."
   trace: manufacturing-scenario
 firstEngagement:
   needFromYou:
@@ -139,12 +139,13 @@ firstEngagement:
   exitRamp: "At the go/no-go, you decide whether to continue. If you stop, you keep the questions and the report, and nothing stays connected to your systems."
 faq:
   - q: "Our SOPs are already in SafetyCulture. Why not use its AI?"
-    a: "Use it first for anything stored there. We cover the manuals and work instructions outside it. If Mitti answers your test questions well enough, we'll tell you."
+    a: "Try its AI Assistant on your own SOP questions first. We build for the manuals and work instructions it doesn't cover for you. If Mitti answers your test questions well enough, we'll tell you."
   - q: "Have you done this for other manufacturers?"
     a: "No. Techsider has no clients yet. So the first step is a two-week trial on one line's documents, with every failure shown."
   - q: "Can it answer in the languages our crews speak?"
     a: "Yes, for the languages you choose, though quality varies by language. Each gets its own test, and one that misses the agreed threshold doesn't go live."
   - q: "Is it a GMP-validated system?"
     a: "No. On a medicine, API or sunscreen site, your quality team decides whether the assistant is part of a GMP activity and how to validate it. We supply the test evidence."
+  # ⚑ owner: confirm the AI Adopt Centres are still taking SMEs (manufacturing dossier, open item 9)
   - q: "Should we go to an AI Adopt Centre first?"
     a: "If you're an eligible SME, it's a sensible first step. The ARM Hub AI Adopt Centre is listed on business.gov.au as offering training, demonstrations and an AI adoption roadmap, with a focus on manufacturing."

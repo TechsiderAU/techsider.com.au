@@ -33,7 +33,7 @@ obligationChips:
     row: qld-bond-claim-evidence
   - label: "Renter data destruction, Vic"
     row: vic-renter-information
-  - label: "Trust audits and spot checks, Qld"
+  - label: "Trust audits and unannounced checks, Qld"
     row: qld-trust-audit
 worksAlongside:
   - system: "PropertyMe, Advanced plan or above"

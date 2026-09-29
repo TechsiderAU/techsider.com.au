@@ -119,7 +119,7 @@ scenario:
     - "False answers and false refusals, counted separately"
     - "Citations to the current version"
     - "Restricted documents hidden from test accounts"
-  shipsFirst: "The assistant in Teams for one staff group, with its test report."
+  shipsFirst: "After the go/no-go, the assistant in Teams for one staff group, with its acceptance-test report."
   trace: education-scenario
 firstEngagement:
   needFromYou:
