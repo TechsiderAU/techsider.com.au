@@ -69,12 +69,12 @@ test.describe("desktop", () => {
     }
   });
 
-  test("while the Demos hub is planned, 'See a demo' lands on the Home demo section", async ({ page }) => {
-    expect(DEMO.href).toBe("/#demo");
+  test("'See a demo' leads to the live Demos hub (Phase D Task 7)", async ({ page }) => {
+    expect(DEMO.href).toBe("/demos/");
     await page.goto("/insights/");
     await page.locator("body > header").getByRole("link", { name: "See a demo" }).click();
-    await expect(page).toHaveURL(/\/#demo$/);
-    await expect(page.locator("#demo")).toBeInViewport();
+    await expect(page).toHaveURL(/\/demos\/$/);
+    await expect(page.locator("h1")).toHaveText("Demos.");
   });
 
   // Headless browsers draw overlay scrollbars, so leave room for a classic one (17px on Windows),

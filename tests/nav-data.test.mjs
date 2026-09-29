@@ -112,11 +112,13 @@ test("industry footer labels read 'AI for {short name}'", () => {
   assert.equal(footerLabel(legal), "AI for legal & professional");
 });
 
-// Phases C and D put pages live task by task, and each task that flips pages extends this pin.
-// After Phase D Task 6: Phase C's live set (every hub, every solution and industry page, Services,
-// Evaluation Partner, Insights, About and Contact), the evaluation method and the checker.
-test("the live pages after Phase D Task 6", () => {
+// Each task that flips pages live extends this pin. After Phase D Task 7: every hub, every solution
+// and industry page, Services, Evaluation Partner, Insights, About and Contact (Phase C); the
+// evaluation method (Task 5), the checker (Task 6), and the Demos hub and the five demo pages (Task 7).
+test("the live pages after Phase D Task 7", () => {
   const [solutions, industries] = NAV_GROUPS.map((g) => g.items.map((p) => p.path));
+  const demos = PAGES.filter((p) => p.base === "/demos/").map((p) => p.path);
+  assert.equal(demos.length, 5);
   assert.deepEqual(
     PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(),
     [
@@ -125,6 +127,7 @@ test("the live pages after Phase D Task 6", () => {
       "/industries/", ...industries,
       "/services/", "/services/evaluation-partner/",
       "/resources/", "/insights/", "/resources/what-you-already-pay-for/", "/resources/evaluation-method/",
+      "/demos/", ...demos,
       "/about/", "/contact/",
     ].sort(),
   );
@@ -152,11 +155,12 @@ test("production nav shows only live pages; preview shows every group", () => {
   const industries = prod.find((g) => g.id === "industries");
   assert.equal(industries.hubHref, "/industries/");
   assert.deepEqual(industries.items.map((i) => i.path), NAV_GROUPS[1].items.map((i) => i.path));
-  // Phase C Task 7: every hub is live, and About lists only Contact. Resources lists Insights and,
-  // from Phase D Tasks 5 and 6, the checker and the evaluation method, in nav order.
+  // Phase C Task 7: every hub is live, and About lists only Contact. Phase D adds the evaluation
+  // method (Task 5), the checker (Task 6) and the Demos hub (Task 7) to Resources; the Safe-Use Kits
+  // wait for a lawyer's review (spec §12 item 6).
   assert.deepEqual(prod.map((g) => g.hubHref), ["/solutions/", "/industries/", "/services/", "/resources/", "/about/"]);
   const byId = Object.fromEntries(prod.map((g) => [g.id, g]));
-  assert.deepEqual(byId.resources.items.map((i) => i.path), ["/insights/", "/resources/what-you-already-pay-for/", "/resources/evaluation-method/"]);
+  assert.deepEqual(byId.resources.items.map((i) => i.path), ["/insights/", "/demos/", "/resources/what-you-already-pay-for/", "/resources/evaluation-method/"]);
   assert.deepEqual(byId.about.items.map((i) => i.path), ["/contact/"], "Trust and Legal wait for the owner (spec §12)");
   assert.deepEqual(byId.resources.anchors, []);
   assert.equal(byId.services.anchors.length, 3);
@@ -166,12 +170,13 @@ test("production nav shows only live pages; preview shows every group", () => {
   assert.equal(pre[2].anchors.length, 3);
 });
 
-test("CTAs fall back while their target page is unbuilt: Talk to us reaches the live /contact/, See a demo falls back", () => {
-  assert.deepEqual(resolveCta(CTAS.talk, false), { label: "Talk to us", href: "/contact/" });
-  assert.deepEqual(resolveCta(CTAS.talk, true), { label: "Talk to us", href: "/contact/" });
-  assert.deepEqual(resolveCta(CTAS.demo, false), { label: "See a demo", href: "/#demo" });
-  assert.deepEqual(resolveCta(CTAS.demo, true), { label: "See a demo", href: "/demos/" });
+test("CTAs reach their live pages in both builds: Talk to us /contact/, See a demo /demos/ (Phase D Task 7)", () => {
+  for (const preview of [false, true]) {
+    assert.deepEqual(resolveCta(CTAS.talk, preview), { label: "Talk to us", href: "/contact/" });
+    assert.deepEqual(resolveCta(CTAS.demo, preview), { label: "See a demo", href: "/demos/" });
+  }
   assert.equal(CTAS.talk.fallbackHref, `mailto:${SITE.email}`, "the fallback a planned /contact/ would use");
+  assert.equal(CTAS.demo.fallbackHref, "/#demo", "the fallback a planned /demos/ would use");
 });
 
 test("no-JS links, footer and legal row only point at shown pages", () => {
@@ -191,8 +196,10 @@ test("no-JS links, footer and legal row only point at shown pages", () => {
   assert.deepEqual(prod.map((c) => c.title), ["Solutions", "Industries", "Services", "Resources", "Company"]);
   assert.deepEqual(prod[0].links, NAV_GROUPS[0].items.map((i) => ({ label: i.shortName, href: i.path })));
   assert.deepEqual(prod[1].links, NAV_GROUPS[1].items.map((i) => ({ label: footerLabel(i), href: i.path })));
+  // Phase D Tasks 5–7: the evaluation method, the checker and the Demos hub join Insights.
   assert.deepEqual(prod.find((c) => c.title === "Resources").links, [
     { label: "Insights", href: "/insights/" },
+    { label: "Demos", href: "/demos/" },
     { label: "What you already pay for", href: "/resources/what-you-already-pay-for/" },
     { label: "Evaluation method", href: "/resources/evaluation-method/" },
   ]);

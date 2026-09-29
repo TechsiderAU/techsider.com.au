@@ -1,0 +1,30 @@
+---
+// The transcript slot of a demo's DemoFrame, by the demo's kind: the static transcript, which reads
+// in full without JavaScript (spec §8.8). ⑤'s is Task 6's PlatformFacts, the full vendor table under
+// its as-at date. `level` is the heading level under the frame: 2 directly under a page's h1, 3 in a
+// section (the Home band). A sample report has none here: its demo page frames ReportSummary, and a
+// solution hero shows the SampleReport itself.
+import AssistantTranscript from "./AssistantTranscript.astro";
+import InboxTranscript from "./InboxTranscript.astro";
+import PlatformFacts from "./PlatformFacts.astro";
+import RegisterTranscript from "./RegisterTranscript.astro";
+import platformAi from "../../data/platform-ai.json";
+import { platformAiFile, type DemoData } from "../../content/schemas";
+import type { SiteContext } from "../../lib/site";
+import { checkerView } from "../../lib/views/checker";
+
+interface Props {
+  demo: DemoData;
+  site: SiteContext;
+  level?: 2 | 3;
+}
+
+const { demo, site, level = 2 } = Astro.props;
+if (demo.kind === "report") {
+  throw new Error(`DemoTranscriptSlot: "${demo.title}" is a sample report. Render ReportSummary (its demo page) or SampleReport (a hero) instead.`);
+}
+---
+{demo.kind === "register" && <RegisterTranscript data={demo.data} />}
+{demo.kind === "assistant" && <AssistantTranscript data={demo.data} level={level} idPrefix="assistant" />}
+{demo.kind === "inbox" && <InboxTranscript data={demo.data} />}
+{demo.kind === "checker" && <PlatformFacts view={checkerView(platformAiFile.parse(platformAi), site)} />}

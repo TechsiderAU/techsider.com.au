@@ -73,16 +73,17 @@ test("production: planned pages get a null href, and contact links reach the liv
   for (const i of site.industries) assert.equal(i.href, expected(i.path), i.id);
   for (const [key, path] of Object.entries(PAGE_PATHS)) assert.equal(site.page(key).href, expected(path), key);
   for (const id of SOLUTION_IDS) assert.equal(site.demo(id), expected(`/demos/${id}/`), id);
-  // After Phase D Task 6: every hub, every solution and industry page, Services, Evaluation Partner,
-  // Insights, the checker (payFor), the evaluation method, About and Contact are live. The demos wait
-  // for Phase D Task 7, the Safe-Use Kits for lawyer review, and Trust and Legal for the owner (spec §12).
+  // After Phase D Task 7: every hub, every solution and industry page, Services, Evaluation Partner,
+  // Insights, About and Contact (Phase C); the evaluation method (Task 5), the checker (Task 6), and
+  // the Demos hub and every demo page (Task 7). The Safe-Use Kits wait for a lawyer's review (spec §12
+  // item 6); Trust and Legal wait for the owner (spec §12).
   assert.deepEqual(
     Object.keys(PAGE_PATHS).filter((key) => site.page(key).href !== null),
-    ["home", "solutions", "industries", "services", "evaluationPartner", "resources", "insights", "payFor", "evaluationMethod", "about", "contact"],
+    ["home", "solutions", "industries", "services", "evaluationPartner", "resources", "insights", "demos", "payFor", "evaluationMethod", "about", "contact"],
   );
   assert.ok(site.solutions.every((s) => s.href !== null), "a solution page is hidden");
   assert.ok(site.industries.every((i) => i.href !== null), "an industry page is hidden");
-  assert.ok(SOLUTION_IDS.every((id) => site.demo(id) === null), "a demo page is shown before Phase D");
+  assert.deepEqual(SOLUTION_IDS.map((id) => site.demo(id)), SOLUTION_IDS.map((id) => `/demos/${id}/`), "a demo page is hidden");
   assert.equal(site.contact(), "/contact/");
   assert.equal(site.contact({ interest: "ai-evaluation" }), "/contact/?interest=ai-evaluation");
   assert.equal(site.contact({ industry: "government" }), "/contact/?industry=government");
@@ -131,9 +132,10 @@ test("refId reads a plain id and Astro's { id, collection } reference", () => {
 
 test("crumbs start at Home and leave out hubs that aren't shown", () => {
   const current = { label: "Document Registers", path: "/solutions/document-registers/" };
-  // The Demos hub is planned until Phase D, so it drops out of a production trail.
+  // The Demos hub is live from Phase D Task 7, so a demo page's trail keeps it.
   assert.deepEqual(crumbs(siteContext(false), ["demos", { label: "Document Registers", path: "/demos/document-registers/" }]), [
     { label: "Home", href: "/" },
+    { label: "Demos", href: "/demos/" },
     { label: "Document Registers", href: "/demos/document-registers/" },
   ]);
   // The Solutions hub is live from Phase C Task 3, so it stays.
@@ -153,14 +155,14 @@ test("crumbs start at Home and leave out hubs that aren't shown", () => {
     { label: "Insights", href: "/insights/" },
     { label: "A post", href: "/insights/a-post/" },
   ]);
-  // A live hub stays and a hidden one drops out; "home" never repeats Home.
-  assert.deepEqual(crumbs(siteContext(false), ["home", "resources", "demos", { label: "X", path: "/demos/x/" }]), [
+  // A live hub stays and a hidden page drops out; "home" never repeats Home.
+  assert.deepEqual(crumbs(siteContext(false), ["home", "resources", "safeUseKits", { label: "X", path: "/resources/safe-use-kits/x/" }]), [
     { label: "Home", href: "/" },
     { label: "Resources", href: "/resources/" },
-    { label: "X", href: "/demos/x/" },
+    { label: "X", href: "/resources/safe-use-kits/x/" },
   ]);
   // Two hidden hubs in a row both drop out.
-  assert.deepEqual(crumbs(siteContext(false), ["demos", "trust", { label: "Y", path: "/y/" }]), [
+  assert.deepEqual(crumbs(siteContext(false), ["trust", "legal", { label: "Y", path: "/y/" }]), [
     { label: "Home", href: "/" },
     { label: "Y", href: "/y/" },
   ]);

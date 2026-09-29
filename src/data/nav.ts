@@ -29,6 +29,13 @@ export interface PageEntry {
    * goes live.
    */
   description?: string;
+  /**
+   * Set only on a page whose content another page owns: its canonical URL's path (spec §8.8: the ⑤
+   * demo page embeds the checker, whose canonical page is /resources/what-you-already-pay-for/).
+   * BaseLayout points the page's <link rel="canonical"> and og:url there, and astro.config.mjs
+   * leaves the page out of the sitemap.
+   */
+  canonicalPath?: string;
 }
 
 export interface Anchor {
@@ -163,7 +170,9 @@ const RESOURCES_HUB = describe(page("resources", "Resources", "/", "/resources/"
   "Free resources from Techsider for Australian teams putting AI to work in regulated industries: field notes on retrieval, evaluation and where models run.");
 const INSIGHTS = describe(page("resources", "Insights", "/", "/insights/", "live", "Insights", "Field notes on shipping AI in regulated work."),
   "Field notes on shipping AI in regulated Australian work: retrieval that cites its sources, evaluation before launch, and choosing where models are hosted.");
-const DEMOS = page("demos", "Demos", "/", "/demos/", "planned", "Demos", "Canned replays of each solution. No live model.");
+// WB-4 (controller ruling 7): ①–③ are replays, ④ is a sample report and ⑤ the one client-side tool.
+const DEMOS = describe(page("demos", "Demos", "/", "/demos/", "live", "Demos", "Three replays, a sample report and a client-side tool. No live model."),
+  "Canned replays on synthetic or public documents, an illustrative sample evaluation report, and a checker for the AI inside software you already pay for.");
 // No kit is called free while any kit waits for lawyer review (spec §12 item 6): the page lists all
 // three, so one reviewed kit doesn't make the others free. tests/company-pages.test.mjs holds this.
 const SAFE_USE_KITS = describe(page("resources", "Safe-Use Kits", "/resources/", "/resources/safe-use-kits/", "planned", "Safe-Use Kits",
@@ -191,7 +200,25 @@ const PRIVACY = describe(page("legal", "Privacy", "/legal/", "/legal/privacy/", 
 const WEBSITE_TERMS = describe(page("legal", "Website terms", "/legal/", "/legal/website-terms/", "planned"),
   "The terms for using techsider.com.au: general information, not advice; what the canned demos are; who owns the content; and how links to other sites work.");
 const CONTACT_SENT = page("contact", "Sent", "/contact/", "/contact/sent/", "planned", "Message sent");
-const DEMO_PAGES = SOLUTIONS.map((s) => page("demos", s.shortName, "/demos/", `/demos/${slugify(s.shortName)}/`, "planned", `${s.fullName} demo`));
+/** Each demo page's meta description (spec §11.3), by its slug, which is its solution's. */
+const DEMO_DESCRIPTIONS: Record<string, string> = {
+  "document-registers": "A canned replay on synthetic management agreements and trust deeds: every register field links to its page, and unsigned or expired items are flagged.",
+  "knowledge-assistant": "A canned replay on public Victorian and APRA documents: each answer cites its passage, questions they don't answer are refused, and a false answer is caught.",
+  "draft-for-approval": "A canned replay on a synthetic property-management inbox: eight messages sorted, work orders and updates drafted, one escalated, nothing sent until approved.",
+  "ai-evaluation": "An illustrative sample evaluation report on our own demo assistant: its sample size, confidence intervals, agreed thresholds and each failure found, rated.",
+  "ai-switch-on": "Tick the software you already pay for to see the AI it includes or sells as an add-on, where the vendor says it's processed, and what's left for a build.",
+};
+/**
+ * One demo page per solution (spec §8.8), live from Phase D Task 7. The ⑤ page embeds the "What you
+ * already pay for" checker, whose own page is the tool's canonical URL (spec §8.8), so it carries
+ * that page's path as its canonicalPath.
+ */
+const DEMO_PAGES = SOLUTIONS.map((s) => {
+  const slug = slugify(s.shortName);
+  const entry = describe(page("demos", s.shortName, "/demos/", `/demos/${slug}/`, "live", `${s.fullName} demo`), DEMO_DESCRIPTIONS[slug]);
+  if (slug === "ai-switch-on") entry.canonicalPath = PAY_FOR.path;
+  return entry;
+});
 
 export const NAV_GROUPS: NavGroup[] = [
   { id: "solutions", label: "Solutions", hub: SOLUTIONS_HUB, allLabel: "All solutions", layout: "rows", items: SOLUTIONS, anchors: [] },

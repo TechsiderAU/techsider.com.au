@@ -78,7 +78,8 @@ test("only the 404 is noindex: every other page production builds is meant to be
 });
 
 test("no page links to a planned page, or to a path inside one, anywhere on the page (Review Focus 2)", () => {
-  for (const path of ["/trust/", "/demos/", "/demos/ai-evaluation/", "/legal/privacy/", "/contact/sent/"]) {
+  // Phase D Task 7 put /demos/ and its pages live; these wait for owner or lawyer review.
+  for (const path of ["/trust/", "/resources/safe-use-kits/", "/legal/", "/legal/privacy/", "/contact/sent/"]) {
     assert.ok(inPlanned(path), `${path} is no longer planned: update this self-check`);
   }
   const offenders = [];

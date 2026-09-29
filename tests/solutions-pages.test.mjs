@@ -64,8 +64,10 @@ test("each solution page: one h1 (the full name), the one-liner, and a primary C
     const cta = elements(hero.outer, (t) => t.name === "a" && t.attrs.href === VIEWS[id].ctas.primary.href);
     assert.equal(cta.length, 1, `${id}: no primary CTA to ${VIEWS[id].ctas.primary.href}`);
     assert.equal(text(cta[0].inner), `Talk to us about ${VIEWS[id].shortName}`);
-    assert.equal(VIEWS[id].ctas.secondary, null, `${id}: a demo link before Phase D`);
-    assert.equal(elementsWith(hero.outer, "data-solution-demo").length, 0, `${id}: a demo slot before Phase D`);
+    // Phase D Task 7: the demo sits in the hero, with "Try the demo" below it
+    // (tests/demos-pages.test.mjs pins what the slot holds).
+    assert.deepEqual(VIEWS[id].ctas.secondary, { label: "Try the demo", href: `/demos/${id}/` }, `${id}: the demo link`);
+    assert.equal(elementsWith(hero.outer, "data-solution-demo").length, 1, `${id}: no demo slot`);
   }
 });
 

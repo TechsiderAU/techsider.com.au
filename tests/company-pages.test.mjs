@@ -336,7 +336,7 @@ test("/resources/: a linked card for each resource this build shows, and no unli
   const shown = siteContext(false).resources.filter((r) => r.href !== null);
   const cards = elementsWith(main, "data-resource");
   assert.deepEqual(cards.map((c) => c.attrs["data-resource"]), shown.map((r) => r.key));
-  assert.deepEqual(cards.map((c) => c.attrs["data-resource"]), ["insights", "payFor", "evaluationMethod"], "Phase D Tasks 5 and 6 add the evaluation method and the checker; later tasks add the rest");
+  assert.deepEqual(cards.map((c) => c.attrs["data-resource"]), ["insights", "demos", "payFor", "evaluationMethod"], "the Safe-Use Kits wait for a lawyer's review (spec §12 item 6)");
   cards.forEach((card, i) => assert.deepEqual(tagged(card.inner, "a").map((a) => a.attrs.href), [shown[i].href]));
 });
 

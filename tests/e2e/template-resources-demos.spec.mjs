@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { focusKeys } from "../support/keys.mjs";
 import { demoFixture, kitFixture, pendingKitFixture } from "../../src/fixtures/index.ts";
-import { CHECKER_BADGE, DEMO_BADGE, KIT_PENDING_NOTE } from "../../src/lib/fixed-copy.ts";
+import { CHECKER_BADGE, DEMO_BADGE, KIT_PENDING_NOTE, REPORT_BADGE } from "../../src/lib/fixed-copy.ts";
 
 // The resources and demos templates (spec §8.7, §8.8) on the preview gallery: axe at 390px and
 // 1280px, no horizontal scroll at 320px, 44px targets, visible focus, the badges, the kit review
@@ -67,7 +67,8 @@ for (const width of [390, 1280]) {
       await expect(frame).toHaveCount(1);
       const badge = frame.locator("[data-demo-badge]");
       await expect(badge).toBeVisible();
-      await expect(badge).toHaveText(DEMO_BADGE);
+      // Ledger ruling R4: the ④-like demo is a sample report, not a replay.
+      await expect(badge).toHaveText(kind === "demo" ? DEMO_BADGE : REPORT_BADGE);
       // Both fixture demos are illustrative (spec §9.3): the frame's own label, not the ④ trace's.
       await expect(frame).toHaveAttribute("data-provenance", "illustrative");
       const label = frame.locator(":scope > [data-provenance-label]");
@@ -104,11 +105,11 @@ for (const width of [390, 1280]) {
   });
 }
 
-test("the Demos hub badges the checker as a client-side tool and every other demo as a canned replay", async ({ page }) => {
+test("the Demos hub badges the checker as a client-side tool, the sample report as a report, and every other demo as a canned replay", async ({ page }) => {
   await page.goto(path("demos-hub"));
   await expect(page.locator("[data-page-hero] [data-hero-badge]")).toHaveCount(0);
   const meta = page.locator("#demos [data-demo-kind] .link-card-meta");
-  await expect(meta).toHaveText([DEMO_BADGE, DEMO_BADGE, DEMO_BADGE, DEMO_BADGE, CHECKER_BADGE]);
+  await expect(meta).toHaveText([DEMO_BADGE, DEMO_BADGE, DEMO_BADGE, REPORT_BADGE, CHECKER_BADGE]);
   for (const el of await meta.all()) await expect(el).toBeVisible();
   await page.goto(path("pay-for"));
   await expect(page.locator("[data-page-hero] [data-hero-badge]")).toHaveText(CHECKER_BADGE);

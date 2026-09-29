@@ -14,8 +14,11 @@ const INDUSTRY_IDS = [
 ];
 /** What a singleton route's getStaticPaths returns for a shown page: one path, with no rest segment. */
 const BUILT = [{ params: { page: undefined } }];
-/** Pages that stay planned through Phase C: the Trust and legal pages, the kits, the demos, Sent. */
-const PLANNED_THROUGH_PHASE_C = ["/trust/", "/legal/", "/legal/privacy/", "/legal/website-terms/", "/resources/safe-use-kits/", "/demos/", "/contact/sent/"];
+/**
+ * Pages that stay planned through Phase C and still are: the Trust and legal pages, the kits and
+ * Sent. The demos stayed planned through Phase C too, until Phase D Task 7 put them live.
+ */
+const PLANNED_THROUGH_PHASE_C = ["/trust/", "/legal/", "/legal/privacy/", "/legal/website-terms/", "/resources/safe-use-kits/", "/contact/sent/"];
 
 /** Runs `fn` as the production build (preview false) or the preview build sees nav.ts. */
 function inBuild(preview, fn) {
@@ -106,7 +109,7 @@ test("shownIds: production lists only the live pages under a hub, still in nav o
       const live = PAGES.filter((p) => p.base === base && p.status === "live").map((p) => p.path.slice(base.length, -1));
       assert.deepEqual(shownIds(base), live, base);
     }
-    assert.deepEqual(shownIds("/demos/"), [], "a demo page is live before Phase D");
+    assert.deepEqual(shownIds("/demos/"), SOLUTION_IDS, "a demo page is still planned after Phase D Task 7");
     assert.deepEqual(shownIds("/legal/"), [], "a legal document is live before its review");
     assert.ok(shownIds("/").includes("404"), "the 404 is not shown in production");
     const paths = ["/solutions/knowledge-assistant/", "/solutions/ai-evaluation/"];

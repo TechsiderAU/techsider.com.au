@@ -1,8 +1,10 @@
 # ② Cited Knowledge Assistant: /solutions/knowledge-assistant/ (spec §4.1 ②, §8.3).
 # The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
-# fill byIndustry and matrix; Phase D adds demo. The launch package shows its two audience variants
+# fill byIndustry and matrix. `demo` names the hero's demo, src/data/demos/knowledge-assistant.json,
+# which /demos/knowledge-assistant/ also shows. The launch package shows its two audience variants
 # as the two tabs (spec §8.3).
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
+demo: knowledge-assistant
 job: >-
   Answers staff questions from one collection of your own manuals, policies or procedures, and shows
   the document, section and version it used. When the documents don't support an answer, it says

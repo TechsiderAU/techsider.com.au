@@ -2,27 +2,34 @@
 // One solution page (spec §8.3): /solutions/<id>/ for every solution this build shows. The route
 // stays thin, as the gallery specimens are: it builds the SolutionView from the solution's YAML
 // entry, the shared offer copy in src/data/services.ts and this build's SiteContext, and hands it
-// to SolutionTemplate inside BaseLayout. The hero's demo slot stays empty until Phase D adds the
-// demos (the ④ sample report included).
+// to SolutionTemplate inside BaseLayout. The hero's demo slot holds the solution's demo, the file its
+// `demo` names in src/data/demos/ (spec §8.3, §9.1), which DemoEmbed renders by kind; the CTAs sit
+// below it.
 import type { GetStaticPaths, InferGetStaticParamsType, InferGetStaticPropsType } from "astro";
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import SolutionTemplate from "../../templates/SolutionTemplate.astro";
+import DemoEmbed from "../../components/demo/DemoEmbed.astro";
 import { isPreview } from "../../data/nav";
 import { SERVICES } from "../../data/services";
 import { pageDescription, pageTitle } from "../../lib/meta";
 import { pageAt, shownIds } from "../../lib/pages";
 import { siteContext } from "../../lib/site";
+import { demoFor } from "../../lib/views/demos";
 import { solutionView } from "../../lib/views/solution";
 
-// Every shown solution page needs its content entry. A missing one fails the build here, as
-// check 01 fails a live nav entry without its YAML file.
+// Every shown solution page needs its content entry and its demo. A missing one fails the build
+// here, as check 01 fails a live nav entry without its YAML file.
 export const getStaticPaths = (async () => {
   const entries = new Map((await getCollection("solutions")).map((entry) => [entry.id, entry]));
+  const demos = await getCollection("demos");
   return shownIds("/solutions/").map((id) => {
     const entry = entries.get(id);
     if (entry === undefined) throw new Error(`/solutions/${id}/ is shown, but src/content/solutions/${id}.yaml does not exist`);
-    return { params: { id }, props: { data: entry.data } };
+    if (entry.data.demo !== id) {
+      throw new Error(`src/content/solutions/${id}.yaml: demo is ${JSON.stringify(entry.data.demo)}, but the hero shows the solution's own demo, so it must be "${id}" (spec §8.3)`);
+    }
+    return { params: { id }, props: { data: entry.data, demo: demoFor(demos, id) } };
   });
 }) satisfies GetStaticPaths;
 
@@ -30,10 +37,13 @@ type Params = InferGetStaticParamsType<typeof getStaticPaths>;
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { id } = Astro.params as Params;
-const { data }: Props = Astro.props;
+const { data, demo }: Props = Astro.props;
 const entry = pageAt(`/solutions/${id}/`);
-const view = solutionView({ id, data, shared: SERVICES, site: siteContext(isPreview()) });
+const site = siteContext(isPreview());
+const view = solutionView({ id, data, shared: SERVICES, site });
 ---
 <BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
-  <SolutionTemplate view={view} />
+  <SolutionTemplate view={view}>
+    <DemoEmbed slot="demo" demo={demo} site={site} />
+  </SolutionTemplate>
 </BaseLayout>

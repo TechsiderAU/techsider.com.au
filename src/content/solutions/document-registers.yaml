@@ -1,7 +1,9 @@
 # ① Document Registers & Evidence Packs: /solutions/document-registers/ (spec §4.1 ①, §8.3).
 # The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
-# fill byIndustry and matrix; Phase D adds demo.
+# fill byIndustry and matrix. `demo` names the hero's demo, src/data/demos/document-registers.json,
+# which /demos/document-registers/ also shows.
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
+demo: document-registers
 job: >-
   Reads one family of documents your team checks by hand, such as trust deeds or management
   agreements, and fills a fixed field list for each one. Anything missing, unsigned, expired,

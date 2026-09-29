@@ -1,0 +1,23 @@
+---
+// The Demos hub (spec §7.1, §8.8) at /demos/, built while nav.ts shows it: one card per solution's
+// demo, in spec §4.1 order, titled from its demo file and badged by kind (DemosHubTemplate: the ⑤
+// checker is a client-side tool, the ④ demo a sample report, the others canned replays).
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DemosHubTemplate from "../../templates/DemosHubTemplate.astro";
+import { isPreview } from "../../data/nav";
+import { pageDescription, pageTitle } from "../../lib/meta";
+import { pageAt, singletonPaths } from "../../lib/pages";
+import { siteContext } from "../../lib/site";
+import { demoCards } from "../../lib/views/demos";
+
+export const getStaticPaths = (() => singletonPaths("/demos/")) satisfies GetStaticPaths;
+
+const page = pageAt("/demos/");
+const site = siteContext(isPreview());
+const demos = demoCards(await getCollection("demos"), site);
+---
+<BaseLayout title={pageTitle(page)} description={pageDescription(page)}>
+  <DemosHubTemplate demos={demos} site={site} />
+</BaseLayout>

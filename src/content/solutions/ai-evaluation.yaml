@@ -1,10 +1,12 @@
 # ④ Independent AI Evaluation: /solutions/ai-evaluation/ (spec §4.1 ④, §4.4, §8.3).
 # The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
-# fill byIndustry and matrix; Phase D adds demo (the sample report in the hero). Block 4 is titled
+# fill byIndustry and matrix. `demo` names the hero's demo, src/data/demos/ai-evaluation.json: the
+# sample report, which /demos/ai-evaluation/ also shows. Block 4 is titled
 # "Engagements" and the page publishes the independence policy (spec §4.4, §8.3).
 # Every package is onshore: false. The test runs in the client's environment, but the system under
 # test runs where its vendor runs it, so the page shows where data is processed instead (spec §3.2).
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
+demo: ai-evaluation
 job: >-
   Tests one AI system you bought, licensed or had built elsewhere, for one use case, on your own
   questions and cases in your own environment. The method is set out in advance, and the thresholds
@@ -216,6 +218,7 @@ packages:
       - A probity note agreed with your procurement lead before testing
       - The same questions run through each tendered tool, side by side
       - Findings on each claim tested, with every failure listed
+      - The test set, ready to re-run after contract
     clientTime: >-
       A procurement lead for probity sign-off, and subject-matter staff to write and grade
       questions. Hours are stated at scoping.

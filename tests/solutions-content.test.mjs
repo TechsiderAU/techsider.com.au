@@ -153,11 +153,11 @@ test("per-solution switches: ④ is 'Engagements' with the independence policy; 
   }
 });
 
-test("demo is unset until Phase D; byIndustry and matrix name only industry ids", () => {
+test("each solution names its own demo (Phase D Task 7); byIndustry and matrix name only industry ids", () => {
   const industries = new Set(PAGES.filter((p) => p.base === "/industries/").map((p) => p.path.slice("/industries/".length, -1)));
   for (const id of IDS) {
     const d = DATA[id];
-    assert.equal(d.demo, undefined, `${id}: demo`);
+    assert.equal(d.demo, id, `${id}: demo`);
     for (const ref of [...d.byIndustry, ...Object.keys(d.matrix)]) assert.ok(industries.has(ref), `${id}: "${ref}" is not an industry id`);
   }
 });
@@ -199,6 +199,8 @@ test("the honesty lines and fixed wording the spec and rulings require are prese
   has("ai-switch-on", "dontDo", "your own adviser approves any consent, engagement-letter or policy text");
   const tender = DATA["ai-evaluation"].packages.find((p) => p.id === "tender-ai-claims-verification");
   assert.match(`${tender.scope} ${tender.precondition}`, /probity note/);
+  // NB-1 (Phase C ledger, ruling R5): the verified test set stays with the buyer, to re-run after contract.
+  assert.ok(tender.inclusions.includes("The test set, ready to re-run after contract"), "④'s Tender AI-Claims Verification lacks its re-runnable test set");
   const agentic = DATA["ai-evaluation"].packages.find((p) => p.id === "agentic-ai-control-evaluation");
   assert.match(agentic.scope, /It is not an attack\./);
   // Spec §9.5: every page says plainly that there are no clients yet.

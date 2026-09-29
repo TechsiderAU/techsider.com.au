@@ -15,7 +15,7 @@ import {
   sampleReportFixture,
 } from "../src/fixtures/index.ts";
 import { crumbs, industryLink, solutionLink } from "../src/lib/site.ts";
-import { CHECKER_BADGE, DEMO_BADGE, DEMO_CTA, KIT_PENDING_NOTE, kitReviewedNote } from "../src/lib/fixed-copy.ts";
+import { CHECKER_BADGE, DEMO_BADGE, DEMO_CTA, KIT_PENDING_NOTE, REPORT_BADGE, kitReviewedNote } from "../src/lib/fixed-copy.ts";
 
 const KINDS = ["resources-hub", "safe-use-kits", "pay-for", "evaluation-method", "demos-hub", "demo", "demo-report"];
 const SAMPLE_CAPTION = "Sample report: Techsider testing its own demo system, so not independent.";
@@ -267,7 +267,8 @@ test("Demos hub: one card per demo, in order, badged by kind and linking to its 
     const eyebrow = elements(card.inner, (tag) => (tag.attrs.class ?? "").split(" ").includes("link-card-eyebrow"))[0];
     const meta = elements(card.inner, (tag) => (tag.attrs.class ?? "").split(" ").includes("link-card-meta"))[0];
     assert.equal(text(eyebrow.inner), `${s.number} ${s.shortName}`);
-    assert.equal(text(meta.inner), kind === "checker" ? CHECKER_BADGE : DEMO_BADGE, kind);
+    // Ledger ruling R4: the ④ sample report is not a replay, so it has its own badge.
+    assert.equal(text(meta.inner), { checker: CHECKER_BADGE, report: REPORT_BADGE }[kind] ?? DEMO_BADGE, kind);
     const [link] = anchors(card.inner);
     assert.equal(link.href, fixtureSite.demo(s.id), kind);
     assert.match(link.text, /\bFixture\b/);
@@ -285,7 +286,8 @@ test("demo pages: the frame shows its badge first, then the engine slot, the sta
     const tags = startTags(frame);
     const at = (attr) => tags.findIndex((tag) => attr in tag.attrs);
     const [badge] = byAttr(frame, "data-demo-badge");
-    assert.equal(text(badge.inner), DEMO_BADGE, `${kind}: kind "${kind === "demo" ? "register" : "report"}" gets the replay badge`);
+    // Ledger ruling R4: the register demo is a canned replay; the ④-like demo is a sample report.
+    assert.equal(text(badge.inner), kind === "demo" ? DEMO_BADGE : REPORT_BADGE, `${kind}: kind "${kind === "demo" ? "register" : "report"}" gets its badge`);
     assert.ok(!("hidden" in badge.attrs) && badge.attrs["aria-hidden"] !== "true" && !/sr-only/.test(badge.attrs.class ?? ""), `${kind}: the badge is hidden`);
     assert.equal(at("data-demo-badge"), 1, `${kind}: the badge is not the frame's first child`);
     assert.ok(at("data-demo-engine") > at("data-demo-badge") && at("data-demo-transcript") > at("data-demo-engine"), `${kind}: slot order`);
@@ -349,30 +351,36 @@ test("#next: the demo CTA as its heading, then the solution page", () => {
   }
 });
 
-// Phase C Task 7 puts the Resources hub live at /resources/ (tests/company-pages.test.mjs checks
-// its cards), Phase D Task 2 puts the ② demo's frame in the Home's demo band, Phase D Task 5 the
-// evaluation method at /resources/evaluation-method/ (tests/evaluation-method.test.mjs checks the
-// page), and Phase D Task 6 the checker at /resources/what-you-already-pay-for/, whose hero carries
-// the checker badge (tests/checker.test.mjs checks the page). The kits page and the demo pages stay
-// out of production until they go live.
-test("production: resources templates only on the live Resources hub, evaluation method and checker, and only the Home a demo frame", () => {
+// Phase D puts the resources and demos pages live: the evaluation method (Task 5), the checker
+// (Task 6) and the demos (Task 7). Each template's markup reaches production only on the pages that
+// render it:
+// - the Resources hub on /resources/;
+// - the method page and the checker's page on their own pages, the checker badge on the latter;
+// - the sample report on the method page, the ④ demo page and the ④ hero;
+// - the vendor table on the checker's page and the ⑤ demo page;
+// - the demo template on the five demo pages;
+// - demo frames on those pages, in the four solution heroes that hold one (④'s holds the sample
+//   report), and in the Home's demo band (Task 2's ② frame, which Task 8's Home keeps).
+// The Safe-Use Kits page stays out until a lawyer reviews the kits (spec §12 item 6).
+test("production: resources and demos template markup appears only on the pages that render it", () => {
   const CHECKER = "resources/what-you-already-pay-for/index.html";
-  const live = {
-    'data-template="resources-hub"': "resources/index.html",
-    'data-template="evaluation-method"': "resources/evaluation-method/index.html",
-    'data-template="pay-for"': CHECKER,
+  const METHOD = "resources/evaluation-method/index.html";
+  const demoPages = ["document-registers", "knowledge-assistant", "draft-for-approval", "ai-evaluation", "ai-switch-on"].map((id) => `demos/${id}/index.html`);
+  const framedHeroes = ["document-registers", "knowledge-assistant", "draft-for-approval", "ai-switch-on"].map((id) => `solutions/${id}/index.html`);
+  const only = {
+    'data-template="resources-hub"': ["resources/index.html"],
+    'data-template="evaluation-method"': [METHOD],
+    'data-template="pay-for"': [CHECKER],
+    "data-hero-badge": [CHECKER],
+    "data-sample-report": [METHOD, "demos/ai-evaluation/index.html", "solutions/ai-evaluation/index.html"],
+    "data-platform-facts": [CHECKER, "demos/ai-switch-on/index.html"],
+    'data-template="demo"': demoPages,
+    "data-demo-frame": [...demoPages, ...framedHeroes, "index.html"],
+    "data-kit": [],
+    'data-template="safe-use-kits"': [],
   };
-  for (const f of allHtmlFiles()) {
-    const html = readDist(f);
-    for (const hook of ["data-kit", 'data-template="demo"', 'data-template="safe-use-kits"']) {
-      assert.ok(!html.includes(hook), `dist/${f} carries ${hook}`);
-    }
-    if (f !== CHECKER) assert.ok(!html.includes("data-hero-badge"), `dist/${f} carries data-hero-badge`);
-    for (const [hook, file] of Object.entries(live)) {
-      if (f !== file) assert.ok(!html.includes(hook), `dist/${f} carries ${hook}`);
-    }
-    const frames = startTags(html).filter((t) => "data-demo-frame" in t.attrs).length;
-    assert.equal(frames, f === "index.html" ? 1 : 0, `dist/${f} carries ${frames} demo frame(s)`);
+  const files = allHtmlFiles();
+  for (const [hook, pages] of Object.entries(only)) {
+    assert.deepEqual(files.filter((f) => readDist(f).includes(hook)).sort(), [...pages].sort(), hook);
   }
-  for (const [hook, file] of Object.entries(live)) assert.ok(readDist(file).includes(hook), `dist/${file} doesn't render ${hook}`);
 });

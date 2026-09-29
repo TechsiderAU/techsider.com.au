@@ -58,7 +58,7 @@ test("production: dist/404.html is noindex, titled and described, with one h1 an
   expectNotFoundPage(readDist("404.html"), site, "dist");
   const shown = HUBS.filter((key) => site.page(key).href !== null);
   assert.ok(shown.includes("home") && shown.includes("insights"), "Home or Insights isn't offered");
-  assert.ok(!shown.includes("demos"), "the Demos hub is offered before Phase D builds it");
+  assert.ok(shown.includes("demos"), "the live Demos hub isn't offered (Phase D Task 7 put it live)");
 });
 
 test("preview: dist-preview/404.html offers every hub, since the preview build shows every page", () => {

@@ -1,0 +1,29 @@
+---
+// The engine slot of a demo's DemoFrame, by the demo's kind (blueprint, Engine). Each engine
+// component carries its own script, and Astro includes a component's script only on a page that
+// renders it, so a page loads only its demo's code (spec §11.4). ①, ② and ③ share Task 2's
+// DemoEngine, whose one boot script loads the kind's renderer as its own chunk. A replay starts when
+// its frame enters the viewport: on load in a demo page's hero, once scrolled to in a solution hero
+// or the Home band. ⑤'s engine is the "What you already pay for" checker itself, run by the
+// visitor's ticks; `level` is its results heading level, 2 directly under a page's h1. ④ has no
+// engine: its demo is the sample report.
+import DemoEngine from "./DemoEngine.astro";
+import PlatformChecker from "./PlatformChecker.astro";
+import platformAi from "../../data/platform-ai.json";
+import { platformAiFile, type DemoData } from "../../content/schemas";
+import type { SiteContext } from "../../lib/site";
+import { checkerView } from "../../lib/views/checker";
+
+interface Props {
+  demo: DemoData;
+  site: SiteContext;
+  level?: 2 | 3;
+}
+
+const { demo, site, level = 2 } = Astro.props;
+if (demo.kind === "report") {
+  throw new Error(`DemoEngineSlot: "${demo.title}" is a sample report, which has no engine. Render SampleReport instead.`);
+}
+---
+{(demo.kind === "register" || demo.kind === "assistant" || demo.kind === "inbox") && <DemoEngine kind={demo.kind} />}
+{demo.kind === "checker" && <PlatformChecker view={checkerView(platformAiFile.parse(platformAi), site)} headingLevel={level} />}

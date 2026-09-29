@@ -19,6 +19,8 @@ test("fixed copy: every constant is the spec's text, word for word", () => {
   assert.equal(copy.SCENARIO_LABEL, "Illustrative scenario: not a client engagement");
   assert.equal(copy.DEMO_BADGE, "Canned replay · synthetic or public data");
   assert.equal(copy.CHECKER_BADGE, "Client-side tool · dated vendor data");
+  // Ledger ruling R4: the ④ demo is a sample report, not a replay, so it never carries DEMO_BADGE.
+  assert.equal(copy.REPORT_BADGE, "Sample report · Techsider testing its own demo system");
   assert.equal(copy.DEMO_CTA, "Want this on your documents, in your environment?");
   assert.equal(copy.ONSHORE_PILLAR, "Your data stays onshore.");
   assert.equal(copy.PROCESSING_NOTE, "We show you where your data is processed.");
@@ -43,7 +45,7 @@ test("fixed copy: the module exports exactly the blueprint's constants", () => {
     "ACCEPTANCE_TEST_LABEL", "CHECKER_BADGE", "CONTACT_H1", "DELIVERY_LETTER", "DEMO_BADGE", "DEMO_CTA",
     "EXTRA_INTERESTS", "HOME_CLOSING", "HOME_PROMPT", "HOME_TRUST_QUESTION", "KIT_PENDING_NOTE", "MESSAGE_PLACEHOLDER",
     "NOT_LEGAL_ADVICE", "ONSHORE_PILLAR", "ORG_SIZES", "PACKAGED_OFFER_DISCLAIMER", "PROCESSING_NOTE",
-    "SCENARIO_LABEL", "SERVICES_H1", "WORKS_METHOD_LABEL", "kitReviewedNote",
+    "REPORT_BADGE", "SCENARIO_LABEL", "SERVICES_H1", "WORKS_METHOD_LABEL", "kitReviewedNote",
   ]);
   // The pending note starts with the same disclaimer as the reviewed one; only the review state differs.
   assert.ok(copy.KIT_PENDING_NOTE.startsWith(`${copy.NOT_LEGAL_ADVICE} `));

@@ -106,7 +106,11 @@ test("on the production site context every planned page is plain text and contac
     { label: "Solutions", href: "/solutions/" },
     { label: "Document Registers", href: "/solutions/document-registers/" },
   ]);
-  assert.deepEqual(live.ctas, { primary: { label: "Talk to us about Document Registers", href: TALK_REGISTERS }, secondary: null });
+  // The demo pages are live from Phase D Task 7, so the hero's second CTA leads to ①'s.
+  assert.deepEqual(live.ctas, {
+    primary: { label: "Talk to us about Document Registers", href: TALK_REGISTERS },
+    secondary: { label: "Try the demo", href: "/demos/document-registers/" },
+  });
   assert.equal(live.closing.href, TALK_REGISTERS);
   // The evaluation method is live from Phase D Task 5, so the production method link reaches it.
   assert.equal(live.howWeTest.methodHref, "/resources/evaluation-method/");

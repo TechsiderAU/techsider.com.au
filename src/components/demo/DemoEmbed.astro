@@ -1,0 +1,40 @@
+---
+// A solution's demo shown outside its own demo page (spec §8.3 block 1, §9.1): the solution page's
+// hero (SolutionTemplate's "demo" slot), and the Home band can render ② the same way (level 3,
+// under the band's h2). By kind:
+// - ① ② ③: the replay in its DemoFrame, badged as a canned replay, with its engine (DemoControls,
+//   the stage and the log) and its static transcript. The run starts when the frame scrolls into
+//   view (blueprint, Engine); the hero's "Try the demo" below it leads to the demo page.
+// - ④: the sample report itself, with SampleReport's fixed caption (spec §9.1).
+// - ⑤: the compact checker frame, badged as a client-side tool: CheckerSummary, which links to the
+//   full tool on /resources/what-you-already-pay-for/. It has no engine, so the page loads no
+//   checker script.
+import DemoFrame from "../page/DemoFrame.astro";
+import SampleReport from "../ui/SampleReport.astro";
+import CheckerSummary from "./CheckerSummary.astro";
+import DemoEngineSlot from "./DemoEngineSlot.astro";
+import DemoTranscriptSlot from "./DemoTranscriptSlot.astro";
+import type { DemoData } from "../../content/schemas";
+import { CHECKER_BADGE, DEMO_BADGE } from "../../lib/fixed-copy";
+import type { SiteContext } from "../../lib/site";
+
+interface Props {
+  demo: DemoData;
+  site: SiteContext;
+  level?: 2 | 3;
+}
+
+const { demo, site, level = 2 } = Astro.props;
+---
+{demo.kind === "report" && <SampleReport report={demo.data} />}
+{demo.kind === "checker" && (
+  <DemoFrame title={demo.title} badge={CHECKER_BADGE} provenance={demo.provenance}>
+    <CheckerSummary slot="transcript" site={site} />
+  </DemoFrame>
+)}
+{(demo.kind === "register" || demo.kind === "assistant" || demo.kind === "inbox") && (
+  <DemoFrame title={demo.title} badge={DEMO_BADGE} provenance={demo.provenance}>
+    <DemoEngineSlot slot="engine" demo={demo} site={site} level={level} />
+    <DemoTranscriptSlot slot="transcript" demo={demo} site={site} level={level} />
+  </DemoFrame>
+)}

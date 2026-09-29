@@ -16,6 +16,9 @@ export const KIT_PENDING_NOTE = "General information, not legal advice. This kit
 export const SCENARIO_LABEL = "Illustrative scenario: not a client engagement"; // §8.5 block 7
 export const DEMO_BADGE = "Canned replay · synthetic or public data"; // §8.8
 export const CHECKER_BADGE = "Client-side tool · dated vendor data"; // §8.8 ⑤
+// §8.8 ④ and §9.1: the ④ demo is a sample report, not a replay (Phase D ledger ruling R4), so its
+// badge names what it is in the words of SampleReport's fixed caption (§8.12), not DEMO_BADGE's.
+export const REPORT_BADGE = "Sample report · Techsider testing its own demo system";
 export const DEMO_CTA = "Want this on your documents, in your environment?"; // §8.8
 export const ONSHORE_PILLAR = "Your data stays onshore."; // §3.2
 export const PROCESSING_NOTE = "We show you where your data is processed."; // §3.2 scope rule

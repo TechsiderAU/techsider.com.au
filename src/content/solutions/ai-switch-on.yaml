@@ -1,10 +1,12 @@
 # ⑤ AI Switch-On & Safe Use: /solutions/ai-switch-on/ (spec §4.1 ⑤, §8.3). Mid-market only.
 # The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
-# fill byIndustry and matrix; Phase D adds demo (the "What you already pay for" checker). No program
+# fill byIndustry and matrix. `demo` names the hero's demo, src/data/demos/ai-switch-on.json: the
+# "What you already pay for" checker, whose compact frame links to the full tool. No program
 # (spec §8.3). Every package is onshore: false, because the vendor sets where processing runs.
 # Kits are named, never described as reviewed, and offered only "where one is published": they stay
 # unpublished until a lawyer reviews them (plan Global Constraints, Kits; research index A1).
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
+demo: ai-switch-on
 job: >-
   Gets value from the AI already inside software you pay for, such as Microsoft 365, Xero, Karbon,
   Dext or PropertyMe. It configures the features you already own, applies the Safe-Use Kit for your

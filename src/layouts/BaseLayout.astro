@@ -15,15 +15,22 @@ interface Props {
   description: string;
   /** Adds <meta name="robots" content="noindex"> (the template previews and the 404). */
   noindex?: boolean;
+  /**
+   * The canonical URL's path when another page owns this page's content: a route passes its nav
+   * entry's canonicalPath (the ⑤ demo page's is /resources/what-you-already-pay-for/, spec §8.8).
+   * <link rel="canonical"> and og:url use it; without it, both are the page's own URL.
+   */
+  canonicalPath?: string;
 }
 
 const {
   title = "Techsider — Enterprise AI for Australian business",
   description,
   noindex = false,
+  canonicalPath,
 } = Astro.props;
 
-const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const canonical = new URL(canonicalPath ?? Astro.url.pathname, Astro.site).toString();
 // The Organization carries no description: the page's meta description describes the page, and
 // would give the one organisation a different description on every page.
 const organization = {

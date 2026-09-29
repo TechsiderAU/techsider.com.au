@@ -60,11 +60,11 @@ test("ids are unique on every preview page", () => {
 });
 
 test("inside <main>, no preview page links to a planned page of the real site, or to a path inside one", () => {
-  // Pages that stay planned through Phase C (the demos wait for Phase D, the rest for owner or lawyer review).
-  for (const path of ["/trust/", "/demos/", "/demos/document-registers/", "/contact/sent/", "/legal/privacy/"]) {
+  // Pages still planned after Phase D Task 7, which put the demos live: they wait for owner or lawyer review.
+  for (const path of ["/trust/", "/resources/safe-use-kits/", "/legal/", "/contact/sent/", "/legal/privacy/"]) {
     assert.ok(inPlanned(path), `${path} counts as planned`);
   }
-  for (const path of ["/", "/404", "/insights/", "/insights/a-post/", "/preview/templates/contact/", "/downloads/a-kit.pdf"]) {
+  for (const path of ["/", "/404", "/insights/", "/insights/a-post/", "/demos/", "/demos/document-registers/", "/preview/templates/contact/", "/downloads/a-kit.pdf"]) {
     assert.ok(!inPlanned(path), `${path} doesn't count as planned`);
   }
   const offenders = [];

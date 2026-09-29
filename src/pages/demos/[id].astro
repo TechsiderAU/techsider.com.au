@@ -1,0 +1,52 @@
+---
+// One demo page (spec §8.8, §9.1): /demos/<id>/ for every demo page this build shows, where <id> is
+// the solution's id and names its demo file, src/data/demos/<id>.json. DemoTemplate renders the hero
+// frame, badged by kind, and the #next CTA; this route fills the frame's slots by kind:
+// - ① ② ③: the replay's engine and its static transcript. The run starts when the frame enters the
+//   viewport (blueprint, Engine), which in the hero is on load;
+// - ④: no engine; the frame's ReportSummary leads down to the sample report, which DemoTemplate
+//   renders in full with its fixed caption;
+// - ⑤: the "What you already pay for" checker itself, with its full vendor table (PlatformFacts) as
+//   the static transcript. Its canonical URL is the checker's own page (nav.ts canonicalPath), and
+//   the sitemap leaves it out.
+import type { GetStaticPaths, InferGetStaticParamsType, InferGetStaticPropsType } from "astro";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DemoTemplate from "../../templates/DemoTemplate.astro";
+import DemoEngineSlot from "../../components/demo/DemoEngineSlot.astro";
+import DemoTranscriptSlot from "../../components/demo/DemoTranscriptSlot.astro";
+import ReportSummary from "../../components/demo/ReportSummary.astro";
+import { isPreview } from "../../data/nav";
+import { pageDescription, pageTitle } from "../../lib/meta";
+import { pageAt, shownIds } from "../../lib/pages";
+import { siteContext, solutionLink } from "../../lib/site";
+import { demoFor } from "../../lib/views/demos";
+
+// Every shown demo page needs its demo file: demoFor() fails the build without one.
+export const getStaticPaths = (async () => {
+  const entries = await getCollection("demos");
+  return shownIds("/demos/").map((id) => ({ params: { id }, props: { demo: demoFor(entries, id) } }));
+}) satisfies GetStaticPaths;
+
+type Params = InferGetStaticParamsType<typeof getStaticPaths>;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { id } = Astro.params as Params;
+const { demo }: Props = Astro.props;
+const page = pageAt(`/demos/${id}/`);
+const site = siteContext(isPreview());
+const solution = solutionLink(site, id);
+const meta = { title: demo.title, kind: demo.kind, provenance: demo.provenance };
+---
+<BaseLayout title={pageTitle(page)} description={pageDescription(page)} canonicalPath={page.canonicalPath}>
+  {demo.kind === "report" ? (
+    <DemoTemplate solution={solution} demo={meta} report={demo.data} site={site}>
+      <ReportSummary slot="transcript" report={demo.data} />
+    </DemoTemplate>
+  ) : (
+    <DemoTemplate solution={solution} demo={meta} report={null} site={site}>
+      <DemoEngineSlot slot="engine" demo={demo} site={site} />
+      <DemoTranscriptSlot slot="transcript" demo={demo} site={site} />
+    </DemoTemplate>
+  )}
+</BaseLayout>

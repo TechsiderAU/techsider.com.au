@@ -2,15 +2,15 @@
 // Demos hub (spec §7.1 /demos/, §8.8). Body only: a Phase D route loads the demos collection,
 // passes { solutionId, title, kind } per demo and siteContext(isPreview()), and renders this
 // inside BaseLayout. One LinkCard per demo, badged by its kind: the ⑤ checker is a live
-// client-side tool, not a replay, so it carries the checker badge; every other demo carries the
-// canned-replay badge. The badges are per card only: a page-wide replay badge in the hero would
-// mislabel the checker.
+// client-side tool, not a replay, so it carries the checker badge; the ④ demo is a sample report,
+// so it carries the report badge (ledger ruling R4); the replays carry the canned-replay badge.
+// The badges are per card only: a page-wide replay badge in the hero would mislabel ④ and ⑤.
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import LinkCard from "../components/page/LinkCard.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
 import type { DemoKind } from "../content/schemas";
-import { CHECKER_BADGE, DEMO_BADGE } from "../lib/fixed-copy";
+import { CHECKER_BADGE, DEMO_BADGE, REPORT_BADGE } from "../lib/fixed-copy";
 import { crumbs, solutionLink, type SiteContext } from "../lib/site";
 
 interface Props {
@@ -25,7 +25,7 @@ const cards = demos.map((d) => {
     kind: d.kind,
     eyebrow: `${solution.number} ${solution.shortName}`,
     title: d.title,
-    badge: d.kind === "checker" ? CHECKER_BADGE : DEMO_BADGE,
+    badge: d.kind === "checker" ? CHECKER_BADGE : d.kind === "report" ? REPORT_BADGE : DEMO_BADGE,
     href: site.demo(d.solutionId),
   };
 });

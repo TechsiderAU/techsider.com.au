@@ -2,10 +2,12 @@
 // One demo page (spec §8.8, §9.1). Body only: a Phase D route loads the solution's demo entry,
 // fills the slots and renders this inside BaseLayout. The ⑤ route also sets the canonical URL to
 // /resources/what-you-already-pay-for/, which owns the checker (spec §8.8).
-// - The hero holds the DemoFrame, badged by kind (checker → CHECKER_BADGE, else DEMO_BADGE) and
-//   marked with the demo's provenance, which every route must pass (an illustrative demo is labelled).
+// - The hero holds the DemoFrame, badged by kind (checker → CHECKER_BADGE, the ④ report →
+//   REPORT_BADGE, the replays → DEMO_BADGE) and marked with the demo's provenance, which every route must pass (an illustrative demo is labelled).
 //   Its named slots pass straight through: `engine` (Phase D) and `transcript` (the no-JS static
-//   transcript, which DemoFrame requires).
+//   transcript, which DemoFrame requires). Astro counts a named slot passed inside a condition as
+//   filled even when the condition is false, so the frame renders in two branches: a route that
+//   fills no engine slot (the ④ sample report) gets a frame with no engine region.
 // - #sample-report: only when `report` is set (the ④ demo), with SampleReport's fixed caption.
 // - #next: the demo CTA, the contact prompt for this solution and a link to the solution page.
 import PageHero from "../components/page/PageHero.astro";
@@ -15,7 +17,7 @@ import DemoFrame from "../components/page/DemoFrame.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
 import SampleReport from "../components/ui/SampleReport.astro";
 import type { DemoData, DemoKind, SampleReportData } from "../content/schemas";
-import { CHECKER_BADGE, DEMO_BADGE, DEMO_CTA } from "../lib/fixed-copy";
+import { CHECKER_BADGE, DEMO_BADGE, DEMO_CTA, REPORT_BADGE } from "../lib/fixed-copy";
 import { crumbs, type SiteContext, type SolutionLink } from "../lib/site";
 
 interface Props {
@@ -30,7 +32,8 @@ const here = site.demo(solution.id);
 if (here === null) {
   throw new Error(`DemoTemplate: the ${solution.id} demo page isn't shown in this build, so it has nothing to render`);
 }
-const badge = demo.kind === "checker" ? CHECKER_BADGE : DEMO_BADGE;
+// Only a replay is called one: ④ is a sample report and ⑤ a client-side tool (ledger ruling R4).
+const badge = demo.kind === "checker" ? CHECKER_BADGE : demo.kind === "report" ? REPORT_BADGE : DEMO_BADGE;
 const hasEngine = Astro.slots.has("engine");
 const hasTranscript = Astro.slots.has("transcript");
 ---
@@ -42,10 +45,16 @@ const hasTranscript = Astro.slots.has("transcript");
     sub={solution.oneLiner}
     breadcrumb={crumbs(site, ["demos", { label: solution.shortName, path: here }])}
   >
-    <DemoFrame title={demo.title} badge={badge} provenance={demo.provenance}>
-      {hasEngine && <slot name="engine" slot="engine" />}
-      {hasTranscript && <slot name="transcript" slot="transcript" />}
-    </DemoFrame>
+    {hasEngine ? (
+      <DemoFrame title={demo.title} badge={badge} provenance={demo.provenance}>
+        <slot name="engine" slot="engine" />
+        {hasTranscript && <slot name="transcript" slot="transcript" />}
+      </DemoFrame>
+    ) : (
+      <DemoFrame title={demo.title} badge={badge} provenance={demo.provenance}>
+        {hasTranscript && <slot name="transcript" slot="transcript" />}
+      </DemoFrame>
+    )}
   </PageHero>
 
   {report && (

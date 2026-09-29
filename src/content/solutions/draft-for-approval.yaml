@@ -1,9 +1,11 @@
 # ③ Draft-for-Approval Automation: /solutions/draft-for-approval/ (spec §4.1 ③, §8.3).
 # The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
-# fill byIndustry and matrix; Phase D adds demo. No ③ package is in the launch set, so the page shows
+# fill byIndustry and matrix. `demo` names the hero's demo, src/data/demos/draft-for-approval.json,
+# which /demos/draft-for-approval/ also shows. No ③ package is in the launch set, so the page shows
 # the generic package and the on-request list. Prior-year variance flags stay off: their platform
 # overlap is unverified.
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
+demo: draft-for-approval
 job: >-
   Handles one repetitive back-office job across the two or three systems it spans: it sorts,
   summarises, drafts and routes. Anything that would be sent, changed or decided waits for a person

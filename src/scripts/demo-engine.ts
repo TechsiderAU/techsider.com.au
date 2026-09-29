@@ -208,15 +208,22 @@ function whenVisible(el: HTMLElement, go: () => void): void {
     go();
     return;
   }
-  const io = new IntersectionObserver(
-    (entries) => {
-      if (!entries.some((e) => e.isIntersecting)) return;
-      io.disconnect();
-      go();
-    },
-    { rootMargin: "0px 0px -20% 0px" },
-  );
-  io.observe(el);
+  const observe = (): void => {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        go();
+      },
+      { rootMargin: "0px 0px -20% 0px" },
+    );
+    io.observe(el);
+  };
+  // A page opened at an anchor (/solutions/<id>/#faq) makes the browser's own scroll there with the
+  // load event (tabs.ts's revealWhenSettled() waits for it too). Observed any earlier, a hero frame
+  // can count as in view at the top of the page for a moment, and start a replay nobody scrolled to.
+  if (document.readyState === "complete") observe();
+  else addEventListener("load", observe, { once: true });
 }
 
 /**
