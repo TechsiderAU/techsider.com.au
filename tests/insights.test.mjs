@@ -25,20 +25,9 @@ function assertNoPillar(text, where) {
 
 // The type label is Techsider's own eyebrow form (spec §6.4): a lower-case mono bracket tag,
 // never Mistral's uppercase, letter-spaced eyebrow. The brackets are hidden from screen readers.
-// The legacy Home section (src/components/Insights.astro, retired in Phase D) writes it as a
-// mono <p> holding the bracket spans.
-const TYPE_TAG = new RegExp(`<p class="([^"]*)"[^>]*>\\s*<span aria-hidden="true"[^>]*>\\[<\\/span>(?:${TYPE})<span aria-hidden="true"[^>]*>\\]<\\/span>`, "g");
-function typeTags(html, where) {
-  const tags = [...html.matchAll(TYPE_TAG)];
-  for (const [, cls] of tags) {
-    assert.match(cls, /\bfont-mono\b/, `${where}: the type tag is not set in mono`);
-    assert.doesNotMatch(cls, /\buppercase\b|\btracking-/, `${where}: the type tag is an uppercase, letter-spaced eyebrow`);
-  }
-  return tags.length;
-}
-
-// The restyled insights pages (Phase B2 Task 13) write it as a BracketChip, which sets the mono
-// face in its own scoped style and never takes an uppercase or tracking class.
+// Every insights surface writes it as a BracketChip (the restyled pages since Phase B2 Task 13, and
+// the Home page's latest insights since Phase D Task 8), which sets the mono face in its own scoped
+// style and never takes an uppercase or tracking class.
 const CHIP_TAG = new RegExp(`<span class="bracket-chip"[^>]*\\bdata-bracket-chip\\b[^>]*><span aria-hidden="true"[^>]*>\\[<\\/span>(?:${TYPE})<span aria-hidden="true"[^>]*>\\]<\\/span><\\/span>`, "g");
 const chipTags = (html) => (html.match(CHIP_TAG) ?? []).length;
 
@@ -80,13 +69,17 @@ test("the insights index tags every post with its type, then its date and readin
   assertNoPillar(text, "insights/index.html");
 });
 
-test("the home Insights section tags its cards by type", () => {
+test("the Home page's latest insights tag each card by type, as the index does", () => {
   const html = readDist("index.html");
   const start = html.indexOf('id="insights"');
   const end = html.indexOf("</section>", start);
   assert.ok(start >= 0 && end > start, "home #insights section not found");
   const section = html.slice(start, end);
-  assert.equal(typeTags(section, "home #insights"), Math.min(3, PUBLISHED.length), "the legacy Home section shows the newest three posts");
+  const mode = section.match(/\bdata-latest-insights="(cards|link)"/)?.[1];
+  assert.ok(mode, "home #insights has no latest-insights block");
+  const cards = section.split("data-insight-card").slice(1);
+  assert.equal(cards.length, mode === "cards" ? Math.min(3, PUBLISHED.length) : 0, `home #insights shows ${cards.length} cards in "${mode}" mode`);
+  for (const card of cards) assert.equal(chipTags(card.slice(0, card.indexOf("<h3"))), 1, "a Home card without its type chip above the title");
   assertNoPillar(visibleText(section), "home #insights");
 });
 

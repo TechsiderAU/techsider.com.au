@@ -46,7 +46,7 @@ test("evals post example checks completeness (72 and 24 hours)", () => {
   assert.match(page, /must_contain\W+72 hours\W+24 hours/);
 });
 
-test("Industries copy makes no IRAP/ISM alignment claim", () => {
+test("the Home page makes no IRAP- or ISM-alignment claim (spec §9.4)", () => {
   const home = visibleText(readDist("index.html"));
   assert.doesNotMatch(home, /IRAP-aligned|ISM- and IRAP/);
 });

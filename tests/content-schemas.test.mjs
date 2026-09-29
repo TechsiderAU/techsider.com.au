@@ -701,7 +701,11 @@ const ABOUT = {
   principles: texts("Test principle", 5).map(titled), howWeWork: texts("Test step", 3).map(titled),
   buildLog: [{ date: "2026-09-01", event: "Test event" }],
 };
-const HOME = { heroTrace: "test-hero-trace", faq: [{ q: HOME_TRUST_QUESTION, a: "Test answer, long enough to pass." }, ...faq(3)] };
+const HOME = {
+  heroTrace: "test-hero-trace",
+  faq: [{ q: HOME_TRUST_QUESTION, a: "Test answer, long enough to pass." }, ...faq(3)],
+  trustPageLine: "Test sentence about the Trust page.",
+};
 const DOCUMENT = { title: "Test document", summary: "Test summary, twenty plus characters.", lastUpdated: "2026-09-01" };
 
 test("page data: positioning holds the four pillars in spec §3.2 order", () => {
@@ -781,6 +785,9 @@ test("page data: the Home FAQ asks the trust question exactly once (spec §8.1.1
   badWith(homeData, { ...HOME, faq: [{ ...HOME.faq[0], q: "You're new. Why should we trust you" }, ...faq(3)] }, "faq", message);
   bad(homeData, { ...HOME, faq: HOME.faq.slice(0, 3) }, "three FAQs");
   bad(homeData, { ...HOME, heroTrace: "Test Trace" }, "hero trace that is not a slug");
+  const { trustPageLine: _line, ...noLine } = HOME;
+  bad(homeData, noLine, "no Trust page line");
+  bad(homeData, { ...HOME, trustPageLine: "Test too short" }, "a Trust page line under 20 characters");
 });
 
 test("page data: about needs five principles; document frontmatter defaults draft to false", () => {

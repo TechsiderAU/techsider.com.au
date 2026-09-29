@@ -4,12 +4,16 @@
 // `now`, and wraps this in BaseLayout. Section ids keep the spec §7.1 anchors (#services #approach
 // #industries #demo #insights #faq #contact, which CI check 03 requires on the built Home page)
 // and add #switcher, #pillars and #where-it-runs.
-// - Slot `demo`: the demo band's engine (Phase D). The gallery fills it with a placeholder figure.
+// - Slot `demo`: the demo band's demo. The real Home fills it with the ② Knowledge Assistant demo
+//   on the Phase D engine (src/pages/index.astro); the gallery fills it with a placeholder figure.
 // - The hero trace is decorative (spec §6.5): the TracePanel sits in an aria-hidden wrapper, and
 //   its title, provenance and lines are present once more as static text for assistive technology.
 //   B2 renders it without the type-in motion (Phase E).
 // - The four pillars carry data-pillar, never data-onshore-pillar: that attribute marks a
 //   package's onshore pillar, which CI check 10 ties to data-onshore="true".
+// - The pillars block is titled "The four rules we build by" (WB-5): it describes the pillars
+//   without presenting them as enforceable commitments. Each pillar shows its mechanism, then its
+//   plain mid-market version prefixed "Put simply:" (WB-6, spec §3.2).
 // Surfaces alternate from the carbon hero; the closing prompt sits on the page's carbon inside
 // the content width, so no full-width band sits directly above the footer (spec §6.4).
 import PageHero from "../components/page/PageHero.astro";
@@ -117,12 +121,13 @@ const routeColumns = [
     </div>
   </PageSection>
 
-  <PageSection id="pillars" title="What you can hold us to" surface="carbon">
+  <PageSection id="pillars" title="The four rules we build by" surface="carbon">
     <ul class="home-pillars">
       {view.pillars.map((pillar) => (
         <li class="home-pillar" data-pillar={pillar.id}>
           <h3 class="home-pillar-title">{pillar.title}</h3>
           <p class="home-pillar-mechanism">{pillar.mechanism}</p>
+          <p class="home-pillar-plain" data-pillar-plain><span class="home-pillar-plain-label">Put simply:</span> {pillar.midMarket}</p>
         </li>
       ))}
     </ul>
@@ -344,7 +349,7 @@ const routeColumns = [
     line-height: 1.5;
   }
 
-  /* What you can hold us to (carbon): four pillars. */
+  /* The four rules we build by (carbon): four pillars, each with its mechanism and its plain version. */
   .home-pillars {
     display: grid;
     gap: 1rem;
@@ -381,6 +386,19 @@ const routeColumns = [
   .home-pillar-mechanism {
     margin: 0;
     line-height: 1.5;
+    color: var(--color-muted);
+  }
+  /* The plain version reads in bone below a carbon hairline; its label is muted mono (both pairs
+     pass on graphite, spec §6.1). */
+  .home-pillar-plain {
+    margin: 0;
+    padding-top: 0.75rem;
+    line-height: 1.5;
+    border-top: 1px solid var(--color-carbon);
+  }
+  .home-pillar-plain-label {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
     color: var(--color-muted);
   }
 

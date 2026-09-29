@@ -306,14 +306,14 @@ test("/contact/: the H1, the address as plain text, no form, the reply time, wha
   assert.deepEqual(tagged(one(main, "id", "elsewhere").inner, "a").map((a) => a.attrs.href), CONTACT.deflection.map((d) => `mailto:${d.email}`));
 });
 
-test("the reply time is written once, in the contact data; only /contact/ and the legacy Home state it", () => {
+test("the reply time is written once, in the contact data, and only /contact/ states it", () => {
   const files = listFiles(join(ROOT, "src"), (rel) => SOURCE_FILE.test(rel) && !rel.startsWith("fixtures/"));
   const writing = files.filter((f) => readFileSync(f, "utf8").includes(CONTACT.replyTime)).map((f) => relPath(ROOT, f)).sort();
-  // src/components/Contact.astro is the legacy Home's contact section, which Phase D retires with the
-  // legacy Home (blueprint "Phase D, not C"). Until then it must say the same thing.
-  assert.deepEqual(writing, ["src/components/Contact.astro", "src/data/contact.ts"]);
+  // The legacy Home's contact section said it too, until Phase D Task 8 deleted it with the legacy
+  // Home. No other page states a reply time (spec §8.11).
+  assert.deepEqual(writing, ["src/data/contact.ts"]);
   const stating = allHtmlFiles().filter((f) => /\bwe reply within\b/i.test(visibleText(readDist(f)))).sort();
-  assert.deepEqual(stating, ["contact/index.html", "index.html"]);
+  assert.deepEqual(stating, ["contact/index.html"]);
   for (const f of stating) assert.ok(visibleText(readDist(f)).includes(`We reply within ${CONTACT.replyTime}.`), f);
 });
 

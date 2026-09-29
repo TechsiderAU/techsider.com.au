@@ -1,33 +1,49 @@
 ---
+// The Home page (spec §8.1): HomeTemplate over the real data, inside BaseLayout with the Home page's
+// own title and description from nav.ts. The view is built as the gallery's HomeSpecimen builds it
+// from fixtures: the positioning copy (the sub-promise and the pillars), the Services data (the two
+// routes in, the delivery choices and the onshore note), the Home data (the hero trace and the
+// FAQ), every solution, industry and trace, the insight cards, and the build time, which decides
+// the latest-insights rule (deploy.yml rebuilds weekly, spec §8.1 block 9).
+// The #demo band plays the ② Knowledge Assistant demo, the corrected RAG demo of spec §9.4, on the
+// Phase D engine, through DemoEmbed, the one embed component the solution heroes use too. The route
+// loads the knowledge-assistant entry (src/data/demos/knowledge-assistant.json) and fails the build
+// without it; level 3 makes its scenario titles h3s under the band's h2. The replay starts once the band is scrolled into view, and only
+// then loads its renderer and data (spec §11.4; tests/perf-budget.test.mjs and
+// tests/e2e/prod-home.spec.mjs hold it to that).
+import { getCollection, getEntry } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Hero from "../components/Hero.astro";
-import TrustStrip from "../components/TrustStrip.astro";
-import Services from "../components/Services.astro";
-import Approach from "../components/Approach.astro";
-import WhyUs from "../components/WhyUs.astro";
-import Industries from "../components/Industries.astro";
-import Demo from "../components/Demo.astro";
-import Insights from "../components/Insights.astro";
-import Faq from "../components/Faq.astro";
-import Contact from "../components/Contact.astro";
-import { PAGES } from "../data/nav";
-import { pageDescription } from "../lib/meta";
+import HomeTemplate from "../templates/HomeTemplate.astro";
+import DemoEmbed from "../components/demo/DemoEmbed.astro";
+import { isPreview } from "../data/nav";
+import { HOME } from "../data/home";
+import { POSITIONING } from "../data/positioning";
+import { SERVICES } from "../data/services";
+import { pageDescription, pageTitle } from "../lib/meta";
+import { pageAt } from "../lib/pages";
+import { siteContext } from "../lib/site";
+import { homeView } from "../lib/views/home";
+import { insightCards } from "../lib/views/insights";
 
-// The legacy Home body until Phase D's HomeTemplate route replaces it (its demo band needs the
-// Phase D demo engine); its meta description is the Home page's own, from nav.ts.
-const home = PAGES.find((p) => p.path === "/");
-if (home === undefined) throw new Error("nav.ts has no page at /");
+const page = pageAt("/");
+const site = siteContext(isPreview());
+const demo = await getEntry("demos", "knowledge-assistant");
+if (demo === undefined) throw new Error("index.astro: src/data/demos/knowledge-assistant.json is missing, so the #demo band has nothing to play");
+if (demo.data.kind !== "assistant") throw new Error(`index.astro: knowledge-assistant.json is a "${demo.data.kind}" demo, not the ② assistant the #demo band plays`);
+const view = homeView({
+  positioning: POSITIONING,
+  services: SERVICES,
+  home: HOME,
+  solutions: Object.fromEntries((await getCollection("solutions")).map((e) => [e.id, e.data])),
+  industries: Object.fromEntries((await getCollection("industries")).map((e) => [e.id, e.data])),
+  traces: Object.fromEntries((await getCollection("traces")).map((e) => [e.id, e.data])),
+  insights: insightCards(await getCollection("insights"), site),
+  now: new Date(),
+  site,
+});
 ---
-
-<BaseLayout description={pageDescription(home)}>
-  <Hero />
-  <TrustStrip />
-  <Services />
-  <Approach />
-  <WhyUs />
-  <Industries />
-  <Demo />
-  <Insights />
-  <Faq />
-  <Contact />
+<BaseLayout title={pageTitle(page)} description={pageDescription(page)}>
+  <HomeTemplate view={view}>
+    <DemoEmbed slot="demo" demo={demo.data} site={site} level={3} />
+  </HomeTemplate>
 </BaseLayout>

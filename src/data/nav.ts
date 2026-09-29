@@ -110,8 +110,10 @@ function describe(entry: PageEntry, description: string): PageEntry {
   return entry;
 }
 
+// The Home description keeps the sub-promise's audience range word for word (ruling 12,
+// src/data/positioning.ts), so the owner's one decision on spec §12 item 12 covers both.
 const HOME = describe(page("home", "Home", "/", "/", "live", "Techsider"),
-  "AI that ships. Measured before it ships. We design, build and run AI solutions for Australian organisations, from 40-person practices to federal agencies.");
+  "AI that ships. Measured before it ships. Five AI solutions for Australian organisations, from 40-person practices to federal agencies, with demos to try.");
 // Always built: GitHub Pages serves dist/404.html for any path it has no file for.
 const NOT_FOUND = describe(page("system", "Not found", "/", "/404", "live"),
   "No page lives at this address. It may be mistyped or out of date. Follow a link below to a section of the Techsider site, or report the broken link by email.");

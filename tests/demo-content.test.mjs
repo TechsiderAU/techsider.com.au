@@ -40,8 +40,9 @@ test("demo metrics are labelled illustrative, on the frame and above the transcr
   assert.match(home, /Scores and timings are illustrative: a scripted replay, not a measured run\./);
 });
 
-test("demo is described as a scripted replay, not a recording", () => {
+test("demo is described as a canned replay, not a recording", () => {
   assert.doesNotMatch(home, /Recorded illustrative demo|recorded walkthrough/i);
   assert.match(home, /Canned replay · synthetic or public data/);
-  assert.match(home, /A scripted replay of a cited assistant/);
+  // The legacy band's lede went with it (Phase D Task 8); the Home FAQ says what the demo is.
+  assert.match(home, /It's a canned replay over public documents: it runs in your browser and never calls a model\./);
 });

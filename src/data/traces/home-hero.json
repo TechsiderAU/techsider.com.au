@@ -1,0 +1,11 @@
+{
+  "title": "A staff question answered from a fictional agency's policy library, with its source",
+  "provenance": "illustrative",
+  "lines": [
+    { "t": "09:14:02", "op": "ask.question", "detail": "Question received from a fictional state agency officer" },
+    { "t": "09:14:02", "op": "retrieve.passages", "detail": "Policy passages ranked against the question" },
+    { "t": "09:14:03", "op": "check.grounding", "detail": "Answer checked against the passages it cites" },
+    { "t": "09:14:03", "op": "cite.source", "detail": "Answer shown with the page it came from", "metric": { "value": 1840, "unit": "ms" } },
+    { "t": "09:14:03", "op": "log.trace", "detail": "Question, sources and answer kept for the next test run" }
+  ]
+}

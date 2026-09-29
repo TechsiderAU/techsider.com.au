@@ -245,6 +245,7 @@ export const homeFixture: HomeData = {
     { q: "Fixture question: what does a first fixture step look like?", a: "Fixture answer: a short fixture call, then a fixture test on your own files." },
     { q: "Fixture question: what if the fixture software already does this?", a: "Fixture answer: then we say so, and you keep using the fixture software." },
   ],
+  trustPageLine: "Fixture sentence: the fixture Trust page answers fixture questions.",
 };
 
 export interface DocumentFixture {

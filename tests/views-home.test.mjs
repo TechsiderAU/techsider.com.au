@@ -68,11 +68,24 @@ test("homeView: the demo band, the two routes in, the pillars, the FAQ and the c
   assert.deepEqual(view.routes, { ...servicesFixture.routes, evaluationPartnerHref: "/preview/templates/evaluation-partner/" });
   assert.deepEqual(view.pillars.map((p) => p.id), ["cited", "measured", "onshore", "ownership"]);
   assert.deepEqual(view.pillars, positioningFixture.pillars);
-  assert.deepEqual(view.faq, homeFixture.faq);
+  // The gallery shows /trust/, so the trust answer ends with the Trust page line (spec §8.1.10).
+  assert.deepEqual(view.faq, homeFixture.faq.map((f) => (f.q === HOME_TRUST_QUESTION ? { ...f, a: `${f.a} ${homeFixture.trustPageLine}` } : f)));
   assert.equal(view.faq.filter((f) => f.q === HOME_TRUST_QUESTION).length, 1);
   assert.deepEqual(view.closing, {
     command: HOME_CLOSING.command, args: "--about=<industry>", label: CTAS.talk.label, href: "/preview/templates/contact/",
   });
+});
+
+test("homeView: the trust answer names the Trust page only while /trust/ is shown (spec §8.1.10)", () => {
+  const trustAnswer = (v) => v.faq.find((f) => f.q === HOME_TRUST_QUESTION).a;
+  const own = homeFixture.faq.find((f) => f.q === HOME_TRUST_QUESTION).a;
+  assert.equal(fixtureSite.page("trust").href, "/preview/templates/trust/");
+  assert.equal(trustAnswer(view), `${own} ${homeFixture.trustPageLine}`);
+  // The same gallery with /trust/ not shown: every answer is the data's own.
+  const noTrust = { ...fixtureSite, page: (key) => (key === "trust" ? { ...fixtureSite.page(key), href: null } : fixtureSite.page(key)) };
+  const hidden = homeView(input({ site: noTrust }));
+  assert.equal(trustAnswer(hidden), own);
+  assert.deepEqual(hidden.faq, homeFixture.faq);
 });
 
 test("homeView: where it runs lists (a), (b), (c) in order whatever order the data lists them in", () => {

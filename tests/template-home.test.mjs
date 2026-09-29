@@ -30,7 +30,7 @@ const SECTIONS = [
   ["services", "Five solutions", "bone"],
   ["demo", "See it work", "carbon"],
   ["approach", "Two ways in", "bone"],
-  ["pillars", "What you can hold us to", "carbon"],
+  ["pillars", "The four rules we build by", "carbon"],
   ["where-it-runs", "Where it runs", "bone"],
   ["industries", "Built for your industry", "carbon"],
   ["insights", "Latest insights", "bone"],
@@ -207,13 +207,16 @@ test("home: #approach shows the two routes with their steps, and the partner lin
   assert.ok(routes[1].inner.trimEnd().endsWith(partner.outer), "the partner line ends the enterprise column");
 });
 
-test("home: #pillars shows the four pillars with their mechanisms, and no element is an onshore pillar", () => {
+test("home: #pillars shows each pillar's mechanism, then 'Put simply:' and its plain version (WB-6), and no element is an onshore pillar", () => {
   const html = readPreviewDist(HOME);
   const pillars = elementsWith(one(mainOf(html), "id", "pillars").inner, "data-pillar");
   assert.deepEqual(pillars.map((p) => p.attrs["data-pillar"]), ["cited", "measured", "onshore", "ownership"]);
   pillars.forEach((p, i) => {
-    assert.equal(text(tagged(p.inner, "h3")[0].inner), positioningFixture.pillars[i].title);
-    assert.ok(text(p.inner).includes(positioningFixture.pillars[i].mechanism));
+    const pillar = positioningFixture.pillars[i];
+    assert.equal(text(tagged(p.inner, "h3")[0].inner), pillar.title);
+    const paragraphs = tagged(p.inner, "p");
+    assert.deepEqual(paragraphs.map((x) => text(x.inner)), [pillar.mechanism, `Put simply: ${pillar.midMarket}`]);
+    assert.equal(paragraphs[1].attrs["data-pillar-plain"], "", "the plain version isn't marked data-pillar-plain");
   });
   // data-onshore-pillar marks a package's pillar (CI check 10); Home's pillars never carry it.
   for (const file of [HOME, STALE]) {

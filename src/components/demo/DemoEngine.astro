@@ -33,7 +33,7 @@ const { kind } = Astro.props;
         import("../../data/demos/knowledge-assistant.json"),
       ]);
       // The build validates this file against the demo schema (src/content.config.ts), and
-      // AssistantDemo renders its transcript from the same file.
+      // DemoEmbed and the demo page render its transcript from the same file.
       return assistantRenderer(file.default.data as unknown as AssistantData);
     },
     // The ① replay reads the frame's own static transcript, so it loads no data file.

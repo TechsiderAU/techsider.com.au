@@ -47,9 +47,15 @@ test("acid on bone is documented as unusable (it is ~1:1)", () => {
   assert.ok(ratio(token("acid"), token("bone")) < 1.5);
 });
 
-test("legacy aliases map onto the new palette", () => {
-  const alias = { bg: "carbon", "bg-elev": "graphite", "bg-deep": "carbon", text: "bone", "text-mute": "muted", "text-dim": "muted", accent: "acid", "accent-ink": "carbon", border: "graphite", "border-soft": "graphite" };
-  for (const [a, t] of Object.entries(alias)) assert.equal(token(a), EXPECTED[t], `--color-${a}`);
+// The legacy aliases let the pre-rebuild Home sections render in the new palette. Phase D deleted
+// those sections and the aliases with them, so the theme holds the spec §6.1 tokens and fonts only.
+test("the theme defines no legacy alias: no old colour name and no serif face", () => {
+  for (const alias of ["bg", "bg-elev", "bg-deep", "text", "text-mute", "text-dim", "accent", "accent-ink", "border", "border-soft"]) {
+    // Any value, not only a hex (token() reads hex values only), so an alias redefined as var(--color-…) still fails.
+    assert.doesNotMatch(theme, new RegExp(`--color-${alias}\\s*:`), `--color-${alias} is still defined`);
+  }
+  assert.doesNotMatch(theme, /--font-serif\b/, "--font-serif is still defined");
+  assert.doesNotMatch(css, /LEGACY/, "global.css still has a legacy block");
 });
 
 test("the built CSS ships Archivo (width axis) and JetBrains Mono, and no Garamond/Inter", () => {

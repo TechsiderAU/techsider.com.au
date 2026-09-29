@@ -1,9 +1,10 @@
 ---
 // /preview/templates/home/: the Home template over every fixture set, with the gallery's
 // SiteContext, so every link stays inside the gallery. `now` is FIXTURE_NOW, when the newest
-// fixture insight is 9 days old, so the latest-insights block shows its cards. The demo band's
-// engine arrives in Phase D, so its slot holds a placeholder figure. Fixtures are imported
-// statically (only src/preview/ may import them).
+// fixture insight is 9 days old, so the latest-insights block shows its cards. The demo slot holds
+// a placeholder figure, so this page tests the template alone; the real Home fills it with the ②
+// demo (src/pages/index.astro, tests/home-page.test.mjs). Fixtures are imported statically (only
+// src/preview/ may import them).
 import HomeTemplate from "../../templates/HomeTemplate.astro";
 import { homeView } from "../../lib/views/home";
 import { insightCards } from "../../lib/views/insights";

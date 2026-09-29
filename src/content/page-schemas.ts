@@ -110,7 +110,9 @@ export const aboutData = z.strictObject({
   buildLog: z.array(z.strictObject({ date: z.coerce.date(), event: z.string() })).min(1),
 });
 
-export const homeData = z.strictObject({ heroTrace: slug, faq: z.array(faqItem).min(4) })
+// `trustPageLine` ends the trust answer, and only while /trust/ is shown: homeView() appends it
+// then, so the answer never names a page the build doesn't have (spec §8.1.10).
+export const homeData = z.strictObject({ heroTrace: slug, faq: z.array(faqItem).min(4), trustPageLine: z.string().min(20) })
   .refine((h) => h.faq.filter((f) => f.q === HOME_TRUST_QUESTION).length === 1, {
     message: `the Home FAQ asks "${HOME_TRUST_QUESTION}" exactly once (spec §8.1.10)`, path: ["faq"],
   });

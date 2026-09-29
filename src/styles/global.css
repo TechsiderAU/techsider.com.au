@@ -27,20 +27,6 @@
   --font-sans: "Archivo Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Archivo Variable", system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
-
-  /* LEGACY aliases: let pre-rebuild sections render in the new palette.
-     Remove in Phase B when those sections are replaced. */
-  --color-bg: #0b0b0c;
-  --color-bg-elev: #2a2b2e;
-  --color-bg-deep: #0b0b0c;
-  --color-text: #f2f1ec;
-  --color-text-mute: #9a9a94;
-  --color-text-dim: #9a9a94;
-  --color-accent: #c8ff2e;
-  --color-accent-ink: #0b0b0c;
-  --color-border: #2a2b2e;
-  --color-border-soft: #2a2b2e;
-  --font-serif: "Archivo Variable", system-ui, sans-serif;
 }
 
 /* Base element styles. Layered so any utility on the same element (e.g. a

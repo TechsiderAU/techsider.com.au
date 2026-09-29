@@ -7,7 +7,7 @@ import type { z } from "astro/zod";
 import type { TraceData, makeIndustrySchema, makeSolutionSchema } from "../../content/schemas.ts";
 import type { HomeData, PositioningData, ServicesData } from "../../content/page-schemas.ts";
 import { CTAS, SITE } from "../../data/nav.ts";
-import { DELIVERY_LETTER, HOME_CLOSING, HOME_PROMPT } from "../fixed-copy.ts";
+import { DELIVERY_LETTER, HOME_CLOSING, HOME_PROMPT, HOME_TRUST_QUESTION } from "../fixed-copy.ts";
 import type { Link, SiteContext } from "../site.ts";
 import { latestInsights, type InsightCardView } from "./insights.ts";
 
@@ -39,6 +39,7 @@ export interface HomeView {
   industries: { shortName: string; hook: string; href: string | null }[];
   /** "cards" while the newest post is at most 45 days old at `now` (the newest 3); otherwise "link" and no cards. */
   insights: { mode: "cards" | "link"; cards: InsightCardView[]; allHref: string | null };
+  /** home.faq in order. The trust answer ends with home.trustPageLine only while /trust/ is shown (spec §8.1.10). */
   faq: { q: string; a: string }[];
   closing: { command: "talk_to_us"; args: "--about=<industry>"; label: "Talk to us"; href: string };
 }
@@ -69,6 +70,7 @@ export function homeView(input: {
   const trace = traces[home.heroTrace];
   if (trace === undefined) throw new Error(`homeView: no trace "${home.heroTrace}" for the hero (homeData.heroTrace)`);
   const cards = latestInsights(insights, now);
+  const trustShown = site.page("trust").href !== null;
 
   return {
     hero: {
@@ -106,7 +108,7 @@ export function homeView(input: {
       href: i.href,
     })),
     insights: { mode: cards.length > 0 ? "cards" : "link", cards, allHref: site.page("insights").href },
-    faq: home.faq,
+    faq: home.faq.map((f) => (f.q === HOME_TRUST_QUESTION && trustShown ? { q: f.q, a: `${f.a} ${home.trustPageLine}` } : f)),
     closing: { command: HOME_CLOSING.command, args: HOME_CLOSING.args, label: "Talk to us", href: site.contact() },
   };
 }

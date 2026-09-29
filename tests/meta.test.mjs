@@ -109,6 +109,15 @@ test("BaseLayout requires a description: no default, so a route can't fall back 
   assert.doesNotMatch(destructure, /description\s*=/, "BaseLayout still defaults the description");
 });
 
+test("BaseLayout requires a title too: the legacy Home's default is gone, so every route names its own page (spec §11.3)", () => {
+  const src = readFileSync(new URL("../src/layouts/BaseLayout.astro", import.meta.url), "utf8");
+  const props = src.match(/interface Props \{([\s\S]*?)\n\}/)?.[1] ?? "";
+  assert.match(props, /^\s*title: string;/m, "BaseLayout's title prop is optional");
+  const destructure = src.match(/const \{([\s\S]*?)\} = Astro\.props;/)?.[1] ?? "";
+  assert.doesNotMatch(destructure, /title\s*=/, "BaseLayout still defaults the title");
+  assert.doesNotMatch(src, /Enterprise AI for Australian business/, "BaseLayout still carries the legacy Home's title");
+});
+
 for (const [build, dir] of Object.entries(BUILDS)) {
   test(`${build}: every nav page it builds carries its own description, for search and for sharing`, () => {
     const built = PAGES.filter((p) => resolveDistPath(dir, p.path) !== null);
