@@ -1,0 +1,44 @@
+{
+  "rows": [
+    {
+      "id": "soci-offshore-operational-info",
+      "obligation": "CIRMP Rules ss 6(d) and 7(1)(b)–(c): sensitive operational information stored, transmitted or processed outside Australia",
+      "meaning": "For critical electricity, gas, water and liquid fuel assets, layout diagrams, schematics, configuration information and other data a reasonable person would consider confidential or sensitive about the asset are sensitive operational information. Storing, transmitting or processing them in a model, index or log store outside Australia is a material risk your CIRMP has to identify and, as far as reasonably practicable, minimise or eliminate.",
+      "design": "Every step we build, including model inference, is designed to run in an Australian region. Inside a platform you already license, we show you where the vendor runs it.",
+      "evidence": "A data-flow map showing where each step runs",
+      "source": "https://www.legislation.gov.au/F2023L00112/latest/text",
+      "asAt": "2026-06-10",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "soci-emerging-technology",
+      "obligation": "CIRMP Rules s 8A(2)(c)–(d): risks from advanced, novel or emerging technology",
+      "meaning": "The Rules don't define the term; the Explanatory Statement says it captures technology such as AI. Deploying or hosting AI in a way that could prejudice the asset's availability, integrity, reliability or confidentiality is a material risk the CIRMP has to minimise or eliminate, so far as reasonably practicable. For assets that were CI assets before 10 June 2026, Home Affairs gives 10 June 2027 as the date to comply by.",
+      "design": "What we build reads your documents without changing them, anything it drafts waits for a person, and it is re-tested when the model changes.",
+      "evidence": "A test report listing every failure, and each re-test record",
+      "source": "https://www.legislation.gov.au/F2023L00112/latest/text",
+      "asAt": "2026-06-10",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "qld-coal-current-sops",
+      "obligation": "Coal Mining Safety and Health Regulation 2017 (Qld) s 11: current SOPs easily accessible",
+      "meaning": "A Queensland coal mine's site senior executive must keep a list of current SOPs, and the current SOP for each activity, easily accessible to the workers doing it, in a format that's easy to use and understand. An assistant that answers from a superseded SOP works against that, and it doesn't replace the list or the copy.",
+      "design": "The assistant answers only from SOPs marked current, shows the version it used, and says so when the SOP is silent.",
+      "evidence": "A test report and the list of SOP versions indexed",
+      "source": "https://www.legislation.qld.gov.au/view/html/inforce/current/sl-2017-0165",
+      "asAt": "2026-09-01",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "qld-mq-current-procedures",
+      "obligation": "Mining and Quarrying Safety and Health Regulation 2017 (Qld) s 115: only current procedures in use",
+      "meaning": "At a Queensland mine or quarry other than a coal mine, the site senior executive must control the issue and availability of written procedures and standard work instructions so only current versions are in use, and make copies of the current ones available to the workers they apply to. An assistant that answers from a superseded version works against that.",
+      "design": "The assistant answers only from current versions, drops superseded ones, and shows the version number and issue date it used.",
+      "evidence": "A test report and a log of versions indexed and removed",
+      "source": "https://www.legislation.qld.gov.au/view/html/inforce/current/sl-2017-0166",
+      "asAt": "2026-03-27",
+      "lastReviewed": "2026-09-29"
+    }
+  ]
+}

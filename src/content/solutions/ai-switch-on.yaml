@@ -30,6 +30,7 @@ byIndustry:
   - accounting
   - education
   - real-estate
+  - legal-and-professional
 genericPackage:
   id: switch-on-in-3-weeks
   name: Switch-on in 3 weeks
@@ -139,6 +140,7 @@ matrix:
   accounting: Admin Hours Audit + Switch-On
   education: "Switch-on for independent schools"
   real-estate: "Admin Hours Audit and switch-on"
+  legal-and-professional: "Practice-system AI, set up and measured"
 faq:
   - q: Can't we switch these features on ourselves?
     a: >-

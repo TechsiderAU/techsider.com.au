@@ -1,0 +1,149 @@
+# /industries/legal-and-professional/ (spec §5, §8.5). Facts: .superpowers/research/2026-09-29/phase-c/industries/
+# legal-and-professional.md, post-fact-check text. Held (Phase C rulings 1 and 7): the Federal Court GPN-AI row, until
+# its live page is checked in a browser. No Trust Deed Register on this page; consultancies appear only as buyers of an
+# independent evaluation. Four rows keep the page inside §8.5's word range. The joint statement binds NSW, Victoria
+# and WA only (the dossier's correction 1), so the page names its three regulators.
+# ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/legal-and-professional.json, must be in the standard engagement terms (spec §12 item 2)
+promise: Test legal AI on your own matters before anyone relies on it.
+constraintSet: Built around the NSW, Victorian and WA regulators' joint AI statement, NSW SC Gen 23 and Vic SC Gen 25.
+constraintHook: Joint AI statement, NSW SC Gen 23 and Vic SC Gen 25.
+flagshipUseCases:
+  - name: Vendor AI Evaluation on your own matters
+    solution: ai-evaluation
+    status: launch
+  - name: Ask the Firm Manual
+    solution: knowledge-assistant
+    status: on-request
+  - name: Admin Hours Audit + Switch-On
+    solution: ai-switch-on
+    status: launch
+  - name: Verification and AI-use record for court work
+    solution: ai-switch-on
+    status: on-request
+  - name: Private Workspace
+    solution: ai-switch-on
+    status: on-request
+obligationChips:
+  - label: Client confidentiality, ASCR r 9.1
+    row: joint-statement-confidentiality
+  - label: NSW SC Gen 23 restricted material
+    row: nsw-gen23-restricted-material
+  - label: NSW SC Gen 23 citation checks
+    row: nsw-gen23-verification
+  - label: Vic Supreme Court SC Gen 25
+    row: vic-sc-gen25
+worksAlongside:
+  - system: iManage Work (iManage Cloud)
+    method: read-only
+    verified: 2026-09-29
+  - system: Microsoft SharePoint
+    method: read-only
+    verified: 2026-09-29
+  - system: Smokeball
+    method: read-only
+    verified: 2026-09-29
+  - system: Harvey (history export)
+    method: import
+    verified: 2026-09-29
+leadSolutions:
+  - ai-evaluation
+  - knowledge-assistant
+  - ai-switch-on
+packages:
+  - solution: ai-evaluation
+    package: vendor-ai-evaluation
+  - solution: ai-evaluation
+    package: independent-evaluation-report
+  - solution: ai-switch-on
+    package: admin-hours-audit-switch-on
+  - solution: knowledge-assistant
+    package: ask-the-firm-manual
+platformFirst: If your firm runs LEAP, use Matter AI and LawY first; both come with every LEAP subscription. If you license Ask iManage, try its repository search before asking us to build.
+dontDo:
+  - Rebuild matter Q&A, legal research or drafting inside Word. Your practice and research tools already do these.
+  - Build KYC, ID verification or AML/CTF program software.
+  - Draft or tailor legal wording. Your own adviser approves any policy, consent or engagement-letter text.
+problem:
+  from: Lawyers reach for general-purpose AI and check each answer by hand, often in workplaces with no AI guidelines.
+  to: Your firm chooses its AI on a test of your own matters, and keeps a record of every check on court work.
+  source:
+    label: VLSB+C, Generative AI Use in the Legal Profession
+    url: https://lsbc.vic.gov.au/research-centre/what-we-do/publications/generative-ai-use-legal-profession-findings-2025-victorian
+    asAt: 2026-04-20
+workflow:
+  - id: choose-a-tool
+    stage: Choose
+    useCases:
+      - name: Vendor AI Evaluation before you sign
+        solution: ai-evaluation
+        status: launch
+  - id: switch-on
+    stage: Switch on
+    useCases:
+      - name: Admin Hours Audit + Switch-On
+        solution: ai-switch-on
+        status: launch
+      - name: Private Workspace
+        solution: ai-switch-on
+        status: on-request
+        note: Only for firms with no suitable licence.
+  - id: court-work
+    stage: Court work
+    useCases:
+      - name: Verification and AI-use record
+        solution: ai-switch-on
+        status: on-request
+  - id: keep-it-working
+    stage: Keep it working
+    useCases:
+      - name: Model-Change Regression when a vendor changes its model
+        solution: ai-evaluation
+        status: launch
+mockPanel:
+  title: "Side-by-side test: one question"
+  fields:
+    - label: Question
+      value: Which clause sets the rent review date?
+    - label: Tool A
+      value: Clause 4.2, linked to the page
+    - label: Tool B
+      value: Clause 7.1, the make-good clause
+  chips:
+    - status: ok
+      text: "Tool A: correct, citation found"
+    - status: blocked
+      text: "Tool B: wrong clause cited"
+  citations:
+    - source: Lease, de-identified
+      clause: Clause 4.2
+scenario:
+  title: Two research tools, one renewal date.
+  problem: A fictional commercial law firm must choose between two legal AI tools before its research subscription renews.
+  approach: Senior lawyers pick questions from closed matters with known answers. Both tools answer them in the firm's own trial accounts, and two lawyers grade each answer separately.
+  measure:
+    - Wrong answers by task type, for each tool
+    - Citations that don't exist or don't support the proposition
+    - Agreement between the two graders
+  shipsFirst: The question set, with agreed answers and pass thresholds, before either tool runs.
+  trace: legal-and-professional-scenario
+firstEngagement:
+  needFromYou:
+    - One decision to test, and a partner who agrees the pass thresholds first.
+    - Questions from closed matters whose answers your lawyers know.
+    - Access to each tool, in accounts your firm controls.
+  youGet:
+    - A side-by-side report listing every wrong answer and unsupported citation.
+    - A data note per tool on where inputs are stored and processed.
+    - The question set and a replay script for the next model change.
+  exitRamp: Once the questions and thresholds are agreed, you decide whether to continue. The question set is yours either way.
+faq:
+  - q: You have no clients yet. Why trust your evaluation?
+    a: "Don't take it on trust: we have no clients yet. Your lawyers write and grade the questions, and you can re-run the test without us."
+  - q: Does testing mean our client files leave the firm?
+    a: Only to the tools under test. Tests run in tool accounts your firm controls, on cleared matters or de-identified copies, and a data note first records where each tool stores and processes inputs. Whether a client must consent is your call.
+  - q: Are you paid by legal AI vendors?
+    a: No. We take no resale margin or referral fees from vendors we evaluate, and disclose any vendor relationship. We never issue an independent evaluation of a system we built, configured or advised on for the same firm.
+  - q: Does your verification record meet the practice notes?
+    a: No. The record is a log, not a safeguard. The responsible lawyer still verifies each authority; the record shows who checked it, against which source, and when.
+  - q: Is this page only for law firms?
+    a: Mostly. Consultancies can commission an independent evaluation of AI they deliver to clients, or use the Evaluation Partner route under their own contract.

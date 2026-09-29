@@ -1,0 +1,9 @@
+{
+  "title": "Scope test on one scripted consultation",
+  "provenance": "illustrative",
+  "lines": [
+    { "t": "09:00:00", "op": "scribe.replay", "detail": "Scripted knee review run through the scribe" },
+    { "t": "09:00:06", "op": "note.compare", "detail": "Output lined up against the reference note" },
+    { "t": "09:00:09", "op": "scope.flag", "detail": "Imaging suggestion flagged: never said" }
+  ]
+}

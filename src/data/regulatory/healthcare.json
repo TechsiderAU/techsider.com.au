@@ -1,0 +1,44 @@
+{
+  "rows": [
+    {
+      "id": "tga-digital-scribes",
+      "obligation": "TGA Digital scribes guidance: a scribe that analyses or interprets is a medical device",
+      "meaning": "A scribe intended only to transcribe or translate a consultation into a written record, without analysis or interpretation, is not a medical device. One that analyses or interprets, for example by generating a diagnosis, differential diagnosis or treatment recommendation the clinician didn't state, is a medical device and must be in the ARTG before supply. A software update can move a product across that line.",
+      "design": "The scribe evaluation includes a scope test for any diagnosis, test or treatment the clinician never said, re-run on each vendor update.",
+      "evidence": "A scope-test log with the product version tested",
+      "source": "https://www.tga.gov.au/products/medical-devices/software-and-artificial-intelligence-ai/overview/types-software-based-medical-devices/digital-scribes",
+      "asAt": "2026-01-30",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "acsqhc-ai-clinical-use-guide",
+      "obligation": "ACSQHC AI Clinical Use Guide v1.0 and Ambient scribe scenario: 'while you use' and 'after you use' steps",
+      "meaning": "The guide and scenario ask clinicians to review scribe summaries for hallucinations, over-summarisation and missing information, label records AI helped create, and take part in regular reviews of how the scribe performs.",
+      "design": "We count omissions, additions and errors separately, and hand over the test set so your clinicians can re-run it.",
+      "evidence": "An evaluation report and the re-runnable test set",
+      "source": "https://www.safetyandquality.gov.au/resources/ai-clinical-use-guide",
+      "asAt": "2025-08-01",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "ahpra-ai-obligations",
+      "obligation": "Ahpra and National Boards AI guidance: Accountability and Informed consent principles",
+      "meaning": "The practitioner must apply human judgement to any AI output and check the accuracy of records a scribe creates, and generally needs the patient's informed consent before a scribe records. Ahpra says tools should be tested by the user or organisation for fitness for purpose before clinical use.",
+      "design": "Testing happens before clinical use, against thresholds your clinicians agree in week 0. It never replaces a clinician's review of each note.",
+      "evidence": "A pre-use test report with the agreed thresholds and every failure",
+      "source": "https://www.ahpra.gov.au/Resources/Artificial-Intelligence-in-healthcare.aspx",
+      "asAt": "2024-08-22",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "privacy-act-ai-products",
+      "obligation": "Privacy Act s 6D(4)(b) and OAIC guidance on commercially available AI products",
+      "meaning": "Private health service providers that hold health information are covered by the Privacy Act at any turnover, so AI that handles health information is subject to the APPs. The OAIC expects due diligence on whether a product was tested for your use, and regular performance reviews rather than 'set and forget'.",
+      "design": "Evaluations run on scripted or consented material inside your environment, and we record where each processing step runs.",
+      "evidence": "A one-page data note naming where each step runs",
+      "source": "https://www.oaic.gov.au/privacy/privacy-guidance-for-organisations-and-government-agencies/guidance-on-privacy-and-the-use-of-commercially-available-ai-products",
+      "asAt": "2025-01-17",
+      "lastReviewed": "2026-09-29"
+    }
+  ]
+}

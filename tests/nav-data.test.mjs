@@ -113,14 +113,15 @@ test("industry footer labels read 'AI for {short name}'", () => {
 });
 
 // Phase C puts pages live task by task, and each task that flips pages extends this pin.
-test("Phase C: the live pages after Task 5", () => {
+test("Phase C: the live pages after Task 6", () => {
   assert.deepEqual(PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(), [
     "/", "/404", "/insights/",
     "/services/", "/services/evaluation-partner/",
     "/solutions/", "/solutions/ai-evaluation/", "/solutions/ai-switch-on/", "/solutions/document-registers/",
     "/solutions/draft-for-approval/", "/solutions/knowledge-assistant/",
-    "/industries/government/", "/industries/financial-services/", "/industries/accounting/",
+    "/industries/", "/industries/government/", "/industries/financial-services/", "/industries/accounting/",
     "/industries/education/", "/industries/manufacturing/", "/industries/real-estate/",
+    "/industries/healthcare/", "/industries/resources-and-energy/", "/industries/legal-and-professional/",
   ].sort());
 });
 
@@ -142,6 +143,10 @@ test("production nav shows only live pages; preview shows every group", () => {
   assert.equal(prod[0].id, "solutions");
   assert.equal(prod[0].hubHref, "/solutions/");
   assert.deepEqual(prod[0].items.map((i) => i.path), NAV_GROUPS[0].items.map((i) => i.path));
+  // Phase C Task 6: the Industries hub is live, so its group links to it and lists all nine pages.
+  const industries = prod.find((g) => g.id === "industries");
+  assert.equal(industries.hubHref, "/industries/");
+  assert.deepEqual(industries.items.map((i) => i.path), NAV_GROUPS[1].items.map((i) => i.path));
   const pre = visibleGroups(true);
   assert.deepEqual(pre.map((g) => g.id), ["solutions", "industries", "services", "resources", "about"]);
   assert.equal(pre[0].hubHref, "/solutions/");
@@ -162,6 +167,11 @@ test("no-JS links, footer and legal row only point at shown pages", () => {
   // all five solution pages.
   assert.deepEqual(noJsLinks(false)[0], { label: "Solutions", href: "/solutions/" });
   assert.deepEqual(footerColumns(false)[0], { title: "Solutions", links: NAV_GROUPS[0].items.map((i) => ({ label: i.shortName, href: i.path })) });
+  // Phase C Task 6: with its hub live, the no-JS row carries one Industries link in place of the
+  // industry pages, and the footer's Industries column lists all nine.
+  assert.deepEqual(noJsLinks(false).filter((l) => l.href.startsWith("/industries/")), [{ label: "Industries", href: "/industries/" }]);
+  assert.deepEqual(footerColumns(false).find((c) => c.title === "Industries").links,
+    NAV_GROUPS[1].items.map((i) => ({ label: footerLabel(i), href: i.path })));
   assert.ok(noJsLinks(false).some((l) => l.href === "/insights/"));
   assert.deepEqual(legalLinks(false), []);
   assert.equal(footerColumns(true).length, 5);

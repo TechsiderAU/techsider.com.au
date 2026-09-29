@@ -35,6 +35,9 @@ byIndustry:
   - government
   - financial-services
   - education
+  - healthcare
+  - resources-and-energy
+  - legal-and-professional
 genericPackage:
   id: one-system-one-use-case
   name: One system, one use case
@@ -312,6 +315,9 @@ matrix:
   government: Copilot agents leaving pilot
   financial-services: Model-change regression on vendor AI
   education: "Evaluation of deployed staff AI"
+  healthcare: "Scribe and clinical AI evaluation"
+  resources-and-energy: "Pre-contract tests; SOCI evidence on request"
+  legal-and-professional: "Legal AI tested on your matters"
 faq:
   - q: You have no clients. Why should we trust your evaluation?
     a: >-

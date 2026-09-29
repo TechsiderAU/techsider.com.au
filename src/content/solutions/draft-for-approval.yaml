@@ -30,6 +30,7 @@ byIndustry:
   - accounting
   - manufacturing
   - real-estate
+  - resources-and-energy
 genericPackage:
   id: one-job-drafts-for-approval
   name: One job, drafts for approval
@@ -136,6 +137,7 @@ matrix:
   accounting: ATO Letter Sorter, on request
   manufacturing: "Draft work requests, on request"
   real-estate: "Shared inbox triage, on request"
+  resources-and-energy: "Shift handover records, on request"
 faq:
   - q: Will it send anything on its own?
     a: >-

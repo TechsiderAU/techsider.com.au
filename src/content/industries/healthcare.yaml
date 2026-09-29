@@ -1,0 +1,144 @@
+# /industries/healthcare/ (spec §5, §8.5). Facts: .superpowers/research/2026-09-29/phase-c/industries/healthcare.md,
+# post-fact-check text. Held (Phase C rulings 1 and 6): the NSW Health AI Framework row and the APP 1.7–1.9 row.
+# Life sciences gets one FAQ answer and no regulatory claim. Four rows keep the page inside §8.5's word range.
+# ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/healthcare.json, must be in the standard engagement terms (spec §12 item 2)
+promise: Know what your AI scribe leaves out.
+constraintSet: Built around the TGA scribe line, ACSQHC's clinical use guide, Ahpra's AI guidance and the Privacy Act at any practice size.
+constraintHook: TGA scribe line, ACSQHC reviews, Privacy Act at any size.
+flagshipUseCases:
+  - name: Scribe & Clinical AI Evaluation
+    solution: ai-evaluation
+    status: launch
+  - name: Non-clinical Policy & Procedure Assistant
+    solution: knowledge-assistant
+    status: launch
+  - name: Administrative credentialing and referral registers
+    solution: document-registers
+    status: on-request
+    note: Administrative only. A person makes every credentialing or referral decision.
+  - name: Compliance Dossier Builder for life sciences
+    solution: document-registers
+    status: on-request
+obligationChips:
+  - label: "TGA line: transcribe vs interpret"
+    row: tga-digital-scribes
+  - label: "ACSQHC: regular scribe reviews"
+    row: acsqhc-ai-clinical-use-guide
+  - label: "Ahpra: test before clinical use"
+    row: ahpra-ai-obligations
+  - label: Privacy Act at any practice size
+    row: privacy-act-ai-products
+worksAlongside:
+  - system: Microsoft SharePoint
+    method: read-only
+    verified: 2026-09-29
+  - system: Halaxy
+    method: read-only
+    verified: 2026-09-29
+  - system: Cliniko
+    method: read-only
+    verified: 2026-09-29
+leadSolutions:
+  - ai-evaluation
+  - knowledge-assistant
+  - document-registers
+packages:
+  - solution: ai-evaluation
+    package: scribe-clinical-ai-evaluation
+  - solution: ai-evaluation
+    package: vendor-ai-evaluation
+  - solution: knowledge-assistant
+    package: policy-procedure-assistant
+  - solution: document-registers
+    package: credentialing-referral-registers
+platformFirst: If your staff have Microsoft Copilot licences, SharePoint's built-in AI can already answer from a policy library within each user's permissions. Try it first; we'll say whether it's good enough.
+dontDo:
+  - Build scribes, or anything that interprets clinical conversations.
+  - Build clinical coding or imaging AI. We evaluate those products instead.
+  - Give clinical advice. The Policy & Procedure Assistant answers from non-clinical policies only.
+problem:
+  from: A scribe arrives through a vendor demo or a software update, and what it leaves out of notes in your specialties hasn't been measured.
+  to: Each AI tool is tested on your own scripted consultations before rollout and after each update, with omissions and additions counted.
+  source:
+    label: "ACSQHC, AI Safety Scenario: Ambient scribe (v1.0)"
+    url: https://www.safetyandquality.gov.au/sites/default/files/resources/additional//ai-safety-scenario-ambient-scribe.pdf
+    asAt: 2025-08-01
+workflow:
+  - id: select-a-scribe
+    stage: Select
+    useCases:
+      - name: Vendor AI Evaluation before you sign
+        solution: ai-evaluation
+        status: launch
+  - id: validate-locally
+    stage: Validate
+    useCases:
+      - name: Scribe & Clinical AI Evaluation
+        solution: ai-evaluation
+        status: launch
+  - id: re-test-updates
+    stage: Re-test
+    useCases:
+      - name: Model-Change Regression after vendor updates
+        solution: ai-evaluation
+        status: launch
+  - id: run-the-service
+    stage: Administration
+    useCases:
+      - name: Non-clinical Policy & Procedure Assistant
+        solution: knowledge-assistant
+        status: launch
+      - name: Credentialing and referral intake registers
+        solution: document-registers
+        status: on-request
+        note: Administrative documents only.
+mockPanel:
+  title: "Scope test: scripted knee review"
+  fields:
+    - label: Specialty
+      value: Orthopaedics
+    - label: Version tested
+      value: Fictional Scribe 4.2
+  chips:
+    - status: ok
+      text: Medication and dose match the reference note
+    - status: review
+      text: "Omission: follow-up interval missing"
+    - status: blocked
+      text: "Addition: imaging the clinician never said"
+  citations:
+    - source: Reference note
+      clause: Plan, line 3
+scenario:
+  title: A scribe pilot that went beyond general practice.
+  problem: A fictional day-surgery group licensed a scribe after a GP-based demo. Its specialists say details go missing, and an update added next steps nobody asked for.
+  approach: Clinicians role-play scripted consultations and write reference notes. Two clinicians label what the scribe leaves out or adds, and a scope test checks for any diagnosis, test or treatment never said.
+  measure:
+    - Omissions per note, by specialty
+    - Scope-line breaches before and after the update
+    - Agreement between the two raters
+  shipsFirst: The week-0 threshold sheet and the scripted consultation set.
+  trace: healthcare-scenario
+firstEngagement:
+  needFromYou:
+    - A clinical lead who owns the thresholds.
+    - Clinicians from each specialty to script, role-play and label consultations.
+    - A test account in the scribe you already license.
+  youGet:
+    - An evaluation report with omissions and additions counted separately, and every failure listed.
+    - The scope-test log for the version tested.
+    - The test set and replay script, to re-run after each update.
+  exitRamp: Once the scripted consultations and thresholds are agreed in week 0, and before testing starts, you decide whether to continue. If you stop, you keep the test design.
+faq:
+  - q: Have you evaluated a scribe before?
+    a: "No. We have no clients yet, in health or anywhere else. Judge the method in our scope instead: sample size, reference notes, rater agreement and how omissions are counted."
+  - q: Does patient data have to leave our environment?
+    a: No. The test uses scripted consultations, not patient records, and the replay script runs in your own Microsoft or AWS account.
+  - q: Will your report sign off the scribe?
+    a: No. You get findings rated to your risk matrix and every failure listed. Whether a product is a medical device is the TGA's call.
+  - q: Do you take commissions from scribe vendors?
+    a: No. We take no resale margin or referral fees from vendors we evaluate, and disclose any vendor relationship. We never issue an independent evaluation of a system we built, configured or advised on for you.
+  - q: We're a public health service. How do we engage you?
+    a: "Directly, or through the Evaluation Partner route: we run the evaluation as a workstream under your existing prime, internal-audit co-source firm or law firm. Findings map to the AI instrument your state applies."
+  - q: Do you cover life sciences?
+    a: "One package, on request: the Compliance Dossier Builder turns the documents an audit or inspection asks for into a register linked to source pages."

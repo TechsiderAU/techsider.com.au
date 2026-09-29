@@ -28,6 +28,8 @@ byIndustry:
   - accounting
   - manufacturing
   - real-estate
+  - healthcare
+  - resources-and-energy
 genericPackage:
   id: one-document-family
   name: One document family, one register
@@ -229,6 +231,8 @@ matrix:
   accounting: Trust deed and client structure register
   manufacturing: "Compliance dossiers, on request"
   real-estate: "Management agreement register"
+  healthcare: "Credentialing and referral registers, on request"
+  resources-and-energy: "Approval conditions register, on request"
 faq:
   - q: Have you built this for another firm?
     a: >-

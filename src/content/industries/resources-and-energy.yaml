@@ -1,0 +1,140 @@
+# /industries/resources-and-energy/ (spec §5, §8.5). Facts: .superpowers/research/2026-09-29/phase-c/industries/
+# resources-and-energy.md, post-fact-check text. Held (Phase C rulings 1 and 10): the EPBC row, until after 1 Dec 2026,
+# and the "stays off control systems" design line, until it is in the standard terms. The problem source is DCCEEW's
+# Compliance outcomes page, cited for its pattern only. Four rows keep the page inside §8.5's word range.
+# ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/resources-and-energy.json, must be in the standard engagement terms (spec §12 item 2)
+promise: Every approval condition, on a register you can check.
+constraintSet: Built around the conditions in your approvals, SOCI risk-program rules and Qld mine procedure rules.
+constraintHook: Approval conditions, SOCI risk programs and mine-site procedures.
+flagshipUseCases:
+  - name: Approval & Permit Conditions Register
+    solution: document-registers
+    status: on-request
+    note: Starts with a Two-Week Trial on one approval.
+  - name: Field SOP & Work-Instruction Assistant
+    solution: knowledge-assistant
+    status: launch
+  - name: SOCI AI Risk Evidence
+    solution: ai-evaluation
+    status: on-request
+    note: For utilities and energy businesses.
+  - name: Shift-Handover & Field-Report
+    solution: draft-for-approval
+    status: on-request
+obligationChips:
+  - label: "SOCI: sensitive data held offshore"
+    row: soci-offshore-operational-info
+  - label: "Qld mines: current procedures only"
+    row: qld-mq-current-procedures
+  - label: "SOCI: novel or emerging technology"
+    row: soci-emerging-technology
+  - label: "Qld coal: current SOPs on hand"
+    row: qld-coal-current-sops
+worksAlongside:
+  - system: Microsoft SharePoint
+    method: read-only
+    verified: 2026-09-29
+  - system: Oracle Aconex
+    method: read-only
+    verified: 2026-09-29
+  - system: Mitti (by SafetyCulture)
+    method: read-only
+    verified: 2026-09-29
+  - system: IBM Maximo
+    method: draft-for-approval
+    verified: 2026-09-29
+leadSolutions:
+  - document-registers
+  - knowledge-assistant
+  - ai-evaluation
+packages:
+  - solution: knowledge-assistant
+    package: sop-work-instruction-assistant
+  - solution: ai-evaluation
+    package: vendor-ai-evaluation
+  - solution: document-registers
+    package: permit-conditions-register
+  - solution: ai-evaluation
+    package: soci-ai-risk-evidence
+platformFirst: If your procedures already live in Mitti (by SafetyCulture), try its AI Assistant first. We build for the manuals and work instructions outside it.
+dontDo:
+  - Predictive maintenance, vision QA, orebody modelling or digital twins. Specialist products do those.
+  - AI policy paperwork. Your CIRMP and policy owners write policy.
+problem:
+  from: Approval conditions sit across approvals and management plans, in a spreadsheet rebuilt by hand whenever a plan changes.
+  to: One register where every condition links to its page, with the error rate measured before anyone relies on it.
+  source:
+    label: DCCEEW, Compliance outcomes (EPBC Act)
+    url: https://www.dcceew.gov.au/environment/epbc/compliance/audit-outcomes
+    asAt: 2026-09-15
+workflow:
+  - id: approvals
+    stage: Approvals
+    useCases:
+      - name: Approval & Permit Conditions Register
+        solution: document-registers
+        status: on-request
+  - id: procedures
+    stage: Procedures
+    useCases:
+      - name: SOP & Work-Instruction Assistant
+        solution: knowledge-assistant
+        status: launch
+  - id: shifts-and-field
+    stage: Shifts and field
+    useCases:
+      - name: Shift-Handover & Field-Report
+        solution: draft-for-approval
+        status: on-request
+  - id: risk-and-suppliers
+    stage: Risk and suppliers
+    useCases:
+      - name: SOCI AI Risk Evidence
+        solution: ai-evaluation
+        status: on-request
+mockPanel:
+  title: "Conditions register: fictional approval"
+  fields:
+    - label: Condition
+      value: Rehabilitate cleared areas under the approved plan
+    - label: Evidence required
+      value: Rehabilitation monitoring report
+  chips:
+    - status: ok
+      text: Linked to its page in the approval
+    - status: review
+      text: Due date set by a plan clause, sent to a person
+  citations:
+    - source: Approval notice
+      clause: Condition 12, page 14
+scenario:
+  title: One approval, one conditions register.
+  problem: A fictional mid-tier miner holds two approvals for one project, and its environment lead rebuilds a conditions spreadsheet whenever a plan changes.
+  approach: The system reads the approvals without changing them, turns each condition into a row linked to its page, and sends unclear rows to the environment lead.
+  measure:
+    - Conditions missed or misread against the answer key
+    - How often it flags a row instead of guessing
+    - Time the lead spends checking the register
+  shipsFirst: A draft register for one approval, with page links and its error rate.
+  trace: resources-and-energy-scenario
+firstEngagement:
+  needFromYou:
+    - One approval and its plans, with read-only access.
+    - The conditions your team already tracks, as the answer key.
+    - A person to make the go/no-go call in week two.
+  youGet:
+    - A draft register, each row linked to its page.
+    - The error rate, with every miss listed.
+    - A one-page data note showing where each step ran.
+  exitRamp: At the go/no-go in week two, you decide whether to continue. If you stop, you keep the draft register, the answer key and the test results.
+faq:
+  - q: Have you built this for a miner or utility before?
+    a: No. We have no clients yet, so you start with a Two-Week Trial on one approval, measured against conditions your team already tracks.
+  - q: We run a SOCI-covered asset. Where would our data be processed?
+    a: Every step we build, model inference included, is designed to run in an Australian region. If your model isn't available there, we tell you before build. Inside a platform you already license, the vendor sets the location; we show you where.
+  - q: Will this meet our CIRMP obligations?
+    a: No. Your CIRMP stays yours. SOCI AI Risk Evidence gives your risk team artefacts such as data-flow maps and test reports. It isn't legal advice.
+  - q: We already run Mitti or Microsoft Copilot. Why not use their AI?
+    a: Try them first; if they answer your procedures well enough, we'll say so. We build for the manuals outside those tools.
+  - q: Will the assistant work at remote sites?
+    a: Only where the device can reach the service, because the model runs in the cloud. We check connectivity at your sites during the Trial.

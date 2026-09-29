@@ -31,6 +31,9 @@ byIndustry:
   - accounting
   - education
   - manufacturing
+  - healthcare
+  - resources-and-energy
+  - legal-and-professional
 genericPackage:
   id: one-manual-one-team
   name: One manual, one team
@@ -190,6 +193,9 @@ matrix:
   accounting: Ask the Firm Manual, on request
   education: "Staff policy answers, section cited"
   manufacturing: "Multilingual SOP answers, page shown"
+  healthcare: "Non-clinical policy and procedure answers"
+  resources-and-energy: "Field SOPs and work instructions"
+  legal-and-professional: "Firm manual answers, on request"
 faq:
   - q: We already have Copilot. Why would we need this?
     a: >-

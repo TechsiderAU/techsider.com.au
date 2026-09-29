@@ -1,0 +1,27 @@
+---
+// /industries/: the Industries hub (spec §8.4). A singleton route (src/lib/pages.ts): built only
+// while nav.ts shows the page. It feeds IndustriesHubTemplate exactly as the gallery's
+// IndustriesHubSpecimen does, from the collections instead of the fixtures: every industry's
+// content (all nine, since industriesHubView reads each one) and every solution's matrix column.
+// It coexists with ./[id].astro: this file only ever serves /industries/ itself.
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import IndustriesHubTemplate from "../../templates/IndustriesHubTemplate.astro";
+import { isPreview } from "../../data/nav";
+import { pageAt, singletonPaths } from "../../lib/pages";
+import { pageDescription, pageTitle } from "../../lib/meta";
+import { siteContext } from "../../lib/site";
+import { industriesHubView } from "../../lib/views/hubs";
+
+export const getStaticPaths = (() => singletonPaths("/industries/")) satisfies GetStaticPaths;
+
+const page = pageAt("/industries/");
+const site = siteContext(isPreview());
+const industries = Object.fromEntries((await getCollection("industries")).map((entry) => [entry.id, entry.data]));
+const solutions = Object.fromEntries((await getCollection("solutions")).map((entry) => [entry.id, entry.data]));
+const view = industriesHubView({ industries, solutions, site });
+---
+<BaseLayout title={pageTitle(page)} description={pageDescription(page)}>
+  <IndustriesHubTemplate view={view} />
+</BaseLayout>

@@ -129,7 +129,8 @@ const SOLUTIONS = [
     "Get value from the AI already inside the software you pay for: set it up with ground rules, train staff, and measure the hours saved at day 30, in your units."),
 ];
 
-const INDUSTRIES_HUB = page("industries", "Industries", "/", "/industries/", "planned");
+const INDUSTRIES_HUB = describe(page("industries", "Industries", "/", "/industries/", "live"),
+  "Nine industry pages built on the same five solutions: the rules each industry works under, the systems it already runs, and where a first engagement starts.");
 const INDUSTRIES = [
   describe(page("industries", "Government", "/industries/", "/industries/government/", "live", "Government & public sector"),
     "Independent evaluation of AI in government: measured tests on your own questions, with findings mapped to the DTA AI policy, NSW AIAF or Queensland's FAIRA."),
@@ -143,9 +144,12 @@ const INDUSTRIES = [
     "AI for Australian manufacturers: SOP answers in your crews' languages that cite the page, each language tested first, designed around WHS, FSANZ and TGA GMP."),
   describe(page("industries", "Real estate", "/industries/", "/industries/real-estate/", "live", "Real estate & property"),
     "AI for Australian property managers: a management agreement register where every field links to its page, read-only on your trust ledger, platform AI first."),
-  page("industries", "Healthcare", "/industries/", "/industries/healthcare/", "planned", "Healthcare & life sciences"),
-  page("industries", "Resources & energy", "/industries/", "/industries/resources-and-energy/", "planned", "Resources, energy & utilities"),
-  page("industries", "Legal & professional", "/industries/", "/industries/legal-and-professional/", "planned", "Legal & professional services"),
+  describe(page("industries", "Healthcare", "/industries/", "/industries/healthcare/", "live", "Healthcare & life sciences"),
+    "Test AI scribes on your own scripted consultations before rollout and after each vendor update, counting omissions and additions. For Australian healthcare."),
+  describe(page("industries", "Resources & energy", "/industries/", "/industries/resources-and-energy/", "live", "Resources, energy & utilities"),
+    "Turn approval conditions into a register you can check, answer crews from current procedures, and map AI use to SOCI rules. For Australian resources and energy."),
+  describe(page("industries", "Legal & professional", "/industries/", "/industries/legal-and-professional/", "live", "Legal & professional services"),
+    "Test legal AI tools side by side on your own closed matters before you sign, keep a record of every court-work check, and switch on the AI you already pay for."),
 ];
 
 const SERVICES_HUB = describe(page("services", "Services", "/", "/services/", "live", "Services",

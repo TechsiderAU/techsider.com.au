@@ -1,0 +1,44 @@
+{
+  "rows": [
+    {
+      "id": "joint-statement-confidentiality",
+      "obligation": "Joint AI statement (6 Dec 2024), ASCR r 9.1: keep client confidences out of public AI",
+      "meaning": "The NSW, Victorian and WA regulators say confidential, sensitive or privileged client information can't safely go into public chatbots or copilots. If a commercial AI tool is used with any client information, the firm needs to review its contract terms to check that information is kept secure.",
+      "design": "Before any matter material is used, we record where each tool stores and processes inputs, and whether it keeps or trains on them.",
+      "evidence": "A data note per tool on storage, processing, retention and training",
+      "source": "https://lsbc.vic.gov.au/news-updates/news/statement-use-artificial-intelligence-australian-legal-practice",
+      "asAt": "2024-12-06",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "nsw-gen23-restricted-material",
+      "obligation": "NSW SC Gen 23 ¶9A: suppressed, Harman or subpoena material only in closed Gen AI",
+      "meaning": "Material under a suppression or non-publication order, the Harman undertaking, a subpoena or a statutory publication ban can't go into any Gen AI program unless the responsible lawyer is satisfied that it stays in a controlled environment under supplier confidentiality terms, is used only for that proceeding, and isn't used to train any model.",
+      "design": "For each tool, the data note records whether inputs stay in a controlled environment and out of training, or says we couldn't confirm it.",
+      "evidence": "A data note per tool on its environment and training settings",
+      "source": "https://supremecourt.nsw.gov.au/content/dam/dcj/ctsd/supreme-court/documents/Practice-and-Procedure/Practice-Notes/general/current/PN_SC_Gen_23.pdf",
+      "asAt": "2025-01-28",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "nsw-gen23-verification",
+      "obligation": "NSW SC Gen 23 ¶16–17: verify every citation in submissions, not solely with Gen AI",
+      "meaning": "If Gen AI helped prepare written submissions, the author must verify in the submissions that every citation and reference exists, is accurate and is relevant, and that check can't be done solely with a Gen AI tool. Gen AI must not generate the content of affidavits or witness statements (¶10–13).",
+      "design": "The log records each authority, the source a person checked it against, who checked it and when.",
+      "evidence": "A citation-check log per document",
+      "source": "https://supremecourt.nsw.gov.au/content/dam/dcj/ctsd/supreme-court/documents/Practice-and-Procedure/Practice-Notes/general/current/PN_SC_Gen_23.pdf",
+      "asAt": "2025-01-28",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "vic-sc-gen25",
+      "obligation": "Vic Supreme Court SC Gen 25 ¶7.1–7.6: verify AI content; explain how it was verified",
+      "meaning": "AI-produced content must be verified under meaningful human control, and asking one AI tool to confirm another's output doesn't count. Court users must be ready to identify which parts of a document were produced with AI and explain how each was verified.",
+      "design": "The record marks which sections came from AI and how each was checked, so the lawyer can answer the Court from the file.",
+      "evidence": "A per-document record of AI-produced sections and their checks",
+      "source": "https://www.supremecourt.vic.gov.au/areas/legal-resources/practice-notes/sc-gen-25-the-use-of-artificial-intelligence-by-court-users",
+      "asAt": "2026-05-14",
+      "lastReviewed": "2026-09-29"
+    }
+  ]
+}

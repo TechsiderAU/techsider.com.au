@@ -1,0 +1,9 @@
+{
+  "title": "One approval read into a conditions register",
+  "provenance": "illustrative",
+  "lines": [
+    { "t": "07:30:00", "op": "condition.extract", "detail": "Condition read into a register row" },
+    { "t": "07:30:01", "op": "row.link", "detail": "Row linked to its page in the approval" },
+    { "t": "07:30:03", "op": "row.flag", "detail": "Unclear due date sent to the environment lead" }
+  ]
+}

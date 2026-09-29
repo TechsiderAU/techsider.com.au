@@ -1,0 +1,9 @@
+{
+  "title": "One question, two legal AI tools",
+  "provenance": "illustrative",
+  "lines": [
+    { "t": "14:00:00", "op": "tools.ask", "detail": "Same question put to Tool A and Tool B" },
+    { "t": "14:00:05", "op": "cite.check", "detail": "Tool B's cited clause checked against the lease" },
+    { "t": "14:00:07", "op": "grade.queue", "detail": "Both answers sent to two graders" }
+  ]
+}
