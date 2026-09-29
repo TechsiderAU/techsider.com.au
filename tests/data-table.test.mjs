@@ -46,6 +46,9 @@ test("checkTable throws at build time, naming the table, when the table can't re
       'DataTable "Fixture table": rowId "Reg fixture 2" is not a lower-case id (a-z, 0-9 and "-", starting with a letter)',
     ],
     [{ rowMarker: "regulatory-row" }, 'DataTable "Fixture table": rowMarker "regulatory-row" is not a data-* attribute name'],
+    // An empty cell reads as nothing, and an empty link cell renders a focusable link with no name.
+    [{ rows: [ROWS[0], { ...ROWS[1], note: " " }] }, 'DataTable "Fixture table": row 2 has an empty "note" cell'],
+    [{ rows: [{ ...ROWS[0], name: { text: "", href: "https://example.com/fixture/empty" } }] }, 'DataTable "Fixture table": row 1 has an empty "name" cell'],
   ];
   for (const [over, message] of cases) assert.throws(() => checkTable(spec(over)), { message }, JSON.stringify(over));
 });

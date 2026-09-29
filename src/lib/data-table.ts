@@ -34,7 +34,10 @@ export function checkTable({ caption, columns, rows, rowHeader, rowIds, rowMarke
   if (!columns.some((c) => c.key === rowHeader)) fail(`rowHeader "${rowHeader}" is not a column key`);
   rows.forEach((row, i) => {
     for (const c of columns) {
-      if (row[c.key] == null) fail(`row ${i + 1} has no "${c.key}" cell`);
+      const cell = row[c.key];
+      if (cell == null) fail(`row ${i + 1} has no "${c.key}" cell`);
+      // An empty cell reads as nothing, and an empty link cell would be a focusable link with no name.
+      else if (cellText(cell).trim() === "") fail(`row ${i + 1} has an empty "${c.key}" cell`);
     }
   });
   if (rowIds) {

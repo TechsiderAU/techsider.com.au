@@ -60,7 +60,8 @@ export const servicesData = z.strictObject({
 
 export const contactData = z.strictObject({
   replyTime: z.string(), // written once: /contact/ and /contact/sent/ read it, and no other page states a reply time (spec §8.11)
-  formEndpoint: z.url().nullable(), // null until Phase E: the page then shows the email fallback only
+  // null until Phase E: the page then shows the email fallback only. https only: the form posts personal data.
+  formEndpoint: z.url({ protocol: /^https$/ }).nullable(),
   formProvider: z.strictObject({ name: z.string(), country: z.string() }),
   emailProvider: z.strictObject({ name: z.string(), country: z.string() }),
   subProcessors: z.array(z.strictObject({ entity: z.string(), purpose: z.string(), country: z.string(), data: z.string() })).min(2),

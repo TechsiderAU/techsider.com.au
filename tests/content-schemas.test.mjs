@@ -238,6 +238,8 @@ test("solution schema accepts a complete entry and rejects the gaps", () => {
   bad(solutionSchema, { ...SOLUTION, whereItRuns: { choices: ["on-premise"], note: "Test" } }, "unknown run choice");
   bad(solutionSchema, { ...SOLUTION, dontDo: [] }, "empty dontDo");
   bad(solutionSchema, { ...SOLUTION, matrix: { "test-industry": "x".repeat(61) } }, "matrix cell over 60 characters");
+  bad(solutionSchema, { ...SOLUTION, matrix: { "test-industry": "" } }, "empty matrix cell");
+  bad(solutionSchema, { ...SOLUTION, matrix: { "test-industry": "  " } }, "blank matrix cell");
   bad(solutionSchema, { ...SOLUTION, faq: faq(2) }, "two FAQs");
   bad(solutionSchema, { ...SOLUTION, faq: [{ q: "Why?", a: "Test answer, long enough to pass." }, ...faq(2)] }, "FAQ question under 5 characters");
 });
@@ -544,6 +546,7 @@ test("page data: contact takes a form endpoint URL or null, and real email addre
   ok(contactData, CONTACT, "contact");
   assert.equal(ok(contactData, { ...CONTACT, formEndpoint: null }, "contact without a form endpoint").formEndpoint, null);
   bad(contactData, { ...CONTACT, formEndpoint: "example.com/form" }, "form endpoint that is not a URL");
+  bad(contactData, { ...CONTACT, formEndpoint: "http://example.com/form" }, "form endpoint over plain http (the form posts personal data)");
   const { formEndpoint, ...unset } = CONTACT;
   bad(contactData, unset, "form endpoint left out rather than null");
   bad(contactData, { ...CONTACT, deflection: CONTACT.deflection.map((d, i) => (i === 0 ? { ...d, email: "security" } : d)) }, "deflection email that is not an address");

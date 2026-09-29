@@ -58,7 +58,7 @@ export const makeSolutionSchema = (ref: RefFactory) => z.strictObject({
   independencePolicy: z.boolean().default(false), // ④ renders the §4.4 independence policy
   platformFirst: z.string().optional(),
   dontDo: z.array(z.string()).min(1),
-  matrix: z.record(z.string(), z.string().max(60)),
+  matrix: z.record(z.string(), z.string().max(60).regex(/\S/, "a matrix cell is never empty")), // a DataTable cell
   demo: slug.optional(),
   faq: z.array(faqItem).min(3),
 });
