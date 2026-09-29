@@ -19,6 +19,7 @@ import {
   decodeEntities, elements, elementsWith, listFiles, loadExceptions, loadYaml, readFrontmatter, relPath, result,
 } from "../scripts/ci/lib.mjs";
 import { EXCEPTIONS_FILE, SOURCE_FILE, WARN_PHRASES, scan } from "../scripts/ci/checks/04-banned-phrases.mjs";
+import { SCOPES as VERIFY_SCOPES } from "../scripts/ci/checks/07-verify-markers.mjs";
 import { documentSchema } from "../src/content/page-schemas.ts";
 import { makeKitSchema, plainRef } from "../src/content/schemas.ts";
 import { PAGES, SITE } from "../src/data/nav.ts";
@@ -106,6 +107,32 @@ test("each held fact carries its owner marker, which check 07 keeps open until l
   has("src/data/contact.ts", "// ⚑ owner: confirm the reply-time promise (spec §12 item 9)");
   has("src/data/about.ts", "// ⚑ owner: re-confirm team claims (spec §12 item 10)");
   has("src/content/documents/evaluation-method.md", "<!-- ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2) -->");
+});
+
+test("the Trust FAQ's missing §8.11 answers are held by an owner marker (C7-T7-F2)", () => {
+  // Spec §8.11 asks the Trust FAQ for retention, encryption, the DPA and "Can we trust the output?";
+  // nothing true can be said yet, so the gap is a ⚑ check 07 keeps open until launch.
+  const qs = TRUST.faq.map((f) => f.q).join("\n");
+  assert.doesNotMatch(qs, /\bencrypt|\bDPA\b|data processing agreement|trust the output/i, "an answer arrived: drop the marker");
+  assert.ok(source("src/data/trust.ts").includes('// ⚑ owner: add the §8.11 FAQ answers on retention, encryption, the DPA and "Can we trust the output?" (spec §8.11)'));
+});
+
+test("every ⚑ that check 07 reports is one owner marker naming its action (C7-T7-F4)", () => {
+  // A ⚑ in a cross-reference is still an open item to check 07, so every glyph starts an action.
+  let markers = 0;
+  for (const scope of VERIFY_SCOPES) {
+    for (const file of listFiles(join(ROOT, scope), (rel) => /\.(astro|md|mdx|ya?ml|json|ts|tsx|js|mjs|html|css|svg|txt)$/.test(rel) && !rel.endsWith("-exceptions.json"))) {
+      readFileSync(file, "utf8").split("\n").forEach((line, i) => {
+        const n = line.split("⚑").length - 1;
+        if (n === 0) return;
+        markers += n;
+        const at = `${relPath(ROOT, file)}:${i + 1}`;
+        assert.equal(n, 1, `${at}: ${n} markers on one line`);
+        assert.match(line, /⚑ owner: \S/, `${at}: a ⚑ that names no owner action`);
+      });
+    }
+  }
+  assert.ok(markers >= 50, `only ${markers} markers found`);
 });
 
 test("About: the principles are the four pillars word for word, then vendor neutrality; no seniority, place or headcount", () => {

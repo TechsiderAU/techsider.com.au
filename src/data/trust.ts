@@ -65,10 +65,11 @@ export const TRUST: TrustData = {
   // Direct answer first, 30–110 words each (spec §8.11). A Part A answer describes the website and
   // email today; a Part B answer names the Part B term it rests on and shows only once that term is
   // confirmed (trustView in src/lib/views/company.ts).
+  // ⚑ owner: add the §8.11 FAQ answers on retention, encryption, the DPA and "Can we trust the output?" (spec §8.11)
   faq: [
     {
       // The mailbox's storage country joins this answer once the owner confirms it with the
-      // provider (the ⚑ on emailProvider in src/data/contact.ts).
+      // provider (the owner marker on emailProvider in src/data/contact.ts).
       q: "Where is the information I send you stored?",
       a: "In our email mailbox, which Lark Suite hosts. You reach us by email, so your message, your name and your address stay in that mailbox. This website stores nothing you send: it is a set of static files with no database and no form, served by GitHub Pages through Cloudflare.",
       part: "A", asAt,
