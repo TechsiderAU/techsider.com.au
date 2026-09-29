@@ -96,7 +96,8 @@ test("SampleReport shows n, method, typed thresholds, pass/fail as text and ever
   const show = (m) => `${m.value}${m.unit ?? ""}`;
   for (const [i, t] of sampleReportFixture.thresholds.entries()) {
     await expect(rows.nth(i).locator('th[scope="row"]')).toHaveText(t.metric);
-    await expect(rows.nth(i).locator("td")).toHaveText([show(t.target), show(t.result), t.pass ? "Pass" : "Fail"]);
+    // innerText: at this width each cell's column label is display:none, so only the value counts.
+    await expect(rows.nth(i).locator("td")).toHaveText([show(t.target), show(t.result), t.pass ? "Pass" : "Fail"], { useInnerText: true });
   }
   const failures = report.locator("[data-rating]");
   await expect(failures).toHaveCount(sampleReportFixture.failures.length);
@@ -127,47 +128,61 @@ test("TracePanel labels its provenance and renders metrics from typed values", a
 });
 
 const tables = (page) => page.locator("[data-data-table]");
-const shown = (loc) => loc.evaluate((el) => getComputedStyle(el).display !== "none" && el.getBoundingClientRect().height > 0);
+const LABELS = ["Obligation", "What it means", "How we design for it", "Evidence you get", "Source"];
 
+// One <table> at every width (B1 review finding BR-7a): a table from 768px, its rows stacked as
+// cards below. tests/e2e/data-table.spec.mjs covers the specimen's row ids and link cells.
 for (const width of [1280, 768]) {
-  test(`at ${width}px every DataTable is a real table and the cards are not rendered`, async ({ page }) => {
+  test(`at ${width}px every DataTable lays out as a table, without the in-cell labels`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(PAGE);
-    await expect(tables(page)).toHaveCount(6); // standalone + inside both SampleReports, on carbon and on bone
+    // The specimen, plus the tables inside the SampleReports, on carbon and on bone.
+    expect(await tables(page).count()).toBeGreaterThanOrEqual(6);
     for (const t of await tables(page).all()) {
-      expect(await shown(t.locator("table"))).toBe(true);
-      expect(await t.locator(".data-cards").evaluate((el) => getComputedStyle(el).display)).toBe("none");
+      await expect(t.locator("table")).toHaveCount(1);
+      expect(await t.locator("table").evaluate((el) => getComputedStyle(el).display)).toBe("table");
+      expect(await t.locator("thead").evaluate((el) => getComputedStyle(el).display)).toBe("table-header-group");
+      expect(await t.locator(".dt-label").evaluateAll((els) => els.every((el) => getComputedStyle(el).display === "none"))).toBe(true);
     }
     const table = page.locator("#gallery-data-table [data-data-table] table");
     await expect(table.locator("caption")).toHaveText("Fixture obligations register");
-    await expect(table.locator('thead th[scope="col"]')).toHaveCount(4);
+    await expect(table.locator('thead th[scope="col"]')).toHaveText(LABELS);
     await expect(table.locator('tbody th[scope="row"]')).toHaveText(regulatoryFixture.rows.map((r) => r.obligation));
   });
 }
 
 for (const width of [767, 390]) {
-  test(`at ${width}px every DataTable renders as <dl> cards and the table is not rendered`, async ({ page }) => {
+  test(`at ${width}px every DataTable stacks its rows as cards, each value under its column label`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(PAGE);
-    await expect(tables(page)).toHaveCount(6);
+    expect(await tables(page).count()).toBeGreaterThanOrEqual(6);
     for (const t of await tables(page).all()) {
-      expect(await t.locator("table").evaluate((el) => getComputedStyle(el).display)).toBe("none");
-      expect(await shown(t.locator(".data-cards"))).toBe(true);
+      const table = t.locator("table");
+      await expect(table).toHaveCount(1);
+      expect(await table.evaluate((el) => getComputedStyle(el).display)).toBe("block");
+      // The header row is out of sight (each cell shows its label instead), but it stays in the
+      // table, so screen readers still hear the column headers.
+      expect(await t.locator("thead").evaluate((el) => el.getBoundingClientRect().height)).toBeLessThanOrEqual(1);
+      expect(await table.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(0);
     }
-    const cards = page.locator("#gallery-data-table .data-cards");
-    await expect(cards.locator(".dt-cards-caption")).toHaveText("Fixture obligations register");
-    // The card list is named by its caption, as the table is by <caption>.
-    await expect(cards.getByRole("list", { name: "Fixture obligations register", exact: true })).toHaveCount(1);
-    const wiring = await page.locator("[data-data-table] .data-cards").evaluateAll((els) =>
-      els.map((el) => ({ id: el.querySelector(".dt-cards-caption").id, labelledby: el.querySelector("ul.dt-cards").getAttribute("aria-labelledby") })),
+    const table = page.locator("#gallery-data-table [data-data-table] table");
+    await expect(table.locator("caption")).toHaveText("Fixture obligations register");
+    await expect(table.locator("caption")).toBeVisible();
+    const cards = table.locator("tbody tr");
+    await expect(cards).toHaveCount(regulatoryFixture.rows.length);
+    const card = cards.first();
+    await expect(card.locator('th[scope="row"]')).toHaveText(regulatoryFixture.rows[0].obligation);
+    await expect(card.locator(".dt-label")).toHaveText(LABELS.slice(1));
+    for (const label of await card.locator(".dt-label").all()) await expect(label).toBeVisible();
+    await expect(card.locator("td").first()).toContainText(regulatoryFixture.rows[0].meaning);
+    // Stacked: every cell starts at the card's left edge, below the cell before it.
+    const boxes = await card.locator("th, td").evaluateAll((els) =>
+      els.map((el) => el.getBoundingClientRect()).map((r) => ({ x: r.x, top: r.top, bottom: r.bottom })),
     );
-    expect(wiring).toHaveLength(6);
-    for (const w of wiring) expect(w.labelledby).toBe(w.id);
-    expect(new Set(wiring.map((w) => w.id)).size, "caption ids are unique on the page").toBe(wiring.length);
-    for (const w of wiring) expect(w.id).toMatch(/^[a-z][a-z0-9-]*$/);
-    await expect(cards.locator(".dt-card-heading")).toHaveText(regulatoryFixture.rows.map((r) => r.obligation));
-    await expect(cards.locator(".dt-card").first().locator("dl dt")).toHaveText(["What it means", "How we design for it", "Evidence you get"]);
-    await expect(cards.locator(".dt-card").first().locator("dl dd").first()).toHaveText(regulatoryFixture.rows[0].meaning);
+    for (const [i, box] of boxes.entries()) {
+      expect(box.x).toBeCloseTo(boxes[0].x, 0);
+      if (i > 0) expect(box.top).toBeGreaterThanOrEqual(boxes[i - 1].bottom - 0.5);
+    }
   });
 }
 

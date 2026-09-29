@@ -18,7 +18,7 @@ test("each component takes exactly the props the blueprint names", () => {
   assert.deepEqual(propKeys(source("MockPanel")), ["panel"]);
   assert.deepEqual(propKeys(source("SampleReport")), ["report"]);
   assert.deepEqual(propKeys(source("TracePanel")), ["trace"]);
-  assert.deepEqual(propKeys(source("DataTable")), ["caption", "columns", "rows", "rowHeader"]);
+  assert.deepEqual(propKeys(source("DataTable")), ["caption", "columns", "rows", "rowHeader", "rowIds", "rowMarker"]);
   // Provenance travels in the data, as it does for a trace (spec §9.3: every report dataset
   // declares it), so SampleReport's one prop carries it and no caller can leave it out.
   for (const [name, schema] of [["sampleReport", sampleReport], ["traceFile", traceFile]]) {

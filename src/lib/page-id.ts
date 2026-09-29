@@ -1,5 +1,4 @@
-// Ids for a component that can render more than once on a page, such as DataTable's card-list
-// caption (SampleReport holds a DataTable, and a page may show several reports). Pass
+// Ids for a component that can render more than once on a page, where a fixed id would repeat. Pass
 // Astro.locals as `page`: it is one object per page render, so every page numbers from 1
 // and a build gives the same ids every time.
 const counters = new WeakMap<object, Map<string, number>>();

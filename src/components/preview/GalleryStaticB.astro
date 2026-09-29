@@ -13,7 +13,7 @@ interface Props {
   panel: MockPanelData;
   report: SampleReportData;
   trace: TraceData;
-  rows: { obligation: string; meaning: string; design: string; evidence: string }[];
+  rows: { id: string; obligation: string; meaning: string; design: string; evidence: string; source: string }[];
 }
 
 const { panel, report, trace, rows } = Astro.props;
@@ -37,13 +37,19 @@ const tableColumns = [
   { key: "meaning", label: "What it means" },
   { key: "design", label: "How we design for it" },
   { key: "evidence", label: "Evidence you get" },
+  { key: "source", label: "Source" },
 ];
-const tableRows = rows.map((r) => ({
+// Source is a link cell. The last row's href is null, so the specimen also shows the plain text
+// that a link cell falls back to when its page isn't shown.
+const tableRows = rows.map((r, i) => ({
   obligation: r.obligation,
   meaning: r.meaning,
   design: r.design,
   evidence: r.evidence,
+  source: { text: `Fixture source ${i + 1}`, href: i === rows.length - 1 ? null : r.source },
 }));
+// Row ids take the surface suffix, so the carbon and bone specimens never share an id.
+const rowIds = (suffix: string) => rows.map((r) => `row-${r.id}${suffix}`);
 const surfaces = [
   { suffix: "", label: "on carbon", className: "" },
   { suffix: "-bone", label: "on bone", className: "surface-bone" },
@@ -74,7 +80,14 @@ const surfaces = [
     <section id={`gallery-data-table${s.suffix}`} class:list={["gallery-b", s.className]} aria-labelledby={`gallery-data-table${s.suffix}-h`}>
       <div class="gallery-b-inner">
         <h2 id={`gallery-data-table${s.suffix}-h`} class="gallery-b-heading">DataTable {s.label}</h2>
-        <DataTable caption="Fixture obligations register" columns={tableColumns} rows={tableRows} rowHeader="obligation" />
+        <DataTable
+          caption="Fixture obligations register"
+          columns={tableColumns}
+          rows={tableRows}
+          rowHeader="obligation"
+          rowIds={rowIds(s.suffix)}
+          rowMarker="data-specimen-row"
+        />
       </div>
     </section>
   </>
