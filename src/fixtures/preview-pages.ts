@@ -12,7 +12,8 @@ export type PreviewGroup = "gallery" | "components" | "templates";
 
 export type PreviewKind =
   | "index" | "components" | "tabs" | "page-kit"
-  | "solution" | "solution-evaluation" | "solution-switch-on";
+  | "solution" | "solution-evaluation" | "solution-switch-on"
+  | "industry" | "industry-government";
 
 export interface PreviewPage {
   /** "" is the gallery index at /preview/. Template pages use `templates/<kind>`. */
@@ -31,6 +32,8 @@ export const PREVIEW_PAGES: PreviewPage[] = [
   { slug: "templates/solution", title: "Fixture solution page", kind: "solution", group: "templates" },
   { slug: "templates/solution-evaluation", title: "Fixture evaluation solution page", kind: "solution-evaluation", group: "templates" },
   { slug: "templates/solution-switch-on", title: "Fixture switch-on solution page", kind: "solution-switch-on", group: "templates" },
+  { slug: "templates/industry", title: "Fixture industry page", kind: "industry", group: "templates" },
+  { slug: "templates/industry-government", title: "Fixture government industry page", kind: "industry-government", group: "templates" },
 ];
 
 export function previewPath(page: PreviewPage): string {

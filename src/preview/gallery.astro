@@ -17,6 +17,8 @@ import PageKitSpecimen from "./specimens/PageKitSpecimen.astro";
 import SolutionSpecimen from "./specimens/SolutionSpecimen.astro";
 import SolutionEvaluationSpecimen from "./specimens/SolutionEvaluationSpecimen.astro";
 import SolutionSwitchOnSpecimen from "./specimens/SolutionSwitchOnSpecimen.astro";
+import IndustrySpecimen from "./specimens/IndustrySpecimen.astro";
+import IndustryGovernmentSpecimen from "./specimens/IndustryGovernmentSpecimen.astro";
 import { PREVIEW_PAGES, previewPath } from "../fixtures/index.ts";
 import type { PreviewGroup, PreviewKind, PreviewPage } from "../fixtures/index.ts";
 
@@ -39,6 +41,8 @@ const SPECIMENS: Record<Exclude<PreviewKind, "index">, AstroComponentFactory> = 
   solution: SolutionSpecimen,
   "solution-evaluation": SolutionEvaluationSpecimen,
   "solution-switch-on": SolutionSwitchOnSpecimen,
+  industry: IndustrySpecimen,
+  "industry-government": IndustryGovernmentSpecimen,
 };
 
 // The gallery nav lists the index first, then every other page under its group's heading.

@@ -184,6 +184,44 @@ test("08: a kit without a source, and unreadable JSON or YAML, are reported", as
   assert.ok(errors.some((e) => e.startsWith(`${REG}/fixture-broken.json: not valid JSON`)), errors.join("\n"));
 });
 
+// The built-HTML part (blueprint Task 7): the Government industry page renders one section per
+// jurisdiction, and each must hold a regulatory-map row. A launch gate like the source part.
+const GOV_PAGE = "dist/preview/templates/industry-government/index.html";
+
+test("08: built jurisdiction sections that each hold a regulatory row pass, nested sections included", async () => {
+  const t = tree({
+    [GOV_PAGE]: page(`
+      <section id="commonwealth" data-jurisdiction-section="commonwealth">
+        <section id="commonwealth-designed-around"><p>Fixture chips</p></section>
+        <section id="commonwealth-regulatory-map"><table><tbody><tr id="reg-commonwealth-fixture-row-1" data-regulatory-row><th>Fixture obligation</th></tr></tbody></table></section>
+      </section>
+      <section id="local" data-jurisdiction-section="local"><div id="reg-local-fixture-row-2" data-regulatory-row>Fixture obligation</div></section>`),
+    "dist/index.html": page("<p>Fixture home without jurisdiction sections</p>"),
+  });
+  assert.deepEqual(await regulatoryKits({ ...t, mode: "gate" }), clean08);
+});
+
+test("08: a built jurisdiction section without a regulatory row is a warning in report mode and an error in gate mode", async () => {
+  const t = tree({
+    [GOV_PAGE]: page(`
+      <section id="commonwealth" data-jurisdiction-section="commonwealth"><table><tbody><tr data-regulatory-row><th>Fixture obligation</th></tr></tbody></table></section>
+      <section id="state" data-jurisdiction-section="state">
+        <section id="state-regulatory-map"><p>Fixture map with no rows</p></section>
+      </section>
+      <section id="local" data-jurisdiction-section="local">
+        <!-- <tr data-regulatory-row> -->
+        <script type="application/json">{ "html": "<tr data-regulatory-row>" }</script>
+        <p>data-regulatory-row is only text here</p>
+      </section>`),
+  });
+  const findings = [
+    `${GOV_PAGE}: jurisdiction section "state" has no regulatory row ([data-regulatory-row])`,
+    `${GOV_PAGE}: jurisdiction section "local" has no regulatory row ([data-regulatory-row])`,
+  ];
+  assert.deepEqual(await regulatoryKits({ ...t, mode: "report" }), { ...clean08, warnings: findings });
+  assert.deepEqual(await regulatoryKits({ ...t, mode: "gate" }), { ...clean08, errors: findings });
+});
+
 // ---------- 10: package status ----------
 
 test("10: launch tabs, listed on-request packages and a flagged onshore pillar pass", async () => {
@@ -410,9 +448,10 @@ test("--checks picks checks by number or full id, in CHECKS order, and refuses a
 
 // Every component and every B2 template renders only in dist-preview/, so checks that read
 // built pages must run there too: on the production dist/ they pass vacuously (no SampleReport,
-// no illustrative element, no package tab). 01, 02, 07 and 08 read sources or the production
-// nav and stay with the production build.
-const PREVIEW_PROFILE = "--dist dist-preview --checks 03,04,05,06,10,11";
+// no illustrative element, no package tab, no jurisdiction section). 01, 02 and 07 read sources
+// or the production nav and stay with the production build. 08 runs with both: its source part
+// reads src/ either way, and its built-HTML part needs the Government industry specimen.
+const PREVIEW_PROFILE = "--dist dist-preview --checks 03,04,05,06,08,10,11";
 
 test("npm run build:preview ends with the preview profile of the checks", () => {
   assert.equal(pkg.scripts["build:preview"], `TECHSIDER_NAV_PREVIEW=1 node scripts/ci/build.mjs --outDir dist-preview && node scripts/ci/run-all.mjs ${PREVIEW_PROFILE}`);
@@ -421,8 +460,8 @@ test("npm run build:preview ends with the preview profile of the checks", () => 
 test("the preview build passes the preview profile, and the profile really reads the gallery", () => {
   const r = verify(PREVIEW_PROFILE.split(" "));
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.match(r.stdout, /^verify: 6 checks against dist-preview \(VERIFY_MODE=report\)$/m);
-  for (const id of ["03-anchors", "04-banned-phrases", "05-captions", "06-provenance", "10-package-status", "11-pricing"]) {
+  assert.match(r.stdout, /^verify: 7 checks against dist-preview \(VERIFY_MODE=report\)$/m);
+  for (const id of ["03-anchors", "04-banned-phrases", "05-captions", "06-provenance", "08-regulatory-kits", "10-package-status", "11-pricing"]) {
     assert.match(r.stdout, new RegExp(`^ {2}(ok|warn) +${id}\\b`, "m"), id);
   }
   // Not vacuous: the gallery holds what checks 05, 06(c) and 10 look for.

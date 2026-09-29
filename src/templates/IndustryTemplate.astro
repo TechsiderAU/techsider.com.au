@@ -1,0 +1,554 @@
+---
+// Industry page template (spec §8.5). Body only: a Phase C route loads the industry, its
+// regulatory rows, the solutions, the traces and the insight cards, calls industryView()
+// (src/lib/views/industry.ts) and renders this inside BaseLayout. Every link comes from the view,
+// so a page that isn't shown yet renders as plain text.
+// - Single mode (eight industries): blocks 2, 5 and 6 render once, as #designed-around,
+//   #packages and #regulatory-map.
+// - Jurisdiction mode (Government): #designed-around holds jump links, then #commonwealth,
+//   #state and #local each repeat blocks 2, 5 and 6 as h3 sub-blocks with their own ids and
+//   row anchors. #packages keeps the page-wide half of block 5 (lead solutions, "Use your
+//   platform's AI first", "What we don't do", the demo link) once, after the workflow.
+// - The scenario is a carbon section marked data-provenance="illustrative" whose first child is
+//   the fixed label (CI check 06 reads it). Its container is padding, not a wrapper element.
+import PageHero from "../components/page/PageHero.astro";
+import PageSection from "../components/page/PageSection.astro";
+import ChipRow from "../components/page/ChipRow.astro";
+import CtaLinks from "../components/page/CtaLinks.astro";
+import Notice from "../components/page/Notice.astro";
+import InsightCard from "../components/page/InsightCard.astro";
+import BracketChip from "../components/ui/BracketChip.astro";
+import DataTable from "../components/ui/DataTable.astro";
+import FaqList from "../components/ui/FaqList.astro";
+import MockPanel from "../components/ui/MockPanel.astro";
+import PromptBlock from "../components/ui/PromptBlock.astro";
+import SectionHeader from "../components/ui/SectionHeader.astro";
+import TabPanel from "../components/ui/TabPanel.astro";
+import Tabs from "../components/ui/Tabs.astro";
+import TracePanel from "../components/ui/TracePanel.astro";
+import { NOT_LEGAL_ADVICE, SCENARIO_LABEL } from "../lib/fixed-copy";
+import type { IndustryView, RegulatoryBlockView } from "../lib/views/industry";
+
+interface Props {
+  view: IndustryView;
+}
+
+const { view } = Astro.props;
+const packagesTitle = `What we build for ${view.shortName.toLowerCase()}`;
+
+// Content dates are UTC midnights ("2026-09-01"), so they print in UTC: "1 September 2026".
+const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+
+const solutionLabel = (s: { number: string; shortName: string }) => `${s.number} ${s.shortName}`;
+const obligationChips = (b: RegulatoryBlockView) => b.chips.map((c) => ({ label: c.label, href: c.href }));
+const systemChips = (b: RegulatoryBlockView) => b.works.map((w) => ({ label: w.system, href: null, note: w.methodLabel }));
+const leadChips = view.leadSolutions.map((s) => ({ label: solutionLabel(s), href: s.href }));
+
+// Regulatory map columns (spec §8.5 block 6). The state section adds "Applies to", because its
+// rows can bind NSW, Victoria or Queensland, or several of them.
+const mapColumns = (appliesTo: boolean) => [
+  { key: "obligation", label: "Obligation" },
+  { key: "meaning", label: "What it means for an AI system" },
+  { key: "design", label: "How we design for it" },
+  { key: "evidence", label: "Evidence you get" },
+  ...(appliesTo ? [{ key: "appliesTo", label: "Applies to" }] : []),
+  { key: "source", label: "Source" },
+];
+const mapRows = (b: RegulatoryBlockView) =>
+  b.rows.map((r): Record<string, string | { text: string; href: string }> => ({
+    obligation: r.obligation,
+    meaning: r.meaning,
+    design: r.design,
+    evidence: r.evidence,
+    ...(r.appliesTo === null ? {} : { appliesTo: r.appliesTo }),
+    source: { text: `Source, as at ${formatDate(r.asAt)}`, href: r.source },
+  }));
+---
+<div class="template" data-template="industry">
+  <PageHero
+    title={view.promise}
+    display={false}
+    eyebrow="industry"
+    sub={view.constraintSet}
+    breadcrumb={view.breadcrumb}
+    ctas={view.ctas}
+  />
+
+  <PageSection id="designed-around" title="Designed around">
+    {view.single ? (
+      <div class="ind-stack">
+        <ChipRow id="designed-around-obligations" label="Designed around" chips={obligationChips(view.single)} />
+        <ChipRow id="designed-around-systems" label="Works alongside" chips={systemChips(view.single)} />
+      </div>
+    ) : (
+      <ul class="ind-jumps" aria-labelledby="designed-around-heading">
+        {view.sections.map((s) => (
+          <li><BracketChip label={s.title} href={`#${s.id}`} /></li>
+        ))}
+      </ul>
+    )}
+  </PageSection>
+
+  {view.sections.map((s) => (
+    <section id={s.id} class="ind-band surface-bone" aria-labelledby={`${s.id}-heading`} data-jurisdiction-section={s.id}>
+      <SectionHeader id={`${s.id}-heading`} title={s.title} />
+      <section id={`${s.id}-designed-around`} class="ind-sub" aria-labelledby={`${s.id}-designed-around-heading`}>
+        <SectionHeader id={`${s.id}-designed-around-heading`} title="Designed around" level={3} />
+        <div class="ind-stack">
+          <ChipRow id={`${s.id}-obligations`} label="Designed around" chips={obligationChips(s)} />
+          <ChipRow id={`${s.id}-systems`} label="Works alongside" chips={systemChips(s)} />
+        </div>
+      </section>
+      <section id={`${s.id}-packages`} class="ind-sub" aria-labelledby={`${s.id}-packages-heading`}>
+        <SectionHeader id={`${s.id}-packages-heading`} title={packagesTitle} level={3} />
+        <ul class="ind-cards">
+          {s.packages.map((p) => (
+            <li>
+              <article class="ind-card" data-package-status={p.status}>
+                <h4 class="ind-card-title">{p.href ? <a href={p.href}>{p.name}</a> : p.name}</h4>
+                <p class="ind-meta">
+                  <BracketChip label={solutionLabel(p.solution)} href={p.solution.href ?? undefined} />
+                  {p.status === "on-request" && <span class="ind-tag">On request</span>}
+                </p>
+                <p class="ind-card-summary">{p.summary}</p>
+              </article>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section id={`${s.id}-regulatory-map`} class="ind-sub" aria-labelledby={`${s.id}-regulatory-map-heading`}>
+        <SectionHeader id={`${s.id}-regulatory-map-heading`} title="Regulatory map" level={3} />
+        <div>
+          <DataTable
+            caption={`Regulatory map: ${s.title}`}
+            columns={mapColumns(s.id === "state")}
+            rows={mapRows(s)}
+            rowHeader="obligation"
+            rowIds={s.rows.map((r) => r.anchor)}
+            rowMarker="data-regulatory-row"
+          />
+          <p class="ind-reviewed">Last reviewed <time datetime={isoDate(s.lastReviewed)}>{formatDate(s.lastReviewed)}</time></p>
+          <Notice text={NOT_LEGAL_ADVICE} />
+        </div>
+      </section>
+    </section>
+  ))}
+
+  <PageSection id="problem" title="The problem" width="prose">
+    <div class="ind-problem">
+      <p class="ind-from">{view.problem.from}</p>
+      <p class="ind-arrow" aria-hidden="true">→</p>
+      <p class="ind-to">{view.problem.to}</p>
+    </div>
+    <p class="ind-source">
+      <a href={view.problem.source.url}>{view.problem.source.label}, as at <time datetime={isoDate(view.problem.source.asAt)}>{formatDate(view.problem.source.asAt)}</time></a>
+    </p>
+  </PageSection>
+
+  <PageSection id="workflow" title="How the work flows">
+    <Tabs id={`${view.id}-workflow`} label="How the work flows">
+      {view.workflow.map((stage) => (
+        <TabPanel id={stage.id} label={stage.stage}>
+          <ul class="ind-usecases">
+            {stage.useCases.map((u) => (
+              <li class="ind-usecase">
+                <p class="ind-usecase-name">{u.name}</p>
+                <p class="ind-meta">
+                  <BracketChip label={solutionLabel(u.solution)} href={u.solution.href ?? undefined} />
+                  {u.onRequest && <span class="ind-tag">On request</span>}
+                </p>
+                {u.note && <p class="ind-usecase-note">{u.note}</p>}
+              </li>
+            ))}
+          </ul>
+        </TabPanel>
+      ))}
+    </Tabs>
+    <div class="ind-mock">
+      <MockPanel panel={view.mockPanel} />
+    </div>
+  </PageSection>
+
+  <PageSection id="packages" title={packagesTitle}>
+    <div class="ind-stack">
+      <ChipRow id="packages-lead" label="Lead solutions" chips={leadChips} />
+      {view.single && (
+        <ul class="ind-cards">
+          {view.single.packages.map((p) => (
+            <li>
+              <article class="ind-card" data-package-status={p.status}>
+                <h3 class="ind-card-title">{p.href ? <a href={p.href}>{p.name}</a> : p.name}</h3>
+                <p class="ind-meta">
+                  <BracketChip label={solutionLabel(p.solution)} href={p.solution.href ?? undefined} />
+                  {p.status === "on-request" && <span class="ind-tag">On request</span>}
+                </p>
+                <p class="ind-card-summary">{p.summary}</p>
+              </article>
+            </li>
+          ))}
+        </ul>
+      )}
+      {view.platformFirst && (
+        <div class="ind-note">
+          <h3 class="ind-h3">Use your platform's AI first</h3>
+          <p>{view.platformFirst}</p>
+        </div>
+      )}
+      <div class="ind-note">
+        <h3 class="ind-h3">What we don't do</h3>
+        <ul class="ind-list">
+          {view.dontDo.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      {view.demoHref && <CtaLinks secondary={{ label: "Try the demo", href: view.demoHref }} />}
+    </div>
+  </PageSection>
+
+  {view.single && (
+    <PageSection id="regulatory-map" title="Regulatory map">
+      <DataTable
+        caption="Regulatory map"
+        columns={mapColumns(false)}
+        rows={mapRows(view.single)}
+        rowHeader="obligation"
+        rowIds={view.single.rows.map((r) => r.anchor)}
+        rowMarker="data-regulatory-row"
+      />
+      <p class="ind-reviewed">Last reviewed <time datetime={isoDate(view.single.lastReviewed)}>{formatDate(view.single.lastReviewed)}</time></p>
+      <Notice text={NOT_LEGAL_ADVICE} />
+    </PageSection>
+  )}
+
+  <section id="scenario" class="ind-band ind-scenario" aria-labelledby="scenario-heading" data-provenance="illustrative">
+    <p class="ind-scenario-label">{SCENARIO_LABEL}</p>
+    <SectionHeader id="scenario-heading" title={view.scenario.title} />
+    <ol class="ind-steps">
+      <li class="ind-step">
+        <p class="ind-step-label">Problem</p>
+        <p>{view.scenario.problem}</p>
+      </li>
+      <li class="ind-step">
+        <p class="ind-step-label"><span class="ind-step-arrow" aria-hidden="true">→ </span>Approach</p>
+        <p>{view.scenario.approach}</p>
+      </li>
+      <li class="ind-step">
+        <p class="ind-step-label"><span class="ind-step-arrow" aria-hidden="true">→ </span>How we'd measure</p>
+        <ul class="ind-list">
+          {view.scenario.measure.map((m) => <li>{m}</li>)}
+        </ul>
+      </li>
+      <li class="ind-step">
+        <p class="ind-step-label"><span class="ind-step-arrow" aria-hidden="true">→ </span>What ships first</p>
+        <p>{view.scenario.shipsFirst}</p>
+      </li>
+    </ol>
+    <TracePanel trace={view.scenario.trace} />
+  </section>
+
+  <PageSection id="first-engagement" title={`A first engagement in ${view.shortName.toLowerCase()}`}>
+    <div class="ind-columns">
+      <div class="ind-column">
+        <h3 class="ind-h3">What we need from you</h3>
+        <ul class="ind-list">
+          {view.firstEngagement.needFromYou.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <div class="ind-column">
+        <h3 class="ind-h3">What you get</h3>
+        <ul class="ind-list">
+          {view.firstEngagement.youGet.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <div class="ind-column">
+        <h3 class="ind-h3">The exit ramp</h3>
+        <p>{view.firstEngagement.exitRamp}</p>
+      </div>
+    </div>
+  </PageSection>
+
+  {view.insights.length > 0 && (
+    <PageSection id="insights" title="Related insights">
+      <ul class="ind-insights">
+        {view.insights.map((card) => (
+          <li><InsightCard card={card} level={3} /></li>
+        ))}
+      </ul>
+    </PageSection>
+  )}
+
+  <PageSection id="faq" title="Questions">
+    <FaqList items={view.faq} />
+  </PageSection>
+
+  <div id="contact" class="ind-closing">
+    <PromptBlock command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
+  </div>
+</div>
+
+<style>
+  /* The hand-written carbon and bone bands (jurisdiction sections, scenario) keep the page-kit
+     rhythm: full-bleed background, content within the 80rem container, 4rem vertical rhythm
+     (6rem from 64rem). The container is padding, so the section's own children line up with
+     every PageSection's content. */
+  .ind-band {
+    padding-block: 4rem;
+    padding-inline: max(1rem, calc((100% - 80rem) / 2 + 1rem));
+  }
+  @media (min-width: 40rem) {
+    .ind-band {
+      padding-inline: max(1.5rem, calc((100% - 80rem) / 2 + 1.5rem));
+    }
+  }
+  @media (min-width: 64rem) {
+    .ind-band {
+      padding-block: 6rem;
+    }
+  }
+  .ind-sub {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .ind-stack {
+    display: grid;
+    gap: 2rem;
+  }
+  .ind-jumps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+  }
+
+  /* Recommended package cards and workflow use cases, on bone. */
+  .ind-cards {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 48rem) {
+    .ind-cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .ind-cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .ind-card {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    height: 100%;
+    padding: 1.25rem;
+    border: 1px solid var(--color-bone-line);
+    border-radius: 8px;
+  }
+  .ind-card-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+  .ind-card-title a,
+  .ind-source a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted-dark);
+    text-underline-offset: 3px;
+  }
+  .ind-card-title a:hover,
+  .ind-source a:hover {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+  .ind-card-summary,
+  .ind-usecase-note {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--color-muted-dark);
+    overflow-wrap: anywhere;
+  }
+  .ind-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    margin: 0;
+  }
+  /* "On request" is text in an outlined tag, never a colour alone (spec §6.6). */
+  .ind-tag {
+    padding: 0.125rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+  }
+  .ind-usecase {
+    display: grid;
+    gap: 0.5rem;
+    padding-block: 1rem;
+    border-top: 1px solid var(--color-bone-line);
+  }
+  .ind-usecase:last-child {
+    border-bottom: 1px solid var(--color-bone-line);
+  }
+  .ind-usecase-name {
+    margin: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .ind-mock {
+    margin-top: 2.5rem;
+  }
+
+  /* The problem: from → to, then the linked public source. */
+  .ind-problem {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .ind-from,
+  .ind-to {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .ind-from {
+    color: var(--color-muted-dark);
+  }
+  .ind-arrow {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    color: var(--color-acid-deep);
+  }
+  .ind-source {
+    margin: 1.5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    overflow-wrap: anywhere;
+  }
+
+  .ind-h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+  .ind-note p {
+    margin: 0;
+    max-width: 65ch;
+    line-height: 1.6;
+  }
+  .ind-list {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 65ch;
+    padding-left: 1.25rem;
+    list-style: square;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  .ind-reviewed {
+    margin: 1rem 0 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted-dark);
+  }
+
+  /* The illustrative scenario (carbon). */
+  .ind-scenario {
+    display: grid;
+    gap: 2rem;
+  }
+  .ind-scenario-label {
+    justify-self: start;
+    margin: 0;
+    padding-left: 0.875rem;
+    border-left: 3px solid var(--color-acid);
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+  }
+  .ind-steps {
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 64rem) {
+    .ind-steps {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .ind-step {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-graphite);
+  }
+  .ind-step p {
+    margin: 0;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  .ind-step .ind-step-label {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+  .ind-step-arrow {
+    color: var(--color-acid);
+  }
+
+  /* A first engagement: three columns from 48rem. */
+  .ind-columns {
+    display: grid;
+    gap: 2rem;
+  }
+  @media (min-width: 48rem) {
+    .ind-columns {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .ind-column {
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-bone-line);
+  }
+  .ind-column p {
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .ind-insights {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 48rem) {
+    .ind-insights {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* "Talk to us about AI for {industry}" is longer than .btn's one line allows at 320px
+     (global.css sets white-space: nowrap), in the hero and in the closing prompt: let it wrap. */
+  [data-template="industry"] :global(.btn) {
+    padding-block: 0.5rem;
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* The closing prompt sits inside the content width on carbon, a normal section's space above
+     the footer: never a full-width band (spec §6.4). */
+  .ind-closing {
+    padding: 4rem 1rem;
+  }
+  @media (min-width: 64rem) {
+    .ind-closing {
+      padding-block: 6rem;
+    }
+  }
+</style>

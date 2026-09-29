@@ -1,0 +1,7 @@
+---
+// /preview/templates/industry-government/: the industry template in jurisdiction mode
+// (fixture-government: Commonwealth, State and Local sections, one row shared by two of them).
+import IndustryTemplate from "../../templates/IndustryTemplate.astro";
+import { fixtureIndustryView } from "./industry-view";
+---
+<IndustryTemplate view={fixtureIndustryView("fixture-government")} />

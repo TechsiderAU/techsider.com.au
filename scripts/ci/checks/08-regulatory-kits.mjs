@@ -5,11 +5,15 @@
 //   the Commonwealth (cth), a state (nsw, vic or qld) and local government.
 // - Every src/content/kits/*.yaml validates with the kit schema, carries source and
 //   asAt, and has been lawyer-reviewed (lawyerReviewedAt is set).
-// Findings are errors with VERIFY_MODE=gate and warnings otherwise. With no files
-// yet (Phase B1) there is nothing to check.
-import { join } from "node:path";
+// - In the built pages, every [data-jurisdiction-section] (the Government industry page's
+//   Commonwealth, State and Local sections, spec §8.5) holds at least one
+//   [data-regulatory-row], so no jurisdiction renders without its regulatory map.
+// Findings are errors with VERIFY_MODE=gate and warnings otherwise. With no files and no
+// built jurisdiction section yet there is nothing to check; a dist folder that doesn't
+// exist has no pages to scan.
+import { join, resolve } from "node:path";
 import { makeKitSchema, plainRef, regulatoryFile } from "../../../src/content/schemas.ts";
-import { listFiles, loadYaml, readJson, relPath, result } from "../lib.mjs";
+import { elementsWith, htmlFiles, listFiles, loadYaml, readJson, readText, relPath, result, startTags } from "../lib.mjs";
 
 export const NAME = "08-regulatory-kits";
 const ROW_FIELDS = ["source", "asAt", "lastReviewed"];
@@ -76,7 +80,23 @@ function kitFindings(rel, data) {
   return out;
 }
 
-export async function run({ root, mode }) {
+/** Every built jurisdiction section without a regulatory row, one finding each. */
+function jurisdictionFindings(dist) {
+  const out = [];
+  const root = resolve(dist);
+  for (const file of htmlFiles(root)) {
+    const html = readText(file);
+    const page = `dist/${relPath(root, file)}`;
+    for (const section of elementsWith(html, "data-jurisdiction-section")) {
+      if (startTags(section.inner).some((t) => "data-regulatory-row" in t.attrs)) continue;
+      const name = section.attrs["data-jurisdiction-section"] || section.attrs.id || "(unnamed)";
+      out.push(`${page}: jurisdiction section "${name}" has no regulatory row ([data-regulatory-row])`);
+    }
+  }
+  return out;
+}
+
+export async function run({ root, dist, mode }) {
   const r = result();
   const kind = mode === "gate" ? "error" : "warning";
   for (const file of entries(root, "src/data/regulatory", ".json")) {
@@ -101,5 +121,6 @@ export async function run({ root, mode }) {
     }
     for (const msg of kitFindings(rel, data)) r.add(kind, msg);
   }
+  if (dist) for (const msg of jurisdictionFindings(dist)) r.add(kind, msg);
   return { name: NAME, errors: r.errors, warnings: r.warnings };
 }
