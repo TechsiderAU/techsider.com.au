@@ -1,0 +1,9 @@
+---
+// Preview specimen for /preview/templates/evaluation-partner/ (kind "evaluation-partner"):
+// EvaluationPartnerTemplate over the Services page fixture (its evaluationPartner block and the
+// shared independence policy) and the gallery's SiteContext. Fixtures are imported statically
+// (see src/preview/gallery.astro).
+import EvaluationPartnerTemplate from "../../templates/EvaluationPartnerTemplate.astro";
+import { fixtureSite, servicesFixture } from "../../fixtures/index.ts";
+---
+<EvaluationPartnerTemplate services={servicesFixture} site={fixtureSite} />

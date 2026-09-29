@@ -1,0 +1,138 @@
+---
+// Prove → Build → Run (spec §4.2, §8.6 block 2): the three delivery phases as an ordered list.
+// Each phase is a <section> whose id is the phase id, so the Services nav anchors
+// (/services/#prove, #build and #run in src/data/nav.ts) land on it. A phase shows its name (h3),
+// duration, summary, deliverables and exit criteria (an h4 each): the exit criteria are the
+// evaluation gate that ends the phase.
+// Between two phases, a decorative inline SVG connector points to the next one: down while the
+// phases stack, right from 64rem, where they sit in one row. It is aria-hidden and holds shapes
+// only: every word on the diagram is HTML, so it zooms, translates and reads aloud as text.
+// Follows its surface: graphite hairlines and an acid connector on carbon; bone-line hairlines
+// and an acid-deep connector on bone (acid is never an icon on bone, spec §6.1).
+import type { ServicesData } from "../../content/page-schemas";
+
+interface Props {
+  phases: ServicesData["phases"];
+}
+
+const { phases } = Astro.props;
+---
+<ol class="process-steps" data-process-steps>
+  {phases.map((phase, i) => (
+    <li class="process-step">
+      <section id={phase.id} class="process-phase" aria-labelledby={`${phase.id}-heading`} data-phase={phase.id}>
+        <h3 id={`${phase.id}-heading`} class="process-name">{phase.name}</h3>
+        <p class="process-duration" data-phase-duration>{phase.duration}</p>
+        <p class="process-summary">{phase.summary}</p>
+        <h4 class="process-label">Deliverables</h4>
+        <ul class="process-list" data-phase-deliverables>
+          {phase.deliverables.map((item) => <li>{item}</li>)}
+        </ul>
+        <h4 class="process-label">Exit criteria</h4>
+        <ul class="process-list" data-phase-exit-criteria>
+          {phase.exitCriteria.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+      {i < phases.length - 1 && (
+        <svg class="process-connector" data-process-connector viewBox="0 0 24 48" aria-hidden="true" focusable="false">
+          <path d="M12 3 V42" />
+          <path d="M5 34 L12 43 L19 34" />
+        </svg>
+      )}
+    </li>
+  ))}
+</ol>
+
+<style>
+  .process-steps {
+    --process-line: var(--color-graphite);
+    --process-muted: var(--color-muted);
+    --process-connector: var(--color-acid);
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  :global(.surface-bone) .process-steps {
+    --process-line: var(--color-bone-line);
+    --process-muted: var(--color-muted-dark);
+    --process-connector: var(--color-acid-deep);
+  }
+  /* A dark island (bg-carbon / bg-graphite) inside a bone section is a dark surface again. */
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .process-steps {
+    --process-line: var(--color-graphite);
+    --process-muted: var(--color-muted);
+    --process-connector: var(--color-acid);
+  }
+  .process-step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .process-phase {
+    flex: 1;
+    min-width: 0;
+    padding: 1.5rem;
+    border: 1px solid var(--process-line);
+    border-radius: 8px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+  .process-name {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .process-duration {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--process-muted);
+  }
+  .process-summary {
+    margin: 1rem 0 0;
+  }
+  .process-label {
+    margin: 1.25rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: lowercase;
+  }
+  .process-list {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+    list-style: square;
+  }
+  .process-list li + li {
+    margin-top: 0.25rem;
+  }
+  /* Stacked: the connector sits between two phases and points down. */
+  .process-connector {
+    display: block;
+    width: 1.5rem;
+    height: 3rem;
+    margin: 0.25rem auto;
+    fill: none;
+    stroke: var(--process-connector);
+    stroke-width: 1.5;
+    stroke-linecap: square;
+  }
+  /* One row from 64rem: the connector turns to point right and sits centred in the 3rem gap. */
+  @media (min-width: 64rem) {
+    .process-steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 3rem;
+    }
+    .process-connector {
+      position: absolute;
+      top: 1.25rem;
+      left: calc(100% + 0.75rem);
+      margin: 0;
+      transform: rotate(-90deg);
+    }
+  }
+</style>

@@ -1,0 +1,8 @@
+---
+// Preview specimen for /preview/templates/services/ (kind "services"): ServicesTemplate over the
+// Services page fixture and the gallery's SiteContext. Fixtures are imported statically (see
+// src/preview/gallery.astro).
+import ServicesTemplate from "../../templates/ServicesTemplate.astro";
+import { fixtureSite, servicesFixture } from "../../fixtures/index.ts";
+---
+<ServicesTemplate services={servicesFixture} site={fixtureSite} />

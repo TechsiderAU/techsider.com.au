@@ -44,6 +44,8 @@ test("the preview registry lists the gallery index, components and tabs pages, e
       ["templates/industries-hub", "industries-hub", "templates"],
       ["templates/home", "home", "templates"],
       ["templates/home-stale-insights", "home-stale-insights", "templates"],
+      ["templates/services", "services", "templates"],
+      ["templates/evaluation-partner", "evaluation-partner", "templates"],
     ],
   );
   assert.deepEqual(PREVIEW_PAGES.map(previewPath), [
@@ -60,6 +62,8 @@ test("the preview registry lists the gallery index, components and tabs pages, e
     "/preview/templates/industries-hub/",
     "/preview/templates/home/",
     "/preview/templates/home-stale-insights/",
+    "/preview/templates/services/",
+    "/preview/templates/evaluation-partner/",
   ]);
   assert.equal(new Set(PREVIEW_PAGES.map((p) => p.kind)).size, PREVIEW_PAGES.length, "a kind is registered twice");
   for (const p of PREVIEW_PAGES) {

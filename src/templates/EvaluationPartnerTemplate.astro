@@ -1,0 +1,123 @@
+---
+// Evaluation Partner page body (spec §8.6 "Evaluation Partner", §4.2): the ④ evaluation work
+// delivered as a workstream under a buyer's existing prime, internal-audit co-source firm, law firm
+// or SI. It reads services.evaluationPartner plus the shared independence policy (spec §4.4).
+// Phase C's /services/evaluation-partner/ route loads src/data/services.ts and wraps this in
+// BaseLayout; in B2 only the preview gallery renders it. Every link comes from the SiteContext
+// (Phase B2 scope ruling 4): the breadcrumb leaves Services out while its page isn't shown, and
+// the method link renders only once the method page is shown.
+// Every section is bone except the hero and the closing prompt.
+import PageHero from "../components/page/PageHero.astro";
+import PageSection from "../components/page/PageSection.astro";
+import FaqList from "../components/ui/FaqList.astro";
+import PromptBlock from "../components/ui/PromptBlock.astro";
+import type { ServicesData } from "../content/page-schemas";
+import { crumbs, type SiteContext } from "../lib/site";
+
+interface Props {
+  services: ServicesData;
+  site: SiteContext;
+}
+
+const { services, site } = Astro.props;
+const partner = services.evaluationPartner;
+// Spec §10.1: the one CTA preselects the Evaluation Partner interest.
+const discuss = { label: "Discuss an evaluation workstream", href: site.contact({ interest: "evaluation-partner" }) };
+const methodHref = site.page("evaluationMethod").href;
+---
+<div class="template" data-template="evaluation-partner">
+  <PageHero
+    title={partner.promise}
+    display={false}
+    breadcrumb={crumbs(site, ["services", "evaluationPartner"])}
+    ctas={{ primary: discuss }}
+  />
+
+  <PageSection id="who" title="Who it's for" width="prose">
+    <ul class="partner-list">
+      {partner.audiences.map((item) => <li>{item}</li>)}
+    </ul>
+  </PageSection>
+
+  <PageSection id="delivers" title="What the workstream delivers" width="prose">
+    <ul class="partner-list">
+      {partner.delivers.map((item) => <li>{item}</li>)}
+    </ul>
+  </PageSection>
+
+  <PageSection id="fit" title="How it fits under your contract" width="prose">
+    <ul class="partner-list">
+      {partner.fit.map((item) => <li>{item}</li>)}
+    </ul>
+  </PageSection>
+
+  <PageSection id="independence" title="Independence policy" width="prose">
+    <ul class="partner-list">
+      {services.independence.map((item) => <li>{item}</li>)}
+    </ul>
+  </PageSection>
+
+  <PageSection id="method" title="Method and harness" width="prose">
+    <p class="partner-text">{partner.methodSummary}</p>
+    {methodHref !== null && (
+      <p class="partner-text"><a href={methodHref} class="partner-link">Read the evaluation method</a></p>
+    )}
+  </PageSection>
+
+  <PageSection id="faq" title="Questions" width="prose">
+    <FaqList items={partner.faq} />
+  </PageSection>
+
+  <div id="contact" class="partner-closing">
+    <PromptBlock command="talk_to_us" args="--about=evaluation-partner" label={discuss.label} href={discuss.href} />
+  </div>
+</div>
+
+<style>
+  .partner-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style: square;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  .partner-list li + li {
+    margin-top: 0.5rem;
+  }
+  .partner-text {
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  .partner-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-carbon);
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted-dark);
+    text-underline-offset: 3px;
+  }
+  .partner-link:hover {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+  /* The closing prompt sits inside the content width on carbon, not in a band (spec §6.4). */
+  .partner-closing {
+    max-width: 80rem;
+    margin-inline: auto;
+    padding: 4rem 1rem;
+  }
+  @media (min-width: 40rem) {
+    .partner-closing {
+      padding-inline: 1.5rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .partner-closing {
+      padding-block: 6rem;
+    }
+  }
+</style>

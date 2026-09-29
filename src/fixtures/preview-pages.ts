@@ -15,7 +15,8 @@ export type PreviewKind =
   | "solution" | "solution-evaluation" | "solution-switch-on"
   | "industry" | "industry-government"
   | "solutions-hub" | "industries-hub"
-  | "home" | "home-stale-insights";
+  | "home" | "home-stale-insights"
+  | "services" | "evaluation-partner";
 
 export interface PreviewPage {
   /** "" is the gallery index at /preview/. Template pages use `templates/<kind>`. */
@@ -40,6 +41,8 @@ export const PREVIEW_PAGES: PreviewPage[] = [
   { slug: "templates/industries-hub", title: "Fixture industries hub", kind: "industries-hub", group: "templates" },
   { slug: "templates/home", title: "Fixture home page", kind: "home", group: "templates" },
   { slug: "templates/home-stale-insights", title: "Fixture home page, stale insights", kind: "home-stale-insights", group: "templates" },
+  { slug: "templates/services", title: "Fixture services page", kind: "services", group: "templates" },
+  { slug: "templates/evaluation-partner", title: "Fixture Evaluation Partner page", kind: "evaluation-partner", group: "templates" },
 ];
 
 export function previewPath(page: PreviewPage): string {
