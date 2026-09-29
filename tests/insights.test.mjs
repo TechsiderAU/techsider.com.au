@@ -70,9 +70,9 @@ test("the home Insights section tags its cards by type", () => {
   assertNoPillar(visibleText(section), "home #insights");
 });
 
-test("the content layer registers all seven collections from the shared schemas", () => {
+test("the content layer registers all eight collections from the shared schemas", () => {
   const dir = join(ROOT, ".astro/collections");
-  for (const name of ["insights", "solutions", "industries", "kits", "regulatory", "demos", "traces"]) {
+  for (const name of ["insights", "solutions", "industries", "kits", "regulatory", "demos", "traces", "documents"]) {
     assert.ok(existsSync(join(dir, `${name}.schema.json`)), `.astro/collections/${name}.schema.json is missing (run npm run build)`);
   }
   const insights = JSON.parse(readFileSync(join(dir, "insights.schema.json"), "utf8"));
@@ -80,4 +80,6 @@ test("the content layer registers all seven collections from the shared schemas"
   assert.ok(!("pillar" in insights.properties) && !("sectors" in insights.properties), "insights schema still has pillar/sectors");
   const traces = JSON.parse(readFileSync(join(dir, "traces.schema.json"), "utf8"));
   assert.ok(traces.required?.includes("provenance"), "traces schema does not require provenance");
+  const documents = JSON.parse(readFileSync(join(dir, "documents.schema.json"), "utf8"));
+  assert.deepEqual(documents.required, ["title", "summary", "lastUpdated"], "documents schema (src/content/page-schemas.ts documentSchema)");
 });

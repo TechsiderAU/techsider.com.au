@@ -54,13 +54,21 @@ test("patterns the pre-check can't evaluate are rejected loudly", () => {
   }
 });
 
-test("every B1 content and data directory exists and carries a README", () => {
+test("every content and data directory exists and carries a README", () => {
   for (const dir of [
-    "src/content/solutions", "src/content/industries", "src/content/kits",
+    "src/content/solutions", "src/content/industries", "src/content/kits", "src/content/documents",
     "src/data/regulatory", "src/data/demos", "src/data/traces", "src/data/runs",
   ]) {
     const readme = join(ROOT, dir, "README.md");
     assert.ok(existsSync(readme), `${dir}/README.md is missing`);
     assert.match(readFileSync(readme, "utf8"), /^# \S/, `${dir}/README.md has no heading`);
   }
+});
+
+test("README.md documents a directory and is never an entry, even in a '*.md' collection", () => {
+  assert.equal(optionalGlob({ pattern: "*.md", base: tree(["README.md"]) }).name, "optional-glob");
+  assert.equal(optionalGlob({ pattern: "**/*.md", base: tree(["README.md", "nested/README.md"]) }).name, "optional-glob");
+  assert.equal(optionalGlob({ pattern: "*.md", base: tree(["README.md", "test-entry.md"]) }).name, "glob-loader");
+  // The delegated glob() leaves README.md out too (the documents collection probe in the plan builds with one).
+  assert.match(readFileSync(join(ROOT, "src/content/optional-glob.ts"), "utf8"), /glob\(\{ \.\.\.opts, pattern: \[opts\.pattern, `!\*\*\/\$\{README\}`\] \}\)/);
 });

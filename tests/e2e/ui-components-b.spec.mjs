@@ -85,25 +85,55 @@ test("SampleReport labels its provenance: the illustrative fixture says so, a me
   }
 });
 
-test("SampleReport shows n, method, typed thresholds, pass/fail as text and every failure with its rating", async ({ page }) => {
+const metricText = (m) => `${m.value}${m.unit ?? ""}`;
+// A report has two tables, so each is found by its caption. Cells are read by accessible name,
+// which leaves out any aria-hidden inline column label.
+async function expectTableRows(table, rows) {
+  const trs = table.locator("tbody tr");
+  await expect(trs).toHaveCount(rows.length);
+  for (const [i, [header, ...cells]] of rows.entries()) {
+    await expect(trs.nth(i).getByRole("rowheader")).toHaveAccessibleName(header);
+    const tds = trs.nth(i).getByRole("cell");
+    await expect(tds).toHaveCount(cells.length);
+    for (const [j, text] of cells.entries()) await expect(tds.nth(j)).toHaveAccessibleName(text);
+  }
+}
+
+test("SampleReport shows n, method, typed thresholds with intervals, pass/fail as text and every failure with its rating", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(PAGE);
   const report = page.locator("#gallery-sample-report [data-sample-report]").first();
   await expect(report).toContainText(`n = ${sampleReportFixture.n}`);
   await expect(report).toContainText(sampleReportFixture.method);
-  const rows = report.locator("table tbody tr");
-  await expect(rows).toHaveCount(sampleReportFixture.thresholds.length);
-  const show = (m) => `${m.value}${m.unit ?? ""}`;
-  for (const [i, t] of sampleReportFixture.thresholds.entries()) {
-    await expect(rows.nth(i).locator('th[scope="row"]')).toHaveText(t.metric);
-    // innerText: at this width each cell's column label is display:none, so only the value counts.
-    await expect(rows.nth(i).locator("td")).toHaveText([show(t.target), show(t.result), t.pass ? "Pass" : "Fail"], { useInnerText: true });
-  }
+  const thresholds = report.getByRole("table", { name: "Each threshold, its target and the result", exact: true });
+  await expectTableRows(thresholds, sampleReportFixture.thresholds.map((t) => [
+    t.metric, metricText(t.target), metricText(t.result), `${t.ci.low}–${t.ci.high}${t.result.unit ?? ""} (${t.ci.level}% CI)`, t.pass ? "Pass" : "Fail",
+  ]));
   const failures = report.locator("[data-rating]");
   await expect(failures).toHaveCount(sampleReportFixture.failures.length);
   for (const [i, f] of sampleReportFixture.failures.entries()) {
     await expect(failures.nth(i)).toContainText(f.id);
     await expect(failures.nth(i)).toContainText(new RegExp(`Rating: ${f.rating}`, "i"));
+    await expect(failures.nth(i)).toContainText(`Framework level: ${f.frameworkLevel}`);
+  }
+});
+
+test("every SampleReport shows the spec §9.1 evidence: ground truth, agreement, framework and the model-change regression", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(PAGE);
+  const r = sampleReportFixture;
+  const reports = page.locator("[data-sample-report]");
+  await expect(reports).toHaveCount(4);
+  for (const report of await reports.all()) {
+    const meta = report.locator(".sample-meta");
+    await expect(meta.locator("dt")).toHaveText(["System", "Sample size", "Method", "Ground truth", "Inter-rater agreement", "Failures mapped to"]);
+    await expect(meta.locator("dd").nth(3)).toHaveText(r.groundTruth);
+    await expect(meta.locator("dd").nth(4)).toHaveText(`${r.interRater.statistic}: ${metricText(r.interRater.value)}`);
+    await expect(meta.locator("dd").nth(5)).toHaveText(r.framework);
+    await expect(report.getByRole("heading", { level: 3, name: "Model-change regression", exact: true })).toBeVisible();
+    const regression = report.getByRole("table", { name: `The same test set on ${r.regression.baseline} and ${r.regression.candidate}`, exact: true });
+    await expect(regression.getByRole("columnheader")).toHaveText(["Metric", r.regression.baseline, r.regression.candidate]);
+    await expectTableRows(regression, r.regression.rows.map((row) => [row.metric, metricText(row.baseline), metricText(row.candidate)]));
   }
 });
 

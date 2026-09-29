@@ -10,6 +10,7 @@ import {
   regulatoryFile,
   traceFile,
 } from "./content/schemas";
+import { documentSchema } from "./content/page-schemas";
 
 // Entry id = file name without extension = the page's nav.ts slug (spec §11.2).
 // Page identity (name, path, one-liner) lives in src/data/nav.ts only; these hold content and relationships.
@@ -49,4 +50,12 @@ const traces = defineCollection({
   schema: traceFile,
 });
 
-export const collections = { insights, solutions, industries, kits, regulatory, demos, traces };
+// Long prose: the legal documents and the evaluation method (entry ids privacy, website-terms and
+// evaluation-method). The singleton pages' typed data (Services, Contact, Trust, About, Home) is
+// not a collection: it lives in src/data/*.ts and is validated by src/content/page-schemas.ts.
+const documents = defineCollection({
+  loader: optionalGlob({ pattern: "*.md", base: "./src/content/documents" }),
+  schema: documentSchema,
+});
+
+export const collections = { insights, solutions, industries, kits, regulatory, demos, traces, documents };

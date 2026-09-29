@@ -3,6 +3,9 @@
 // is not a collection at all, so the ids are joined here, in plain Node.
 // Parity covers live nav entries (and every content file); parity for planned
 // entries waits for Phase C's content.
+// Beyond ids, an industry's recommended packages must be real, renderable packages of
+// their solution (never internal ones, spec §4.1), and a chip that names a jurisdiction
+// must link to a regulatory row that lists it (spec §8.5 Government).
 import { existsSync } from "node:fs";
 import { basename, join } from "node:path";
 import { listFiles, loadNav, loadYaml, readFrontmatter, readJson, relPath, result } from "../lib.mjs";
@@ -74,6 +77,12 @@ export async function run({ root }) {
     }
   };
 
+  // Parsed once: industries read their solutions' package ids, then the solutions are checked.
+  const solutions = new Map([...ids.solutions].map(([id, file]) => [id, parse(file, loadYaml)]));
+  /** Package id → status, over a solution's generic package and its listed packages. */
+  const packagesOf = (d) =>
+    new Map([d?.genericPackage, ...list(d?.packages)].filter((p) => typeof p?.id === "string").map((p) => [p.id, p.status]));
+
   for (const [id, file] of ids.industries) {
     const d = parse(file, loadYaml);
     if (!d) continue;
@@ -82,22 +91,38 @@ export async function run({ root }) {
     list(d.workflow).forEach((stage, i) =>
       list(stage?.useCases).forEach((u, j) => ref(file, `workflow[${i}].useCases[${j}].solution`, "solutions", u?.solution)),
     );
+    list(d.packages).forEach((p, i) => {
+      ref(file, `packages[${i}].solution`, "solutions", p?.solution);
+      const solution = solutions.get(p?.solution);
+      if (!solution) return; // an unknown id is reported above, an unparseable file by parse()
+      const status = packagesOf(solution).get(p?.package);
+      if (status === undefined) {
+        r.add("error", `${rel(file)}: packages[${i}].package is "${p?.package}", which is not a package id in ${ID_DIRS.solutions}/${p.solution}.yaml`);
+      } else if (status === "internal") {
+        r.add("error", `${rel(file)}: packages[${i}].package "${p.package}" is internal to ${p.solution}, and internal packages never render`);
+      }
+    });
     const chips = list(d.obligationChips);
     if (chips.length) {
       const regRel = `src/data/regulatory/${id}.json`;
       const reg = existsSync(join(root, regRel)) ? parse(join(root, regRel), readJson) : null;
-      const rows = new Set(list(reg?.rows).map((row) => row?.id));
+      const rows = new Map(list(reg?.rows).map((row) => [row?.id, row]));
       chips.forEach((c, i) => {
         if (!rows.has(c?.row)) {
           r.add("error", `${rel(file)}: obligationChips[${i}].row is "${c?.row}", which is not a row id in ${regRel}${reg ? "" : " (file missing)"}`);
+          return;
+        }
+        const listed = list(rows.get(c.row)?.jurisdictions);
+        if (c.jurisdiction !== undefined && !listed.includes(c.jurisdiction)) {
+          r.add("error", `${rel(file)}: obligationChips[${i}] names "${c.jurisdiction}", but row "${c.row}" in ${regRel} lists ${listed.length ? listed.join(", ") : "no jurisdictions"}`);
         }
       });
     }
     if (d.scenario !== undefined) ref(file, "scenario.trace", "traces", d.scenario?.trace);
   }
 
-  for (const [, file] of ids.solutions) {
-    const d = parse(file, loadYaml);
+  for (const [solutionId, file] of ids.solutions) {
+    const d = solutions.get(solutionId);
     if (!d) continue;
     list(d.byIndustry).forEach((x, i) => ref(file, `byIndustry[${i}]`, "industries", x));
     if (d.demo != null) ref(file, "demo", "demos", d.demo);

@@ -1,9 +1,6 @@
 // Preview-only fixture: the rules are in src/fixtures/index.ts.
 // `evidence` names an artefact and never claims it satisfies an obligation (spec §11.6).
-import type { z } from "astro/zod";
-import type { regulatoryFile } from "../content/schemas.ts";
-
-type RegulatoryData = z.infer<typeof regulatoryFile>;
+import type { Jurisdiction, RegulatoryData, RegulatoryRow } from "../content/schemas.ts";
 
 /** A regulatory file is named after its industry: src/data/regulatory/<industry>.json. */
 export const REGULATORY_FIXTURE_ID = "fixture-industry";
@@ -41,21 +38,45 @@ export const regulatoryFixture: RegulatoryData = {
       lastReviewed: new Date("2026-09-20"),
       jurisdictions: ["cth", "nsw", "local"],
     },
+    {
+      id: "fixture-row-4",
+      obligation: "Fixture obligation four: keep fixture records for the retention period",
+      meaning: "Fixture meaning: the fixture system never deletes a record a person still needs.",
+      design: "Fixture design: the fixture register only reads records and never deletes them.",
+      evidence: "Fixture evidence: a sample access-log extract",
+      source: "https://example.com/fixture/obligation-four",
+      asAt: new Date("2026-09-01"),
+      lastReviewed: new Date("2026-09-24"),
+    },
   ],
 };
 
 /** The Government file, src/data/regulatory/government.json: every row names its jurisdictions (CI check 08). */
 export const GOVERNMENT_REGULATORY_FIXTURE_ID = "fixture-government";
 
-type Jurisdiction = NonNullable<RegulatoryData["rows"][number]["jurisdictions"]>[number];
+const WORD = ["one", "two", "three", "four"];
+// Four rows per sub-section: fixture-gov-row-1..4 Commonwealth, 5..8 state, 9..12 local.
+// Row 5 covers cth as well as nsw, so it appears in the Commonwealth and State sections; row 8
+// covers two states, so the State section's "Applies to" column reads "NSW, Vic".
+const GOVERNMENT_ROWS: { level: string; lastReviewed: string; jurisdictions: Jurisdiction[] }[] = [
+  ...[0, 1, 2, 3].map(() => ({ level: "Commonwealth", lastReviewed: "2026-09-18", jurisdictions: ["cth"] as Jurisdiction[] })),
+  { level: "state", lastReviewed: "2026-09-22", jurisdictions: ["cth", "nsw"] },
+  { level: "state", lastReviewed: "2026-09-22", jurisdictions: ["nsw"] },
+  { level: "state", lastReviewed: "2026-09-16", jurisdictions: ["vic"] },
+  { level: "state", lastReviewed: "2026-09-16", jurisdictions: ["nsw", "vic"] },
+  ...[0, 1, 2, 3].map(() => ({ level: "local", lastReviewed: "2026-09-12", jurisdictions: ["local"] as Jurisdiction[] })),
+];
 
-// One row per Government sub-section; governmentIndustryFixture's chips link to these rows.
-const GOVERNMENT_ROW_JURISDICTION: Record<string, Jurisdiction> = {
-  "fixture-row-1": "cth",
-  "fixture-row-2": "nsw",
-  "fixture-row-3": "local",
-};
+const governmentRow = ({ level, lastReviewed, jurisdictions }: (typeof GOVERNMENT_ROWS)[number], i: number): RegulatoryRow => ({
+  id: `fixture-gov-row-${i + 1}`,
+  obligation: `Fixture ${level} obligation ${WORD[i % 4]}: an agency explains each automated fixture step`,
+  meaning: `Fixture meaning: a fixture officer can show what the system did for ${level} fixture row ${i + 1}.`,
+  design: "Fixture design: every fixture step writes a trace line a person can export.",
+  evidence: "Fixture evidence: a sample fixture trace export",
+  source: `https://example.com/fixture/gov-obligation-${i + 1}`,
+  asAt: new Date("2026-09-01"),
+  lastReviewed: new Date(lastReviewed),
+  jurisdictions,
+});
 
-export const governmentRegulatoryFixture: RegulatoryData = {
-  rows: regulatoryFixture.rows.map((row) => ({ ...row, jurisdictions: [GOVERNMENT_ROW_JURISDICTION[row.id]] })),
-};
+export const governmentRegulatoryFixture: RegulatoryData = { rows: GOVERNMENT_ROWS.map(governmentRow) };

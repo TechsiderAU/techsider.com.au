@@ -4,6 +4,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { elements, elementsWith } from "../scripts/ci/lib.mjs";
+import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { mockPanel, sampleReport, traceFile } from "../src/content/schemas.ts";
 import { mockPanelFixture, sampleReportFixture, traceFixture } from "../src/fixtures/index.ts";
 
@@ -81,4 +83,52 @@ test("the fixtures these components render are valid and exercise every branch",
   const trace = traceFile.parse(traceFixture);
   assert.equal(trace.provenance, "illustrative");
   assert.ok(trace.lines.some((l) => l.metric), "no line with a metric");
+});
+
+// Spec §9.1, in the built gallery (dist-preview/, from `npm run build:preview`): every SampleReport
+// shows the ground truth, inter-rater agreement, confidence intervals, framework levels and the
+// model-change regression table, with each row's values in column order.
+const inOrder = (text, parts) => {
+  let at = 0;
+  for (const part of parts) {
+    const i = text.indexOf(part, at);
+    if (i < 0) return false;
+    at = i + part.length;
+  }
+  return true;
+};
+const bodyRows = (table) =>
+  elements(table.inner, (t) => t.name === "tr").filter((tr) => /<td\b/.test(tr.inner)).map((tr) => visibleText(tr.inner).trim());
+
+test("SampleReport renders the spec §9.1 fields: ground truth, agreement, intervals, framework levels, regression", () => {
+  const html = readPreviewDist("preview/components/index.html");
+  const reports = elementsWith(html, "data-sample-report");
+  assert.equal(reports.length, 4, "illustrative and measured, on carbon and on bone");
+  const r = sampleReportFixture;
+  const show = (m) => `${m.value}${m.unit ?? ""}`;
+  for (const report of reports) {
+    const text = visibleText(report.inner);
+    for (const expected of [
+      `Ground truth ${r.groundTruth}`,
+      `Inter-rater agreement ${r.interRater.statistic}: ${show(r.interRater.value)}`,
+      `Failures mapped to ${r.framework}`,
+      "Model-change regression",
+      ...r.failures.map((f) => `Framework level: ${f.frameworkLevel}`),
+    ]) assert.ok(text.includes(expected), `a SampleReport lacks "${expected}"`);
+    const [thresholds, regression, ...more] = elementsWith(report.inner, "data-data-table");
+    assert.ok(thresholds && regression && more.length === 0, "a SampleReport holds exactly two DataTables");
+    const tRows = bodyRows(thresholds);
+    assert.equal(tRows.length, r.thresholds.length);
+    r.thresholds.forEach((t, i) => {
+      const ci = `${t.ci.low}–${t.ci.high}${t.result.unit ?? ""} (${t.ci.level}% CI)`;
+      assert.ok(inOrder(tRows[i], [t.metric, show(t.target), show(t.result), ci, t.pass ? "Pass" : "Fail"]), `threshold row: ${tRows[i]}`);
+    });
+    const columns = elements(regression.inner, (t) => t.name === "th" && t.attrs.scope === "col").map((th) => visibleText(th.inner).trim());
+    assert.deepEqual(columns, ["Metric", r.regression.baseline, r.regression.candidate]);
+    const rRows = bodyRows(regression);
+    assert.equal(rRows.length, r.regression.rows.length);
+    r.regression.rows.forEach((row, i) => {
+      assert.ok(inOrder(rRows[i], [row.metric, show(row.baseline), show(row.candidate)]), `regression row: ${rRows[i]}`);
+    });
+  }
 });

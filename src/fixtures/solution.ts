@@ -2,26 +2,28 @@
 // Covers every package state: a launch generic package (onshore), two launch packages
 // (the first isn't onshore), an on-request package and an internal one (never rendered).
 // Two launch packages, as in spec §4.1's Document Registers, give the Tabs specimen two tabs.
-import type { z } from "astro/zod";
-import type { makeSolutionSchema } from "../content/schemas.ts";
-
-type SolutionData = z.infer<ReturnType<typeof makeSolutionSchema>>;
+// byIndustry names fixture-industry-9, the one industry whose gallery href is null, so the
+// solution specimen shows a "By industry" chip as plain text. src/fixtures/sets.ts holds the
+// four other fixture solutions.
+import type { SolutionData } from "../content/schemas.ts";
 
 export const SOLUTION_FIXTURE_ID = "fixture-solution";
 
 export const solutionFixture: SolutionData = {
   job: "Fixture job: turn a pile of fixture agreements into a register a person can check.",
   artefact: "Fixture artefact: a register where every value links to its fixture source page.",
+  forLine: "Fixture teams that read the same fixture agreements by hand",
   needProfiles: [
     { title: "Fixture need A", body: "Fixture body: a team that reads the same fixture clauses by hand every month." },
     { title: "Fixture need B", body: "Fixture body: a team that must show where each fixture value came from." },
   ],
-  byIndustry: ["fixture-industry"],
+  byIndustry: ["fixture-industry", "fixture-industry-3", "fixture-industry-5", "fixture-industry-8", "fixture-industry-9"],
   genericPackage: {
     id: "fixture-generic-package",
     name: "Fixture Generic Package",
     status: "launch",
     onshore: true,
+    buyers: ["mid-market"],
     forWhom: "Fixture audience: a small fixture team with one repeated reading job.",
     scope: "Fixture scope: one fixture document type, one register and one review screen.",
     inclusions: [
@@ -40,6 +42,7 @@ export const solutionFixture: SolutionData = {
       name: "Fixture Launch Package",
       status: "launch",
       onshore: false,
+      buyers: ["mid-market"],
       forWhom: "Fixture audience: a fixture team already using a hosted fixture platform.",
       scope: "Fixture scope: one fixture register built on the platform you already license.",
       inclusions: ["Fixture inclusion: a test set and its report"],
@@ -55,6 +58,7 @@ export const solutionFixture: SolutionData = {
       name: "Fixture Second Launch Package",
       status: "launch",
       onshore: true,
+      buyers: ["mid-market", "enterprise-government"],
       forWhom: "Fixture audience: a second fixture team with its own fixture document family.",
       scope: "Fixture scope: a second fixture document type, register and review screen.",
       inclusions: [
@@ -81,6 +85,7 @@ export const solutionFixture: SolutionData = {
       precondition: "Fixture precondition: an internal fixture review",
     },
   ],
+  packagesHeading: "Packages",
   program: {
     title: "Fixture program",
     summary: "Fixture summary: the same fixture register rolled out across several fixture teams.",
@@ -98,9 +103,16 @@ export const solutionFixture: SolutionData = {
     choices: ["your-account", "managed", "platform-you-license"],
     note: "Fixture note: the fixture team picks where the register runs.",
   },
+  independencePolicy: false,
   platformFirst: "Fixture platform-first note: check what the fixture software already includes first.",
   dontDo: ["Fixture limit: the system never makes the final call on a fixture record."],
-  matrix: { "fixture-industry": "Fixture cell: agreements register" },
+  matrix: {
+    "fixture-industry": "Fixture cell: agreements register",
+    "fixture-industry-3": "Fixture cell: deed register",
+    "fixture-industry-5": "Fixture cell: management agreement register",
+    "fixture-industry-8": "Fixture cell: intake register",
+    "fixture-industry-9": "Fixture cell: permit conditions register",
+  },
   demo: "fixture-demo",
   faq: [
     { q: "Fixture question one?", a: "Fixture answer one, long enough to pass the schema." },

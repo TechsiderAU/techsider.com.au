@@ -16,17 +16,33 @@ const label = report.provenance === "measured" ? `Measured run: ${report.run}` :
 const RATING_LABEL = { low: "Low", medium: "Medium", high: "High" } as const;
 // Targets and results are typed metrics (spec §9.3), shown as value then unit ("90%"), as TracePanel shows its metrics.
 const show = (m: { value: number; unit?: string }) => `${m.value}${m.unit ?? ""}`;
+// A confidence interval takes its result's unit: "88–95% (95% CI)".
+const showCi = (ci: { low: number; high: number; level: number }, unit = "") => `${ci.low}–${ci.high}${unit} (${ci.level}% CI)`;
 const thresholdColumns = [
   { key: "metric", label: "Metric" },
   { key: "target", label: "Target" },
   { key: "result", label: "Result" },
+  { key: "ci", label: "Confidence interval" },
   { key: "outcome", label: "Outcome" },
 ];
 const thresholdRows = report.thresholds.map((t) => ({
   metric: t.metric,
   target: show(t.target),
   result: show(t.result),
+  ci: showCi(t.ci, t.result.unit),
   outcome: t.pass ? "Pass" : "Fail",
+}));
+// Spec §9.1: the same test set on two model versions.
+const { regression } = report;
+const regressionColumns = [
+  { key: "metric", label: "Metric" },
+  { key: "baseline", label: regression.baseline },
+  { key: "candidate", label: regression.candidate },
+];
+const regressionRows = regression.rows.map((row) => ({
+  metric: row.metric,
+  baseline: show(row.baseline),
+  candidate: show(row.candidate),
 }));
 ---
 <article class="sample-report" data-sample-report data-provenance={report.provenance}>
@@ -48,6 +64,18 @@ const thresholdRows = report.thresholds.map((t) => ({
       <dt>Method</dt>
       <dd>{report.method}</dd>
     </div>
+    <div>
+      <dt>Ground truth</dt>
+      <dd>{report.groundTruth}</dd>
+    </div>
+    <div>
+      <dt>Inter-rater agreement</dt>
+      <dd>{report.interRater.statistic}: {show(report.interRater.value)}</dd>
+    </div>
+    <div>
+      <dt>Failures mapped to</dt>
+      <dd>{report.framework}</dd>
+    </div>
   </dl>
   <section class="sample-section">
     <h3 class="sample-subhead">Thresholds</h3>
@@ -60,12 +88,17 @@ const thresholdRows = report.thresholds.map((t) => ({
         <li class="sample-failure" data-rating={f.rating}>
           <p class="sample-failure-head">
             <span class="sample-failure-id">{f.id}</span>{" "}
-            <span class="sample-failure-rating">Rating: {RATING_LABEL[f.rating]}</span>
+            <span class="sample-failure-rating">Rating: {RATING_LABEL[f.rating]}</span>{" "}
+            <span class="sample-failure-level">Framework level: {f.frameworkLevel}</span>
           </p>
           <p>{f.description}</p>
         </li>
       ))}
     </ol>
+  </section>
+  <section class="sample-section">
+    <h3 class="sample-subhead">Model-change regression</h3>
+    <DataTable caption={`The same test set on ${regression.baseline} and ${regression.candidate}`} columns={regressionColumns} rows={regressionRows} rowHeader="metric" />
   </section>
 </article>
 
@@ -125,7 +158,7 @@ const thresholdRows = report.thresholds.map((t) => ({
   }
   @media (min-width: 48rem) {
     .sample-meta {
-      grid-template-columns: 1fr 1fr 2fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   .sample-meta div {
@@ -134,7 +167,8 @@ const thresholdRows = report.thresholds.map((t) => ({
   }
   .sample-meta dt,
   .sample-failure-id,
-  .sample-failure-rating {
+  .sample-failure-rating,
+  .sample-failure-level {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--sr-muted);

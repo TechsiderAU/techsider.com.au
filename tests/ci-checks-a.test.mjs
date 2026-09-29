@@ -308,6 +308,63 @@ test("01: every dangling cross-reference is reported (Astro's reference() only l
   ]);
 });
 
+test("01: an industry's recommended package is a real, renderable package of its solution", async () => {
+  const res = await check(slugs, {
+    "src/content/solutions/alpha-fixture.yaml": {
+      ...solution(),
+      genericPackage: { id: "alpha-generic", status: "launch" },
+      packages: [
+        { id: "alpha-launch", status: "launch" },
+        { id: "alpha-on-request", status: "on-request" },
+        { id: "alpha-internal", status: "internal" },
+      ],
+    },
+    "src/content/industries/gamma-and-fixture.yaml": {
+      ...industry(),
+      packages: [
+        { solution: "alpha-fixture", package: "alpha-generic" },
+        { solution: "alpha-fixture", package: "alpha-launch" },
+        { solution: "alpha-fixture", package: "alpha-on-request" },
+        { solution: "alpha-fixture", package: "alpha-internal" },
+        { solution: "alpha-fixture", package: "missing-package" },
+        { solution: "missing-solution", package: "alpha-launch" },
+      ],
+    },
+  });
+  assertErrors(res, [
+    /gamma-and-fixture\.yaml: packages\[3\]\.package "alpha-internal" is internal to alpha-fixture, and internal packages never render/,
+    /gamma-and-fixture\.yaml: packages\[4\]\.package is "missing-package", which is not a package id in src\/content\/solutions\/alpha-fixture\.yaml/,
+    /gamma-and-fixture\.yaml: packages\[5\]\.solution is "missing-solution", which is not an id in src\/content\/solutions\//,
+  ]);
+});
+
+test("01: a chip that names a jurisdiction links to a row that lists it (spec §8.5 Government)", async () => {
+  const row = regulatory().rows[0];
+  const res = await check(slugs, {
+    "src/content/industries/gamma-and-fixture.yaml": {
+      ...industry(),
+      jurisdictions: ["cth", "nsw"],
+      obligationChips: [
+        { label: "Fixture Commonwealth obligation", row: "fixture-row-1", jurisdiction: "cth" },
+        { label: "Fixture state obligation", row: "fixture-row-2", jurisdiction: "nsw" },
+        { label: "Fixture untagged-row obligation", row: "fixture-row-3", jurisdiction: "nsw" },
+        { label: "Fixture untagged obligation", row: "fixture-row-3" },
+      ],
+    },
+    "src/data/regulatory/gamma-and-fixture.json": {
+      rows: [
+        { ...row, jurisdictions: ["cth", "nsw"] },
+        { ...row, id: "fixture-row-2", jurisdictions: ["vic"] },
+        { ...row, id: "fixture-row-3" },
+      ],
+    },
+  });
+  assertErrors(res, [
+    /obligationChips\[1\] names "nsw", but row "fixture-row-2" in src\/data\/regulatory\/gamma-and-fixture\.json lists vic$/,
+    /obligationChips\[2\] names "nsw", but row "fixture-row-3" in src\/data\/regulatory\/gamma-and-fixture\.json lists no jurisdictions$/,
+  ]);
+});
+
 test("01: an unparseable content file is an error, not a crash", async () => {
   const res = await check(slugs, { "src/content/kits/gamma-fixture-kit.yaml": "industry: [unclosed\n" });
   assertErrors(res, [/src\/content\/kits\/gamma-fixture-kit\.yaml: cannot parse/]);
