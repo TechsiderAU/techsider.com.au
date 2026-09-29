@@ -142,7 +142,9 @@ const mapRows = (b: RegulatoryBlockView) =>
       <p class="ind-to">{view.problem.to}</p>
     </div>
     <p class="ind-source">
-      <a href={view.problem.source.url}>{view.problem.source.label}, as at <time datetime={isoDate(view.problem.source.asAt)}>{formatDate(view.problem.source.asAt)}</time></a>
+      {/* One span, so the 44px inline-flex link has a single flex item: bare text beside the
+          <time> would become its own flex item and lose the space before the date. */}
+      <a href={view.problem.source.url}><span>{view.problem.source.label}, as at <time datetime={isoDate(view.problem.source.asAt)}>{formatDate(view.problem.source.asAt)}</time></span></a>
     </p>
   </PageSection>
 

@@ -8,9 +8,9 @@
 //   `reg-${section}-${rowId}` on a jurisdiction page (Government), where one row can sit in two
 //   sections (a Commonwealth rule that also binds NSW, say) and so renders twice.
 // - Broken data fails the build: a chip whose row isn't in its map, a package that doesn't
-//   exist or is internal, a missing scenario trace, a workflow stage id used twice or also used
-//   by the page (a section id or a reg- row anchor), or (jurisdiction mode) a row that names
-//   no jurisdiction.
+//   exist or is internal, a missing scenario trace, a repeated regulatory row id, a workflow
+//   stage id that repeats or that the page already writes (a section id or a reg- row anchor),
+//   or (jurisdiction mode) a row that names no jurisdiction.
 import type { z } from "astro/zod";
 import type {
   MockPanelData, SectionId, TraceData, jurisdiction, makeIndustrySchema, makeSolutionSchema, regulatoryRow,
@@ -161,6 +161,14 @@ export function industryView(input: {
       throw new Error(`industryView(${id}): stage id "${stage.id}" is also a section id or row anchor on the page`);
     }
     stageIds.add(stage.id);
+  }
+  // Row ids are page anchors too (reg-<row>, or reg-<section>-<row>), and neither the schema nor
+  // check 08 makes them unique within a regulatory file: a repeated one would give the page two
+  // rows with one id, and a chip would land on the first.
+  const rowIds = new Set<string>();
+  for (const row of rows) {
+    if (rowIds.has(row.id)) throw new Error(`industryView(${id}): row "${row.id}" appears twice; row ids are page anchors`);
+    rowIds.add(row.id);
   }
 
   let single: RegulatoryBlockView | null = null;

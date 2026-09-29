@@ -208,7 +208,7 @@ test("while planned pages aren't shown, solution links and the demo are text and
   assert.ok(!v.breadcrumb.some((c) => c.label === fixtureSite.page("industries").label), "a hidden hub stays out of the breadcrumb");
 });
 
-test("broken data fails the build: an unknown chip row, package or solution, an internal package, a missing trace, a repeated or clashing stage id", () => {
+test("broken data fails the build: an unknown chip row, package or solution, an internal package, a missing trace, a repeated row id, a repeated or clashing stage id", () => {
   const data = industryFixtures[INDUSTRY];
   const rows = regulatoryFixtures[INDUSTRY].rows;
   const chip = data.obligationChips[0];
@@ -222,6 +222,8 @@ test("broken data fails the build: an unknown chip row, package or solution, an 
   assert.throws(() => industryView(input(INDUSTRY, withPackage({ solution: "fixture-solution", package: "fixture-internal-package" }))), /package "fixture-internal-package" of solution "fixture-solution" is internal/);
   assert.throws(() => industryView(input(INDUSTRY, withPackage({ solution: "fixture-no-such-solution", package: "fixture-generic-package" }))), /names solution "fixture-no-such-solution", which isn't in solutions/);
   assert.throws(() => industryView(input(INDUSTRY, { traces: {} })), new RegExp(`scenario trace "${data.scenario.trace}" isn't in traces`));
+  // Review Focus 1: a row id is a page anchor (reg-<row>), so a copy-pasted row may not repeat it.
+  assert.throws(() => industryView(input(INDUSTRY, { rows: [...rows, { ...rows[0] }] })), new RegExp(`row "${rows[0].id}" appears twice; row ids are page anchors`));
   // Review Focus 1: a stage id is a page anchor, so it may not repeat or reuse an id the page writes.
   assert.throws(() => industryView(input(INDUSTRY, stage(1, data.workflow[0].id))), /appears twice/);
   assert.throws(() => industryView(input(INDUSTRY, stage(1, "problem"))), /stage id "problem" is also a section id/);

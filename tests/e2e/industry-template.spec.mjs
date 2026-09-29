@@ -16,6 +16,8 @@ const gov = fixtureIndustryView("fixture-government");
 const WIDE = { width: 1280, height: 800 };
 const NARROW = { width: 390, height: 844 };
 const CARBON = "rgb(11, 11, 12)";
+// Dates print as the template prints them: "1 September 2026", in UTC.
+const formatDate = (d) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const axe = (page) => new AxeBuilder({ page }).include("main").withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]);
 const PAGES = [[SINGLE, single], [GOV, gov]];
 // A Designed around chip and the row it names: on the single page the second chip, on the
@@ -95,7 +97,7 @@ test("below 768px the workflow is an accordion, and a stage hash opens its item"
   await expect(page.locator(`#${stage.id}-body`)).toBeVisible();
 });
 
-test("the scenario label and every not-legal-advice line are visible", async ({ page }) => {
+test("the scenario label and every not-legal-advice line are visible, and the problem source reads as one line", async ({ page }) => {
   await page.setViewportSize(NARROW);
   for (const [path, view] of PAGES) {
     await page.goto(path);
@@ -105,6 +107,12 @@ test("the scenario label and every not-legal-advice line are visible", async ({ 
     const notices = page.locator("[data-notice]", { hasText: NOT_LEGAL_ADVICE });
     await expect(notices).toHaveCount(view.single ? 1 : view.sections.length);
     for (const n of await notices.all()) await expect(n).toBeVisible();
+    // The source link is a 44px flex box: its text must stay one flex item, or the browser drops
+    // the space before the <time> ("as at1 August 2026"). The markup tests read HTML text, where
+    // the space is present, so only the rendered innerText catches it.
+    const source = page.locator(`#problem a[href="${view.problem.source.url}"]`);
+    await expect(source).toHaveCount(1);
+    expect(await source.evaluate((el) => el.innerText)).toBe(`${view.problem.source.label}, as at ${formatDate(view.problem.source.asAt)}`);
   }
 });
 
