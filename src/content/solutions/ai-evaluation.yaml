@@ -31,7 +31,9 @@ needProfiles:
     body: >-
       Before the agents you run touch case or customer systems, a configuration review checks their
       identity, permissions, approval gates and logging.
-byIndustry: []
+byIndustry:
+  - government
+  - financial-services
 genericPackage:
   id: one-system-one-use-case
   name: One system, one use case
@@ -305,7 +307,9 @@ dontDo:
   - We never do adversarial testing in-house. Where it's needed, it's done by a CREST-accredited tester you engage.
   - We don't sign off systems as safe to deploy. The report is findings, not an assurance opinion.
   - We don't write AI policy paperwork or build a GRC or register product. Findings go into the tools you already run.
-matrix: {}
+matrix:
+  government: Copilot agents leaving pilot
+  financial-services: Model-change regression on vendor AI
 faq:
   - q: You have no clients. Why should we trust your evaluation?
     a: >-

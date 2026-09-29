@@ -1,0 +1,133 @@
+# /industries/accounting/ (spec §5, §8.5). Facts: .superpowers/research/2026-09-29/phase-c/industries/accounting.md,
+# post-fact-check text, and verify-register.md §3 (APESB Technical Alert) and §17 (First AML). Rows:
+# src/data/regulatory/accounting.json. Phase C rulings 1 and 4: tpb-verify-and-document is held until ss 30
+# and 40 are re-read after 1 Oct 2026; the page leads with the year-end Trust Deed Register, with AML/CTF a
+# conditional second benefit; the ATO Letter Sorter stays on request; no First AML gap claim.
+# Mid-market page (spec §3.4): plain English, and no "agent" for anything we build.
+# ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/accounting.json, must be in the standard engagement terms (spec §12 item 2)
+promise: Every client trust deed in one register you can check.
+constraintSet: Designed around TPB(GS) 55/2026, the TFN Rule, the Privacy Act and, for AUSTRAC-regulated services, AML/CTF due diligence.
+constraintHook: TPB AI guidance, the TFN Rule and AML/CTF CDD for trusts
+flagshipUseCases:
+  - name: Trust Deed & Client Structure Register
+    solution: document-registers
+    status: launch
+  # ⚑ owner: the accounting Safe-Use Kit must be lawyer-reviewed and published before this page launches (spec §12 item 6; research index A1)
+  - name: Admin Hours Audit + Switch-On, with the accounting Safe-Use Kit
+    solution: ai-switch-on
+    status: launch
+  - name: ATO Letter Sorter
+    solution: draft-for-approval
+    status: on-request
+    note: For practices without an ATO document feed.
+  - name: Ask the Firm Manual
+    solution: knowledge-assistant
+    status: on-request
+    note: For larger practices.
+obligationChips:
+  - { label: "Code item 6: client permission", row: tpb-code-item-6 }
+  - { label: "APESB alert: verify AI output", row: apesb-ai-technical-alert }
+  - { label: "TFN Rule: safeguard TFNs", row: tfn-rule }
+  - { label: APPs 6 and 11 for AI products, row: privacy-app-6-11-ai-products }
+  - { label: AML/CTF CDD for trust customers, row: aml-trust-cdd }
+# Every access path is verified in the dossier's "Works alongside" table (fetched 2026-09-29). FYI is left
+# out: the dossier found no public read API (ruling 4 allows only verified access methods).
+worksAlongside:
+  - { system: Karbon (Business and Enterprise plans), method: read-only, verified: 2026-09-29 }
+  # ⚑ owner: Xero app-partner registration (research index B9)
+  - { system: Xero Practice Manager, method: read-only, verified: 2026-09-29 }
+  - { system: SharePoint and OneDrive (Sites.Selected), method: read-only, verified: 2026-09-29 }
+leadSolutions: [document-registers, ai-switch-on, draft-for-approval]
+packages:
+  - { solution: document-registers, package: trust-deed-register }
+  - { solution: ai-switch-on, package: admin-hours-audit-switch-on }
+  - { solution: draft-for-approval, package: ato-letter-sorter }
+platformFirst: Run Karbon? Its email summaries and suggested replies are on by default. On FYI, look at the ATO SmartDocs integration for ATO documents. For one client's due diligence, First AML's AI document reader reads trust deeds inside the case.
+dontDo:
+  - We don't rebuild bookkeeping, reconciliation or BAS preparation.
+  - We don't make due-diligence decisions. Your AML/CTF compliance officer does.
+  - We don't give legal or tax advice, or draft engagement-letter wording.
+problem:
+  from: More than a million trusts appear in the ATO's 2023–24 trust return statistics. Seniors read each client's deeds by hand, again every year end.
+  to: One register of every client trust, each field linked to its page and checked against deeds your seniors already know.
+  source:
+    label: ATO, Trust statistics for Taxation statistics 2023–24
+    url: https://www.ato.gov.au/about-ato/research-and-statistics/in-detail/taxation-statistics/taxation-statistics-2023-24/statistics-in-taxation-statistics-2023-24/trust-statistics-for-taxation-statistics-2023-24
+    asAt: 2026-06-17
+workflow:
+  - id: year-end
+    stage: Year end
+    useCases:
+      - name: Trust Deed & Client Structure Register
+        solution: document-registers
+        status: launch
+  - id: new-structures
+    stage: New structures
+    useCases:
+      - name: Trust roles for AML/CTF due diligence
+        solution: document-registers
+        status: launch
+        note: Only if your practice provides AUSTRAC-regulated services.
+  - id: day-to-day
+    stage: Day to day
+    useCases:
+      - name: Admin Hours Audit + Switch-On
+        solution: ai-switch-on
+        status: launch
+      - name: ATO Letter Sorter
+        solution: draft-for-approval
+        status: on-request
+  - id: staff-questions
+    stage: Staff questions
+    useCases:
+      - name: Ask the Firm Manual
+        solution: knowledge-assistant
+        status: on-request
+        note: For larger practices.
+mockPanel:
+  title: "Trust register row: Example Family Trust (fictional)"
+  fields:
+    - label: Trustee
+      value: Example Trustee Pty Ltd
+    - label: Vesting date
+      value: Not found in the deed
+  chips:
+    - status: ok
+      text: Trustee matches the latest deed of variation
+    - status: review
+      text: Appointor changed by a deed of variation
+    - status: blocked
+      text: Deed of variation unsigned
+  citations:
+    - source: Trust deed
+      clause: Clause 12
+scenario:
+  title: Year-end trust review at a fictional mid-size practice
+  problem: At a fictional practice of about 120 staff, seniors reopen several hundred client trust deeds each June.
+  approach: Two seniors record answers for 40 deeds they know. The register reads those deeds, links every value to its page and queues anything unsigned.
+  measure:
+    - Error rate for each field, with every miss listed
+    - How often it says "not found" when the deed has the field
+  shipsFirst: "The Two-Week Trial report: the error rate for each field, and a go/no-go."
+  trace: accounting-scenario
+firstEngagement:
+  needFromYou:
+    - 30–50 trust deeds your seniors know, with their answers
+    - Read-only access to the deeds, or a secure copy
+    - "A trial window: November to early December, or April to May"
+  youGet:
+    - A trial report with each field's error rate and every miss
+    - Register rows for the trial deeds, linked to their pages
+    - A one-page note on where deeds are processed
+  exitRamp: At the go/no-go, you decide whether to continue. If you stop, you keep the trial report, the answer key and the rows produced.
+faq:
+  - q: Have you built this for other accounting practices?
+    a: No. Techsider has no clients yet, in accounting or anywhere else, so you start with a Two-Week Trial on deeds your seniors know.
+  - q: Do we need client permission before our deeds go through your system?
+    a: Possibly, and more likely if we run it for you. The Code item 6 row in the regulatory map sets out what the TPB says. You get a data note naming every processor, and your adviser decides whether your terms cover it.
+  - q: Where is the data processed?
+    a: The register runs in an Australian region, in your own Microsoft or AWS account or one we manage. For Switch-On, you see each vendor's processing location where it's published.
+  - q: Why not just use Karbon's AI, or FYI's ATO SmartDocs integration?
+    a: Use them first. Neither reads your trust deeds into a register you can check field by field.
+  - q: What happens when the AI model changes?
+    a: The test on your answer key is re-run before the new model is used, and you see old and new results side by side.

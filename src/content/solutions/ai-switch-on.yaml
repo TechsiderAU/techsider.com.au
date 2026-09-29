@@ -26,7 +26,8 @@ needProfiles:
     body: >-
       The Audit sets a baseline of where staff hours go. Day 30 measures the hours saved against it,
       in your own units.
-byIndustry: []
+byIndustry:
+  - accounting
 genericPackage:
   id: switch-on-in-3-weeks
   name: Switch-on in 3 weeks
@@ -132,7 +133,8 @@ dontDo:
   - "We don't draft or tailor legal wording: your own adviser approves any consent, engagement-letter or policy text."
   - We don't administer Microsoft 365 or manage devices. That stays with your IT provider.
   - We don't independently evaluate a tool we set up for you. Someone else should.
-matrix: {}
+matrix:
+  accounting: Admin Hours Audit + Switch-On
 faq:
   - q: Can't we switch these features on ourselves?
     a: >-

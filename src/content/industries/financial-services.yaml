@@ -1,0 +1,132 @@
+# /industries/financial-services/ (spec §5, §8.5). Facts: .superpowers/research/2026-09-29/phase-c/industries/financial-services.md,
+# post-fact-check text. Rows: src/data/regulatory/financial-services.json. Phase C ruling 3: the problem
+# source is APRA's AI letter; SOCI AI Risk Evidence stays off this page; the H1 promises no trigger the
+# client can't see ("whenever the model may have changed"). "Agents" is allowed on FS pages (spec §3.4).
+# ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/financial-services.json, must be in the standard engagement terms (spec §12 item 2)
+promise: Validate vendor AI on your own cases whenever the model may have changed.
+constraintSet: "For APRA-regulated entities and ASIC licensees: CPS 230, APRA's AI letter, REP 798 and RG 271, tested in your own environment."
+constraintHook: CPS 230 ¶29, APRA's AI letter, REP 798 and RG 271
+flagshipUseCases:
+  - name: Model-Change Regression
+    solution: ai-evaluation
+    status: launch
+  - name: Pre-contract Vendor AI Evaluation
+    solution: ai-evaluation
+    status: launch
+  - name: Conduct-risk recall tests on complaints, hardship and vulnerability cues
+    solution: ai-evaluation
+    status: launch
+    note: Complaint recognition follows RG 271's definition; hardship and vulnerability cues are reported separately.
+  - name: Second-line harness training
+    solution: ai-evaluation
+    status: launch
+    note: Part of every evaluation's handover.
+obligationChips:
+  - { label: "APRA AI letter, 30 Apr 2026", row: apra-ai-letter }
+  - { label: CPS 230 ¶29 control testing, row: cps230-control-testing }
+  - { label: CPS 230 material service providers, row: cps230-service-providers }
+  - { label: ASIC REP 798 third-party AI models, row: asic-rep-798 }
+  - { label: RG 271 complaint recognition, row: rg271-complaints }
+# Every access path is verified in the dossier's "Works alongside" table (fetched 2026-09-29).
+worksAlongside:
+  - { system: Copilot Studio (conversation transcripts), method: read-only, verified: 2026-09-29 }
+  - { system: Microsoft Copilot (Purview audit log), method: read-only, verified: 2026-09-29 }
+  - { system: Genesys Cloud CX (S3 recording export), method: read-only, verified: 2026-09-29 }
+  - { system: SharePoint (procedure libraries), method: read-only, verified: 2026-09-29 }
+leadSolutions: [ai-evaluation, knowledge-assistant]
+packages:
+  - { solution: ai-evaluation, package: model-change-regression }
+  - { solution: ai-evaluation, package: vendor-ai-evaluation }
+  - { solution: ai-evaluation, package: independent-evaluation-report }
+platformFirst: If your AI runs as a Copilot Studio agent, use its built-in agent evaluation to re-run the same test set after each change. Bring us in for an independent test on your own labelled cases.
+dontDo:
+  - We don't red-team or penetration-test in-house. A CREST-accredited tester you engage does.
+  - We don't build a private AI platform or model gateway.
+  - We don't write AI policy paperwork. Your policy owners do.
+problem:
+  from: Vendor AI is approved on the vendor's presentations and a point-in-time sample check, and the contract says little about model changes.
+  to: Your own test set is re-run whenever the model may have changed, and every failure is listed.
+  source:
+    label: APRA, Letter to industry on artificial intelligence (AI)
+    url: https://www.apra.gov.au/news-and-publications/apra-letter-industry-artificial-intelligence-ai
+    asAt: 2026-04-30
+workflow:
+  - id: choose-vendor
+    stage: Choose
+    useCases:
+      - name: Pre-contract Vendor AI Evaluation
+        solution: ai-evaluation
+        status: launch
+  - id: validate
+    stage: Validate
+    useCases:
+      - name: Independent validation with conduct-risk recall
+        solution: ai-evaluation
+        status: launch
+  - id: run-and-change
+    stage: Run and change
+    useCases:
+      - name: Model-Change Regression
+        solution: ai-evaluation
+        status: launch
+      - name: Agentic AI Control Evaluation
+        solution: ai-evaluation
+        status: launch
+  - id: hand-over
+    stage: Hand over
+    useCases:
+      - name: Second-line harness training
+        solution: ai-evaluation
+        status: launch
+      - name: Policy & Procedure Assistant
+        solution: knowledge-assistant
+        status: launch
+        note: Only where your platform doesn't already do it.
+mockPanel:
+  title: "Regression: complaint flags after an upgrade (fictional)"
+  fields:
+    - label: System
+      value: Contact-centre call summaries
+    - label: Compared
+      value: Current model against the vendor's upgrade
+  chips:
+    - status: blocked
+      text: Complaint missed by the upgrade
+    - status: review
+      text: Hardship-related complaint flagged by one model only
+    - status: ok
+      text: Summary cites the call segment
+  citations:
+    - source: Fictional call
+      clause: Segment 3
+scenario:
+  title: Complaint flags after a summary-model change
+  problem: A fictional customer-owned bank's contact-centre AI flags possible complaints. Its vendor announces a model upgrade without saying what changed.
+  approach: The complaints team labels past, de-identified calls in the bank's own environment. The same calls run through both models.
+  measure:
+    - Complaint recall, current model against the upgrade
+    - Recall on hardship and vulnerability cues, reported separately
+  shipsFirst: A labelled test set and a baseline run to compare the upgrade against.
+  trace: financial-services-scenario
+firstEngagement:
+  needFromYou:
+    - One AI system and one use case, with a named control owner
+    - Read-only access to past calls, chats or emails
+    - One or two people to label examples
+  youGet:
+    - An Independent Evaluation Report listing every failure
+    - An evidence bundle and replay script for your own subscription
+    - A handover so your second line can re-run the test
+  exitRamp: Once thresholds are agreed, you decide whether to continue. The test set is yours either way.
+faq:
+  # ⚑ owner: "the method is published" holds only if the evaluation method ships at launch (research index B10)
+  - q: You have no clients yet. Why rely on your findings?
+    a: Don't rely on our name; we have no clients yet. The method is published, and every finding comes with the test set, labels and a replay script, so your second line can re-perform it.
+  - q: Can we give your report to the board or APRA as a formal opinion?
+    a: No. It's findings, not an assurance opinion, and it isn't an ASAE 3000 or ASRE engagement. What you table, and how, is your decision.
+  - q: Does customer data leave our environment?
+    a: Not to us. The harness and graders run in your own Microsoft or AWS subscription. The vendor's system processes each test case where it runs in normal use, and the data note records where that is. If a grader would need a model outside Australia, we tell you before it runs.
+  - q: Do we need to onboard you as a new supplier?
+    a: Not necessarily. Through our Evaluation Partner route, the work can run under a firm you've already onboarded, such as your internal-audit co-source. How CPS 230 applies is your call.
+  - q: Our vendor won't give model-change notice. Can testing make up for that?
+    a: It can't replace contract terms, but it gives you your own evidence. Some platforms don't record which model version answered, so a scheduled re-run is one practical way to notice a change.

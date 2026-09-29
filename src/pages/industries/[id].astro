@@ -1,0 +1,52 @@
+---
+// /industries/<id>/ (spec §8.5): one page per industry that this build shows and that has content.
+// getStaticPaths joins nav.ts (src/lib/pages.ts) to the industries collection. A live industry
+// without its src/content/industries/<id>.yaml fails the build, as check 01 does; a planned one
+// shown only in a preview build is skipped until its task writes it. The page is built exactly as
+// the gallery's industry specimens build theirs (src/preview/specimens/industry-view.ts), from the
+// real collections: the industry, its regulatory rows, every solution and trace, and the insight cards.
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import { getCollection, getEntry } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import IndustryTemplate from "../../templates/IndustryTemplate.astro";
+import { isPreview } from "../../data/nav";
+import { pageDescription, pageTitle } from "../../lib/meta";
+import { pageAt, shownIds } from "../../lib/pages";
+import { siteContext } from "../../lib/site";
+import { industryView } from "../../lib/views/industry";
+import { insightCards } from "../../lib/views/insights";
+
+export const getStaticPaths = (async () => {
+  const entries = new Map((await getCollection("industries")).map((entry) => [entry.id, entry]));
+  return shownIds("/industries/").flatMap((id) => {
+    const entry = entries.get(id);
+    if (entry) return [{ params: { id }, props: { entry } }];
+    if (pageAt(`/industries/${id}/`).status === "live") {
+      throw new Error(`/industries/${id}/ is live, but src/content/industries/${id}.yaml does not exist`);
+    }
+    return [];
+  });
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { entry } = Astro.props;
+const path = `/industries/${entry.id}/`;
+const site = siteContext(isPreview());
+const regulatory = await getEntry("regulatory", entry.id);
+if (!regulatory) throw new Error(`${path}: src/data/regulatory/${entry.id}.json does not exist`);
+const solutions = Object.fromEntries((await getCollection("solutions")).map((s) => [s.id, s.data]));
+const traces = Object.fromEntries((await getCollection("traces")).map((t) => [t.id, t.data]));
+const view = industryView({
+  id: entry.id,
+  data: entry.data,
+  rows: regulatory.data.rows,
+  solutions,
+  traces,
+  insights: insightCards(await getCollection("insights"), site),
+  site,
+});
+const page = pageAt(path);
+---
+<BaseLayout title={pageTitle(page)} description={pageDescription(page)}>
+  <IndustryTemplate view={view} />
+</BaseLayout>

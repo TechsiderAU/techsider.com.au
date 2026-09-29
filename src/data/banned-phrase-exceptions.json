@@ -1,4 +1,8 @@
 [
+  { "file": "src/content/industries/*.yaml", "phrase": "CREST-accredited tester you engage", "reason": "names a third-party tester's accreditation, not ours, in industry copy (spec §3.5 seeded exception; §4.1 import rule 5)" },
+  { "file": "src/content/industries/*.yaml", "phrase": "not an assurance opinion", "reason": "the ④ disclaimer in industry FAQs (spec §3.5 seeded exception)" },
+  { "file": "src/data/regulatory/government.json", "phrase": "Victorian Government AI Assurance Framework", "reason": "proper name of a Victorian Government instrument (Phase C ruling 2; verify-register §8)" },
+  { "file": "dist", "phrase": "Victorian Government AI Assurance Framework", "reason": "proper name of a Victorian Government instrument, on /industries/government/ (Phase C ruling 2; verify-register §8)" },
   { "file": "src/components/Approach.astro", "phrase": "fixed price", "reason": "legacy section, removed in Phase C" },
   { "file": "src/components/Approach.astro", "phrase": "two-week discovery", "reason": "legacy section, removed in Phase C" },
   { "file": "src/components/Faq.astro", "phrase": "fixed price", "reason": "legacy section, removed in Phase C" },

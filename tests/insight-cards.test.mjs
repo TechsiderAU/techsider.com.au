@@ -43,11 +43,15 @@ test("insightCards: industry references become chips, as links only when the pag
     industries: ["fixture-government", { id: "fixture-industry-9", collection: "industries" }],
   })], fixtureSite);
   assert.deepEqual(card.industries, [
-    { label: "Fixture Government", href: "/preview/templates/industry-government/" },
-    { label: "Fixture Industry Nine", href: null },
+    { id: "fixture-government", label: "Fixture Government", href: "/preview/templates/industry-government/" },
+    { id: "fixture-industry-9", label: "Fixture Industry Nine", href: null },
   ]);
-  const [prod] = insightCards([post("p", NOW, { industries: ["government"] })], siteContext(false));
-  assert.deepEqual(prod.industries, [{ label: "Government", href: null }]);
+  // Production links an industry chip once the page is live (Government from Phase C Task 4).
+  const [prod] = insightCards([post("p", NOW, { industries: ["government", "healthcare"] })], siteContext(false));
+  assert.deepEqual(prod.industries, [
+    { id: "government", label: "Government", href: "/industries/government/" },
+    { id: "healthcare", label: "Healthcare", href: siteContext(false).industries.find((i) => i.id === "healthcare").href },
+  ]);
   assert.throws(() => insightCards([post("p", NOW, { industries: ["mining"] })], siteContext(true)), /Unknown industry id "mining"/);
 });
 

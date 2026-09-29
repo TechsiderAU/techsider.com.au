@@ -1,0 +1,54 @@
+{
+  "rows": [
+    {
+      "id": "apra-ai-letter",
+      "obligation": "APRA letter to industry on AI (30 Apr 2026): continuous monitoring, second-line capability",
+      "meaning": "APRA expects AI monitoring to be continuous and proportionate to how critical the use case is, and expects second line and internal audit to have the skills and tooling to assess AI systems independently.",
+      "design": "Your second line gets the harness to re-run the test on its own schedule.",
+      "evidence": "A reproducible evidence bundle with a replay script for your own subscription",
+      "source": "https://www.apra.gov.au/news-and-publications/apra-letter-industry-artificial-intelligence-ai",
+      "asAt": "2026-04-30",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "cps230-control-testing",
+      "obligation": "CPS 230 ¶29: regularly test controls for design and operating effectiveness",
+      "meaning": "Where an AI tool performs or supports a control, such as flagging complaints, that control must be tested at a frequency matched to the risk, with results reported to senior management.",
+      "design": "Thresholds are agreed with your control owner before the first run.",
+      "evidence": "Control-test scripts for your GRC, in a format agreed at scoping, with the failure list",
+      "source": "https://www.apra.gov.au/standards/cps-230",
+      "asAt": "2026-07-01",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "cps230-service-providers",
+      "obligation": "CPS 230 ¶52, ¶59–60: due diligence, monitoring and APRA notice for material providers",
+      "meaning": "If an AI vendor supports a critical operation or exposes you to material operational risk, you must do due diligence before signing or materially changing the arrangement, regularly assess how well your controls manage the risks of using it, and notify APRA of critical-operation arrangements and before any material offshoring, which can include inference run overseas.",
+      "design": "Vendor AI is tested on your cases before you sign, and the data note records where inference runs.",
+      "evidence": "A side-by-side vendor test report before contract",
+      "source": "https://www.apra.gov.au/standards/cps-230",
+      "asAt": "2026-07-01",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "asic-rep-798",
+      "obligation": "ASIC REP 798 (29 Oct 2024): licensee duties applied to third-party AI models",
+      "meaning": "ASIC says existing licensee obligations apply to AI and licensees stay responsible for outsourced functions, and asks how they validate, monitor and review third-party AI models.",
+      "design": "The report records the model details your vendor discloses, and those it won't.",
+      "evidence": "A vendor evaluation report listing undisclosed model details",
+      "source": "https://www.asic.gov.au/regulatory-resources/find-a-document/reports/rep-798-beware-the-gap-governance-arrangements-in-the-face-of-ai-innovation/",
+      "asAt": "2024-10-29",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "rg271-complaints",
+      "obligation": "RG 271.27–271.32: recognise complaints even when not labelled or not in writing",
+      "meaning": "An AI that summarises or triages customer contacts sits where your firm must recognise complaints: dissatisfaction where a response is expected, even if the customer never says 'complaint' or speaks rather than writes.",
+      "design": "Recall is measured separately for complaints and hardship-related complaints, and every miss is listed.",
+      "evidence": "A recall report by category with the list of missed complaints",
+      "source": "https://www.asic.gov.au/regulatory-resources/find-a-document/regulatory-guides/rg-271-internal-dispute-resolution/",
+      "asAt": "2021-09-02",
+      "lastReviewed": "2026-09-29"
+    }
+  ]
+}

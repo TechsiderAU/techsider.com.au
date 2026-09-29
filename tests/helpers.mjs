@@ -4,6 +4,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { elements } from "../scripts/ci/lib.mjs";
 
 const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
 const DIST_PREVIEW = fileURLToPath(new URL("../dist-preview/", import.meta.url));
@@ -42,4 +43,19 @@ export function allHtmlFiles(dir = DIST) {
     else if (name.endsWith(".html")) out.push(relative(DIST, p));
   }
   return out;
+}
+
+/**
+ * The words a reader reads in a page's own copy in <main> (spec §8.5's industry-page length, which
+ * counts the regulatory map and the FAQ): whitespace-separated tokens holding a letter or a digit.
+ * aria-hidden copies (the DataTable's stacked-card column labels, bracket glyphs, the mock panel's
+ * decorative buttons) repeat what the page already says once, and the Related insights cards
+ * (#insights) are generated links to posts, so neither counts. Every industry page test uses it.
+ */
+export function pageWords(html) {
+  let main = html.slice(html.search(/<main\b/), html.indexOf("</main>"));
+  const [insights] = elements(main, (t) => t.attrs.id === "insights");
+  if (insights) main = main.replace(insights.outer, " ");
+  for (const hidden of elements(main, (t) => t.attrs["aria-hidden"] === "true")) main = main.replace(hidden.outer, " ");
+  return visibleText(main).split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
 }

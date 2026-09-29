@@ -24,7 +24,8 @@ needProfiles:
     body: >-
       The register reads your documents read-only and adds no new login. You get a spreadsheet, a
       CSV or an import your system already accepts.
-byIndustry: []
+byIndustry:
+  - accounting
 genericPackage:
   id: one-document-family
   name: One document family, one register
@@ -222,7 +223,8 @@ dontDo:
   - We don't write to trust ledgers or any other record. Registers are read-only on your systems.
   - We don't make compliance or due-diligence decisions, or give legal or tax advice.
   - We don't rebuild bookkeeping capture, identity verification, or anything your platform already reads well enough.
-matrix: {}
+matrix:
+  accounting: Trust deed and client structure register
 faq:
   - q: Have you built this for another firm?
     a: >-

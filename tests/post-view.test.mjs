@@ -66,8 +66,9 @@ test("postView: the first solution reference wins, then the first industry (spec
   // Astro's reference() gives { id, collection }; refId reads both shapes.
   const refs = { solutions: [{ id: "ai-evaluation", collection: "solutions" }], industries: [{ id: "government", collection: "industries" }] };
   assert.equal(view(refs, true).closing.href, "/contact/?interest=ai-evaluation");
-  assert.deepEqual(view(refs, true).card.industries, [{ label: "Government", href: "/industries/government/" }]);
-  assert.deepEqual(view(refs).card.industries, [{ label: "Government", href: null }]);
+  assert.deepEqual(view(refs, true).card.industries, [{ id: "government", label: "Government", href: "/industries/government/" }]);
+  // Government is live from Phase C Task 4, so production links its chip too.
+  assert.deepEqual(view(refs).card.industries, [{ id: "government", label: "Government", href: "/industries/government/" }]);
 });
 
 test("postView: an illustrative post carries the scenario label", () => {

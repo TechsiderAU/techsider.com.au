@@ -108,7 +108,8 @@ test("on the production site context every planned page is plain text or email; 
   assert.deepEqual(live.ctas, { primary: { label: "Talk to us about Document Registers", href: MAILTO }, secondary: null });
   assert.equal(live.closing.href, MAILTO);
   assert.equal(live.howWeTest.methodHref, null);
-  assert.deepEqual(live.byIndustry, [{ label: "Accounting", href: null }, { label: "Government", href: null }]);
+  // Accounting and Government are live from Phase C Task 4, so their By industry chips link.
+  assert.deepEqual(live.byIndustry, [{ label: "Accounting", href: "/industries/accounting/" }, { label: "Government", href: "/industries/government/" }]);
   for (const p of live.onRequest) assert.equal(p.href, MAILTO);
 
   const preview = view("document-registers", data, siteContext(true));

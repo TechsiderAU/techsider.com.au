@@ -1,0 +1,10 @@
+{
+  "title": "Complaint-flag regression at a fictional customer-owned bank",
+  "provenance": "illustrative",
+  "lines": [
+    { "t": "10:00:00", "op": "set.label", "detail": "Past calls labelled by two complaints staff" },
+    { "t": "10:12:31", "op": "run.compare", "detail": "Current and upgraded models run on the same calls" },
+    { "t": "10:31:44", "op": "flag.miss", "detail": "Hardship-related complaint missed by the upgrade" },
+    { "t": "10:40:15", "op": "report.misses", "detail": "Every miss listed with its call reference" }
+  ]
+}

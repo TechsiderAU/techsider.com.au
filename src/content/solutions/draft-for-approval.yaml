@@ -26,7 +26,8 @@ needProfiles:
     body: >-
       If the job lives inside one system, that system's own tools come first, and we'll say so. This
       package is for the gaps between systems.
-byIndustry: []
+byIndustry:
+  - accounting
 genericPackage:
   id: one-job-drafts-for-approval
   name: One job, drafts for approval
@@ -129,7 +130,8 @@ dontDo:
   - We don't build autonomous actions. Nothing is sent, changed or decided without a person's approval.
   - We don't build voice bots or customer-facing chat.
   - We don't rebuild a job your platform's own tools already handle.
-matrix: {}
+matrix:
+  accounting: ATO Letter Sorter, on request
 faq:
   - q: Will it send anything on its own?
     a: >-

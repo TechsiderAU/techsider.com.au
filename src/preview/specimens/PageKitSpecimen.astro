@@ -47,7 +47,7 @@ const cards = [
 const [latest, second] = insightCards(insightFixtures, site);
 const insights = [
   latest,
-  { ...second, industries: [shownIndustry, unshownIndustry].map((i) => ({ label: i.shortName, href: i.href })) },
+  { ...second, industries: [shownIndustry, unshownIndustry].map((i) => ({ id: i.id, label: i.shortName, href: i.href })) },
 ];
 
 // A stand-in for rendered markdown: every element Prose styles.

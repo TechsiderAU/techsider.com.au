@@ -1,0 +1,162 @@
+# /industries/government/ (spec §5, §8.5). Facts: .superpowers/research/2026-09-29/phase-c/industries/government.md,
+# post-fact-check text. Rows: src/data/regulatory/government.json. Phase C rulings 1 and 2: the APP 1.7–1.9
+# row is held until the OAIC guidance due 1 Oct 2026 is re-read; the H1 is the dossier's alternative;
+# no FAQ on panel membership or security clearances; council-framed rows render in Local only.
+# ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/government.json, must be in the standard engagement terms (spec §12 item 2)
+promise: Measure how your AI fails before it leaves pilot.
+constraintSet: Built around the DTA AI policy, the NSW AIAF, Victoria's AI procurement guidance and Queensland's FAIRA, and tested in your own environment.
+constraintHook: Evidence mapped to the DTA tool, the NSW AIAF and FAIRA
+jurisdictions: [cth, nsw, vic, qld, local]
+flagshipUseCases:
+  - name: Evaluation of Copilot agents leaving pilot
+    solution: ai-evaluation
+    status: launch
+  - name: Vendor AI-upgrade evaluation
+    solution: ai-evaluation
+    status: launch
+  - name: Tender AI-Claims Verification
+    solution: ai-evaluation
+    status: launch
+    note: Carries a probity note.
+  - name: Agentic AI Control Evaluation
+    solution: ai-evaluation
+    status: launch
+  - name: Council Policy & Procedure Assistant
+    solution: knowledge-assistant
+    status: launch
+obligationChips:
+  - { label: Impact assessment before deployment, row: cth-dta-ai-impact-assessment, jurisdiction: cth }
+  - { label: Re-validate after a material change, row: cth-dta-monitor-revalidate, jurisdiction: cth }
+  - { label: Agent identity and least privilege, row: cth-dta-agentic-addendum, jurisdiction: cth }
+  - { label: Agentic AI for low-risk tasks only, row: cth-asd-agentic-access, jurisdiction: cth }
+  - { label: "NSW: register AI use cases before use", row: nsw-dcs-2026-02, jurisdiction: nsw }
+  - { label: "Vic: supplier AI disclosed and listed", row: vic-ai-procurement, jurisdiction: vic }
+  - { label: "Vic: gen AI shouldn't make decisions", row: vic-genai-guideline, jurisdiction: vic }
+  - { label: "Qld: a FAIRA when evaluating AI", row: qld-ai-governance-faira, jurisdiction: qld }
+  - { label: "NSW councils: IPP 9 accuracy check", row: nsw-ppip-ipp9, jurisdiction: local }
+  - { label: "Qld councils: QPPs apply", row: qld-ip-act-qpp, jurisdiction: local }
+  - { label: AI-generated records are State records, row: local-nsw-state-records-ai, jurisdiction: local }
+  - { label: "Vic councils: AI recordkeeping policy", row: local-vic-prov-ai-records, jurisdiction: local }
+  - { label: "Qld councils: records in any format", row: local-qld-public-records, jurisdiction: local }
+# Every access path is verified in the dossier's "Works alongside" tables (fetched 2026-09-29). A system's
+# jurisdiction only places its chip in a section; the State chips are spread across nsw, vic and qld.
+worksAlongside:
+  - { system: Microsoft Copilot (Purview audit log), method: read-only, verified: 2026-09-29, jurisdiction: cth }
+  - { system: Copilot Studio (conversation transcripts), method: read-only, verified: 2026-09-29, jurisdiction: cth }
+  - { system: SharePoint and OneDrive (Sites.Selected), method: read-only, verified: 2026-09-29, jurisdiction: cth }
+  - { system: Microsoft Copilot (Purview audit log), method: read-only, verified: 2026-09-29, jurisdiction: nsw }
+  - { system: Copilot Studio (conversation transcripts), method: read-only, verified: 2026-09-29, jurisdiction: vic }
+  - { system: SharePoint and OneDrive (Sites.Selected), method: read-only, verified: 2026-09-29, jurisdiction: qld }
+  - { system: SharePoint and OneDrive (Sites.Selected), method: read-only, verified: 2026-09-29, jurisdiction: local }
+  - { system: Copilot Studio (conversation transcripts), method: read-only, verified: 2026-09-29, jurisdiction: local }
+  - { system: Microsoft Copilot (Purview audit log), method: read-only, verified: 2026-09-29, jurisdiction: local }
+leadSolutions: [ai-evaluation, knowledge-assistant]
+packages:
+  - { solution: ai-evaluation, package: independent-evaluation-report, jurisdiction: cth }
+  - { solution: ai-evaluation, package: model-change-regression, jurisdiction: cth }
+  - { solution: ai-evaluation, package: agentic-ai-control-evaluation, jurisdiction: cth }
+  - { solution: ai-evaluation, package: independent-evaluation-report, jurisdiction: nsw }
+  - { solution: ai-evaluation, package: tender-ai-claims-verification, jurisdiction: vic }
+  - { solution: ai-evaluation, package: vendor-ai-evaluation, jurisdiction: qld }
+  - { solution: knowledge-assistant, package: policy-procedure-assistant, jurisdiction: local }
+  - { solution: ai-evaluation, package: one-system-one-use-case, jurisdiction: local }
+  - { solution: ai-evaluation, package: vendor-ai-evaluation, jurisdiction: local }
+platformFirst: "If your staff have Microsoft Copilot, try agents in SharePoint first: they answer from a site's pages within each person's permissions. If Copilot Studio's built-in evaluation answers your question, we'll say so."
+dontDo:
+  - We don't build a general staff chat assistant to replace the one you already run.
+  - We don't do adversarial testing in-house. A CREST-accredited tester you engage does it.
+  - We don't sell AI policy paperwork, such as AI use-case registers or transparency statements.
+  - We don't evaluate a system we built, configured or advised on for the same agency.
+problem:
+  from: AI tools reach daily staff use before a dedicated risk assessment is done or monitoring controls are in place.
+  to: Each use case leaves pilot with a measured test on your own questions, its failures listed, and a re-test when the model changes.
+  source:
+    label: Queensland Audit Office, Managing the ethical risks of artificial intelligence
+    url: https://www.qao.qld.gov.au/reports-resources/reports-parliament/managing-ethical-risks-artificial-intelligence
+    asAt: 2025-09-24
+workflow:
+  - id: choose-vendor
+    stage: Choose
+    useCases:
+      - name: Vendor AI Evaluation before contract
+        solution: ai-evaluation
+        status: launch
+      - name: Tender AI-Claims Verification
+        solution: ai-evaluation
+        status: launch
+  - id: leave-pilot
+    stage: Leave pilot
+    useCases:
+      - name: Independent Evaluation Report
+        solution: ai-evaluation
+        status: launch
+      - name: Council Policy & Procedure Assistant
+        solution: knowledge-assistant
+        status: launch
+        note: For councils and small bodies.
+  - id: run-agents
+    stage: Run agents
+    useCases:
+      - name: Agentic AI Control Evaluation
+        solution: ai-evaluation
+        status: launch
+  - id: after-a-change
+    stage: After a change
+    useCases:
+      - name: Model-Change Regression
+        solution: ai-evaluation
+        status: launch
+mockPanel:
+  title: "Findings: staff policy agent (fictional)"
+  fields:
+    - label: Use case
+      value: Staff questions on leave and travel
+    - label: Ground truth
+      value: Answers labelled by two policy officers
+    - label: Accountable official
+      value: Named officer
+      redacted: true
+  chips:
+    - status: blocked
+      text: A confident answer the policy doesn't support
+    - status: review
+      text: Declined, though the policy covers it
+    - status: ok
+      text: Cited clause says what the answer claims
+  citations:
+    - source: Fictional travel policy
+      clause: Section 4
+scenario:
+  title: A policy agent leaving pilot at a fictional state department
+  problem: A fictional department has piloted a Copilot Studio agent that answers staff policy questions. Before rollout, the accountable official wants to know how often it answers wrongly, and whether it declines when the policy is silent.
+  approach: Two policy officers label expected answers independently, and the test runs in the department's own subscription.
+  measure:
+    - False answers the policy doesn't support
+    - False refusals when the answer is in the policy
+    - Whether each cited clause says what the answer claims
+  shipsFirst: A test plan and a first failure list from public policy questions, before any staff data is touched.
+  trace: government-scenario
+firstEngagement:
+  needFromYou:
+    - "A named owner, and the instrument you report to: the DTA tool, the NSW AIAF or a FAIRA"
+    - 30–50 questions your staff can answer, or approval to start on public or synthetic data
+    - Read-only access to the system, and your risk matrix
+  youGet:
+    - A test plan with thresholds agreed before testing
+    - An Independent Evaluation Report with the explicit failure list
+    - The evidence bundle, replay script and harness, handed over to your team
+  exitRamp: Once the test set and thresholds are agreed, and before testing starts, you decide whether to continue. If you stop, the test set and any results so far are yours.
+faq:
+  # ⚑ owner: "we publish the method" holds only if the evaluation method ships at launch (research index B10)
+  - q: You have no clients yet. Why trust your evaluation?
+    a: "Don't take it on trust. We have no clients yet, in government or anywhere else, so we publish the method instead: sample size, ground truth and thresholds. You get the test set and a replay script, so your team can check our work."
+  - q: Will your report tell us the system is safe to deploy?
+    a: No. You get findings, not an assurance opinion, and it isn't an ASAE 3000 engagement. Each finding is rated to your risk matrix, and your accountable official decides whether to deploy.
+  - q: Do you evaluate systems you built, or take money from vendors?
+    a: No. We never independently evaluate a system we built, configured or advised on for the same client, and we take no resale margin or referral fees from vendors we evaluate.
+  - q: Will you red-team or penetration-test our AI agents?
+    a: No. The Agentic AI Control Evaluation is a configuration review. Where prompt-injection or tool-misuse testing is needed, a CREST-accredited tester you engage does it, under written rules of engagement.
+  - q: Does our test data leave our environment?
+    a: Not to us. The test and its graders run in your own subscription. The system under test handles each question where its vendor runs it, as in normal use, and the report records that location. While your privacy and security assessments run, we start on public or synthetic data in a Feasibility Sprint.
+  - q: We're a council. What do you design around?
+    a: "Your state's privacy and records rules, listed with their sources in the Local government section: the PPIP Act and State Records Act in NSW, PROV's recordkeeping policy in Victoria, and the Information Privacy Act and Public Records Act in Queensland."

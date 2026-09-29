@@ -1,0 +1,10 @@
+{
+  "title": "Policy agent test run at a fictional state department",
+  "provenance": "illustrative",
+  "lines": [
+    { "t": "09:00:00", "op": "plan.thresholds", "detail": "Pass thresholds agreed before the run" },
+    { "t": "09:05:02", "op": "run.replay", "detail": "Labelled questions replayed in the department's own subscription" },
+    { "t": "09:38:41", "op": "grade.answer", "detail": "Confident answer the travel policy doesn't support" },
+    { "t": "09:52:30", "op": "report.failures", "detail": "Failure list written, rated to the department's risk matrix" }
+  ]
+}

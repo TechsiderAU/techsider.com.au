@@ -16,7 +16,8 @@ export interface InsightCardView {
   typeLabel: string;
   date: Date;
   minutes: number;
-  industries: { label: string; href: string | null }[];
+  /** One chip per industry reference: the industry's id (industry pages match cards on it), its short name and its link. */
+  industries: { id: string; label: string; href: string | null }[];
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -25,7 +26,7 @@ const newestFirst = (a: InsightCardView, b: InsightCardView) => b.date.getTime()
 /**
  * One card per published post, newest first (ties by id). Drafts are dropped. Each industry
  * reference becomes a chip labelled with the industry's short name, linking to its page when the
- * page is shown. An unknown industry id throws.
+ * page is shown, and keeping the industry's id for matching (WB-15). An unknown industry id throws.
  */
 export function insightCards(posts: { id: string; body?: string; data: InsightData }[], site: SiteContext): InsightCardView[] {
   return posts
@@ -40,7 +41,7 @@ export function insightCards(posts: { id: string; body?: string; data: InsightDa
       minutes: readingMinutes(post.body),
       industries: post.data.industries.map((ref) => {
         const industry = industryLink(site, refId(ref));
-        return { label: industry.shortName, href: industry.href };
+        return { id: industry.id, label: industry.shortName, href: industry.href };
       }),
     }))
     .sort(newestFirst);

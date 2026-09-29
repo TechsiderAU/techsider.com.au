@@ -1,0 +1,10 @@
+{
+  "title": "Trust register trial at a fictional mid-size practice",
+  "provenance": "illustrative",
+  "lines": [
+    { "t": "08:30:00", "op": "key.load", "detail": "Seniors' answers loaded for the deeds they know" },
+    { "t": "08:31:10", "op": "deed.read", "detail": "Deeds and deeds of variation read from a read-only folder" },
+    { "t": "08:32:05", "op": "queue.exception", "detail": "Unsigned deed of variation sent to the exception queue" },
+    { "t": "08:47:20", "op": "report.trial", "detail": "Each field checked against the answers, every miss listed" }
+  ]
+}

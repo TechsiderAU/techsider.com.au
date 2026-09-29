@@ -25,7 +25,10 @@ needProfiles:
     body: >-
       Answers can come in the language a worker asks in, with the English step and page shown. Each
       language is tested separately.
-byIndustry: []
+byIndustry:
+  - government
+  - financial-services
+  - accounting
 genericPackage:
   id: one-manual-one-team
   name: One manual, one team
@@ -179,7 +182,10 @@ dontDo:
   - We don't build a chat platform. Inside Microsoft 365, the assistant uses the Copilot you already license.
   - We don't answer from matter files or ERP data, or rebuild SOP answers already inside SafetyCulture (now Mitti).
   - We don't give clinical advice or build student-facing chat.
-matrix: {}
+matrix:
+  government: Council policy and procedure assistant
+  financial-services: Complaints and hardship procedures assistant
+  accounting: Ask the Firm Manual, on request
 faq:
   - q: We already have Copilot. Why would we need this?
     a: >-

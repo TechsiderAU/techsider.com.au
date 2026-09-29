@@ -1,0 +1,54 @@
+{
+  "rows": [
+    {
+      "id": "tpb-code-item-6",
+      "obligation": "TASA s 30-10 Code item 6; TPB(GS) 55/2026 ¶¶23–25: client permission before AI use",
+      "meaning": "Entering client information into an AI tool can be a disclosure to a third party, depending on how the tool is configured and used, so client permission may be needed first.",
+      "design": "A data note says which providers see client data and where it's processed.",
+      "evidence": "A one-page data note naming each processor, its region and its retention setting",
+      "source": "https://www.tpb.gov.au/tpbgs-552026-use-artificial-intelligence-and-code-professional-conduct",
+      "asAt": "2026-07-22",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "apesb-ai-technical-alert",
+      "obligation": "APESB Technical Alert (31 Oct 2025): APES 110 applies to AI use",
+      "meaning": "Members using AI must keep meeting APES 110 and critically assess and verify AI-generated information, and the APESB says they should disclose and supervise AI use.",
+      "design": "Every register field links to its page, so a reviewer can check it.",
+      "evidence": "A register with a source-page link per field, and a test report listing every miss",
+      "source": "https://apesb.org.au/wp-content/uploads/2025/10/TA_Use_of_AI_Oct_31_Oct_25.pdf",
+      "asAt": "2025-10-31",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "tfn-rule",
+      "obligation": "Privacy (Tax File Number) Rule 2015 ss 10, 11: use limits and safeguards for TFNs",
+      "meaning": "Every holder of TFN information, whatever its size, may use or disclose it only for tax, superannuation or personal-assistance law purposes (or to give individuals their own TFN information), and must take reasonable steps to protect it.",
+      "design": "TFNs are masked before any model call unless the job needs the field.",
+      "evidence": "A masking test result that lists any TFN left unmasked",
+      "source": "https://www.legislation.gov.au/F2015L00249/latest/text",
+      "asAt": "2015-03-04",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "privacy-app-6-11-ai-products",
+      "obligation": "Privacy Act APPs 6 and 11: personal information entered into AI products",
+      "meaning": "For practices the APPs cover (generally turnover over $3m; smaller ones only in listed cases), putting personal information into an AI product is a use or disclosure under APP 6, and APP 11 requires reasonable security steps.",
+      "design": "Where the provider offers the setting, tools are set so it doesn't train on what you enter.",
+      "evidence": "An onshore note stating where inference runs and what the provider retains",
+      "source": "https://www.oaic.gov.au/privacy/privacy-guidance-for-organisations-and-government-agencies/guidance-on-privacy-and-the-use-of-commercially-available-ai-products",
+      "asAt": "2025-01-17",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "aml-trust-cdd",
+      "obligation": "AML/CTF Act s 28 (from 1 Jul 2026 for table 6 services): initial CDD for a trust customer",
+      "meaning": "A practice providing AUSTRAC-regulated services, such as setting up or restructuring a trust, must establish a trust customer's trustees, beneficiaries or their classes, and beneficial owners, among other matters. AUSTRAC names the deed and deeds of variation for verifying the trust's details, not individuals' identities.",
+      "design": "Each role links to its deed page; your AML/CTF compliance officer signs off.",
+      "evidence": "A trust register with a page link per field, and an exception list",
+      "source": "https://www.austrac.gov.au/industry-and-business/obligations-and-guidance/your-amlctf-program/customer-due-diligence/initial-customer-due-diligence/initial-customer-due-diligence-guides-customer-type/initial-cdd-trust",
+      "asAt": "2026-05-05",
+      "lastReviewed": "2026-09-29"
+    }
+  ]
+}

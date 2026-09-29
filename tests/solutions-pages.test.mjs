@@ -172,7 +172,7 @@ test("the hub: five job cards linking to the live pages, a matrix row per indust
   assert.ok(HUB.byBuyer.midMarket.some((i) => i.name === "One system, one use case"));
 });
 
-test("production dist/ renders the solution template only on the solution pages, and package markup only there and on the hub", () => {
+test("production dist/ renders the solution template and package tabs only on the solution pages, and package cards only there, on the hub and on industry pages", () => {
   const solutionPages = new Set(IDS.map((id) => `solutions/${id}/index.html`));
   for (const file of allHtmlFiles()) {
     const html = readDist(file);
@@ -181,6 +181,7 @@ test("production dist/ renders the solution template only on the solution pages,
       continue;
     }
     assert.doesNotMatch(html, /data-template="solution"|data-package-tab/, file);
-    if (file !== "solutions/index.html") assert.doesNotMatch(html, /data-package-status/, file);
+    // The Solutions hub lists packages by buyer, and each industry page recommends 3–4 (Phase C Task 4).
+    if (file !== "solutions/index.html" && !file.startsWith("industries/")) assert.doesNotMatch(html, /data-package-status/, file);
   }
 });

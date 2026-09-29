@@ -131,9 +131,12 @@ const SOLUTIONS = [
 
 const INDUSTRIES_HUB = page("industries", "Industries", "/", "/industries/", "planned");
 const INDUSTRIES = [
-  page("industries", "Government", "/industries/", "/industries/government/", "planned", "Government & public sector"),
-  page("industries", "Financial services", "/industries/", "/industries/financial-services/", "planned"),
-  page("industries", "Accounting", "/industries/", "/industries/accounting/", "planned"),
+  describe(page("industries", "Government", "/industries/", "/industries/government/", "live", "Government & public sector"),
+    "Independent evaluation of AI in government: measured tests on your own questions, with findings mapped to the DTA AI policy, NSW AIAF or Queensland's FAIRA."),
+  describe(page("industries", "Financial services", "/industries/", "/industries/financial-services/", "live"),
+    "Independent validation of vendor AI for APRA-regulated entities and ASIC licensees: your own test set, re-run when the model may change, every failure listed."),
+  describe(page("industries", "Accounting", "/industries/", "/industries/accounting/", "live"),
+    "A register of every client trust deed, each field linked to its page and checked against deeds your seniors already know, for Australian accounting practices."),
   page("industries", "Education", "/industries/", "/industries/education/", "planned"),
   page("industries", "Manufacturing", "/industries/", "/industries/manufacturing/", "planned"),
   page("industries", "Real estate", "/industries/", "/industries/real-estate/", "planned", "Real estate & property"),

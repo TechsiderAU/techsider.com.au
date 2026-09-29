@@ -73,11 +73,12 @@ test("production: planned pages get a null href, and contact links fall back to 
   for (const [key, path] of Object.entries(PAGE_PATHS)) assert.equal(site.page(key).href, expected(path), key);
   for (const id of SOLUTION_IDS) assert.equal(site.demo(id), expected(`/demos/${id}/`), id);
   // Phase C puts pages live task by task, and the loops above hold every href to nav.ts. From Task 3
-  // the Solutions hub and all five solution pages link; industry pages stay plain text, and every
-  // contact link stays the email address, while those pages are planned.
+  // the Solutions hub and all five solution pages link; from Task 4, Government, Financial services
+  // and Accounting do too. The other industry pages stay plain text, and every contact link stays the
+  // email address, while those pages are planned.
   assert.equal(site.page("solutions").href, "/solutions/");
   assert.ok(site.solutions.every((s) => s.href === s.path), "a solution page isn't shown");
-  assert.ok(site.industries.every((i) => i.href === null), "an industry page is shown");
+  assert.deepEqual(site.industries.filter((i) => i.href !== null).map((i) => i.id), ["government", "financial-services", "accounting"]);
   const mailto = `mailto:${SITE.email}`;
   assert.equal(site.contact(), mailto);
   assert.equal(site.contact({ interest: "ai-evaluation" }), mailto);

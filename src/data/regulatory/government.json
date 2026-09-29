@@ -1,0 +1,147 @@
+{
+  "rows": [
+    {
+      "id": "cth-dta-ai-impact-assessment",
+      "obligation": "DTA AI policy v2.0: finalise the use case impact assessment before deployment",
+      "meaning": "Before an in-scope AI use case is deployed, the agency must finalise its impact assessment and apply the agreed risk treatments. Agencies must begin these assessments within 12 months of v2.0 taking effect (15 December 2025), and bring existing use cases into line by 30 April 2027.",
+      "design": "Findings are mapped to the tool's sections, such as reliability and safety, or privacy.",
+      "evidence": "A findings table keyed to the tool's sections, with the explicit failure list",
+      "source": "https://www.digital.gov.au/ai/ai-in-government-policy/ai-use-case-impact-assessment",
+      "asAt": "2025-12-15",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["cth"]
+    },
+    {
+      "id": "cth-dta-monitor-revalidate",
+      "obligation": "DTA AI policy v2.0: monitor in-scope use cases; re-validate after a material change",
+      "meaning": "A deployed use case must be monitored, and its impact assessment re-validated after a material change. Agencies should also watch for vendor changes. The DTA says the remaining v2.0 requirements take effect in December 2026.",
+      "design": "The handed-over test set re-runs when the model or vendor changes.",
+      "evidence": "A regression table comparing baseline and new runs on the same test set",
+      "source": "https://www.digital.gov.au/ai/ai-in-government-policy/ai-use-case-impact-assessment",
+      "asAt": "2025-12-15",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["cth"]
+    },
+    {
+      "id": "cth-dta-agentic-addendum",
+      "obligation": "DTA agentic AI addendum, AGT.3.3 and AGT.8.1: agent identity and monitoring",
+      "meaning": "Each agent should have its own identity and only the access it needs, and be monitored for goal drift and tool misuse. It's best-practice guidance that agencies using agentic AI are expected to apply.",
+      "design": "The Agentic AI Control Evaluation reviews each agent's identity, permissions and logging, as configured.",
+      "evidence": "A permissions and approval-gate matrix per agent, each gap rated to your risk matrix",
+      "source": "https://www.digital.gov.au/policy/ai/agentic-ai-addendum-statements-design",
+      "asAt": "2026-06-04",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["cth"]
+    },
+    {
+      "id": "cth-asd-agentic-access",
+      "obligation": "ASD, Careful adoption of agentic AI services: low-risk tasks, never broad access",
+      "meaning": "The authoring agencies recommend agentic AI only for low-risk, non-sensitive tasks, never with broad or unrestricted access, and a person should approve high-impact actions. It's guidance, not a mandate.",
+      "design": "The review checks that your designers, not the agent, decide when a person must approve.",
+      "evidence": "A record of which actions need human approval, per agent, and where that gate is enforced",
+      "source": "https://www.cyber.gov.au/business-government/secure-design/artificial-intelligence/careful-adoption-of-agentic-ai-services",
+      "asAt": "2026-05-01",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["cth"]
+    },
+    {
+      "id": "nsw-dcs-2026-02",
+      "obligation": "NSW DCS-2026-02 and AI Operational Policy: register AI use cases, apply the AIAF",
+      "meaning": "NSW agencies must register AI use cases in the AIAF Platform before use, and re-assess when risk, context or functionality changes. The policy says routine productivity use of approved tools, with meaningful human oversight, doesn't generally need registering.",
+      "design": "Findings are rated to AIAF risk levels, and every test run is dated.",
+      "evidence": "An evaluation report rated to AIAF risk levels, with a dated run history",
+      "source": "https://arp.nsw.gov.au/dcs-2026-02-use-of-artificial-intelligence-by-nsw-government-agencies",
+      "asAt": "2026-09-01",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["nsw"]
+    },
+    {
+      "id": "vic-ai-procurement",
+      "obligation": "Vic, Navigating AI in procurement: assess AI, get supplier disclosure, list permitted uses",
+      "meaning": "Victorian buyers are guided to complete the Victorian Government AI Assurance Framework (being piloted), have suppliers disclose AI use, and list permitted AI uses in the contract. It's guidance, not a mandate.",
+      "design": "Tender AI-Claims Verification tests tendered AI on your questions, with a probity note.",
+      "evidence": "A vendor comparison with each tender claim marked supported or not supported",
+      "source": "https://www.buyingfor.vic.gov.au/navigating-ai-procurement",
+      "asAt": "2026-08-03",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["vic"]
+    },
+    {
+      "id": "vic-genai-guideline",
+      "obligation": "Vic Administrative Guideline on gen AI in the VPS (made 27 Nov 2024)",
+      "meaning": "The guideline says gen-AI tools shouldn't be used to make decisions or undertake assessments, and inputs to an approved tool must not exceed the protective marking set for that tool.",
+      "design": "Assistants retrieve and cite, not decide, and the tool's marking sets what they can read.",
+      "evidence": "A data note listing the collection's protective markings and approved tools",
+      "source": "https://www.vic.gov.au/administrative-guideline-safe-responsible-use-gen-ai-vps",
+      "asAt": "2025-02-12",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["vic"]
+    },
+    {
+      "id": "qld-ai-governance-faira",
+      "obligation": "Qld AI governance policy v2.0.0: a Foundational AI risk assessment (FAIRA) when evaluating AI",
+      "meaning": "Queensland departments must prepare a FAIRA, or an agreed equivalent, when evaluating AI solutions. The policy says a FAIRA doesn't replace privacy impact, security or human rights assessments.",
+      "design": "Findings are cross-referenced to your FAIRA, so it cites measured results.",
+      "evidence": "Findings cross-referenced to the agency's FAIRA, with measured error rates attached",
+      "source": "https://www.forgov.qld.gov.au/information-technology/queensland-government-enterprise-architecture-qgea/qgea-directions-and-guidance/qgea-policies-standards-and-guidelines/artificial-intelligence-governance-policy",
+      "asAt": "2026-08-26",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["qld"]
+    },
+    {
+      "id": "nsw-ppip-ipp9",
+      "obligation": "NSW PPIP Act, IPP 5 and IPP 9: store securely, and check accuracy before use",
+      "meaning": "NSW agencies and councils must take reasonable steps to make sure personal information is accurate and complete before using it, and must store it securely. In our reading, that covers an AI summary of a person's records.",
+      "design": "Answers cite their source page, so staff can check them.",
+      "evidence": "An acceptance test report counting false answers separately from false refusals",
+      "source": "https://www.ipc.nsw.gov.au/resources/fact-sheet-information-protection-principles-ipps",
+      "asAt": "2026-08-17",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["local"]
+    },
+    {
+      "id": "qld-ip-act-qpp",
+      "obligation": "Qld Information Privacy Act 2009, QPP 10 and QPP 11: data quality and security",
+      "meaning": "Queensland agencies, including local governments, must take reasonable steps to make sure the personal information they use is accurate, up to date, complete and relevant, and to protect it from misuse and unauthorised access.",
+      "design": "Each user sees only what they can already open, checked for every staff group.",
+      "evidence": "A permission-check log from the acceptance test, per user group",
+      "source": "https://www.legislation.qld.gov.au/view/whole/html/inforce/current/act-2009-014",
+      "asAt": "2026-07-01",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["local"]
+    },
+    {
+      "id": "local-nsw-state-records-ai",
+      "obligation": "NSW State Records Act 1998 and FA450: council AI-generated records are State records",
+      "meaning": "A record a council creates with generative AI during council business is a State record: it must be saved in an official recordkeeping system and disposed of only as authorised. Drafts that show how decisions were made must be kept.",
+      "design": "Prompts, answers and citations are logged for capture, marked as AI-generated.",
+      "evidence": "A sample log export with AI-generated, tool and prompt metadata fields",
+      "source": "https://www.nsw.gov.au/nsw-government/recordkeeping/create-and-capture/ai-and-recordkeeping",
+      "asAt": "2024-02-09",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["local"]
+    },
+    {
+      "id": "local-vic-prov-ai-records",
+      "obligation": "PROV AI Technologies and Recordkeeping Policy v1.0: document AI use; human checks",
+      "meaning": "Victorian councils are public offices, and AI-generated content is a public record. Councils are to document, as fully as practical, what the AI can and cannot access, and a skilled person with authority must oversee accuracy checks.",
+      "design": "A data note says what each assistant can read and who checks it.",
+      "evidence": "A one-page data note naming readable and excluded collections and the checker",
+      "source": "https://prov.vic.gov.au/recordkeeping-government/document-library/ai-technologies-policy-ai-technologies-and-recordkeeping",
+      "asAt": "2024-02-29",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["local"]
+    },
+    {
+      "id": "local-qld-public-records",
+      "obligation": "Qld Public Records Act 2023: council records are public records in any format",
+      "meaning": "Queensland councils have the same recordkeeping duties as state public authorities. In our reading, an AI output that documents council business is a public record; QSA hasn't published AI-specific guidance for councils.",
+      "design": "Logs export for your records team, with a proposed retention class they confirm.",
+      "evidence": "A log export with a proposed retention class for your records team",
+      "source": "https://www.forgov.qld.gov.au/information-technology/recordkeeping-and-information-management/recordkeeping/local-government-records",
+      "asAt": "2026-09-22",
+      "lastReviewed": "2026-09-29",
+      "jurisdictions": ["local"]
+    }
+  ]
+}

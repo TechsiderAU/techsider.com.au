@@ -227,9 +227,9 @@ export function industryView(input: {
       trace,
     },
     firstEngagement: { needFromYou: [...data.firstEngagement.needFromYou], youGet: [...data.firstEngagement.youGet], exitRamp: data.firstEngagement.exitRamp },
-    // Cards whose industry chips name this industry (insightCards() labels them with the short name).
+    // Cards that reference this industry, matched by id (WB-15): a chip's label is display copy.
     insights: insights
-      .filter((card) => card.industries.some((i) => i.label === link.shortName))
+      .filter((card) => card.industries.some((i) => i.id === id))
       .sort((a, b) => b.date.getTime() - a.date.getTime())
       .slice(0, MAX_INSIGHTS),
     faq: data.faq.map((f) => ({ q: f.q, a: f.a })),

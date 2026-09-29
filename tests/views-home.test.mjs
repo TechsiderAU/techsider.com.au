@@ -120,8 +120,12 @@ test("homeView: in a production build, planned pages fall back to mailto, #demo 
   assert.equal(live.routes.evaluationPartnerHref, "/services/evaluation-partner/");
   // The solution pages are live from Phase C Task 3, so their rows link.
   assert.deepEqual(live.solutions.map((s) => s.href), prod.solutions.map((s) => s.path));
-  assert.ok(live.industrySwitcher.every((i) => i.href === null));
-  assert.ok(live.industries.every((i) => i.href === null));
+  // An industry links once its page is live: Government, Financial services and Accounting from
+  // Phase C Task 4. The switcher and the grid follow the site context, page by page.
+  const industryHrefs = prod.industries.map((i) => i.href);
+  assert.deepEqual(live.industrySwitcher.map((i) => i.href), industryHrefs);
+  assert.deepEqual(live.industries.map((i) => i.href), industryHrefs);
+  for (const id of ["government", "financial-services", "accounting"]) assert.equal(industryHrefs[prod.industries.findIndex((i) => i.id === id)], `/industries/${id}/`, id);
   // Insights is live, so its link stays.
   assert.equal(live.insights.allHref, "/insights/");
 });

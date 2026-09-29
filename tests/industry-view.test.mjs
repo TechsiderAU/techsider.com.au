@@ -169,12 +169,12 @@ test("the scenario resolves its trace; problem, mock panel, limits, first engage
   assert.deepEqual(v.faq, data.faq);
 });
 
-test("related insights: cards naming this industry, newest first, at most three", () => {
-  const own = industryLink(fixtureSite, INDUSTRY).shortName;
-  const other = industryLink(fixtureSite, GOVERNMENT).shortName;
-  const card = (id, date, labels) => ({
+test("related insights: cards referencing this industry, newest first, at most three", () => {
+  const own = industryLink(fixtureSite, INDUSTRY);
+  const other = industryLink(fixtureSite, GOVERNMENT);
+  const card = (id, date, industries) => ({
     id, href: `/insights/${id}/`, title: `Fixture insight ${id}`, description: "Fixture description", typeLabel: "Article",
-    date: new Date(date), minutes: 3, industries: labels.map((label) => ({ label, href: null })),
+    date: new Date(date), minutes: 3, industries: industries.map((i) => ({ id: i.id, label: i.shortName, href: null })),
   });
   const cards = [
     card("fixture-a", "2026-06-01", [own]),
@@ -186,6 +186,19 @@ test("related insights: cards naming this industry, newest first, at most three"
   assert.deepEqual(industryView(input(INDUSTRY, { insights: cards })).insights.map((c) => c.id), ["fixture-e", "fixture-c", "fixture-d"]);
   assert.deepEqual(industryView(input(INDUSTRY, { insights: [cards[1]] })).insights, []);
   assert.deepEqual(cards.map((c) => c.id), ["fixture-a", "fixture-b", "fixture-c", "fixture-d", "fixture-e"], "the input list is not reordered");
+});
+
+// WB-15: a card belongs to an industry page by the industry's id, never by its display label.
+test("related insights match on the industry id, not the chip label", () => {
+  const own = industryLink(fixtureSite, INDUSTRY);
+  const other = industryLink(fixtureSite, GOVERNMENT);
+  const card = (id, chip) => ({
+    id, href: `/insights/${id}/`, title: `Fixture insight ${id}`, description: "Fixture description", typeLabel: "Article",
+    date: new Date("2026-09-01"), minutes: 3, industries: [{ ...chip, href: null }],
+  });
+  const relabelled = card("fixture-relabelled", { id: own.id, label: "A renamed industry" });
+  const lookalike = card("fixture-lookalike", { id: other.id, label: own.shortName });
+  assert.deepEqual(industryView(input(INDUSTRY, { insights: [relabelled, lookalike] })).insights.map((c) => c.id), ["fixture-relabelled"]);
 });
 
 test("while planned pages aren't shown, solution links and the demo are text and contact falls back to email", () => {
