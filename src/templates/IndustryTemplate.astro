@@ -78,7 +78,7 @@ const mapRows = (b: RegulatoryBlockView) =>
   <PageSection id="designed-around" title="Designed around">
     {view.single ? (
       <div class="ind-stack">
-        <ChipRow id="designed-around-obligations" label="Designed around" chips={obligationChips(view.single)} />
+        <ChipRow id="designed-around-obligations" labelledBy="designed-around-heading" chips={obligationChips(view.single)} />
         <ChipRow id="designed-around-systems" label="Works alongside" chips={systemChips(view.single)} />
       </div>
     ) : (
@@ -96,7 +96,7 @@ const mapRows = (b: RegulatoryBlockView) =>
       <section id={`${s.id}-designed-around`} class="ind-sub" aria-labelledby={`${s.id}-designed-around-heading`}>
         <SectionHeader id={`${s.id}-designed-around-heading`} title="Designed around" level={3} />
         <div class="ind-stack">
-          <ChipRow id={`${s.id}-obligations`} label="Designed around" chips={obligationChips(s)} />
+          <ChipRow id={`${s.id}-obligations`} labelledBy={`${s.id}-designed-around-heading`} chips={obligationChips(s)} />
           <ChipRow id={`${s.id}-systems`} label="Works alongside" chips={systemChips(s)} />
         </div>
       </section>

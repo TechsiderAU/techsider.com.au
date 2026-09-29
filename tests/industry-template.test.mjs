@@ -89,6 +89,29 @@ test("single mode: Designed around chips link to rows of the regulatory map belo
   assert.equal(elementsWith(html, "data-jurisdiction-section").length, 0);
 });
 
+// Review finding T7-F4: the "Designed around" heading was followed by a chip-row label with the same
+// text, so a screen reader announced it twice. The heading now names the obligation chips' list,
+// and "Works alongside" keeps its own visible label.
+test("Designed around is said once: its heading names the obligation chips, and Works alongside keeps its label", () => {
+  const html = read("industry");
+  const blocks = [
+    [byId(html, "designed-around"), "designed-around-obligations", "designed-around-heading", "designed-around-systems"],
+    ...gov.sections.map((s) => [byId(read("industry-government"), `${s.id}-designed-around`), `${s.id}-obligations`, `${s.id}-designed-around-heading`, `${s.id}-systems`]),
+  ];
+  for (const [block, rowId, headingId, systemsId] of blocks) {
+    assert.equal((text(block.inner).match(/Designed around/g) ?? []).length, 1, `#${block.attrs.id}: "Designed around" is said more than once`);
+    assert.equal(text(byId(block.inner, headingId).inner), "Designed around");
+    const row = byId(block.inner, rowId);
+    assert.deepEqual(elements(row.inner, (t) => t.name === "p").length, 0, `#${rowId} has a visible label`);
+    const [list] = elements(row.inner, (t) => t.name === "ul");
+    assert.equal(list.attrs["aria-labelledby"], headingId, `#${rowId}'s list is not named by the heading`);
+    assert.ok(elements(list.inner, (t) => t.name === "li").length >= 4, `#${rowId} lost its chips`);
+    const systems = byId(block.inner, systemsId);
+    assert.equal(text(byId(systems.inner, `${systemsId}-label`).inner), "Works alongside");
+    assert.equal(elements(systems.inner, (t) => t.name === "ul")[0].attrs["aria-labelledby"], `${systemsId}-label`);
+  }
+});
+
 test("single mode: the regulatory map's columns, source links, last-reviewed date and not-legal-advice line", () => {
   const map = byId(read("industry"), "regulatory-map");
   assert.deepEqual(headerLabels(map.inner), ["Obligation", "What it means for an AI system", "How we design for it", "Evidence you get", "Source"]);

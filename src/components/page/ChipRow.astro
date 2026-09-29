@@ -4,20 +4,22 @@
 // renders the chip as plain text, never a dead link. An optional note follows its chip.
 // With `id`, the label paragraph is "{id}-label" and names the list through aria-labelledby;
 // without one, the list is named by aria-label, so two unlabelled rows never share an id.
+// With `labelledBy` instead of `label`, the row shows no label of its own: the element with that
+// id, such as the section heading directly above it, names the list, so a label that repeats the
+// heading is never announced twice.
 // Long unbroken labels wrap inside the row (overflow-wrap: anywhere), so 320px never scrolls.
 import BracketChip from "../ui/BracketChip.astro";
 
-interface Props {
-  label: string;
+type Props = {
   chips: { label: string; href: string | null; note?: string }[];
   id?: string;
-}
+} & ({ label: string; labelledBy?: undefined } | { labelledBy: string; label?: undefined });
 
-const { label, chips, id } = Astro.props;
-const labelId = id === undefined ? undefined : `${id}-label`;
+const { label, labelledBy, chips, id } = Astro.props;
+const labelId = label === undefined ? labelledBy : id === undefined ? undefined : `${id}-label`;
 ---
 <div class="chip-row" id={id} data-chip-row>
-  <p class="chip-row-label" id={labelId}>{label}</p>
+  {label !== undefined && <p class="chip-row-label" id={id === undefined ? undefined : labelId}>{label}</p>}
   <ul class="chip-row-list" aria-labelledby={labelId} aria-label={labelId === undefined ? label : undefined}>
     {chips.map((chip) => (
       <li class="chip-row-item">
