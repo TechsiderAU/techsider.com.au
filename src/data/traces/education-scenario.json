@@ -1,0 +1,10 @@
+{
+  "title": "Policy questions, answered or refused",
+  "provenance": "illustrative",
+  "lines": [
+    { "t": "08:40:00", "op": "testset.load", "detail": "Staff-written questions loaded", "metric": { "value": 40, "unit": " questions" } },
+    { "t": "08:41:10", "op": "answer.cite", "detail": "Excursion question answered, section and version shown" },
+    { "t": "08:41:30", "op": "answer.refuse", "detail": "Uncovered question: \"not in our documents\"" },
+    { "t": "08:45:00", "op": "report", "detail": "False answers and false refusals counted separately" }
+  ]
+}

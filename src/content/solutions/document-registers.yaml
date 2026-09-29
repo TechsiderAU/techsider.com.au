@@ -26,6 +26,8 @@ needProfiles:
       CSV or an import your system already accepts.
 byIndustry:
   - accounting
+  - manufacturing
+  - real-estate
 genericPackage:
   id: one-document-family
   name: One document family, one register
@@ -225,6 +227,8 @@ dontDo:
   - We don't rebuild bookkeeping capture, identity verification, or anything your platform already reads well enough.
 matrix:
   accounting: Trust deed and client structure register
+  manufacturing: "Compliance dossiers, on request"
+  real-estate: "Management agreement register"
 faq:
   - q: Have you built this for another firm?
     a: >-

@@ -1,0 +1,153 @@
+# /industries/real-estate/ (spec §5, §8.5). Every fact traces to the Phase C real-estate research
+# dossier, post-fact-check.
+# - The APP 1.7 row is held (Phase C ruling 1), so the page has five chips (ruling 9). The Qld
+#   tenant-data row stays off: its 1 May 2025 scope rests on the RTA's page, not a provision.
+# - Nothing here covers the PropertyMe Connector, and Shared Inbox Triage is scoped to mail
+#   outside PropertyMe (ruling 9). The AML/CTF FAQ states AUSTRAC's dated guidance (ruling 9).
+# - The page copy says "lease", not "tenancy": the Phase C sweep (Review Focus 5) greps for the
+#   word, which spec §3.4 bans in its cloud-account sense.
+# ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/real-estate.json, must be in the standard engagement terms (spec §12 item 2)
+promise: "Know what every management agreement on your rent roll says."
+constraintSet: "Designed around state agency, trust-account and tenant-data rules: read-only on your trust ledger, with drafts a person actions."
+constraintHook: "Read-only on trust ledgers. Tenant data deleted on your schedule."
+flagshipUseCases:
+  - name: "Management Agreement & Rent Roll Register"
+    solution: document-registers
+    status: launch
+  - name: "Admin Hours Audit + Switch-On"
+    solution: ai-switch-on
+    status: launch
+  - name: "Bond Claim Evidence Pack"
+    solution: document-registers
+    status: on-request
+  - name: "Shared Inbox & After-Hours Triage"
+    solution: draft-for-approval
+    status: on-request
+    note: "Mail that lands outside PropertyMe only."
+obligationChips:
+  - label: "Agency agreements, NSW s 55"
+    row: nsw-agency-agreements
+  - label: "Trust system change logs, Vic"
+    row: vic-trust-system-records
+  - label: "Bond claim evidence, Qld s 136AA"
+    row: qld-bond-claim-evidence
+  - label: "Renter data destruction, Vic"
+    row: vic-renter-information
+  - label: "Trust audits and spot checks, Qld"
+    row: qld-trust-audit
+worksAlongside:
+  - system: "PropertyMe, Advanced plan or above"
+    method: read-only
+    verified: 2026-09-29
+  - system: "SharePoint and OneDrive"
+    method: read-only
+    verified: 2026-09-29
+  - system: "Outlook shared mailboxes"
+    method: draft-for-approval
+    verified: 2026-09-29
+  - system: "Microsoft Excel"
+    method: import
+    verified: 2026-09-29
+leadSolutions:
+  - document-registers
+  - ai-switch-on
+  - draft-for-approval
+packages:
+  - solution: ai-switch-on
+    package: admin-hours-audit-switch-on
+  - solution: document-registers
+    package: management-agreement-register
+  - solution: document-registers
+    package: bond-claim-evidence-pack
+platformFirst: "On PropertyMe's Advanced plan or above, start with what you have: Reply with AiMe for drafts you approve, AiMe Comply for general rental-law guidance and Bills AI for supplier bills."
+dontDo:
+  - "We don't write to your trust ledger, make payments or make compliance decisions."
+  - "We don't do identity checks or AML/CTF due diligence."
+problem:
+  from: "In 2024–25, 330,256 new rental bonds were lodged in NSW and 321,876 refunded. Senior property managers read agreements one PDF at a time."
+  to: "A register where every field links to its page, with the error rate measured on your own files first."
+  source:
+    label: "NSW Rental Bond Board, Annual Information Statement 2024–25"
+    url: "https://www.nsw.gov.au/departments-and-agencies/customer-service/publications-and-reports/annual-reports/rental-bond-board-annual-information-statement-2024-2025"
+    asAt: 2025-12-16
+workflow:
+  - id: re-take-on
+    stage: "Take on a management or rent roll"
+    useCases:
+      - name: "Management Agreement & Rent Roll Register"
+        solution: document-registers
+        status: launch
+      - name: "Lease Abstract & Critical Dates"
+        solution: document-registers
+        status: on-request
+        note: "Commercial leases."
+  - id: re-during-lease
+    stage: "During the lease"
+    useCases:
+      - name: "Admin Hours Audit + Switch-On"
+        solution: ai-switch-on
+        status: launch
+      - name: "Shared Inbox & After-Hours Triage"
+        solution: draft-for-approval
+        status: on-request
+        note: "Mail outside PropertyMe only."
+  - id: re-end-of-lease
+    stage: "End of lease"
+    useCases:
+      - name: "Bond Claim Evidence Pack"
+        solution: document-registers
+        status: on-request
+  - id: re-month-end-audit
+    stage: "Month end and audit"
+    useCases:
+      - name: "Trust Audit Prep Pack"
+        solution: document-registers
+        status: on-request
+        note: "Prepares your auditor's sample. Never an audit."
+mockPanel:
+  title: "Agreement register: MA-0142"
+  fields:
+    - label: "Repair limit"
+      value: "Found: clause 5.2, page 2"
+    - label: "Landlord insurance"
+      value: "Not found: sent to the exception queue"
+  chips:
+    - status: ok
+      text: "Signed by licensee and client"
+    - status: review
+      text: "Service date unclear"
+    - status: blocked
+      text: "No insurance clause found"
+  citations:
+    - source: "Management agreement MA-0142 (fictional)"
+      clause: "Clause 5.2, page 2"
+scenario:
+  title: "An agency checks a rent roll it just bought."
+  problem: "A fictional three-office agency buys a rent roll of a few hundred managements and can't say which set a repair limit or lack a signature."
+  approach: "Two senior property managers pick 40 agreements they know as the answer key. The register reads fees, repair limits, insurance and signatures, with page links."
+  measure:
+    - "The error rate per field"
+    - "How often it says \"not found\" rather than guess"
+  shipsFirst: "The answer-key register and its error rates, before the go/no-go."
+  trace: real-estate-scenario
+firstEngagement:
+  needFromYou:
+    - "An operations lead for about 3 hours a week"
+    - "Admin access to PropertyMe and Microsoft 365"
+    - "For the register Trial, a senior property manager for about a day"
+  youGet:
+    - "An hours map: what to build, queue or park"
+    - "The features you already own, switched on, and staff trained"
+    - "An hours-saved report at day 30"
+  exitRamp: "Stop after the Audit, after Switch-On, or at the Trial's go/no-go, keeping the hours map, answer key and register rows."
+faq:
+  - q: "We're on PropertyMe Advanced. Doesn't AiMe already do this?"
+    a: "Partly, and you should use it first. The register reads your signed management agreements, which AiMe doesn't turn into a checked, page-linked register."
+  - q: "Will your system touch our trust account or change PropertyMe?"
+    a: "No. Nothing we build enters, edits or deletes trust records, makes payments or changes records in PropertyMe. A property manager completes every action."
+  - q: "Which agencies have you done this for?"
+    a: "None yet. You get evidence on your own files instead: an error rate on agreements your senior staff know, before you rely on it."
+  - q: "Is this an audit? Will our auditor accept it?"
+    a: "No. It isn't an audit, and we give no opinion. Your approved auditor decides what evidence to rely on. The Trust Audit Prep Pack gathers the sample they ask for and lists what's missing."
+  - q: "Does AML/CTF Tranche 2 apply to property management?"
+    a: "From 1 July 2026, AUSTRAC regulates brokering the sale, purchase or transfer of real estate. Its guidance (updated 31 August 2026) says \"real estate\" excludes leases of 30 years or less. Confirm your position with your adviser."

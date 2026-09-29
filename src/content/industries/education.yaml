@@ -1,0 +1,144 @@
+# /industries/education/ (spec §5, §8.5). Every fact traces to the Phase C education research
+# dossier, post-fact-check.
+# - The APP 1.7–1.9 row is held until the OAIC's automated-decision guidance is re-read (Phase C
+#   ruling 1), so the page has no automated-decision row, chip or FAQ.
+# - ④ is a launch offer here (spec §5; ruling 5), and RTOs are not in the buyer framing.
+# - Vendor products carry their current names (the Phase C platform facts): Microsoft Copilot.
+# ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/education.json, must be in the standard engagement terms (spec §12 item 2)
+promise: "Answers from your own policies, with the page to check."
+constraintSet: "Designed around the Australian Framework for Generative AI in Schools, the Higher Education Threshold Standards and the Privacy Act. Staff-facing only."
+constraintHook: "Schools AI Framework, TEQSA, Privacy Act. Staff-facing only."
+flagshipUseCases:
+  - name: "Staff Policy & Procedure Assistant"
+    solution: knowledge-assistant
+    status: launch
+  - name: "Evaluation of the AI tools you've deployed"
+    solution: ai-evaluation
+    status: launch
+  - name: "AI Switch-On for independent schools"
+    solution: ai-switch-on
+    status: launch
+    note: "No school Safe-Use Kit: your own AI policy applies."
+obligationChips:
+  - label: "Schools Framework 5.2–5.3: tested first"
+    row: schools-framework-reliability
+  - label: "HESF 6.2.1(e): material risks managed"
+    row: hesf-risk-management
+  - label: "OAIC: AI products, APP 6 and APP 10"
+    row: privacy-ai-products
+  - label: "Schools Framework 6.1–6.2: privacy"
+    row: schools-framework-privacy
+worksAlongside:
+  - system: "SharePoint and OneDrive"
+    method: read-only
+    verified: 2026-09-29
+  - system: "Google Drive"
+    method: read-only
+    verified: 2026-09-29
+  - system: "Microsoft Copilot interaction history"
+    method: read-only
+    verified: 2026-09-29
+  - system: "ServiceNow knowledge base"
+    method: read-only
+    verified: 2026-09-29
+leadSolutions:
+  - knowledge-assistant
+  - ai-evaluation
+  - ai-switch-on
+packages:
+  - solution: knowledge-assistant
+    package: policy-procedure-assistant
+  - solution: ai-evaluation
+    package: independent-evaluation-report
+  - solution: ai-switch-on
+    package: admin-hours-audit-switch-on
+platformFirst: "If staff have Microsoft Copilot licences, SharePoint's built-in AI already answers from your policy libraries within existing permissions. Gemini for Education comes with every Google Workspace for Education edition. If either is good enough, we'll say so."
+dontDo:
+  - "We don't build student-facing tutors or chat tools."
+  - "We don't compete with NSWEduChat, SA's EdChat or cechat."
+  - "We don't write AI policies or privacy-policy wording."
+problem:
+  from: "In 2023, full-time classroom teachers spent 6–9 hours a week on administrative tasks. Finding the current procedure means old handbooks, shared drives or emailing someone."
+  to: "Staff ask in Teams or on a web page and get the answer with its section and version, or \"not in our documents\"."
+  source:
+    label: "AITSL, National Trends: Teacher Workforce (June 2025)"
+    url: "https://www.aitsl.edu.au/resources/national-trends-teacher-workforce-june-2025"
+    asAt: 2026-09-29
+workflow:
+  - id: edu-policy-questions
+    stage: "Answer policy questions"
+    useCases:
+      - name: "Staff Policy & Procedure Assistant"
+        solution: knowledge-assistant
+        status: launch
+  - id: edu-switch-on
+    stage: "Switch on what you own"
+    useCases:
+      - name: "Admin Hours Audit + Switch-On"
+        solution: ai-switch-on
+        status: launch
+        note: "Independent schools; no school kit, so your AI policy applies."
+  - id: edu-choose-a-tool
+    stage: "Choose a new AI tool"
+    useCases:
+      - name: "Vendor AI Evaluation"
+        solution: ai-evaluation
+        status: launch
+        note: "Shortlisted tools, tested before you sign."
+  - id: edu-test-deployed-ai
+    stage: "Test the AI you've deployed"
+    useCases:
+      - name: "Independent Evaluation Report"
+        solution: ai-evaluation
+        status: launch
+        note: "Never on a tool we set up for you."
+mockPanel:
+  title: "Staff policy assistant"
+  fields:
+    - label: "Question"
+      value: "Who approves an overnight excursion?"
+    - label: "Answer"
+      value: "The principal, once the risk assessment is signed."
+    - label: "Cited"
+      value: "Staff Handbook, section 7.3, version 4"
+  chips:
+    - status: ok
+      text: "Current version cited"
+    - status: review
+      text: "Two handbook versions found"
+    - status: blocked
+      text: "Restricted HR procedure hidden"
+  citations:
+    - source: "Staff Handbook (fictional)"
+      clause: "Section 7.3, version 4"
+scenario:
+  title: "A staff policy library that answers, or says it can't."
+  problem: "A fictional two-campus independent school keeps about 180 staff policies in SharePoint, some in several versions, and staff email the same questions every week."
+  approach: "Eight staff write 40 questions with known answers and agree the threshold. The assistant reads one collection, with SharePoint permissions, and cites section and version."
+  measure:
+    - "False answers and false refusals, counted separately"
+    - "Citations to the current version"
+    - "Restricted documents hidden from test accounts"
+  shipsFirst: "The assistant in Teams for one staff group, with its test report."
+  trace: education-scenario
+firstEngagement:
+  needFromYou:
+    - "A policy owner for about 2 hours a week"
+    - "5–10 staff to write 30–50 questions with known answers"
+    - "Read-only access to one policy collection"
+  youGet:
+    - "An error rate, with false answers and false refusals shown separately"
+    - "The gaps: unanswered questions and conflicting versions"
+    - "A data note and a go/no-go decision point"
+  exitRamp: "At the go/no-go, you decide whether to continue. If the error rate misses your threshold, or Copilot or Gemini already does the job, you can stop there and keep the questions and results."
+faq:
+  - q: "Have you done this for a school or university before?"
+    a: "No. Techsider has no clients yet, in education or anywhere else. So the first engagement is a two-week trial on your staff's questions, with every failure shown."
+  - q: "We already have Copilot or Gemini. Why would we need this?"
+    a: "You may not. If SharePoint's built-in AI or Gemini for Education answers well enough, we'll tell you. We add a test on your own questions that counts false answers and false refusals."
+  - q: "Will student information go into the assistant?"
+    a: "No. It reads staff policies and procedures only; student records and wellbeing notes are out of scope. The data note lists what it reads and logs, and for how long."
+  - q: "Will your evaluation report satisfy TEQSA?"
+    a: "No one can promise that. The report gives your governing body findings rated to your risk matrix, the method and a replay script: findings, not an assurance opinion."
+  - q: "Can you evaluate the Copilot set-up you configured for us?"
+    a: "No. We never independently evaluate a system we built, configured or advised on for the same institution. We can give another evaluator our results, labelled as not independent."

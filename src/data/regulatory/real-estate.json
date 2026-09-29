@@ -1,0 +1,54 @@
+{
+  "rows": [
+    {
+      "id": "nsw-agency-agreements",
+      "obligation": "Property and Stock Agents Act 2002 (NSW) s 55: signed agency agreement, copy served in 48h",
+      "meaning": "A register can show which management agreements are unsigned, missing prescribed terms or lacking a served copy. It can't decide whether one is valid or whether commission is payable.",
+      "design": "Signature, date and service fields link to their page, and gaps go to the licensee in charge.",
+      "evidence": "An agreement register with page-linked fields, and an exception list",
+      "source": "https://www.nsw.gov.au/housing-and-construction/property-professionals/working-as-an-agent/agency-agreements",
+      "asAt": "2025-09-22",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "vic-trust-system-records",
+      "obligation": "Estate Agents (General, Accounts and Audit) Regs 2018 (Vic) rr 29–30: trust change log",
+      "meaning": "If you keep trust records in a computerised accounting system, it must log before-and-after detail when principal, transaction or ledger details change, and must not let a recorded transaction change except by a separate one.",
+      "design": "We stay read-only on the trust ledger: no entries, edits or deletions.",
+      "evidence": "A data note showing read-only access on each system, and a log of every read",
+      "source": "https://www.legislation.vic.gov.au/in-force/statutory-rules/estate-agents-general-accounts-and-audit-regulations-2018",
+      "asAt": "2018-07-11",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "qld-trust-audit",
+      "obligation": "Agents Financial Administration Act 2014 (Qld) ss 35–36: annual audit, 2 unannounced checks",
+      "meaning": "If you were an agent for the whole audit period, your auditor must make 2 unannounced examinations of your trust accounts during it, besides the annual audit.",
+      "design": "The Trust Audit Prep Pack re-runs from read-only ledger exports and leaves every judgement to your auditor.",
+      "evidence": "A re-runnable disbursement sample with each invoice and owner approval linked",
+      "source": "https://www.legislation.qld.gov.au/view/whole/html/inforce/2023-03-01/act-2014-018",
+      "asAt": "2023-03-01",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "qld-bond-claim-evidence",
+      "obligation": "Residential Tenancies and Rooming Accommodation Act 2008 (Qld) s 136AA: bond evidence",
+      "meaning": "When you claim on a bond, or dispute a tenant's refund application, you must give the tenant supporting evidence within 14 days of the application or request, unless you can't reach them after reasonable efforts.",
+      "design": "The Bond Claim Evidence Pack links each claimed item to its condition-report page and photo, and drafts the bundle for a property manager to check and send.",
+      "evidence": "A draft evidence bundle, and a list of claimed items with no support",
+      "source": "https://www.legislation.qld.gov.au/view/whole/html/inforce/2026-08-17/act-2008-073",
+      "asAt": "2026-08-17",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "vic-renter-information",
+      "obligation": "Residential Tenancies Act 1997 (Vic) ss 505BB–505BC: protect, then destroy renter data",
+      "meaning": "You must take reasonable steps to protect renter information from misuse, loss and unauthorised access or disclosure, and destroy or permanently de-identify it within 3 years after the agreement ends (for unsuccessful applicants, 30 days after the property is let, or 6 months with written consent). It counts as held wherever the document sits, in or outside Victoria.",
+      "design": "We map every place renter information will land, including any model or index provider, and apply the same destruction dates to every copy.",
+      "evidence": "A data-flow map with the destruction date applied at each location",
+      "source": "https://www.legislation.vic.gov.au/in-force/acts/residential-tenancies-act-1997",
+      "asAt": "2026-09-09",
+      "lastReviewed": "2026-09-29"
+    }
+  ]
+}

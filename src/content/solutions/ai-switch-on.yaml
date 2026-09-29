@@ -28,6 +28,8 @@ needProfiles:
       in your own units.
 byIndustry:
   - accounting
+  - education
+  - real-estate
 genericPackage:
   id: switch-on-in-3-weeks
   name: Switch-on in 3 weeks
@@ -135,6 +137,8 @@ dontDo:
   - We don't independently evaluate a tool we set up for you. Someone else should.
 matrix:
   accounting: Admin Hours Audit + Switch-On
+  education: "Switch-on for independent schools"
+  real-estate: "Admin Hours Audit and switch-on"
 faq:
   - q: Can't we switch these features on ourselves?
     a: >-

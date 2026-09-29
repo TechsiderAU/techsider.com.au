@@ -1,0 +1,25 @@
+{
+  "title": "An acquired rent roll against its answer key",
+  "provenance": "illustrative",
+  "lines": [
+    {
+      "t": "10:00:00",
+      "op": "answerkey.load",
+      "detail": "Agreements the senior property managers know",
+      "metric": {
+        "value": 40,
+        "unit": " agreements"
+      }
+    },
+    {
+      "t": "10:00:05",
+      "op": "extract.cite",
+      "detail": "Fees, repair limits, insurance and signatures read, with page links"
+    },
+    {
+      "t": "10:05:00",
+      "op": "report",
+      "detail": "Error rate per field, ahead of the go/no-go"
+    }
+  ]
+}

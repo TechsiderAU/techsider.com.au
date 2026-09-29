@@ -1,0 +1,10 @@
+{
+  "title": "Changeover questions on a night shift",
+  "provenance": "illustrative",
+  "lines": [
+    { "t": "22:10:00", "op": "testset.load", "detail": "Floor-staff questions loaded", "metric": { "value": 80, "unit": " questions" } },
+    { "t": "22:14:20", "op": "answer.cite", "detail": "Answer in the operator's language, English step and page beside it" },
+    { "t": "22:15:05", "op": "answer.refuse", "detail": "Cleaning start time: \"not in our documents\"" },
+    { "t": "22:20:00", "op": "report", "detail": "Errors counted per language against the agreed threshold" }
+  ]
+}

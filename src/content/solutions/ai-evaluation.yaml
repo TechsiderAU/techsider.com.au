@@ -34,6 +34,7 @@ needProfiles:
 byIndustry:
   - government
   - financial-services
+  - education
 genericPackage:
   id: one-system-one-use-case
   name: One system, one use case
@@ -310,6 +311,7 @@ dontDo:
 matrix:
   government: Copilot agents leaving pilot
   financial-services: Model-change regression on vendor AI
+  education: "Evaluation of deployed staff AI"
 faq:
   - q: You have no clients. Why should we trust your evaluation?
     a: >-

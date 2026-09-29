@@ -1,0 +1,150 @@
+# /industries/manufacturing/ (spec §5, §8.5). Every fact traces to the Phase C manufacturing
+# research dossier, post-fact-check.
+# - The NSW Digital Work Systems row is held until the Act commences (Phase C ruling 8), so the
+#   Victorian row takes its chip.
+# - RFQ & Quote Prep is the narrowed fourth package (ruling 8): RFQs built on drawings and
+#   specifications. No vendor product whose name contains "agent" is named (spec §3.4).
+# - The AI Adopt Centre FAQ says nothing about cost or funding (D4; index keep-off list), and
+#   attributes the centre's services to its business.gov.au listing, since whether the program is
+#   still taking SMEs is unconfirmed (dossier's open item 9, on Task 9's owner checklist).
+# ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/manufacturing.json, must be in the standard engagement terms (spec §12 item 2)
+promise: "Answers from your SOPs, on the floor, with the page shown."
+constraintSet: "Designed around WHS duties to instruct and consult, FSANZ recall rules and TGA GMP for computerised systems. Read-only on your documents."
+constraintHook: "WHS instruction, FSANZ recall, TGA GMP: every answer cites its page."
+flagshipUseCases:
+  - name: "Multilingual SOP & Work-Instruction Assistant"
+    solution: knowledge-assistant
+    status: launch
+  - name: "Compliance Dossier Builder"
+    solution: document-registers
+    status: on-request
+  - name: "Fault-to-Work-Order"
+    solution: draft-for-approval
+    status: on-request
+  - name: "RFQ & Quote Prep"
+    solution: draft-for-approval
+    status: on-request
+    note: "RFQs built on drawings and specifications, not catalogue items."
+obligationChips:
+  - label: "Instruction workers can understand"
+    row: whs-instruction-understandable
+  - label: "Written food recall system"
+    row: fsanz-recall-system
+  - label: "GMP computerised systems"
+    row: tga-gmp-computerised-systems
+  - label: "Consult workers before AI goes live"
+    row: whs-consultation-ai
+  - label: "Victoria: instruct, inform, consult"
+    row: vic-ohs-instruction-consultation
+worksAlongside:
+  - system: "SharePoint SOP libraries"
+    method: read-only
+    verified: 2026-09-29
+  - system: "SafetyCulture (now Mitti)"
+    method: read-only
+    verified: 2026-09-29
+  - system: "SAP S/4HANA maintenance notifications"
+    method: draft-for-approval
+    verified: 2026-09-29
+  - system: "Business Central sales quotes"
+    method: draft-for-approval
+    verified: 2026-09-29
+leadSolutions:
+  - knowledge-assistant
+  - document-registers
+  - draft-for-approval
+packages:
+  - solution: knowledge-assistant
+    package: sop-work-instruction-assistant
+  - solution: document-registers
+    package: compliance-dossier-builder
+  - solution: draft-for-approval
+    package: fault-to-work-order
+  - solution: draft-for-approval
+    package: rfq-quote-prep
+platformFirst: "If your procedures already live in SafetyCulture (now Mitti), try its AI Assistant on your own SOP questions first. We cover the manuals and work instructions outside it."
+dontDo:
+  - "We don't build predictive maintenance, vision QA or SOP Q&A inside SafetyCulture."
+  - "We don't build Q&A over your ERP data."
+problem:
+  from: "In 2024–25, 9% of manufacturing businesses reported using AI, against 12% of all businesses. On the floor, answers come from binders and whoever has been on the line longest."
+  to: "Operators ask in their own language and get the current SOP step and page, or \"not in our documents\"."
+  source:
+    label: "Australian Bureau of Statistics, Characteristics of Australian Business, 2024–25"
+    url: "https://www.abs.gov.au/statistics/industry/technology-and-innovation/characteristics-australian-business/2024-25"
+    asAt: 2026-06-25
+workflow:
+  - id: mfg-on-the-floor
+    stage: "On the floor"
+    useCases:
+      - name: "Multilingual SOP & Work-Instruction Assistant"
+        solution: knowledge-assistant
+        status: launch
+        note: "SOPs and OEM manuals outside your safety platform."
+  - id: mfg-maintenance
+    stage: "Maintenance"
+    useCases:
+      - name: "Fault-to-Work-Order"
+        solution: draft-for-approval
+        status: on-request
+        note: "A fault note from one system becomes a draft request in another."
+  - id: mfg-quoting
+    stage: "Quoting"
+    useCases:
+      - name: "RFQ & Quote Prep"
+        solution: draft-for-approval
+        status: on-request
+        note: "Drawing- and specification-based RFQs only."
+  - id: mfg-audits
+    stage: "Audits and inspections"
+    useCases:
+      - name: "Compliance Dossier Builder"
+        solution: document-registers
+        status: on-request
+mockPanel:
+  title: "SOP assistant: filler changeover"
+  fields:
+    - label: "Question"
+      value: "Which guard do I lock before a changeover?"
+    - label: "English SOP step"
+      value: "Step 4: lock out and tag the infeed guard."
+  chips:
+    - status: ok
+      text: "Current revision cited"
+    - status: review
+      text: "Changed after a model update"
+    - status: blocked
+      text: "Not in our documents"
+  citations:
+    - source: "SOP-FL-012 Filler changeover (fictional)"
+      clause: "Page 3, step 4"
+scenario:
+  title: "Night-shift changeover questions on a bottling line."
+  problem: "A fictional 240-person beverage maker keeps changeover steps in English SOPs and a 300-page filler manual, and several night-shift operators read English as a second language."
+  approach: "The assistant reads the line's SOPs and manual, answering in the crew's two main languages beside the English step. Floor staff write the 80 test questions."
+  measure:
+    - "False answers and false refusals, per language"
+    - "Citations to the right page and revision"
+  shipsFirst: "The assistant in Teams for one night-shift group, once it passes."
+  trace: manufacturing-scenario
+firstEngagement:
+  needFromYou:
+    - "One line's SOPs and machine manuals, read-only"
+    - "A document owner for about 2 hours a week"
+    - "5–10 floor staff, including an HSR, writing test questions for about 1 hour each"
+  youGet:
+    - "An error rate per language on 30–50 questions"
+    - "Every wrong or refused answer, with the page it should have used"
+    - "A data note and a go/no-go decision point"
+  exitRamp: "At the go/no-go, you decide whether to continue. If you stop, you keep the questions and the report, and nothing stays connected to your systems."
+faq:
+  - q: "Our SOPs are already in SafetyCulture. Why not use its AI?"
+    a: "Use it first for anything stored there. We cover the manuals and work instructions outside it. If Mitti answers your test questions well enough, we'll tell you."
+  - q: "Have you done this for other manufacturers?"
+    a: "No. Techsider has no clients yet. So the first step is a two-week trial on one line's documents, with every failure shown."
+  - q: "Can it answer in the languages our crews speak?"
+    a: "Yes, for the languages you choose, though quality varies by language. Each gets its own test, and one that misses the agreed threshold doesn't go live."
+  - q: "Is it a GMP-validated system?"
+    a: "No. On a medicine, API or sunscreen site, your quality team decides whether the assistant is part of a GMP activity and how to validate it. We supply the test evidence."
+  - q: "Should we go to an AI Adopt Centre first?"
+    a: "If you're an eligible SME, it's a sensible first step. The ARM Hub AI Adopt Centre is listed on business.gov.au as offering training, demonstrations and an AI adoption roadmap, with a focus on manufacturing."

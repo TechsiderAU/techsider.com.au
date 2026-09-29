@@ -29,6 +29,8 @@ byIndustry:
   - government
   - financial-services
   - accounting
+  - education
+  - manufacturing
 genericPackage:
   id: one-manual-one-team
   name: One manual, one team
@@ -186,6 +188,8 @@ matrix:
   government: Council policy and procedure assistant
   financial-services: Complaints and hardship procedures assistant
   accounting: Ask the Firm Manual, on request
+  education: "Staff policy answers, section cited"
+  manufacturing: "Multilingual SOP answers, page shown"
 faq:
   - q: We already have Copilot. Why would we need this?
     a: >-

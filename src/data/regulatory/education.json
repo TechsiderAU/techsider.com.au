@@ -1,0 +1,44 @@
+{
+  "rows": [
+    {
+      "id": "schools-framework-reliability",
+      "obligation": "Australian Framework for Generative AI in Schools, 5.2 Reliability and 5.3 Monitoring",
+      "meaning": "The Framework (national guidance, not law) expects tools to be tested before use and to work as intended, and their impact on school communities to be monitored so emerging risks are managed.",
+      "design": "An acceptance test on 50–100 questions your staff write, re-run when the AI model changes.",
+      "evidence": "A test report listing every failure, false answers and false refusals counted separately",
+      "source": "https://www.education.gov.au/schooling/resources/australian-framework-generative-artificial-intelligence-ai-schools",
+      "asAt": "2025-06-17",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "schools-framework-privacy",
+      "obligation": "Australian Framework for Generative AI in Schools, 6.1 Privacy and 6.2 Privacy disclosure",
+      "meaning": "The Framework (guidance, not law) expects generative AI to be used in ways that comply with Australian law, avoid unnecessary collection, limit retention and prohibit the sale of student data, with communities told what is collected and shared and consent sought where needed.",
+      "design": "The assistant reads staff policies only, never student records, and log retention is agreed with you in writing.",
+      "evidence": "A one-page data note: what is read and logged, for how long, and where it's processed",
+      "source": "https://www.education.gov.au/schooling/resources/australian-framework-generative-artificial-intelligence-ai-schools",
+      "asAt": "2025-06-17",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "hesf-risk-management",
+      "obligation": "HESF 2021 Standard 6.2.1(e), kept in force by s 7(2): material risks managed and mitigated (becomes 6.2.1(f) from 1 Jan 2027 for Table A Australian Universities, 1 Jul 2027 for other providers)",
+      "meaning": "A registered provider must be able to show, and its governing body assure itself, that material risks to its operations are managed and mitigated. The standard doesn't name AI; a deployed AI tool's material risks fall under it.",
+      "design": "We test the tool you deployed on your questions and rate findings against your risk matrix. We never independently evaluate a tool we built, configured or advised on for you.",
+      "evidence": "An Independent Evaluation Report with rated failures, and a replay script your team can re-run",
+      "source": "https://www.legislation.gov.au/F2021L00488/latest/text",
+      "asAt": "2026-07-14",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "privacy-ai-products",
+      "obligation": "Privacy Act Sch 1, APP 6 and APP 10, as applied in OAIC guidance on AI products",
+      "meaning": "For private schools, private higher-education providers and ANU, APP 6 limits the purposes for which personal information may go into an AI tool, APP 10 requires reasonable steps to keep AI output about people accurate, and the OAIC expects regular reviews.",
+      "design": "We state where inference runs and the provider's retention and human-review settings, and measure accuracy on your questions.",
+      "evidence": "A data note on inference location and provider settings, plus the measured error rate",
+      "source": "https://www.oaic.gov.au/privacy/privacy-guidance-for-organisations-and-government-agencies/guidance-on-privacy-and-the-use-of-commercially-available-ai-products",
+      "asAt": "2025-01-17",
+      "lastReviewed": "2026-09-29"
+    }
+  ]
+}

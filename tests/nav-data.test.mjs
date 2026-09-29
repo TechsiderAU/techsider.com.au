@@ -113,13 +113,14 @@ test("industry footer labels read 'AI for {short name}'", () => {
 });
 
 // Phase C puts pages live task by task, and each task that flips pages extends this pin.
-test("Phase C: the live pages after Task 4", () => {
+test("Phase C: the live pages after Task 5", () => {
   assert.deepEqual(PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(), [
     "/", "/404", "/insights/",
     "/services/", "/services/evaluation-partner/",
     "/solutions/", "/solutions/ai-evaluation/", "/solutions/ai-switch-on/", "/solutions/document-registers/",
     "/solutions/draft-for-approval/", "/solutions/knowledge-assistant/",
     "/industries/government/", "/industries/financial-services/", "/industries/accounting/",
+    "/industries/education/", "/industries/manufacturing/", "/industries/real-estate/",
   ].sort());
 });
 

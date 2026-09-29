@@ -1,0 +1,54 @@
+{
+  "rows": [
+    {
+      "id": "whs-instruction-understandable",
+      "obligation": "Model WHS Regulations r39(2)–(3), adopted outside Victoria: suitable, understandable instruction",
+      "meaning": "Treat an assistant's answers as instruction you provide: suited to the work, its risks and controls, and, so far as reasonably practicable, readily understandable, which for some crews means another language.",
+      "design": "Answers in the worker's language show the English SOP step and page, and each language is tested separately.",
+      "evidence": "A per-language test report, false answers and false refusals counted separately",
+      "source": "https://www.safeworkaustralia.gov.au/doc/model-whs-regulations",
+      "asAt": "2025-12-05",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "whs-consultation-ai",
+      "obligation": "Model WHS Act ss47, 49(d), 49(e)(v): consult workers before introducing AI that may affect safety",
+      "meaning": "An assistant between workers and their procedures can be a change that may affect health and safety. So far as reasonably practicable, you consult the workers likely to be affected, and their health and safety representatives (HSRs) where they have them, before go-live.",
+      "design": "Floor staff and HSRs write the test questions and review answers and refusals before go-live.",
+      "evidence": "A consultation pack with sample answers, refusals and the feedback log",
+      "source": "https://www.safeworkaustralia.gov.au/safety-topic/hazards/digital-technologies-ai/whs-duties",
+      "asAt": "2026-07-23",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "vic-ohs-instruction-consultation",
+      "obligation": "OHS Act 2004 (Vic) ss21(2)(e), 22(1)(c), 35(1)(d)(iv), (f): instruct, inform in languages, consult",
+      "meaning": "Victoria hasn't adopted the model WHS laws, but its Act sets duties of the same shape: instruction to work safely, safety information in other languages where appropriate, and consultation on how information and training are provided or on changes to how work is done.",
+      "design": "The same controls apply: cited SOP pages, a test per language and HSR review.",
+      "evidence": "The acceptance test report and the consultation pack",
+      "source": "https://www.legislation.vic.gov.au/in-force/acts/occupational-health-and-safety-act-2004/045",
+      "asAt": "2025-08-06",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "fsanz-recall-system",
+      "obligation": "Food Standards Code Std 3.2.2 cl 12: written recall system (food manufacturers)",
+      "meaning": "Food manufacturers, wholesalers and importers must have a written recall system and follow it. The Standard doesn't mention AI, but an answer from an old copy could mislead staff.",
+      "design": "The assistant reads only the current recall procedure, cites its version, and refuses when the procedure is silent.",
+      "evidence": "A version-citation test on recall questions",
+      "source": "https://www.legislation.gov.au/F2008B00576/latest/text",
+      "asAt": "2025-08-13",
+      "lastReviewed": "2026-09-29"
+    },
+    {
+      "id": "tga-gmp-computerised-systems",
+      "obligation": "Manufacturing Principles Determination 2020 Sch 1 Pt 1: PIC/S GMP Guide PE009-17, incl. Annex 11",
+      "meaning": "Unless exempt, manufacturers of medicines, APIs and sunscreens must follow the PIC/S GMP Guide, whose Annex 11 says computerised systems in GMP-regulated activities should be validated; the Determination makes that binding unless the TGA accepts otherwise.",
+      "design": "We don't build for batch release, deviations or GMP records. Your quality team decides whether the tool is part of a GMP-regulated activity.",
+      "evidence": "A test pack: intended-use statement, test scripts, results and the failure list",
+      "source": "https://www.legislation.gov.au/F2020L00864/latest/text",
+      "asAt": "2025-09-01",
+      "lastReviewed": "2026-09-29"
+    }
+  ]
+}

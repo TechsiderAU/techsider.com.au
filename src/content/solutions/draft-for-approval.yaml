@@ -28,6 +28,8 @@ needProfiles:
       package is for the gaps between systems.
 byIndustry:
   - accounting
+  - manufacturing
+  - real-estate
 genericPackage:
   id: one-job-drafts-for-approval
   name: One job, drafts for approval
@@ -132,6 +134,8 @@ dontDo:
   - We don't rebuild a job your platform's own tools already handle.
 matrix:
   accounting: ATO Letter Sorter, on request
+  manufacturing: "Draft work requests, on request"
+  real-estate: "Shared inbox triage, on request"
 faq:
   - q: Will it send anything on its own?
     a: >-
