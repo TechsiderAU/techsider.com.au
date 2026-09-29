@@ -4,6 +4,9 @@
 //      waits for the harness's run format in Phase D);
 //  (b) metric-shaped numbers never sit in free text (they belong in typed { value, unit } metrics);
 //  (c) every built element marked data-provenance="illustrative" shows its label.
+// The ⑤ checker is the one exception to (a) and (c) (controller ruling 6): a demo file of kind
+// "checker" declares "sourced" (real, dated vendor facts), only such a file may, and its frame
+// (data-provenance="sourced") needs no label.
 import { existsSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import {
@@ -14,6 +17,7 @@ export const NAME = "06-provenance";
 export const EXCEPTIONS_FILE = "src/data/metric-exceptions.json";
 export const DATA_DIRS = ["src/data/demos", "src/data/traces"];
 export const PROVENANCE = ["measured", "illustrative"];
+export const CHECKER_PROVENANCE = "sourced";
 export const METRIC_PATTERNS = [/\b0\.\d+\b/g, /\b\d+(?:\.\d+)?\s?%/g, /\b\d+\s?ms\b/g, /\b\d+\s?\/\s?\d+\b/g];
 /** Quoted source text, snippets, questions and cited answer segments may restate numbers. */
 export const EXEMPT_KEYS = ["source", "text", "snippet", "question", "quote"];
@@ -56,7 +60,14 @@ export async function run({ root, dist }) {
       r.add("error", `${rel}: cannot parse (${e.message})`);
       continue;
     }
-    if (!PROVENANCE.includes(data?.provenance)) {
+    if (data?.kind === "checker" && rel.startsWith("src/data/demos/")) {
+      if (data.provenance !== CHECKER_PROVENANCE) {
+        r.add(
+          "error",
+          `${rel}: a checker demo's "provenance" must be "${CHECKER_PROVENANCE}": its facts are dated vendor statements, not illustrative data (got ${JSON.stringify(data.provenance)})`,
+        );
+      }
+    } else if (!PROVENANCE.includes(data?.provenance)) {
       r.add("error", `${rel}: "provenance" must be "measured" or "illustrative" (got ${JSON.stringify(data?.provenance)})`);
     }
     walk(data, "", {
@@ -90,6 +101,7 @@ export async function run({ root, dist }) {
     const page = relPath(out, file);
     for (const el of elements(readText(file), (t) => "data-provenance" in t.attrs)) {
       const value = el.attrs["data-provenance"];
+      if (value === CHECKER_PROVENANCE) continue; // the ⑤ checker's frame: sourced vendor facts, no label
       if (!PROVENANCE.includes(value)) r.add("error", `${page}: <${el.name} data-provenance="${value}"> is neither measured nor illustrative`);
       else if (value === "illustrative" && !/\billustrative\b/i.test(visibleText(el.inner))) {
         r.add("error", `${page}: <${el.name} data-provenance="illustrative"> renders no visible "Illustrative" label`);

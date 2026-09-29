@@ -7,13 +7,17 @@
 // `provenance` is the demo's declared provenance (spec §9.3), required so no demo renders
 // unlabelled. It sets data-provenance on the figure, and an illustrative demo shows a visible
 // "Illustrative data" label next to the badge, so CI check 06(c) covers demos as it covers traces
-// and sample reports.
+// and sample reports. The ⑤ checker's "sourced" (real, dated vendor facts; controller ruling 6)
+// shows no label, as "measured" shows none: its badge already reads "Client-side tool · dated
+// vendor data".
 // The figcaption names the demo. The frame is a carbon island (bg-carbon): inside a bone section
 // it keeps carbon-surface colours and the lime focus ring.
+import type { DemoData } from "../../content/schemas";
+
 interface Props {
   title: string;
   badge: string;
-  provenance: "measured" | "illustrative";
+  provenance: DemoData["provenance"];
 }
 
 const { title, badge, provenance } = Astro.props;

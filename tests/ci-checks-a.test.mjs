@@ -585,3 +585,21 @@ test("06: a built element marked illustrative must show its label", async () => 
     /<article data-provenance="illustrative"> renders no visible "Illustrative" label/,
   ]);
 });
+
+test("06: a checker demo declares sourced vendor facts, only a checker may, and a sourced frame needs no label (controller ruling 6)", async () => {
+  const checkerDemo = { solution: "alpha-fixture", title: "Fixture checker", kind: "checker", provenance: "sourced", data: { source: "platform-ai" } };
+  const res = await check(provenance, {
+    "src/data/demos/checker-fixture.json": checkerDemo,
+    "src/data/demos/illustrative-checker-fixture.json": { ...checkerDemo, provenance: "illustrative" },
+    "src/data/demos/sourced-register-fixture.json": { ...demo(), provenance: "sourced" },
+    "src/data/traces/sourced-trace.json": { ...trace(), provenance: "sourced" },
+    "dist/solutions/alpha-fixture/index.html": page(
+      `<figure data-demo-frame data-provenance="sourced"><p data-demo-badge>Client-side tool · dated vendor data</p></figure>`,
+    ),
+  });
+  assertErrors(res, [
+    /illustrative-checker-fixture\.json: a checker demo's "provenance" must be "sourced": its facts are dated vendor statements, not illustrative data \(got "illustrative"\)/,
+    /sourced-register-fixture\.json: "provenance" must be "measured" or "illustrative" \(got "sourced"\)/,
+    /sourced-trace\.json: "provenance" must be "measured" or "illustrative" \(got "sourced"\)/,
+  ]);
+});

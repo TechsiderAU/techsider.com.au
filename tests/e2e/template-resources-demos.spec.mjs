@@ -85,14 +85,16 @@ for (const width of [390, 1280]) {
     await page.goto(path("demo"));
     const frame = page.getByRole("figure", { name: demoFixture.title });
     await expect(frame.locator("[data-demo-badge]")).toBeVisible();
-    const table = frame.locator("[data-demo-transcript]").getByRole("table", { name: demoFixture.data.caption });
+    const { documents, registers: [register] } = demoFixture.data;
+    const table = frame.locator("[data-demo-transcript]").getByRole("table", { name: register.title });
     await expect(table).toBeVisible();
     const rows = table.getByRole("row");
-    await expect(rows).toHaveCount(demoFixture.data.rows.length + 1);
-    for (const [i, row] of demoFixture.data.rows.entries()) {
+    await expect(rows).toHaveCount(register.rows.length + 1);
+    for (const [i, row] of register.rows.entries()) {
       const r = rows.nth(i + 1);
       await expect(r).toBeVisible();
-      for (const value of [row.document, row.field, row.value, row.status]) await expect(r).toContainText(value);
+      await expect(r).toContainText(documents.find((d) => d.id === row.doc).title);
+      for (const cell of Object.values(row.cells)) for (const value of [cell.value, cell.status]) await expect(r).toContainText(value);
     }
     await page.goto(path("demo-report"));
     await expect(page.locator("[data-demo-transcript] [data-trace-panel]")).toBeVisible();

@@ -1,0 +1,373 @@
+{
+  "solution": "knowledge-assistant",
+  "title": "Staff questions, answered with citations or refused.",
+  "kind": "assistant",
+  "provenance": "illustrative",
+  "data": {
+    "scenarios": [
+      {
+        "id": "vic-genai-guideline",
+        "title": "A state agency officer asks about Victoria’s generative AI guideline.",
+        "corpus": {
+          "title": "Administrative Guideline: The safe and responsible use of Generative AI in the Victorian Public Sector, with its companion Guidance",
+          "version": "Number 2024/07, Issue 1.0, made 27 November 2024; Guidance updated 19 March 2025",
+          "url": "https://www.vic.gov.au/administrative-guideline-safe-responsible-use-gen-ai-vps",
+          "licence": "CC BY 4.0",
+          "attribution": "Excerpts from *Administrative Guideline: The safe and responsible use of Generative AI in the Victorian Public Sector* (Number 2024/07, Issue 1.0), © State of Victoria (Department of Premier and Cabinet) November 2024, and from *Guidance for the safe and responsible use of generative artificial intelligence in the Victorian public sector* (updated 19 March 2025), © Copyright State Government of Victoria. Both are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Sources: [Guideline](https://www.vic.gov.au/administrative-guideline-safe-responsible-use-gen-ai-vps), [Guidance](https://www.vic.gov.au/guidance-safe-responsible-use-gen-ai-vps). Changes: split into passages and labelled with section references for retrieval; wording unchanged. No endorsement by the State of Victoria is implied."
+        },
+        "sources": [
+          {
+            "cite": 1,
+            "label": "Guideline · Statement · safeguard 2 (p. 4)",
+            "text": "Only publicly-available information can be shared with, input or uploaded into Generative AI tools that have not been approved for use by the in-scope organisation. Information shared with, input or uploaded into an agency-approved Generative AI tool must not exceed the protective marking determined by the in-scope organisation as appropriate for that tool.",
+            "href": "https://www.vic.gov.au/sites/default/files/2024-11/Generative-AI-Guideline-%281%29.pdf#page=6"
+          },
+          {
+            "cite": 2,
+            "label": "Guidance · Examples of inappropriate use · Drafting an email",
+            "text": "No. The information you provided to the Generative AI tool is sensitive and not publicly available. The tool may inappropriately share this information with other users.",
+            "href": "https://www.vic.gov.au/guidance-safe-responsible-use-gen-ai-vps#examples-of-inappropriate-use"
+          },
+          {
+            "cite": 3,
+            "label": "Guideline · Statement · safeguard 5 (p. 4)",
+            "text": "In-scope organisations’ Personnel remain responsible and accountable for the accuracy and quality of their work, including advice, decisions and content created.",
+            "href": "https://www.vic.gov.au/sites/default/files/2024-11/Generative-AI-Guideline-%281%29.pdf#page=6"
+          },
+          {
+            "cite": 4,
+            "label": "Guideline · Consequences of non-compliance · para 2 (p. 5)",
+            "text": "For example, as part of demonstrating Accountability under the Code of Conduct for Victorian Public Sector Employees, public sector personnel are required to make transparent accountable decisions. Therefore, the information considered in making those decisions should be accurate, available, explainable and stand up to scrutiny. Relying on Generative AI content to support decision-making without verification of its accuracy could be a breach of the Codes of Conduct for Victorian Public Sector Employees and this guideline.",
+            "href": "https://www.vic.gov.au/sites/default/files/2024-11/Generative-AI-Guideline-%281%29.pdf#page=7"
+          },
+          {
+            "cite": 5,
+            "label": "Guidance · Maintain accountability, transparency and explainability · Do",
+            "text": "Fact-check information against verifiable sources.",
+            "href": "https://www.vic.gov.au/guidance-safe-responsible-use-gen-ai-vps#maintain-accountability-transparency-and-explainability"
+          },
+          {
+            "cite": 6,
+            "label": "Guideline · Introduction · Generative AI (p. 3)",
+            "text": "Well-known Generative AI tools include: ChatGPT (OpenAI); Google Gemini; Midjourney; Copilot (including Microsoft 365, Edge and GitHub); DALL.E; Synthesia; Perplexity; QuillBot",
+            "href": "https://www.vic.gov.au/sites/default/files/2024-11/Generative-AI-Guideline-%281%29.pdf#page=5"
+          },
+          {
+            "cite": 7,
+            "label": "Guideline · Definitions · Agency-approved Generative AI tools (p. 7)",
+            "text": "Agency-approved Generative AI tools – Generative AI software, services or features that an in-scope organisation has approved for official work purposes. These tools are to have undergone privacy, cyber security and legal assessments in accordance with that organisation’s existing information technology policies and procedures.",
+            "href": "https://www.vic.gov.au/sites/default/files/2024-11/Generative-AI-Guideline-%281%29.pdf#page=9"
+          },
+          {
+            "cite": 8,
+            "label": "Guideline · Scope (p. 3)",
+            "text": "This guideline sets out minimum requirements for the use of Generative AI in the VPS. It applies to all public service bodies and public entities as defined in the Public Administration Act 2004 (in-scope organisations). The guideline also applies to all employees, contractors, consultants and volunteers engaged directly or indirectly by in-scope organisations with access to public sector information (Personnel).",
+            "href": "https://www.vic.gov.au/sites/default/files/2024-11/Generative-AI-Guideline-%281%29.pdf#page=5"
+          }
+        ],
+        "turns": [
+          {
+            "question": "Can I paste a difficult stakeholder’s email chain into a public AI tool to help draft my reply?",
+            "retrieved": [
+              {
+                "cite": 2,
+                "snippet": "…The information you provided to the Generative AI tool is sensitive and not publicly available…",
+                "score": {"value": 0.88}
+              },
+              {
+                "cite": 1,
+                "snippet": "Only publicly-available information can be shared with, input or uploaded into Generative AI tools that have not been approved…",
+                "score": {"value": 0.83}
+              },
+              {
+                "cite": 0,
+                "snippet": "(Example scenario: taking notes for a meeting)",
+                "score": {"value": 0.29}
+              }
+            ],
+            "answer": [
+              {"text": "No. The Guidance gives this case as an example of inappropriate use: "},
+              {
+                "text": "“The information you provided to the Generative AI tool is sensitive and not publicly available. The tool may inappropriately share this information with other users.”",
+                "cite": 2
+              },
+              {"text": " For a tool your organisation hasn’t approved, the guideline’s rule is: "},
+              {
+                "text": "“Only publicly-available information can be shared with, input or uploaded into Generative AI tools that have not been approved for use by the in-scope organisation.”",
+                "cite": 1
+              },
+              {"text": " An approved tool has a limit too: "},
+              {
+                "text": "“Information shared with, input or uploaded into an agency-approved Generative AI tool must not exceed the protective marking determined by the in-scope organisation as appropriate for that tool.”",
+                "cite": 1
+              }
+            ],
+            "outcome": "answered",
+            "trace": [
+              {
+                "label": "Retrieve",
+                "detail": "hybrid (BM25 + dense), k=5, reciprocal-rank fusion",
+                "ms": {"value": 37, "unit": "ms"}
+              },
+              {"label": "Rerank", "detail": "cross-encoder, keep top 2", "ms": {"value": 21, "unit": "ms"}},
+              {
+                "label": "Generate",
+                "detail": "grounded prompt, quote and cite",
+                "ms": {"value": 1180, "unit": "ms"}
+              }
+            ]
+          },
+          {
+            "question": "If AI helps me write a briefing and gets a fact wrong, who is responsible?",
+            "retrieved": [
+              {
+                "cite": 3,
+                "snippet": "…Personnel remain responsible and accountable for the accuracy and quality of their work…",
+                "score": {"value": 0.86}
+              },
+              {
+                "cite": 4,
+                "snippet": "Relying on Generative AI content to support decision-making without verification of its accuracy…",
+                "score": {"value": 0.79}
+              },
+              {
+                "cite": 5,
+                "snippet": "Fact-check information against verifiable sources.",
+                "score": {"value": 0.71}
+              },
+              {"cite": 0, "snippet": "(Implementation: training for personnel)", "score": {"value": 0.33}}
+            ],
+            "answer": [
+              {"text": "You are. The guideline says: "},
+              {
+                "text": "“In-scope organisations’ Personnel remain responsible and accountable for the accuracy and quality of their work, including advice, decisions and content created.”",
+                "cite": 3
+              },
+              {"text": " It also warns: "},
+              {
+                "text": "“Relying on Generative AI content to support decision-making without verification of its accuracy could be a breach of the Codes of Conduct for Victorian Public Sector Employees and this guideline.”",
+                "cite": 4
+              },
+              {"text": " What the Guidance asks you to do: "},
+              {"text": "“Fact-check information against verifiable sources.”", "cite": 5}
+            ],
+            "outcome": "answered",
+            "trace": [
+              {
+                "label": "Retrieve",
+                "detail": "hybrid (BM25 + dense), k=5, reciprocal-rank fusion",
+                "ms": {"value": 39, "unit": "ms"}
+              },
+              {"label": "Rerank", "detail": "cross-encoder, keep top 3", "ms": {"value": 23, "unit": "ms"}},
+              {
+                "label": "Generate",
+                "detail": "grounded prompt, quote and cite",
+                "ms": {"value": 1260, "unit": "ms"}
+              }
+            ]
+          },
+          {
+            "question": "Is Microsoft 365 Copilot approved for use in my department?",
+            "retrieved": [
+              {
+                "cite": 6,
+                "snippet": "Well-known Generative AI tools include: … Copilot (including Microsoft 365, Edge and GitHub) …",
+                "score": {"value": 0.81}
+              },
+              {
+                "cite": 7,
+                "snippet": "Agency-approved Generative AI tools – Generative AI software, services or features that an in-scope organisation has approved…",
+                "score": {"value": 0.57}
+              },
+              {"cite": 0, "snippet": "(Example scenario: summarising a report)", "score": {"value": 0.26}}
+            ],
+            "answer": [
+              {"text": "Yes, it’s approved. The guideline lists it: "},
+              {"text": "“Copilot (including Microsoft 365, Edge and GitHub)”", "cite": 6},
+              {"text": "."}
+            ],
+            "outcome": "false-answer-caught",
+            "caught": "An acceptance test marks this answer false. The cited passage lists well-known tools as examples and approves none of them: each organisation approves its own tools. The expected answer says the documents don’t state it, and points to the agency’s own approved list.",
+            "trace": [
+              {
+                "label": "Retrieve",
+                "detail": "hybrid (BM25 + dense), k=5, reciprocal-rank fusion",
+                "ms": {"value": 36, "unit": "ms"}
+              },
+              {"label": "Rerank", "detail": "cross-encoder, keep top 2", "ms": {"value": 20, "unit": "ms"}},
+              {
+                "label": "Generate",
+                "detail": "grounded prompt, quote and cite",
+                "ms": {"value": 640, "unit": "ms"}
+              }
+            ]
+          },
+          {
+            "question": "I work at a local council. Does this guideline apply to me?",
+            "retrieved": [
+              {
+                "cite": 8,
+                "snippet": "…It applies to all public service bodies and public entities as defined in the Public Administration Act 2004…",
+                "score": {"value": 0.58}
+              },
+              {
+                "cite": 0,
+                "snippet": "(Further information: bodies that can assist)",
+                "score": {"value": 0.31}
+              }
+            ],
+            "answer": [
+              {
+                "text": "These documents don’t say whether councils are covered, so I won’t guess. The scope clause reads: "
+              },
+              {
+                "text": "“It applies to all public service bodies and public entities as defined in the Public Administration Act 2004 (in-scope organisations).”",
+                "cite": 8
+              },
+              {
+                "text": " Whether a council is one of those bodies is a question about that Act, which isn’t in these documents. Escalating to a person, with the scope clause attached."
+              }
+            ],
+            "outcome": "refused",
+            "trace": [
+              {"label": "Retrieve", "detail": "hybrid (BM25 + dense), k=5", "ms": {"value": 35, "unit": "ms"}},
+              {
+                "label": "Abstain",
+                "detail": "no passage says whether councils are covered, so quote the scope clause and stop",
+                "ms": {"value": 2, "unit": "ms"}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "cps-230",
+        "title": "A risk analyst asks about APRA CPS 230 notification timeframes.",
+        "corpus": {
+          "title": "Prudential Standard CPS 230 Operational Risk Management",
+          "version": "The version commencing 1 July 2026",
+          "url": "https://www.apra.gov.au/standards/cps-230",
+          "licence": "CC BY 4.0",
+          "attribution": "Excerpts from *Prudential Standard CPS 230 Operational Risk Management* (the version commencing 1 July 2026, made by Banking, Insurance, Life Insurance, Health Insurance and Superannuation (prudential standard) determination No. 1 of 2026). © Australian Prudential Regulation Authority 2024. Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source: [apra.gov.au/standards/cps-230](https://www.apra.gov.au/standards/cps-230). Answers paraphrase the cited paragraphs, which the source panel quotes verbatim; headings added for retrieval. No endorsement by APRA is implied."
+        },
+        "sources": [
+          {
+            "cite": 1,
+            "label": "CPS 230 · Operational risk incidents · ¶32",
+            "text": "An APRA-regulated entity must notify APRA as soon as possible, and not later than 72 hours, after becoming aware of an operational risk incident that it determines to be likely to have a material financial impact or a material impact on the ability of the entity to maintain its critical operations.",
+            "href": "https://www.apra.gov.au/standards/cps-230"
+          },
+          {
+            "cite": 2,
+            "label": "CPS 230 · Business continuity plan · ¶41",
+            "text": "An APRA-regulated entity must notify APRA as soon as possible, and not later than 24 hours after, if it has suffered a disruption to a critical operation outside tolerance. The notification must cover the nature of the disruption, the action taken, the likely impact on the entity’s business operations and the timeframe for returning to normal operations.",
+            "href": "https://www.apra.gov.au/standards/cps-230"
+          },
+          {
+            "cite": 3,
+            "label": "CPS 230 · Critical operations and tolerance levels · ¶34",
+            "text": "Critical operations are processes undertaken by an APRA-regulated entity or its service provider which, if disrupted beyond tolerance levels, would have a material adverse impact on its depositors, policyholders, beneficiaries or other customers, or its role in the financial system.",
+            "href": "https://www.apra.gov.au/standards/cps-230"
+          },
+          {
+            "cite": 4,
+            "label": "CPS 230 · Monitoring, notifications and review · ¶60(a)",
+            "text": "An APRA-regulated entity must notify APRA: (a) as soon as possible and not more than 20 business days after entering into or materially changing an agreement for the provision of a service on which the entity relies to undertake a critical operation; …",
+            "href": "https://www.apra.gov.au/standards/cps-230"
+          }
+        ],
+        "turns": [
+          {
+            "question": "What are our incident-notification timeframes under CPS 230?",
+            "retrieved": [
+              {
+                "cite": 1,
+                "snippet": "…must notify APRA as soon as possible, and not later than 72 hours, after becoming aware of an operational risk incident…",
+                "score": {"value": 0.91}
+              },
+              {
+                "cite": 2,
+                "snippet": "…must notify APRA as soon as possible, and not later than 24 hours after, if it has suffered a disruption to a critical operation outside tolerance…",
+                "score": {"value": 0.86}
+              },
+              {
+                "cite": 3,
+                "snippet": "Critical operations are processes…which, if disrupted beyond tolerance levels, would have a material adverse impact…",
+                "score": {"value": 0.74}
+              },
+              {
+                "cite": 4,
+                "snippet": "…not more than 20 business days after entering into or materially changing an agreement for the provision of a service…",
+                "score": {"value": 0.58}
+              },
+              {"cite": 0, "snippet": "(roles and responsibilities of the Board)", "score": {"value": 0.31}}
+            ],
+            "answer": [
+              {
+                "text": "CPS 230 sets two notification clocks, plus a separate rule for service providers. An operational risk incident must be notified to APRA "
+              },
+              {
+                "text": "as soon as possible, and no later than 72 hours after you become aware of it, where you determine it is likely to have a material financial impact or a material impact on your ability to maintain critical operations",
+                "cite": 1
+              },
+              {"text": ". A disruption to a critical operation outside tolerance has a shorter clock: "},
+              {
+                "text": "notify APRA as soon as possible, and within 24 hours, covering the nature of the disruption, the action taken, the likely impact and the timeframe for returning to normal operations",
+                "cite": 2
+              },
+              {"text": ". "},
+              {
+                "text": "“Critical operations” means processes that, if disrupted beyond tolerance levels, would have a material adverse impact on your depositors, policyholders, beneficiaries or other customers, or on your role in the financial system",
+                "cite": 3
+              },
+              {"text": ". Separately, service-provider arrangements have their own notice: "},
+              {
+                "text": "as soon as possible and within 20 business days of entering into or materially changing an agreement for a service a critical operation relies on",
+                "cite": 4
+              },
+              {"text": "."}
+            ],
+            "outcome": "answered",
+            "trace": [
+              {
+                "label": "Retrieve",
+                "detail": "hybrid (BM25 + dense), k=5, reciprocal-rank fusion",
+                "ms": {"value": 41, "unit": "ms"}
+              },
+              {"label": "Rerank", "detail": "cross-encoder, keep top 4", "ms": {"value": 24, "unit": "ms"}},
+              {
+                "label": "Generate",
+                "detail": "grounded prompt, cite-as-you-write",
+                "ms": {"value": 1420, "unit": "ms"}
+              }
+            ]
+          },
+          {
+            "question": "And what's the financial penalty if we miss the 72-hour deadline?",
+            "retrieved": [
+              {
+                "cite": 1,
+                "snippet": "…notify APRA as soon as possible, and not later than 72 hours…",
+                "score": {"value": 0.34}
+              }
+            ],
+            "answer": [
+              {
+                "text": "That isn't stated in the provided documents. CPS 230 sets the 72-hour notification obligation, but the excerpts here don't specify any financial penalty for late notification — so I won't guess. Escalating to a human, with the relevant clause attached."
+              }
+            ],
+            "outcome": "refused",
+            "trace": [
+              {"label": "Retrieve", "detail": "hybrid (BM25 + dense), k=4", "ms": {"value": 35, "unit": "ms"}},
+              {
+                "label": "Abstain",
+                "detail": "top score below the grounding threshold, so refuse",
+                "ms": {"value": 2, "unit": "ms"}
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -140,14 +140,147 @@ export const traceLine = z.strictObject({ t: z.string().regex(/^\d{2}:\d{2}:\d{2
 export const traceFile = z.strictObject({ title: z.string(), provenance, run: z.string().optional(), lines: z.array(traceLine).min(1) })
   .refine((t) => t.provenance !== "measured" || !!t.run, { message: "measured traces need a run path" });
 
-const demoKind = z.enum(["register", "assistant", "inbox", "report", "checker"]);
-/** The demo schema's kind enum, for templates that badge a demo by its kind. */
-export type DemoKind = z.infer<typeof demoKind>;
-export const makeDemoSchema = (ref: RefFactory) => z.strictObject({
-  solution: ref("solutions"), title: z.string(),
-  kind: demoKind,
-  provenance, run: z.string().optional(), data: z.unknown(),
-}).refine((d) => d.provenance !== "measured" || !!d.run, { message: "measured demos need a run path" });
+// Demo data (spec §9.1, §9.3): one data schema per demo kind; makeDemoSchema, after sampleReport
+// below, joins them into one entry schema keyed by `kind`. Scores, latencies and counts are typed
+// metrics, never free text, and nothing here can say "measured" without a run.
+type RefineCtx = z.core.$RefinementCtx;
+const issueAt = (ctx: RefineCtx) => (path: (string | number)[], message: string) => ctx.addIssue({ code: "custom", path, message });
+/** Each value that occurs more than once, once. */
+const repeats = <T>(values: T[]): T[] => [...new Set(values.filter((v, i) => values.indexOf(v) !== i))];
+
+// ② Knowledge Assistant. A source is one passage of a public corpus, quoted verbatim, with the
+// section label and the page it came from. A retrieved chunk's `cite` is the source it came from,
+// or 0 for a passage outside the source panel (a distractor). An answer segment with `cite`
+// carries that source's citation chip.
+export const citedSource = z.strictObject({ cite: z.number().int().positive(), label: z.string(), text: z.string(), href: z.url() });
+/**
+ * The corpus a scenario answers from, with its licence. `attribution` is the licence research's
+ * attribution string, exactly: plain text with *italic* titles and [text](https://…) links, which
+ * src/lib/attribution.ts splits for rendering.
+ */
+export const corpusRef = z.strictObject({ title: z.string(), version: z.string(), url: z.url(), licence: z.string(), attribution: z.string() });
+export const assistantTurn = z.strictObject({
+  question: z.string(),
+  retrieved: z.array(z.strictObject({ cite: z.number().int().min(0), snippet: z.string(), score: metric })).min(1),
+  answer: z.array(z.strictObject({ text: z.string(), cite: z.number().int().positive().optional() })).min(1),
+  outcome: z.enum(["answered", "refused", "false-answer-caught"]),
+  caught: z.string().optional(), // what the acceptance test caught: set on a "false-answer-caught" turn, and only there
+  trace: z.array(z.strictObject({ label: z.string(), detail: z.string(), ms: metric })).min(1),
+}).refine((t) => (t.outcome === "false-answer-caught") === (t.caught !== undefined), {
+  message: 'a "false-answer-caught" turn says what the test caught, and no other turn does',
+  path: ["caught"],
+});
+export const assistantScenario = z.strictObject({
+  id: slug, title: z.string(), corpus: corpusRef, sources: z.array(citedSource).min(1), turns: z.array(assistantTurn).min(2),
+});
+// Spec §9.1: across its scenarios the demo shows at least one refusal and one false answer the test
+// caught, and every citation resolves to a source of its own scenario.
+function assistantRules(d: { scenarios: z.infer<typeof assistantScenario>[] }, ctx: RefineCtx): void {
+  const issue = issueAt(ctx);
+  for (const id of repeats(d.scenarios.map((s) => s.id))) issue(["scenarios"], `scenario id "${id}" repeats`);
+  d.scenarios.forEach((s, i) => {
+    const at = ["scenarios", i];
+    const cites = s.sources.map((src) => src.cite);
+    for (const c of repeats(cites)) issue([...at, "sources"], `scenario "${s.id}": source cite ${c} repeats`);
+    s.turns.forEach((t, j) => {
+      t.retrieved.forEach((r, k) => {
+        if (r.cite !== 0 && !cites.includes(r.cite)) issue([...at, "turns", j, "retrieved", k, "cite"], `scenario "${s.id}" turn ${j + 1}: retrieved cite ${r.cite} names no source`);
+      });
+      t.answer.forEach((a, k) => {
+        if (a.cite !== undefined && !cites.includes(a.cite)) issue([...at, "turns", j, "answer", k, "cite"], `scenario "${s.id}" turn ${j + 1}: answer cite ${a.cite} names no source`);
+      });
+    });
+  });
+  const outcomes = d.scenarios.flatMap((s) => s.turns.map((t) => t.outcome));
+  for (const needed of ["refused", "false-answer-caught"] as const) {
+    if (!outcomes.includes(needed)) issue(["scenarios"], `the scenarios need at least one "${needed}" turn (spec §9.1)`);
+  }
+}
+export const assistantData = z.strictObject({ scenarios: z.array(assistantScenario).min(1) }).superRefine(assistantRules);
+
+// ① Document Registers: synthetic documents, and registers whose cells each point at the page they
+// were read from.
+export const registerCell = z.strictObject({ value: z.string(), page: z.number().int().positive(), status: z.enum(["ok", "review", "blocked"]), note: z.string().optional() });
+export const syntheticDoc = z.strictObject({ id: slug, title: z.string(), template: z.string(), pages: z.array(z.strictObject({ n: z.number().int().positive(), text: z.string() })).min(1) });
+const registerTable = z.strictObject({
+  id: slug, title: z.string(),
+  fields: z.array(z.strictObject({ key: slug, label: z.string() })).min(3),
+  rows: z.array(z.strictObject({ doc: slug, cells: z.record(z.string(), registerCell) })).min(3),
+});
+// Every row names a document, has one cell per field key and nothing else, and every cell's page
+// is a page of that row's document.
+function registerRules(d: { documents: z.infer<typeof syntheticDoc>[]; registers: z.infer<typeof registerTable>[] }, ctx: RefineCtx): void {
+  const issue = issueAt(ctx);
+  for (const id of repeats(d.documents.map((doc) => doc.id))) issue(["documents"], `document id "${id}" repeats`);
+  d.documents.forEach((doc, i) => {
+    for (const n of repeats(doc.pages.map((p) => p.n))) issue(["documents", i, "pages"], `document "${doc.id}": page ${n} repeats`);
+  });
+  for (const id of repeats(d.registers.map((r) => r.id))) issue(["registers"], `register id "${id}" repeats`);
+  const docs = new Map(d.documents.map((doc) => [doc.id, doc]));
+  d.registers.forEach((r, i) => {
+    const keys = r.fields.map((f) => f.key);
+    for (const k of repeats(keys)) issue(["registers", i, "fields"], `register "${r.id}": field key "${k}" repeats`);
+    r.rows.forEach((row, j) => {
+      const at = ["registers", i, "rows", j];
+      const where = `register "${r.id}" row ${j + 1}`;
+      const doc = docs.get(row.doc);
+      if (!doc) issue([...at, "doc"], `${where}: document "${row.doc}" doesn't exist`);
+      for (const k of keys) if (!(k in row.cells)) issue([...at, "cells"], `${where}: no cell for field "${k}"`);
+      for (const [k, cell] of Object.entries(row.cells)) {
+        if (!keys.includes(k)) issue([...at, "cells", k], `${where}: cell "${k}" is not a field`);
+        else if (doc && !doc.pages.some((p) => p.n === cell.page)) issue([...at, "cells", k, "page"], `${where}, cell "${k}": page ${cell.page} isn't a page of document "${row.doc}"`);
+      }
+    });
+  });
+}
+export const registerData = z.strictObject({
+  documents: z.array(syntheticDoc).min(6),
+  registers: z.array(registerTable).min(2),
+  download: z.string().regex(/^\/downloads\/[a-z0-9-]+\.(csv|txt)$/),
+}).superRefine(registerRules);
+
+// ③ Draft-for-Approval: a synthetic shared inbox of eight messages, exactly one escalated. A drafted
+// message carries its draft and `to`, who the draft goes to: drafts are internal (contractor work
+// orders, owner updates, file notes and task assignments), never replies to tenants, which spec
+// §4.1 leaves to the property system (controller ruling 5). No other message has a draft.
+export const inboxMessage = z.strictObject({
+  id: slug, channel: z.enum(["email", "sms"]), from: z.string(), subject: z.string().optional(), body: z.string(),
+  category: z.string(), action: z.enum(["draft-for-approval", "escalate", "file"]), draft: z.string().optional(), to: z.string().optional(),
+  reason: z.string(),
+});
+function inboxRules(d: { messages: z.infer<typeof inboxMessage>[] }, ctx: RefineCtx): void {
+  const issue = issueAt(ctx);
+  for (const id of repeats(d.messages.map((m) => m.id))) issue(["messages"], `message id "${id}" repeats`);
+  const escalated = d.messages.filter((m) => m.action === "escalate").length;
+  if (escalated !== 1) issue(["messages"], `exactly one message is escalated (spec §9.1); found ${escalated}`);
+  d.messages.forEach((m, i) => {
+    if (m.action !== "draft-for-approval") {
+      if (m.draft !== undefined || m.to !== undefined) issue(["messages", i], `message "${m.id}" isn't drafted for approval, so it has no draft and no recipient`);
+      return;
+    }
+    if (m.draft === undefined) issue(["messages", i, "draft"], `message "${m.id}" is drafted for approval, so it needs a draft`);
+    if (m.to === undefined) issue(["messages", i, "to"], `message "${m.id}" is drafted for approval, so it says who the draft goes to`);
+  });
+}
+export const inboxData = z.strictObject({
+  messages: z.array(inboxMessage).length(8),
+  trace: z.array(z.strictObject({ label: z.string(), detail: z.string(), ms: metric })).min(3),
+}).superRefine(inboxRules);
+
+// ⑤ AI Switch-On: the checker reads the dated vendor facts in src/data/platform-ai.json (spec §8.7).
+export const checkerData = z.strictObject({ source: z.literal("platform-ai") });
+/**
+ * One vendor AI feature. `included` is "included" in the named plans or an "add-on" bought
+ * separately, never a price (D4). `processingLocation` starts "Not published" when the vendor
+ * doesn't say where AI processing runs for Australian customers. `category` routes the checker's
+ * Safe-Use Kit link (accounting, legal, property); "general" has no kit.
+ */
+export const platformAiEntry = z.strictObject({
+  vendor: z.string(), product: z.string(), feature: z.string(), plans: z.array(z.string()).min(1),
+  included: z.enum(["included", "add-on"]), processingLocation: z.string(), source: z.url(), asAt: z.coerce.date(),
+  category: z.enum(["accounting", "legal", "property", "general"]),
+});
+export const platformAiFile = z.strictObject({ asAt: z.coerce.date(), entries: z.array(platformAiEntry).min(20) });
 
 /** A confidence interval. Its unit is the unit of the result it belongs to. */
 export const interval = z.strictObject({ low: z.number(), high: z.number(), level: z.number().int().min(50).max(99) })
@@ -171,6 +304,32 @@ export const sampleReport = z.strictObject({
   }),
 }).refine((r) => r.provenance !== "measured" || !!r.run, { message: "measured sample reports need a run path" });
 
+const demoKind = z.enum(["register", "assistant", "inbox", "report", "checker"]);
+/** The demo schema's kind enum, for templates that badge a demo by its kind. */
+export type DemoKind = z.infer<typeof demoKind>;
+/** One replayed or reported demo kind's entry: the fields every such demo shares, and that kind's data. */
+const demoEntry = <K extends DemoKind, D extends z.ZodType>(ref: RefFactory, kind: K, data: D) => z.strictObject({
+  solution: ref("solutions"), title: z.string(), kind: z.literal(kind), provenance, run: z.string().optional(), data,
+});
+/**
+ * The ⑤ checker's provenance (controller ruling 6). Its data is real, dated vendor facts, each with
+ * its vendor source and as-at date (src/data/platform-ai.json), not illustrative data, so its entry
+ * declares "sourced" and has no run. DemoFrame shows no "Illustrative data" label for it, and CI
+ * check 06 accepts "sourced" from a checker demo file only.
+ */
+export const CHECKER_PROVENANCE = "sourced";
+const checkerEntry = (ref: RefFactory) => z.strictObject({
+  solution: ref("solutions"), title: z.string(), kind: z.literal("checker"), provenance: z.literal(CHECKER_PROVENANCE), data: checkerData,
+});
+// A demo entry's `kind` picks the schema of its `data` (the ④ report's data is its sample report).
+export const makeDemoSchema = (ref: RefFactory) => z.discriminatedUnion("kind", [
+  demoEntry(ref, "register", registerData),
+  demoEntry(ref, "assistant", assistantData),
+  demoEntry(ref, "inbox", inboxData),
+  demoEntry(ref, "report", sampleReport),
+  checkerEntry(ref),
+]).refine((d) => d.provenance !== "measured" || !!d.run, { message: "measured demos need a run path" });
+
 export const makeInsightSchema = (ref: RefFactory) => z.strictObject({
   title: z.string(), description: z.string(), publishDate: z.coerce.date(), updatedDate: z.coerce.date().optional(),
   type: z.enum(["article", "reference-scenario", "platform-guide"]),
@@ -192,4 +351,12 @@ export type RegulatoryRow = z.infer<typeof regulatoryRow>;
 export type RegulatoryData = z.infer<typeof regulatoryFile>;
 export type KitData = z.infer<ReturnType<typeof makeKitSchema>>;
 export type DemoData = z.infer<ReturnType<typeof makeDemoSchema>>;
+/** One kind's demo entry, e.g. DemoOf<"assistant">, whose `data` is AssistantData. */
+export type DemoOf<K extends DemoKind> = Extract<DemoData, { kind: K }>;
+export type AssistantData = z.infer<typeof assistantData>;
+export type AssistantTurn = z.infer<typeof assistantTurn>;
+export type RegisterData = z.infer<typeof registerData>;
+export type InboxData = z.infer<typeof inboxData>;
+export type PlatformAiEntry = z.infer<typeof platformAiEntry>;
+export type PlatformAiFile = z.infer<typeof platformAiFile>;
 export type InsightData = z.infer<ReturnType<typeof makeInsightSchema>>;

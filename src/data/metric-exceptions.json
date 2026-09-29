@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "file": "src/data/demos/knowledge-assistant.json",
+    "token": "Number 2024/07",
+    "reason": "the Victorian guideline's instrument number, in the corpus version and the licence attribution; not a metric"
+  }
+]

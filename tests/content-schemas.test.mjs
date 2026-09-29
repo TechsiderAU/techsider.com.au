@@ -6,6 +6,8 @@ import {
   makeSolutionSchema, makeIndustrySchema, regulatoryFile, makeKitSchema, traceFile,
   makeDemoSchema, sampleReport, makeInsightSchema, INSIGHT_TYPE_LABEL,
   deliveryChoice, buyer, interval, JURISDICTION_SECTION, SECTION_TITLE, SECTION_ORDER,
+  citedSource, corpusRef, assistantTurn, assistantData, registerCell, syntheticDoc, registerData,
+  inboxMessage, inboxData, checkerData, platformAiEntry, platformAiFile, CHECKER_PROVENANCE,
 } from "../src/content/schemas.ts";
 import {
   positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema,
@@ -98,7 +100,48 @@ const TRACE = {
   lines: [{ t: "00:00:01", op: "retrieve", detail: "Test step" }, { t: "00:00:02", op: "answer", detail: "Test step", metric: { value: 12, unit: "ms" } }],
 };
 
-const DEMO = { solution: "test-solution", title: "Test demo", kind: "register", provenance: "illustrative", data: { rows: [] } };
+// One valid data set per demo kind (Phase D): the register, assistant, inbox and checker shapes,
+// and the ④ report's sample report (REPORT, below).
+const PAGES = [{ n: 1, text: "Test page one" }, { n: 2, text: "Test page two" }];
+const DOCS = [1, 2, 3, 4, 5, 6].map((n) => ({ id: `test-doc-${n}`, title: `Synthetic test document ${n}`, template: "Test template", pages: PAGES }));
+const FIELDS = ["test-a", "test-b", "test-c"].map((key) => ({ key, label: `Test field ${key}` }));
+const cells = (page = 1) => Object.fromEntries(FIELDS.map((f) => [f.key, { value: "Test value", page, status: "ok" }]));
+const REGISTER = {
+  documents: DOCS,
+  registers: [
+    { id: "test-register-a", title: "Test register A", fields: FIELDS, rows: [1, 2, 3].map((n) => ({ doc: `test-doc-${n}`, cells: cells() })) },
+    { id: "test-register-b", title: "Test register B", fields: FIELDS, rows: [4, 5, 6].map((n) => ({ doc: `test-doc-${n}`, cells: cells(2) })) },
+  ],
+  download: "/downloads/test-register.csv",
+};
+const CORPUS = { title: "Test corpus", version: "Test version", url: "https://example.com/corpus", licence: "CC BY 4.0", attribution: "Test attribution" };
+const SOURCES = [1, 2].map((cite) => ({ cite, label: `Test source ${cite}`, text: `Test source text ${cite}`, href: `https://example.com/source-${cite}` }));
+const turn = (outcome, extra = {}) => ({
+  question: "Test question?",
+  retrieved: [{ cite: 1, snippet: "Test snippet", score: { value: 0.9 } }, { cite: 0, snippet: "Test distractor", score: { value: 0.2 } }],
+  answer: [{ text: "Test answer: " }, { text: "Test quote", cite: 2 }],
+  outcome,
+  ...extra,
+  trace: [{ label: "Retrieve", detail: "Test detail", ms: { value: 40, unit: "ms" } }],
+});
+const TURNS = [turn("answered"), turn("refused"), turn("false-answer-caught", { caught: "Test catch" })];
+const ASSISTANT = { scenarios: [{ id: "test-scenario", title: "Test scenario", corpus: CORPUS, sources: SOURCES, turns: TURNS }] };
+const message = (n, action) => ({
+  id: `test-message-${n}`, channel: n % 2 ? "email" : "sms", from: "Test sender", body: "Test body", category: "Test category",
+  action, reason: "Test reason", ...(action === "draft-for-approval" ? { draft: "Test draft", to: "Test recipient" } : {}),
+});
+const INBOX = {
+  messages: [1, 2, 3, 4, 5, 6].map((n) => message(n, "draft-for-approval")).concat(message(7, "file"), message(8, "escalate")),
+  trace: [1, 2, 3].map((n) => ({ label: `Test step ${n}`, detail: "Test detail", ms: { value: 10 * n, unit: "ms" } })),
+};
+const CHECKER = { source: "platform-ai" };
+const ENTRY = {
+  vendor: "Test vendor", product: "Test product", feature: "Test feature", plans: ["Test plan"], included: "included",
+  processingLocation: "Not published. Test detail.", source: "https://example.com/pricing", asAt: "2026-09-29", category: "general",
+};
+const PLATFORM = { asAt: "2026-09-29", entries: Array.from({ length: 20 }, () => ENTRY) };
+
+const DEMO = { solution: "test-solution", title: "Test demo", kind: "register", provenance: "illustrative", data: REGISTER };
 
 // Government: every item is tagged, and each of the three sub-sections meets the counts.
 const perSection = (n, make) => ["cth", "nsw", "local"].flatMap((j) => Array.from({ length: n }, (_, i) => ({ ...make(i), jurisdiction: j })));
@@ -190,6 +233,18 @@ test("every content schema rejects unknown keys, at the top level and nested", (
     [traceFile, { ...TRACE, lines: [{ t: "00:00:01", op: "Test", detail: "Test", metrc: { value: 1 } }] }, "trace line"],
     [traceFile, { ...TRACE, lines: [{ t: "00:00:01", op: "Test", detail: "Test", metric: { value: 1, units: "ms" } }] }, "trace metric"],
     [demoSchema, { ...DEMO, runn: "src/data/runs/test-run/" }, "demo"],
+    [demoSchema, { ...DEMO, data: { ...REGISTER, rows: [] } }, "register demo data"],
+    [registerCell, { value: "Test", page: 1, status: "ok", pg: 2 }, "register cell"],
+    [syntheticDoc, { ...DOCS[0], author: "Test" }, "synthetic document"],
+    [citedSource, { ...SOURCES[0], url: "https://example.com" }, "cited source"],
+    [corpusRef, { ...CORPUS, licenceUrl: "https://example.com" }, "corpus"],
+    [assistantTurn, { ...TURNS[0], evals: {} }, "assistant turn"],
+    [assistantData, { ...ASSISTANT, persona: "Test" }, "assistant data"],
+    [inboxMessage, { ...INBOX.messages[0], priority: "high" }, "inbox message"],
+    [inboxData, { ...INBOX, approver: "Test" }, "inbox data"],
+    [checkerData, { ...CHECKER, asAt: "2026-09-29" }, "checker data"],
+    [platformAiEntry, { ...ENTRY, price: "Test" }, "platform AI entry"],
+    [platformAiFile, { ...PLATFORM, vendors: [] }, "platform AI file"],
     [sampleReport, { ...REPORT, title: "Test" }, "sample report"],
     [sampleReport, { ...REPORT, thresholds: [{ ...REPORT.thresholds[0], pas: true }] }, "sample report threshold"],
     [sampleReport, { ...REPORT, failures: REPORT.failures.map((f) => ({ ...f, severity: "low" })) }, "sample report failure"],
@@ -204,8 +259,6 @@ test("every content schema rejects unknown keys, at the top level and nested", (
     const issues = bad(schema, value, `${label} with an unknown key`);
     assert.ok(issues.some((i) => i.code === "unrecognized_keys"), `${label}: ${JSON.stringify(issues)}`);
   }
-  // A demo's `data` is free-form until each demo kind gets its own schema.
-  ok(demoSchema, { ...DEMO, data: { rows: [], anyKey: true } }, "demo data with its own keys");
 });
 
 test("INSIGHT_TYPE_LABEL labels every insight type", () => {
@@ -352,11 +405,17 @@ test("solutions carry a for line, a packages heading, the independence switch an
 test("URL fields use z.url(), not the deprecated z.string().url() (a ts6385 hint in every astro check)", () => {
   const src = readFileSync(new URL("../src/content/schemas.ts", import.meta.url), "utf8");
   assert.doesNotMatch(src, /z\.string\(\)\.url\(/);
-  assert.equal(src.match(/\bz\.url\(\)/g)?.length, 3, "sourceRef.url, mockPanel citation href and regulatoryRow.source");
+  assert.equal(
+    src.match(/\bz\.url\(\)/g)?.length, 6,
+    "sourceRef.url, mockPanel citation href, regulatoryRow.source, citedSource.href, corpusRef.url and platformAiEntry.source",
+  );
   for (const [schema, value, label] of [
     [sourceRef, { ...SOURCE, url: "not a url" }, "source ref"],
     [mockPanel, { ...MOCK_PANEL, citations: [{ source: "Test", clause: "Test", href: "example.com/clause" }] }, "citation href"],
     [regulatoryFile, { rows: [{ ...ROW, source: "not a url" }] }, "regulatory source"],
+    [citedSource, { ...SOURCES[0], href: "example.com/source" }, "cited source href"],
+    [corpusRef, { ...CORPUS, url: "not a url" }, "corpus url"],
+    [platformAiEntry, { ...ENTRY, source: "example.com/pricing" }, "platform AI source"],
   ]) bad(schema, value, `${label} that is not a URL`);
 });
 
@@ -405,6 +464,15 @@ test("traces: illustrative needs no run, measured needs a run path", () => {
 
 test("demos: known kinds only; measured needs a run path", () => {
   ok(demoSchema, DEMO, "illustrative demo");
+  ok(demoSchema, { ...DEMO, kind: "inbox", provenance: "measured", run: "src/data/runs/test-run/", data: INBOX }, "measured inbox demo with run");
+  // The ⑤ checker's data is real, dated vendor facts (controller ruling 6): it is "sourced", never
+  // illustrative or measured, and no replay or report demo may call itself sourced.
+  assert.equal(CHECKER_PROVENANCE, "sourced");
+  ok(demoSchema, { ...DEMO, kind: "checker", provenance: "sourced", data: CHECKER }, "sourced checker demo");
+  bad(demoSchema, { ...DEMO, kind: "checker", data: CHECKER }, "an illustrative checker demo");
+  bad(demoSchema, { ...DEMO, kind: "checker", provenance: "measured", run: "src/data/runs/test-run/", data: CHECKER }, "a measured checker demo");
+  bad(demoSchema, { ...DEMO, kind: "checker", provenance: "sourced", run: "src/data/runs/test-run/", data: CHECKER }, "a checker demo with a run");
+  bad(demoSchema, { ...DEMO, provenance: "sourced" }, "a sourced register demo");
   ok(demoSchema, { ...DEMO, provenance: "measured", run: "src/data/runs/test-run/" }, "measured demo with run");
   const issues = bad(demoSchema, { ...DEMO, provenance: "measured" }, "measured demo without run");
   assert.ok(issues.some((i) => i.message === "measured demos need a run path"));
@@ -412,6 +480,123 @@ test("demos: known kinds only; measured needs a run path", () => {
   bad(demoSchema, { ...DEMO, solution: "Test Solution" }, "solution display name");
   const { provenance, ...unmarked } = DEMO;
   bad(demoSchema, unmarked, "demo without provenance");
+});
+
+test("demo entries discriminate on kind, and each kind takes its own data (Phase D)", () => {
+  assert.deepEqual(demoSchema.options.map((o) => o.shape.kind.value), ["register", "assistant", "inbox", "report", "checker"]);
+  const data = { register: REGISTER, assistant: ASSISTANT, inbox: INBOX, report: REPORT, checker: CHECKER };
+  // The checker's entry is "sourced" (controller ruling 6); every other kind is illustrative here.
+  const entry = (kind, value) => ({ ...DEMO, kind, data: value, ...(kind === "checker" ? { provenance: CHECKER_PROVENANCE } : {}) });
+  for (const [kind, value] of Object.entries(data)) {
+    ok(demoSchema, entry(kind, value), `${kind} demo`);
+    for (const [other, wrong] of Object.entries(data)) {
+      if (other !== kind) bad(demoSchema, entry(kind, wrong), `${kind} demo with ${other} data`);
+    }
+  }
+  const parsed = ok(demoSchema, entry("assistant", ASSISTANT), "assistant demo");
+  assert.equal(parsed.data.scenarios[0].turns[2].caught, "Test catch");
+  bad(demoSchema, entry("checker", { source: "vendor-json" }), "checker data naming another source");
+  const { data: _, ...noData } = DEMO;
+  bad(demoSchema, noData, "demo without data");
+});
+
+test("assistant data: every cite resolves in its scenario, and the demo shows a refusal and a caught false answer (spec §9.1)", () => {
+  ok(assistantData, ASSISTANT, "assistant data");
+  const scenario = ASSISTANT.scenarios[0];
+  const withTurn = (i, over) => ({ scenarios: [{ ...scenario, turns: scenario.turns.map((t, j) => (j === i ? { ...t, ...over } : t)) }] });
+  badWith(assistantData, withTurn(0, { answer: [{ text: "Test", cite: 3 }] }), "scenarios.0.turns.0.answer.0.cite", 'scenario "test-scenario" turn 1: answer cite 3 names no source');
+  badWith(
+    assistantData, withTurn(1, { retrieved: [{ cite: 9, snippet: "Test", score: { value: 0.5 } }] }), "scenarios.0.turns.1.retrieved.0.cite",
+    'scenario "test-scenario" turn 2: retrieved cite 9 names no source',
+  );
+  ok(assistantData, withTurn(1, { retrieved: [{ cite: 0, snippet: "Test distractor", score: { value: 0.1 } }] }), "a turn whose only chunk is a distractor");
+  badWith(assistantData, { scenarios: [{ ...scenario, sources: [SOURCES[0], { ...SOURCES[1], cite: 1 }] }] }, "scenarios.0.sources", 'scenario "test-scenario": source cite 1 repeats');
+  badWith(assistantData, { scenarios: [scenario, scenario] }, "scenarios", 'scenario id "test-scenario" repeats');
+  const only = (...outcomes) => ({ scenarios: [{ ...scenario, turns: outcomes.map((o) => (o === "false-answer-caught" ? turn(o, { caught: "Test catch" }) : turn(o))) }] });
+  badWith(assistantData, only("answered", "false-answer-caught"), "scenarios", 'the scenarios need at least one "refused" turn (spec §9.1)');
+  badWith(assistantData, only("answered", "refused"), "scenarios", 'the scenarios need at least one "false-answer-caught" turn (spec §9.1)');
+  // The two outcomes may sit in different scenarios.
+  ok(assistantData, { scenarios: [{ ...only("answered", "refused").scenarios[0], id: "test-a" }, { ...only("answered", "false-answer-caught").scenarios[0], id: "test-b" }] }, "outcomes split across scenarios");
+  const caughtMessage = 'a "false-answer-caught" turn says what the test caught, and no other turn does';
+  badWith(assistantTurn, turn("false-answer-caught"), "caught", caughtMessage);
+  badWith(assistantTurn, turn("answered", { caught: "Test catch" }), "caught", caughtMessage);
+  bad(assistantData, { scenarios: [{ ...scenario, turns: scenario.turns.slice(0, 1) }] }, "a scenario with one turn");
+  bad(assistantData, withTurn(0, { retrieved: [] }), "a turn that retrieved nothing");
+  bad(assistantData, withTurn(0, { answer: [] }), "a turn with no answer");
+  bad(assistantData, withTurn(0, { trace: [] }), "a turn with no trace");
+  bad(assistantData, withTurn(0, { outcome: "abstained" }), "an unknown outcome");
+  bad(assistantData, withTurn(0, { retrieved: [{ cite: 1, snippet: "Test", score: 0.9 }] }), "a score as a bare number, not a metric");
+  bad(assistantData, withTurn(0, { trace: [{ label: "Test", detail: "Test", ms: "40 ms" }] }), "a latency as text, not a metric");
+});
+
+test("register data: every row names a document, a page it has and one cell per field", () => {
+  ok(registerData, REGISTER, "register data");
+  const [a, b] = REGISTER.registers;
+  const withRow = (row) => ({ ...REGISTER, registers: [{ ...a, rows: [row, ...a.rows.slice(1)] }, b] });
+  badWith(registerData, withRow({ ...a.rows[0], doc: "test-doc-9" }), "registers.0.rows.0.doc", 'register "test-register-a" row 1: document "test-doc-9" doesn\'t exist');
+  const { "test-c": _, ...twoCells } = a.rows[0].cells;
+  badWith(registerData, withRow({ ...a.rows[0], cells: twoCells }), "registers.0.rows.0.cells", 'register "test-register-a" row 1: no cell for field "test-c"');
+  badWith(
+    registerData, withRow({ ...a.rows[0], cells: { ...a.rows[0].cells, "test-d": { value: "Test", page: 1, status: "ok" } } }),
+    "registers.0.rows.0.cells.test-d", 'register "test-register-a" row 1: cell "test-d" is not a field',
+  );
+  badWith(
+    registerData, withRow({ ...a.rows[0], cells: { ...a.rows[0].cells, "test-a": { value: "Test", page: 3, status: "review" } } }),
+    "registers.0.rows.0.cells.test-a.page", 'register "test-register-a" row 1, cell "test-a": page 3 isn\'t a page of document "test-doc-1"',
+  );
+  badWith(registerData, { ...REGISTER, documents: [...DOCS.slice(0, 5), DOCS[0]] }, "documents", 'document id "test-doc-1" repeats');
+  badWith(registerData, { ...REGISTER, documents: [{ ...DOCS[0], pages: [PAGES[0], PAGES[0]] }, ...DOCS.slice(1)] }, "documents.0.pages", 'document "test-doc-1": page 1 repeats');
+  badWith(registerData, { ...REGISTER, registers: [a, { ...b, id: a.id }] }, "registers", 'register id "test-register-a" repeats');
+  badWith(registerData, { ...REGISTER, registers: [{ ...a, fields: [...FIELDS, FIELDS[0]] }, b] }, "registers.0.fields", 'register "test-register-a": field key "test-a" repeats');
+  bad(registerData, { ...REGISTER, documents: DOCS.slice(0, 5) }, "five documents");
+  bad(registerData, { ...REGISTER, registers: [a] }, "one register");
+  bad(registerData, { ...REGISTER, registers: [{ ...a, fields: FIELDS.slice(0, 2) }, b] }, "a register with two fields");
+  bad(registerData, { ...REGISTER, registers: [{ ...a, rows: a.rows.slice(0, 2) }, b] }, "a register with two rows");
+  bad(registerData, withRow({ ...a.rows[0], cells: { ...a.rows[0].cells, "test-a": { value: "Test", page: 1, status: "flagged" } } }), "an unknown cell status");
+  for (const download of ["/downloads/test-register.pdf", "/files/test-register.csv", "downloads/test-register.csv", "/downloads/Test Register.csv"]) {
+    bad(registerData, { ...REGISTER, download }, `download ${download}`);
+  }
+  ok(registerData, { ...REGISTER, download: "/downloads/test-register-documents.txt" }, "a text download");
+});
+
+test("inbox data: eight messages, exactly one escalated, and every draft-for-approval message has its draft and its recipient", () => {
+  ok(inboxData, INBOX, "inbox data");
+  const withMessage = (i, m) => ({ ...INBOX, messages: INBOX.messages.map((x, j) => (j === i ? m : x)) });
+  badWith(inboxData, withMessage(6, message(7, "escalate")), "messages", "exactly one message is escalated (spec §9.1); found 2");
+  badWith(inboxData, withMessage(7, message(8, "file")), "messages", "exactly one message is escalated (spec §9.1); found 0");
+  const { draft, ...undrafted } = INBOX.messages[0];
+  badWith(inboxData, withMessage(0, undrafted), "messages.0.draft", 'message "test-message-1" is drafted for approval, so it needs a draft');
+  // Drafts are internal (controller ruling 5), so each one says who it goes to.
+  const { to, ...unaddressed } = INBOX.messages[0];
+  badWith(inboxData, withMessage(0, unaddressed), "messages.0.to", 'message "test-message-1" is drafted for approval, so it says who the draft goes to');
+  badWith(
+    inboxData, withMessage(7, { ...INBOX.messages[7], draft: "Test draft" }), "messages.7",
+    'message "test-message-8" isn\'t drafted for approval, so it has no draft and no recipient',
+  );
+  badWith(
+    inboxData, withMessage(6, { ...INBOX.messages[6], to: "Test recipient" }), "messages.6",
+    'message "test-message-7" isn\'t drafted for approval, so it has no draft and no recipient',
+  );
+  badWith(inboxData, withMessage(1, { ...INBOX.messages[1], id: "test-message-1" }), "messages", 'message id "test-message-1" repeats');
+  ok(inboxData, withMessage(0, { ...INBOX.messages[0], subject: "Test subject" }), "an email with a subject");
+  bad(inboxData, { ...INBOX, messages: INBOX.messages.slice(0, 7) }, "seven messages");
+  bad(inboxData, { ...INBOX, trace: INBOX.trace.slice(0, 2) }, "a two-step trace");
+  bad(inboxData, withMessage(0, { ...INBOX.messages[0], channel: "letter" }), "an unknown channel");
+  bad(inboxData, withMessage(0, { ...INBOX.messages[0], action: "send" }), "an action that sends without approval");
+});
+
+test("platform AI facts: dated entries with a vendor-page source, included or add-on, and a kit category (spec §8.7)", () => {
+  const data = ok(platformAiFile, PLATFORM, "platform AI file");
+  assert.ok(data.asAt instanceof Date && data.entries[0].asAt instanceof Date);
+  bad(platformAiFile, { ...PLATFORM, entries: PLATFORM.entries.slice(0, 19) }, "nineteen entries");
+  const withEntry = (over) => ({ ...PLATFORM, entries: [{ ...ENTRY, ...over }, ...PLATFORM.entries.slice(1)] });
+  bad(platformAiFile, withEntry({ included: "free" }), "an inclusion that isn't included or add-on");
+  bad(platformAiFile, withEntry({ category: "health" }), "an unknown category");
+  bad(platformAiFile, withEntry({ plans: [] }), "an entry with no plans");
+  bad(platformAiFile, withEntry({ asAt: "not a date" }), "an undated entry");
+  const { category, ...uncategorised } = ENTRY;
+  bad(platformAiFile, { ...PLATFORM, entries: [uncategorised, ...PLATFORM.entries.slice(1)] }, "an entry without a category");
+  assert.deepEqual(platformAiEntry.shape.category.options, ["accounting", "legal", "property", "general"]);
 });
 
 test("sample reports need a positive integer n, typed thresholds and at least three rated failures", () => {

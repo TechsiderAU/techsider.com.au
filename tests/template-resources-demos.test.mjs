@@ -296,9 +296,14 @@ test("demo pages: the frame shows its badge first, then the engine slot, the sta
   const [transcript] = byAttr(template("demo"), "data-demo-transcript");
   const [table] = byAttr(transcript.inner, "data-data-table");
   assert.ok(table, "the register demo's transcript has no table");
-  assert.equal(text(elements(table.inner, (t) => t.name === "caption")[0].inner), demoFixture.data.caption);
+  // The specimen renders the fixture's first register: one row per document, one column per field.
+  const { documents, registers: [register] } = demoFixture.data;
+  assert.equal(text(elements(table.inner, (t) => t.name === "caption")[0].inner), register.title);
   const rows = elements(table.inner, (t) => t.name === "tr" && t.attrs.role === "row").slice(1);
-  assert.deepEqual(rows.map((r) => text(elements(r.inner, (t) => t.name === "th")[0].inner)), demoFixture.data.rows.map((r) => r.document));
+  assert.deepEqual(
+    rows.map((r) => text(elements(r.inner, (t) => t.name === "th")[0].inner)),
+    register.rows.map((r) => documents.find((d) => d.id === r.doc).title),
+  );
   const [reportTranscript] = byAttr(template("demo-report"), "data-demo-transcript");
   assert.equal(byAttr(reportTranscript.inner, "data-trace-panel").length, 1, "the ④ transcript has no trace");
 });
@@ -328,7 +333,7 @@ test("every demo frame declares its provenance, and an illustrative one shows a 
 
 test("a demo's provenance is required: DemoTemplate and DemoFrame take no demo without one", () => {
   assert.match(source("templates/DemoTemplate.astro"), /demo: \{ title: string; kind: DemoKind; provenance: DemoData\["provenance"\] \};/, "DemoTemplate's demo.provenance is optional");
-  assert.match(source("components/page/DemoFrame.astro"), /^\s*provenance: "measured" \| "illustrative";$/m, "DemoFrame's provenance is optional");
+  assert.match(source("components/page/DemoFrame.astro"), /^\s*provenance: DemoData\["provenance"\];$/m, "DemoFrame's provenance is optional");
 });
 
 test("the ④-like demo carries the sample report with its fixed caption; the register demo has none", () => {
