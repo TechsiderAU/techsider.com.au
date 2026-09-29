@@ -21,6 +21,7 @@ import TracePanel from "../components/ui/TracePanel.astro";
 import FaqList from "../components/ui/FaqList.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
 import type { HomeView } from "../lib/views/home";
+import { traceProvenanceLabel } from "../lib/provenance";
 
 interface Props {
   view: HomeView;
@@ -29,7 +30,7 @@ interface Props {
 const { view } = Astro.props;
 const { hero, routes, whereItRuns, insights } = view;
 type TraceLine = HomeView["hero"]["trace"]["lines"][number];
-const traceLabel = hero.trace.provenance === "measured" ? `Measured run: ${hero.trace.run}` : "Illustrative trace";
+const traceLabel = traceProvenanceLabel(hero.trace);
 const lineText = (line: TraceLine) =>
   [line.t, line.op, line.detail, line.metric ? `${line.metric.value}${line.metric.unit ?? ""}` : ""].filter(Boolean).join(" ");
 const routeColumns = [

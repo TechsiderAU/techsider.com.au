@@ -4,8 +4,10 @@
 // Run `npm run build:preview` first. The builder is covered by tests/views-home.test.mjs.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, idsIn, startTags } from "../scripts/ci/lib.mjs";
+import { traceProvenanceLabel } from "../src/lib/provenance.ts";
 import { HOME_ANCHORS } from "../scripts/ci/checks/03-anchors.mjs";
 import { homeView } from "../src/lib/views/home.ts";
 import { insightCards } from "../src/lib/views/insights.ts";
@@ -117,13 +119,35 @@ test("home: the hero trace is aria-hidden and its lines are present once more as
   const staticText = one(html, "data-hero-trace-text");
   assert.match(staticText.attrs.class, /(^|\s)sr-only(\s|$)/);
   assert.ok(!("aria-hidden" in staticText.attrs));
-  assert.equal(text(tagged(staticText.inner, "p")[0].inner), `${hero.title} (Illustrative trace)`);
+  assert.equal(text(tagged(staticText.inner, "p")[0].inner), `${hero.title} (${traceProvenanceLabel(hero)})`);
+  // The same label the TracePanel caption shows, from the one helper both use.
+  assert.equal(text(one(trace.inner, "data-provenance-label").inner), traceProvenanceLabel(hero));
   assert.deepEqual(tagged(staticText.inner, "li").map((li) => text(li.inner)), hero.lines.map(lineText));
   // Exactly one static copy: outside the aria-hidden wrapper, each line appears once.
   const outsideHidden = html.replace(trace.outer, "");
   for (const line of hero.lines) {
     assert.equal(text(outsideHidden).split(lineText(line)).length - 1, 1, `"${lineText(line)}" is not present exactly once`);
   }
+});
+
+// Review finding T9-F2: the Home template re-derived TracePanel's provenance label for its static
+// copy, so the two honesty labels could drift apart. Both now call traceProvenanceLabel().
+test("home: the hero's static copy and TracePanel take the provenance label from one helper", () => {
+  for (const file of ["components/ui/TracePanel.astro", "templates/HomeTemplate.astro"]) {
+    const src = readFileSync(new URL(`../src/${file}`, import.meta.url), "utf8");
+    assert.match(src, /import \{ traceProvenanceLabel \} from "[./]+lib\/provenance";/, `${file} doesn't import traceProvenanceLabel`);
+    assert.match(src, /traceProvenanceLabel\((?:hero\.)?trace\)/, `${file} doesn't call traceProvenanceLabel`);
+    assert.doesNotMatch(src, /Illustrative trace|Measured run:/, `${file} spells out a trace provenance label itself`);
+  }
+});
+
+test("traceProvenanceLabel: an illustrative trace says so, a measured one names its run, and a measured one without a run fails", () => {
+  const base = { title: "Fixture trace", lines: [] };
+  assert.equal(traceProvenanceLabel({ ...base, provenance: "illustrative" }), "Illustrative trace");
+  assert.equal(traceProvenanceLabel({ ...base, provenance: "measured", run: "src/data/runs/fixture-run/" }), "Measured run: src/data/runs/fixture-run/");
+  assert.throws(() => traceProvenanceLabel({ ...base, provenance: "measured" }), {
+    message: 'trace "Fixture trace": provenance is "measured", but no run path is given',
+  });
 });
 
 test("home: the industry switcher is a 9-chip row, linking every shown industry", () => {

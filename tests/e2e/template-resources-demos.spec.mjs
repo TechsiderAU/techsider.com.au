@@ -59,7 +59,7 @@ test("every link and button in the templates is at least 44px in both dimensions
 });
 
 for (const width of [390, 1280]) {
-  test(`the demo badge is visible above the static transcript on both demo pages at ${width}px`, async ({ page }) => {
+  test(`the demo badge and the Illustrative data label are visible above the static transcript on both demo pages at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     for (const kind of ["demo", "demo-report"]) {
       await page.goto(path(kind));
@@ -68,6 +68,11 @@ for (const width of [390, 1280]) {
       const badge = frame.locator("[data-demo-badge]");
       await expect(badge).toBeVisible();
       await expect(badge).toHaveText(DEMO_BADGE);
+      // Both fixture demos are illustrative (spec §9.3): the frame's own label, not the ④ trace's.
+      await expect(frame).toHaveAttribute("data-provenance", "illustrative");
+      const label = frame.locator(":scope > [data-provenance-label]");
+      await expect(label).toHaveText("Illustrative data");
+      await expect(label).toBeVisible();
       const transcript = frame.locator("[data-demo-transcript]");
       await expect(transcript).toBeVisible();
       expect((await badge.boundingBox()).y, kind).toBeLessThan((await transcript.boundingBox()).y);

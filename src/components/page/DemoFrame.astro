@@ -4,15 +4,16 @@
 // - `engine`: the Phase D replay engine, with its Pause/Resume and "Skip to result" controls;
 // - `transcript`: the static transcript, plain HTML that reads in full without JavaScript. Every
 //   demo has one (spec §8.8), so a frame without it fails the build.
-// `provenance` is the demo's declared provenance (spec §9.3). It sets data-provenance on the
-// figure, and an illustrative demo shows a visible "Illustrative data" label next to the badge,
-// so CI check 06(c) covers demos as it covers traces and sample reports.
+// `provenance` is the demo's declared provenance (spec §9.3), required so no demo renders
+// unlabelled. It sets data-provenance on the figure, and an illustrative demo shows a visible
+// "Illustrative data" label next to the badge, so CI check 06(c) covers demos as it covers traces
+// and sample reports.
 // The figcaption names the demo. The frame is a carbon island (bg-carbon): inside a bone section
 // it keeps carbon-surface colours and the lime focus ring.
 interface Props {
   title: string;
   badge: string;
-  provenance?: "measured" | "illustrative";
+  provenance: "measured" | "illustrative";
 }
 
 const { title, badge, provenance } = Astro.props;

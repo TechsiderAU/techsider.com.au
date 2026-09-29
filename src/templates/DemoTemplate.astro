@@ -3,7 +3,7 @@
 // fills the slots and renders this inside BaseLayout. The ⑤ route also sets the canonical URL to
 // /resources/what-you-already-pay-for/, which owns the checker (spec §8.8).
 // - The hero holds the DemoFrame, badged by kind (checker → CHECKER_BADGE, else DEMO_BADGE) and
-//   marked with the demo's provenance when the route passes it (an illustrative demo is labelled).
+//   marked with the demo's provenance, which every route must pass (an illustrative demo is labelled).
 //   Its named slots pass straight through: `engine` (Phase D) and `transcript` (the no-JS static
 //   transcript, which DemoFrame requires).
 // - #sample-report: only when `report` is set (the ④ demo), with SampleReport's fixed caption.
@@ -20,7 +20,7 @@ import { crumbs, type SiteContext, type SolutionLink } from "../lib/site";
 
 interface Props {
   solution: SolutionLink;
-  demo: { title: string; kind: DemoKind; provenance?: DemoData["provenance"] };
+  demo: { title: string; kind: DemoKind; provenance: DemoData["provenance"] };
   report: SampleReportData | null;
   site: SiteContext;
 }

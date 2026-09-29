@@ -1,16 +1,18 @@
 ---
 import type { TraceData } from "../../content/schemas";
+import { traceProvenanceLabel } from "../../lib/provenance";
 
 interface Props {
   trace: TraceData;
 }
 
 const { trace } = Astro.props;
-// An in-code measured trace without a run fails the build rather than render "Measured run: undefined".
+// An in-code measured trace without a run fails the build rather than label an undefined run.
+// The label comes from traceProvenanceLabel(), which the Home hero's static copy also reads.
 if (trace.provenance === "measured" && !trace.run) {
   throw new Error(`TracePanel "${trace.title}": provenance is "measured", but no run path is given`);
 }
-const label = trace.provenance === "measured" ? `Measured run: ${trace.run}` : "Illustrative trace";
+const label = traceProvenanceLabel(trace);
 ---
 <figure class="trace-panel scanlines bg-carbon" data-trace-panel data-provenance={trace.provenance}>
   <figcaption class="trace-caption">

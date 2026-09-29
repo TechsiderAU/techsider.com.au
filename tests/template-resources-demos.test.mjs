@@ -12,6 +12,7 @@ import { elements, elementsWith, startTags } from "../scripts/ci/lib.mjs";
 import { PREVIEW_PAGES } from "../src/fixtures/preview-pages.ts";
 import {
   demoFixture, documentFixtures, fixtureSite, KIT_FIXTURE_ID, kitFixture, PENDING_KIT_FIXTURE_ID, pendingKitFixture,
+  sampleReportFixture,
 } from "../src/fixtures/index.ts";
 import { crumbs, industryLink, solutionLink } from "../src/lib/site.ts";
 import { CHECKER_BADGE, DEMO_BADGE, DEMO_CTA, KIT_PENDING_NOTE, kitReviewedNote } from "../src/lib/fixed-copy.ts";
@@ -292,12 +293,6 @@ test("demo pages: the frame shows its badge first, then the engine slot, the sta
     const captions = elements(frame, (tag) => tag.name === "figcaption");
     assert.equal(text(captions.at(-1).inner), title);
   }
-  const [registerFrame] = byAttr(template("demo"), "data-demo-frame");
-  assert.deepEqual(
-    [registerFrame.attrs["data-provenance"], byAttr(registerFrame.inner, "data-provenance-label").map((l) => text(l.inner))],
-    ["illustrative", ["Illustrative data"]],
-    'the register demo\'s frame is not marked data-provenance="illustrative" with its visible label',
-  );
   const [transcript] = byAttr(template("demo"), "data-demo-transcript");
   const [table] = byAttr(transcript.inner, "data-data-table");
   assert.ok(table, "the register demo's transcript has no table");
@@ -306,6 +301,34 @@ test("demo pages: the frame shows its badge first, then the engine slot, the sta
   assert.deepEqual(rows.map((r) => text(elements(r.inner, (t) => t.name === "th")[0].inner)), demoFixture.data.rows.map((r) => r.document));
   const [reportTranscript] = byAttr(template("demo-report"), "data-demo-transcript");
   assert.equal(byAttr(reportTranscript.inner, "data-trace-panel").length, 1, "the ④ transcript has no trace");
+});
+
+// Review findings T11-F1 and T11-F2: a route could leave the demo's provenance out, so an
+// illustrative demo rendered unlabelled where check 06(c) can't see it; and nothing held the
+// "Illustrative data" label visible. Both demo pages now declare it, and the label is never hidden.
+test("every demo frame declares its provenance, and an illustrative one shows a label nothing hides (spec §9.3)", () => {
+  for (const [kind, provenance] of [["demo", demoFixture.provenance], ["demo-report", sampleReportFixture.provenance]]) {
+    const [frame] = byAttr(template(kind), "data-demo-frame");
+    assert.equal(frame.attrs["data-provenance"], provenance, `${kind}: the frame doesn't carry the demo's provenance`);
+    // The frame's own label, not one inside its slots (the ④ transcript is a trace with its own label).
+    let own = frame.inner;
+    for (const slot of [...byAttr(frame.inner, "data-demo-transcript"), ...byAttr(frame.inner, "data-demo-engine")]) own = own.replace(slot.outer, "");
+    const labels = byAttr(own, "data-provenance-label");
+    assert.deepEqual(labels.map((l) => text(l.inner)), provenance === "illustrative" ? ["Illustrative data"] : [], `${kind}: the frame's provenance label`);
+    for (const label of labels) {
+      assert.ok(!("hidden" in label.attrs), `${kind}: the label is hidden`);
+      assert.notEqual(label.attrs["aria-hidden"], "true", `${kind}: the label is aria-hidden`);
+      assert.doesNotMatch(label.attrs.class ?? "", /(^|\s)(sr-only|visually-hidden|hidden)(\s|$)/, `${kind}: the label is visually hidden`);
+      const wrappers = elements(own, () => true).filter((el) => el.outer !== label.outer && el.outer.includes(label.outer));
+      assert.deepEqual(wrappers.map((el) => el.name), [], `${kind}: the label sits inside another element of the frame, which could hide it`);
+    }
+  }
+  assert.equal(demoFixture.provenance, "illustrative", "the register demo fixture is illustrative, so its label shows");
+});
+
+test("a demo's provenance is required: DemoTemplate and DemoFrame take no demo without one", () => {
+  assert.match(source("templates/DemoTemplate.astro"), /demo: \{ title: string; kind: DemoKind; provenance: DemoData\["provenance"\] \};/, "DemoTemplate's demo.provenance is optional");
+  assert.match(source("components/page/DemoFrame.astro"), /^\s*provenance: "measured" \| "illustrative";$/m, "DemoFrame's provenance is optional");
 });
 
 test("the ④-like demo carries the sample report with its fixed caption; the register demo has none", () => {
