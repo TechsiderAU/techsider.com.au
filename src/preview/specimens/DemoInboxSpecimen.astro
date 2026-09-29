@@ -1,0 +1,31 @@
+---
+// Preview specimen for /preview/templates/demo-inbox/: the ③ Draft-for-Approval demo on the demo
+// page template, as its demo page renders it: DemoEngine (kind "inbox") in the engine slot and
+// InboxTranscript in the transcript slot.
+// Unlike the other specimens, the frame holds real content: the synthetic inbox in
+// src/data/demos/draft-for-approval.json. DemoEngine's loader replays that file, so the transcript
+// has to come from it too, or the replay and its final state would disagree. The page around the
+// frame (the solution, the breadcrumb, the contact prompt) stays fixture.
+// tests/demo-inbox.test.mjs checks the markup and tests/e2e/demo-inbox.spec.mjs the replay.
+// Fixtures are imported statically (see src/preview/gallery.astro).
+import { getEntry } from "astro:content";
+import DemoTemplate from "../../templates/DemoTemplate.astro";
+import DemoEngine from "../../components/demo/DemoEngine.astro";
+import InboxTranscript from "../../components/demo/InboxTranscript.astro";
+import { fixtureSite } from "../../fixtures/index.ts";
+import { solutionLink } from "../../lib/site";
+
+const entry = await getEntry("demos", "draft-for-approval");
+if (entry === undefined) throw new Error("DemoInboxSpecimen: src/data/demos/draft-for-approval.json is missing");
+const demo = entry.data;
+if (demo.kind !== "inbox") throw new Error(`DemoInboxSpecimen: draft-for-approval.json is a "${demo.kind}" demo, not an inbox`);
+---
+<DemoTemplate
+  solution={solutionLink(fixtureSite, "fixture-solution-3")}
+  demo={{ title: demo.title, kind: demo.kind, provenance: demo.provenance }}
+  report={null}
+  site={fixtureSite}
+>
+  <DemoEngine slot="engine" kind="inbox" />
+  <InboxTranscript slot="transcript" data={demo.data} />
+</DemoTemplate>

@@ -18,7 +18,7 @@ export type PreviewKind =
   | "home" | "home-stale-insights"
   | "services" | "evaluation-partner"
   | "resources-hub" | "safe-use-kits" | "pay-for" | "evaluation-method"
-  | "demos-hub" | "demo" | "demo-report"
+  | "demos-hub" | "demo" | "demo-report" | "demo-inbox"
   | "about" | "trust" | "trust-no-terms" | "legal-hub" | "legal-document"
   | "contact" | "contact-no-endpoint" | "sent" | "not-found";
 
@@ -54,6 +54,7 @@ export const PREVIEW_PAGES: PreviewPage[] = [
   { slug: "templates/demos-hub", title: "Fixture demos hub", kind: "demos-hub", group: "templates" },
   { slug: "templates/demo", title: "Fixture demo page", kind: "demo", group: "templates" },
   { slug: "templates/demo-report", title: "Fixture report demo page", kind: "demo-report", group: "templates" },
+  { slug: "templates/demo-inbox", title: "Fixture demo page with the inbox replay", kind: "demo-inbox", group: "templates" },
   { slug: "templates/about", title: "Fixture about page", kind: "about", group: "templates" },
   { slug: "templates/trust", title: "Fixture trust page", kind: "trust", group: "templates" },
   { slug: "templates/trust-no-terms", title: "Fixture trust page with no confirmed terms", kind: "trust-no-terms", group: "templates" },

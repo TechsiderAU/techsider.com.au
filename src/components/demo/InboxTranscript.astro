@@ -1,0 +1,232 @@
+---
+// The ③ Draft-for-Approval demo's static transcript (spec §8.8, §9.1): the `transcript` slot of its
+// DemoFrame, complete without JavaScript, and the demo's final state after a replay or a skip.
+// The whole inbox in order: each message (channel, sender, subject, body), how it was sorted, what
+// was done and why, and its draft; then the approval queue and the trace log.
+// - The replay (src/scripts/demo/inbox.ts) draws the same structure with the same classes and the
+//   same words (src/lib/inbox-copy.ts), and tests/demo-inbox.test.mjs holds the two to the same
+//   text. So the styles below are global: they style the replay's stage too. Every rule is under an
+//   inbox- class or a data-inbox- hook.
+// - No headings: the frame sits under the h1 on the demo page and under an h2 in the solution hero,
+//   so a fixed level would skip one somewhere. Labels are text. No ids, and no links.
+import type { InboxData } from "../../content/schemas.ts";
+import {
+  APPROVAL_LABEL, CHANNEL_TAG, DECISIONS, DECISION_NOTE, DECISION_SR, DRAFT_LABEL, TRACE_LABEL, WAITING_TAG,
+  approvalLine, draftTo, escalatedLine, filedLine, formatMetric, inboxSummary, introLine, outcomeRows,
+} from "../../lib/inbox-copy.ts";
+
+interface Props {
+  data: InboxData;
+}
+
+const { data } = Astro.props;
+const summary = inboxSummary(data);
+const lines = [escalatedLine(summary), filedLine(summary)].filter((line) => line !== null);
+---
+<div class="inbox-view" data-inbox-view data-inbox-transcript>
+  <p class="inbox-intro">{introLine(data)}</p>
+  <ol class="inbox-list">
+    {data.messages.map((m) => (
+      <li class="inbox-item" data-inbox-item data-inbox-action={m.action} data-inbox-channel={m.channel}>
+        <p class="inbox-meta">
+          <span class="inbox-channel"><span aria-hidden="true">[</span>{CHANNEL_TAG[m.channel]}<span aria-hidden="true">]</span></span>
+          <span class="inbox-from">{m.from}</span>
+        </p>
+        {m.subject && <p class="inbox-subject">{m.subject}</p>}
+        <p class="inbox-body">{m.body}</p>
+        <dl class="inbox-outcome" data-inbox-outcome>
+          {outcomeRows(m).map(([term, value]) => (
+            <div>
+              <dt>{term}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+        {m.draft && (
+          <div class="inbox-draft" data-inbox-draft>
+            <p class="inbox-label">{DRAFT_LABEL}</p>
+            <p class="inbox-draft-text">{m.draft}</p>
+          </div>
+        )}
+      </li>
+    ))}
+  </ol>
+  <div class="inbox-panel" data-inbox-approval>
+    <p class="inbox-label">{APPROVAL_LABEL}</p>
+    <p>{approvalLine(summary)}</p>
+    <ul class="inbox-queue">
+      {summary.drafts.map((m) => (
+        <li data-inbox-approval-item>
+          <span class="inbox-status"><span aria-hidden="true">[</span>{WAITING_TAG}<span aria-hidden="true">]</span></span> {draftTo(m)}
+        </li>
+      ))}
+    </ul>
+    {lines.map((line) => <p>{line}</p>)}
+    <div class="inbox-decision">
+      <p class="sr-only">{DECISION_SR}</p>
+      {DECISIONS.map((label) => <span class="inbox-btn" aria-hidden="true">{label}</span>)}
+    </div>
+    <p class="inbox-note">{DECISION_NOTE}</p>
+  </div>
+  <div class="inbox-panel" data-inbox-trace>
+    <p class="inbox-label">{TRACE_LABEL}</p>
+    <ol class="inbox-trace-list">
+      {data.trace.map((t) => (
+        <li class="inbox-trace-step" data-inbox-trace-step>
+          <span class="inbox-trace-label">{t.label}</span>
+          <span class="inbox-trace-detail">{t.detail}</span>
+          <span class="inbox-trace-ms">{formatMetric(t.ms)}</span>
+        </li>
+      ))}
+    </ol>
+  </div>
+</div>
+
+<style>
+  /* Global on purpose: the replay's stage (src/scripts/demo/inbox.ts) builds the same classes in
+     the browser, and scoped styles would miss its nodes. A carbon island (DemoFrame): bone text,
+     muted labels, acid marks, graphite hairlines and panels (spec §6.1). Status is always text
+     (spec §6.6). */
+  :global(.inbox-view) {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  :global(.inbox-view :is(p, dl, dd, ol, ul)) {
+    margin: 0;
+  }
+  :global(.inbox-view :is(ol, ul)) {
+    padding: 0;
+    list-style: none;
+  }
+  :global(.inbox-intro),
+  :global(.inbox-meta),
+  :global(.inbox-label),
+  :global(.inbox-outcome dt),
+  :global(.inbox-trace-label),
+  :global(.inbox-trace-ms),
+  :global(.inbox-btn) {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+  :global(.inbox-intro),
+  :global(.inbox-meta),
+  :global(.inbox-label),
+  :global(.inbox-outcome dt),
+  :global(.inbox-note) {
+    color: var(--color-muted);
+  }
+  :global(.inbox-list) {
+    display: grid;
+    gap: 0.75rem;
+  }
+  @media (min-width: 48rem) {
+    :global(.inbox-list) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  :global(.inbox-item),
+  :global(.inbox-panel) {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-graphite);
+    border-radius: 6px;
+  }
+  /* The escalated message: a review-coloured edge, beside the Action row that says so in words. */
+  :global(.inbox-item[data-inbox-action="escalate"]) {
+    border-color: var(--color-review);
+  }
+  :global(.inbox-meta) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.625rem;
+  }
+  :global(.inbox-channel),
+  :global(.inbox-status) {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--color-acid);
+  }
+  :global(.inbox-subject) {
+    font-weight: 600;
+  }
+  :global(.inbox-outcome) {
+    display: grid;
+    gap: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--color-graphite);
+    font-size: 0.875rem;
+  }
+  :global(.inbox-outcome > div) {
+    display: grid;
+    column-gap: 0.75rem;
+  }
+  @media (min-width: 30rem) {
+    :global(.inbox-outcome > div) {
+      grid-template-columns: 5.5rem minmax(0, 1fr);
+    }
+  }
+  :global(.inbox-draft) {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.625rem 0.75rem;
+    background: var(--color-graphite);
+    border-radius: 4px;
+  }
+  :global(.inbox-label) {
+    font-size: 0.75rem;
+  }
+  :global(.inbox-queue),
+  :global(.inbox-trace-list) {
+    display: grid;
+    gap: 0.375rem;
+  }
+  :global(.inbox-decision) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  /* Shown for illustration, never clickable: outlined text, not a control (as MockPanel's). */
+  :global(.inbox-btn) {
+    padding: 0.25rem 0.625rem;
+    border: 1px solid var(--color-muted);
+    border-radius: 4px;
+  }
+  :global(.inbox-trace-step) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 0.75rem;
+    font-size: 0.875rem;
+  }
+  :global(.inbox-trace-label) {
+    color: var(--color-acid);
+  }
+  :global(.inbox-trace-detail) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  :global(.inbox-trace-ms) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (min-width: 40rem) {
+    :global(.inbox-trace-step) {
+      grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+    }
+    :global(.inbox-trace-detail) {
+      grid-column: auto;
+      grid-row: auto;
+    }
+  }
+  /* A replay reveals parts in place: a part not yet shown keeps its space (spec §11.4 CLS). */
+  :global(.inbox-untyped),
+  :global(.inbox-view [data-inbox-pending]) {
+    visibility: hidden;
+  }
+</style>

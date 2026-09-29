@@ -10,8 +10,8 @@
 import DemoControls from "./DemoControls.astro";
 
 interface Props {
-  /** The demo's kind, which picks its renderer (and, for the assistant, its data file). */
-  kind: "assistant" | "register";
+  /** The demo's kind, which picks its renderer (and, for the assistant and the inbox, its data file). */
+  kind: "assistant" | "register" | "inbox";
 }
 
 const { kind } = Astro.props;
@@ -24,7 +24,7 @@ const { kind } = Astro.props;
 
 <script>
   import { bootDemos } from "../../scripts/demo-engine.ts";
-  import type { AssistantData } from "../../content/schemas.ts";
+  import type { AssistantData, InboxData } from "../../content/schemas.ts";
 
   bootDemos({
     assistant: async () => {
@@ -38,6 +38,14 @@ const { kind } = Astro.props;
     },
     // The ① replay reads the frame's own static transcript, so it loads no data file.
     register: async () => (await import("../../scripts/demo/register.ts")).registerRenderer,
+    inbox: async () => {
+      const [{ inboxRenderer }, file] = await Promise.all([
+        import("../../scripts/demo/inbox.ts"),
+        import("../../data/demos/draft-for-approval.json"),
+      ]);
+      // Validated like the assistant's file, and InboxTranscript renders the same file.
+      return inboxRenderer(file.default.data as unknown as InboxData);
+    },
   });
 </script>
 
