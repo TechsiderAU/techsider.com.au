@@ -1,5 +1,5 @@
 // The Home page view (spec §8.1). A pure view builder (Phase B2 scope ruling 3): it never
-// imports astro:content, so node tests run it on the fixtures, and the Phase C route
+// imports astro:content, so node tests run it on the fixtures, and the Phase D route
 // (src/pages/index.astro) passes it the typed page data, its collection entries and the build
 // time. Every href comes from the SiteContext: a page that isn't shown gives null, and the
 // template renders it as plain text or leaves the link out.

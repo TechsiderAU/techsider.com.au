@@ -162,6 +162,17 @@ const view = solutionView({ id: entry.id, data: entry.data, shared: SERVICES, si
 </BaseLayout>
 ```
 
+### Putting a page live
+
+`src/data/nav.ts` decides what production builds. Every page there is `planned` or `live`:
+
+- **Planned:** the preview build renders it, so its route, template and content are built and tested, but production builds no file for it. The nav and footer leave it out, and every link to it renders as plain text (while `/contact/` is planned, contact links fall back to email).
+- **Live:** production builds it, and it is held to every rule the production build is: the CI checks, including check `02-links` (every link and fragment lands, so a live page can't link to a planned one), and the two site-wide sweeps of `dist/`. `tests/site-sweep.test.mjs` checks one `h1`, heading order, unique ids, and a title and description no other page shares. `tests/e2e/prod-site-sweep.spec.mjs` runs axe at 390px and 1280px, checks for horizontal scroll at 320px with and without JavaScript, and follows every link in `<main>`. Both read the page list from `dist/`, so a page is swept from the build in which it goes live.
+
+A page goes live in one commit. It writes the page's content, its route and its meta description (`describe()` in `src/data/nav.ts`), flips its `status`, and updates the tests that pin the live set, such as `tests/nav-data.test.mjs` and the production shell specs. A page written before it goes live, such as Trust, already has its route under `src/pages/`: its `getStaticPaths` returns `singletonPaths()` from `src/lib/pages.ts`, which builds the page only while `nav.ts` shows it, so flipping its `status` publishes it and no route file moves.
+
+Content can be written and still wait: for a fact to be re-checked, a review, or a business confirmation. Until then the statement stays out of the copy, or its page stays `planned`, and the open item is a `⚑` comment beside the data it concerns. Check `07-verify-markers`, a launch gate, lists every open `⚑` and fails the launch build while any is left. `tests/content-language.test.mjs` keeps held and unverified statements out of the built pages, keeps enterprise vocabulary off the mid-market pages, and checks the proper names the banned-phrase exceptions let through.
+
 ### Tests
 
 `npm test` runs every `tests/*.test.mjs` file with `node:test`. The unit tests import the TypeScript sources directly. The markup tests read the built pages through `readDist()` (`dist/`) and `readPreviewDist()` (`dist-preview/`) from `tests/helpers.mjs`, so build both first:

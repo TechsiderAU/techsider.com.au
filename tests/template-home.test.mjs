@@ -60,7 +60,7 @@ for (const file of [HOME, STALE]) {
     // Display caps come from CSS: the text stays "AI that ships." for assistive technology.
     assert.equal(inlineText(h1s[0].inner), "AI that ships.");
     assert.deepEqual(withClass(h1s[0].inner, "hl").map((s) => text(s.inner)), ["ships"]);
-    // CI check 03 requires these ids on the built Home page (Phase C points / at this template).
+    // CI check 03 requires these ids on the built Home page (Phase D points / at this template).
     const ids = idsIn(template.outer);
     for (const id of HOME_ANCHORS) assert.ok(ids.has(id), `no id="${id}"`);
     // The hero, then each block in order, then the closing prompt last.

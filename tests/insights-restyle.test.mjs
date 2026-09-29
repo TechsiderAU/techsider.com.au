@@ -170,7 +170,7 @@ test("posts: BlogPosting JSON-LD, authored and published by the Organization", (
   }
 });
 
-// The legacy aliases (src/styles/global.css, removed in Phase C) and the retired serif face.
+// The legacy aliases (src/styles/global.css, removed in Phase D with the legacy Home) and the retired serif face.
 const LEGACY_COLOURS = ["bg", "bg-elev", "bg-deep", "text", "text-mute", "text-dim", "accent", "accent-ink", "border", "border-soft"];
 const LEGACY_CLASS = new RegExp(`^(?:[a-z-]+:)*(?:font-serif|(?:text|bg|border|decoration|outline|ring|divide|fill|stroke|from|via|to|shadow)-(?:${LEGACY_COLOURS.join("|")})(?:\\/\\d+)?)$`);
 

@@ -25,7 +25,7 @@ function assertNoPillar(text, where) {
 
 // The type label is Techsider's own eyebrow form (spec §6.4): a lower-case mono bracket tag,
 // never Mistral's uppercase, letter-spaced eyebrow. The brackets are hidden from screen readers.
-// The legacy Home section (src/components/Insights.astro, retired in Phase C) writes it as a
+// The legacy Home section (src/components/Insights.astro, retired in Phase D) writes it as a
 // mono <p> holding the bracket spans.
 const TYPE_TAG = new RegExp(`<p class="([^"]*)"[^>]*>\\s*<span aria-hidden="true"[^>]*>\\[<\\/span>(?:${TYPE})<span aria-hidden="true"[^>]*>\\]<\\/span>`, "g");
 function typeTags(html, where) {

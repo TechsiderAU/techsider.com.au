@@ -88,3 +88,12 @@ test("the README has no banned phrase, and names no person and no headcount", ()
     assert.match(email, /@(?:techsider\.com\.au|example\.com)$/, `the README names a personal address: ${email}`);
   }
 });
+
+test("the README explains how a page goes live, and names the site-wide sweeps that hold every live page", () => {
+  for (const s of [
+    "### Putting a page live", "`planned`", "`live`", "`02-links`", "`07-verify-markers`", "⚑",
+    "tests/site-sweep.test.mjs", "tests/e2e/prod-site-sweep.spec.mjs", "tests/content-language.test.mjs",
+  ]) {
+    assert.ok(README.includes(s), `the README never mentions ${s}`);
+  }
+});
