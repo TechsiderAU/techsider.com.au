@@ -350,17 +350,24 @@ test("#next: the demo CTA as its heading, then the solution page", () => {
 });
 
 // Phase C Task 7 puts the Resources hub live at /resources/ (tests/company-pages.test.mjs checks
-// its cards), and Phase D Task 2 puts the ② demo's frame in the Home's demo band. The kits page,
-// the checker, the evaluation method and the demo pages stay out of production until they go live.
-test("production: only /resources/ carries resources template markup (the hub), and only the Home a demo frame", () => {
+// its cards), Phase D Task 2 puts the ② demo's frame in the Home's demo band, and Phase D Task 5
+// the evaluation method at /resources/evaluation-method/ (tests/evaluation-method.test.mjs checks
+// the page). The kits page, the checker and the demo pages stay out of production until they go live.
+test("production: resources templates only on the live Resources hub and evaluation method, and only the Home a demo frame", () => {
+  const live = {
+    'data-template="resources-hub"': "resources/index.html",
+    'data-template="evaluation-method"': "resources/evaluation-method/index.html",
+  };
   for (const f of allHtmlFiles()) {
     const html = readDist(f);
     for (const hook of ["data-kit", "data-hero-badge", 'data-template="demo"', 'data-template="safe-use-kits"']) {
       assert.ok(!html.includes(hook), `dist/${f} carries ${hook}`);
     }
-    if (f !== "resources/index.html") assert.ok(!html.includes('data-template="resources-hub"'), `dist/${f} carries the Resources hub`);
+    for (const [hook, file] of Object.entries(live)) {
+      if (f !== file) assert.ok(!html.includes(hook), `dist/${f} carries ${hook}`);
+    }
     const frames = startTags(html).filter((t) => "data-demo-frame" in t.attrs).length;
     assert.equal(frames, f === "index.html" ? 1 : 0, `dist/${f} carries ${frames} demo frame(s)`);
   }
-  assert.ok(readDist("resources/index.html").includes('data-template="resources-hub"'), "dist/resources/index.html doesn't render the Resources hub");
+  for (const [hook, file] of Object.entries(live)) assert.ok(readDist(file).includes(hook), `dist/${file} doesn't render ${hook}`);
 });

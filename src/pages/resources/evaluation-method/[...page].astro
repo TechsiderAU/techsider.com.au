@@ -1,0 +1,36 @@
+---
+// /resources/evaluation-method/ (spec §8.7, §9.1, §9.2): EvaluationMethodTemplate over the
+// published method (src/content/documents/evaluation-method.md, rendered into the default slot)
+// and the ④ sample report, the `report` data of the ④ demo (src/data/demos/ai-evaluation.json).
+// The report stays illustrative until a committed harness run replaces it (blueprint scope ruling
+// 1; the launch gate is the owner marker in src/data/runs/README.md), and SampleReport labels it
+// so. The harness isn't published (spec §9.2, §12 item 4), so harnessUrl is null and the page has
+// no harness block or link. Live from Phase D Task 5.
+import type { GetStaticPaths } from "astro";
+import { getEntry, render } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import EvaluationMethodTemplate from "../../../templates/EvaluationMethodTemplate.astro";
+import type { SampleReportData } from "../../../content/schemas";
+import { isPreview } from "../../../data/nav";
+import { pageDescription, pageTitle } from "../../../lib/meta";
+import { pageAt, singletonPaths } from "../../../lib/pages";
+import { siteContext } from "../../../lib/site";
+
+export const getStaticPaths = (() => singletonPaths("/resources/evaluation-method/")) satisfies GetStaticPaths;
+
+const entry = pageAt("/resources/evaluation-method/");
+const doc = await getEntry("documents", "evaluation-method");
+if (doc === undefined) throw new Error("src/content/documents/evaluation-method.md is missing");
+if (doc.data.draft) throw new Error("/resources/evaluation-method/ publishes the method, but evaluation-method.md is a draft");
+const demo = await getEntry("demos", "ai-evaluation");
+if (demo === undefined) throw new Error("src/data/demos/ai-evaluation.json is missing: the method page shows its sample report");
+const { data } = demo;
+if (data.kind !== "report") throw new Error(`src/data/demos/ai-evaluation.json is a "${data.kind}" demo; the method page needs the ④ report`);
+const report: SampleReportData = data.data;
+const { Content } = await render(doc);
+---
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
+  <EvaluationMethodTemplate doc={doc.data} report={report} harnessUrl={null} site={siteContext(isPreview())}>
+    <Content />
+  </EvaluationMethodTemplate>
+</BaseLayout>

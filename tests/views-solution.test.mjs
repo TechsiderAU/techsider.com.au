@@ -108,7 +108,8 @@ test("on the production site context every planned page is plain text and contac
   ]);
   assert.deepEqual(live.ctas, { primary: { label: "Talk to us about Document Registers", href: TALK_REGISTERS }, secondary: null });
   assert.equal(live.closing.href, TALK_REGISTERS);
-  assert.equal(live.howWeTest.methodHref, null);
+  // The evaluation method is live from Phase D Task 5, so the production method link reaches it.
+  assert.equal(live.howWeTest.methodHref, "/resources/evaluation-method/");
   // Accounting and Government are live from Phase C Task 4, so their By industry chips link.
   assert.deepEqual(live.byIndustry, [{ label: "Accounting", href: "/industries/accounting/" }, { label: "Government", href: "/industries/government/" }]);
   for (const p of live.onRequest) assert.equal(p.href, TALK_REGISTERS);

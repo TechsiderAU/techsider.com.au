@@ -3,9 +3,8 @@ title: How we test AI before you rely on it.
 summary: The method behind every Independent AI Evaluation, published so your team can check it. Thresholds come first, every failure is listed, and the evidence is yours to re-run.
 lastUpdated: 2026-09-29
 draft: false
+# ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 ---
-
-<!-- ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2) -->
 
 This is the method behind every Independent AI Evaluation. It tests one AI system on one use case: a tool you bought, licensed or had built elsewhere, run on your own questions and cases, in your own environment. The same method sits behind the acceptance test on a system Techsider builds for you, which is always labelled "acceptance test (not independent)".
 

@@ -106,7 +106,8 @@ test("each held fact carries its owner marker, which check 07 keeps open until l
   }
   has("src/data/contact.ts", "// ⚑ owner: confirm the reply-time promise (spec §12 item 9)");
   has("src/data/about.ts", "// ⚑ owner: re-confirm team claims (spec §12 item 10)");
-  has("src/content/documents/evaluation-method.md", "<!-- ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2) -->");
+  // A frontmatter comment, not a body comment: the body renders on the live page, HTML comments included.
+  has("src/content/documents/evaluation-method.md", "# ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)");
 });
 
 test("the Trust FAQ's missing §8.11 answers are held by an owner marker (C7-T7-F2)", () => {
@@ -335,7 +336,7 @@ test("/resources/: a linked card for each resource this build shows, and no unli
   const shown = siteContext(false).resources.filter((r) => r.href !== null);
   const cards = elementsWith(main, "data-resource");
   assert.deepEqual(cards.map((c) => c.attrs["data-resource"]), shown.map((r) => r.key));
-  assert.deepEqual(cards.map((c) => c.attrs["data-resource"]), ["insights"], "Phase D adds the other resources");
+  assert.deepEqual(cards.map((c) => c.attrs["data-resource"]), ["insights", "evaluationMethod"], "Phase D Task 5 adds the evaluation method; later tasks add the rest");
   cards.forEach((card, i) => assert.deepEqual(tagged(card.inner, "a").map((a) => a.attrs.href), [shown[i].href]));
 });
 

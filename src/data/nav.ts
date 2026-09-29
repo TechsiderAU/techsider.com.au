@@ -171,8 +171,9 @@ const SAFE_USE_KITS = describe(page("resources", "Safe-Use Kits", "/resources/",
   "Safe-Use Kits for accounting, legal and property teams: a starting policy, checks and logs for using AI with client or tenant data, each naming its source.");
 const PAY_FOR = page("resources", "What you already pay for", "/resources/", "/resources/what-you-already-pay-for/", "planned", "What you already pay for",
   "Check which AI features your software already includes.");
-const EVAL_METHOD = page("resources", "Evaluation method", "/resources/", "/resources/evaluation-method/", "planned", "Evaluation method",
-  "How we test AI, published so you can re-run it.");
+const EVAL_METHOD = describe(page("resources", "Evaluation method", "/resources/", "/resources/evaluation-method/", "live", "Evaluation method",
+  "How we test AI, published so you can check it."),
+  "How Techsider tests an AI system before you rely on it: thresholds agreed first, confidence intervals, every failure listed, and an illustrative sample report.");
 const RESOURCES_ITEMS = [INSIGHTS, DEMOS, SAFE_USE_KITS, PAY_FOR, EVAL_METHOD];
 
 const ABOUT = describe(page("about", "About", "/", "/about/", "live"),
