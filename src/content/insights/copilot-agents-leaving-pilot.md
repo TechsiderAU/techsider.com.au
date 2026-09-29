@@ -13,7 +13,7 @@ Picture a Copilot Studio agent that answers staff questions on leave, travel or 
 
 ## What the Commonwealth policy asks
 
-Version 2.0 of the DTA's [Policy for the responsible use of AI in government](https://www.digital.gov.au/ai/ai-in-government-policy) took effect on 15 December 2025. It applies to all non-corporate Commonwealth entities, with some exceptions. Its [AI use case impact assessment](https://www.digital.gov.au/ai/ai-in-government-policy/ai-use-case-impact-assessment) requirements set the order of work for an in-scope use case:
+Version 2.0 of the DTA's [Policy for the responsible use of AI in government](https://www.digital.gov.au/ai/ai-in-government-policy) took effect on 15 December 2025. It applies to all non-corporate Commonwealth entities, with some exceptions. Its [AI use case impact assessment](https://www.digital.gov.au/ai/ai-in-government-policy/ai-use-case-impact-assessment) requirements ask four things of an in-scope use case:
 
 - finalise the impact assessment, and apply any agreed risk treatments, before the solution is deployed;
 - add the use case to the agency's internal register, with its risk rating and accountable owner;

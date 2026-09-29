@@ -72,6 +72,9 @@ const KEEP_OFF = [
   // "billing data" names the data a vendor's feature reads (Karbon, platform-ai.md), not a fee.
   [/pay-as-you-go|\bbilling\b(?! data\b)/i, "D4: no vendor billing wording"],
   [/talk to us|mailto:|\]\(\/contact\//i, "a post has no CTA of its own"],
+  // Government fact-check: the DTA page ties the register entry to no deployment step, so a post
+  // doesn't present the impact-assessment duties as an order of work (C8-T8-F2).
+  [/order of work/i, "the DTA duties set no order: the register isn't tied to deployment"],
 ];
 
 // Every fact traces to a primary source (spec §9.5; blueprint copy rules): a government, regulator,
@@ -166,6 +169,18 @@ test("no new post carries held or keep-off content, pricing words or a CTA of it
     for (const [re, why] of KEEP_OFF) {
       const hit = all.match(re);
       assert.equal(hit, null, `${id}: "${hit?.[0]}" (${why})`);
+    }
+  }
+});
+
+test("a new post's heading quotes only words a blockquote in the post quotes from its source (C8-T8-F3)", () => {
+  for (const id of Object.keys(NEW_POSTS)) {
+    const { body } = post(id);
+    const quoted = body.split("\n").filter((l) => l.startsWith(">")).join("\n").replace(/[“”]/g, '"');
+    for (const heading of body.split("\n").filter((l) => /^#{2,6} /.test(l))) {
+      for (const [, phrase] of heading.replace(/[“”]/g, '"').matchAll(/"([^"]+)"/g)) {
+        assert.ok(quoted.includes(phrase), `${id}: the heading "${heading}" quotes "${phrase}", which no blockquote says`);
+      }
     }
   }
 });

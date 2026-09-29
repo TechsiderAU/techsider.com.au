@@ -19,7 +19,7 @@ Two of the Framework's principles cover testing and monitoring:
 
 Others shape how a tool is set up. Under 3.2, school communities are appropriately informed when generative AI tools are used in ways that affect them. Under 6.1, tools are used in ways that comply with Australian law, avoid unnecessary collection, limit retention, prevent further distribution and prohibit the sale of student data. Under 6.2, school communities are told how and what data will be collected, used and shared, and consent is sought where needed.
 
-## What "tested before use" looks like for a staff assistant
+## What testing before use looks like for a staff assistant
 
 Take a common first use: an assistant that answers staff questions from the school's own policies and procedures, such as excursion approvals, incident reporting or leave. Administrative work already takes teachers' time. [AITSL's June 2025 workforce data](https://www.aitsl.edu.au/resources/national-trends-teacher-workforce-june-2025) reports that "Primary and secondary classroom teachers spent a notable amount of time on lesson planning and administrative tasks (6-9 hours per week per task)". A tool meant to lighten that load has to be checked first, or checking its answers becomes part of the load.
 
