@@ -10,7 +10,7 @@
 //   and every other rendered package its data-package-status (CI check 10's DOM contract).
 import Tabs from "../../components/ui/Tabs.astro";
 import TabPanel from "../../components/ui/TabPanel.astro";
-import { industryFixture, solutionFixture, SOLUTION_FIXTURE_ID } from "../../fixtures/index.ts";
+import { fixtureSite, industryFixture, solutionFixture, SOLUTION_FIXTURE_ID } from "../../fixtures/index.ts";
 
 const workflowPanels = industryFixture.workflow.map((stage, i, all) => ({
   id: stage.id,
@@ -22,7 +22,9 @@ const genericPackage = solutionFixture.genericPackage;
 const launchPackages = solutionFixture.packages.flatMap((p) => (p.status === "launch" ? [p] : []));
 const onRequestPackages = solutionFixture.packages.flatMap((p) => (p.status === "on-request" ? [p] : []));
 const packageItems = (p: typeof genericPackage) => [p.scope, ...p.inclusions, p.timeline];
-const interestHref = `/contact/?interest=${SOLUTION_FIXTURE_ID}`;
+// Like every template's contact link, the on-request link comes from fixtureSite, so it stays in
+// the gallery instead of pointing at the real contact page, which is still planned.
+const interestHref = fixtureSite.contact({ interest: SOLUTION_FIXTURE_ID });
 ---
 <section id="tab-groups" class="preview-surface" aria-labelledby="tab-groups-heading" data-preview-surface="tabs">
   <div class="preview-wrap">

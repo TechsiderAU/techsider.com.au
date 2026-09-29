@@ -95,7 +95,7 @@ test("the packages specimen: generic package first, launch packages as tabs, on-
   const onRequest = specimen.locator('[data-package-status="on-request"]');
   await expect(onRequest).toHaveCount(1);
   await expect(onRequest).toContainText("On request");
-  await expect(onRequest.getByRole("link", { name: "Fixture On-Request Package" })).toHaveAttribute("href", "/contact/?interest=fixture-solution");
+  await expect(onRequest.getByRole("link", { name: "Fixture On-Request Package" })).toHaveAttribute("href", "/preview/templates/contact/?interest=fixture-solution");
   await expect(page.locator('[data-package-status="internal"]')).toHaveCount(0);
   await expect(page.getByText("Fixture Internal Package")).toHaveCount(0);
 });
