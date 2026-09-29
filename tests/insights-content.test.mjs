@@ -69,6 +69,8 @@ const KEEP_OFF = [
   [/APRA audit/i, "spec §3.4: APRA supervises; it doesn't audit"],
   [/no additional cost|at no cost|free of charge|\bfree\b(?! of)/i, "D4: no pricing or 'free' wording"],
   [/\$\s?\d/, "D4: no dollar figures"],
+  // "billing data" names the data a vendor's feature reads (Karbon, platform-ai.md), not a fee.
+  [/pay-as-you-go|\bbilling\b(?! data\b)/i, "D4: no vendor billing wording"],
   [/talk to us|mailto:|\]\(\/contact\//i, "a post has no CTA of its own"],
 ];
 
