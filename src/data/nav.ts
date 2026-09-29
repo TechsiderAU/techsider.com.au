@@ -164,8 +164,10 @@ const RESOURCES_HUB = describe(page("resources", "Resources", "/", "/resources/"
 const INSIGHTS = describe(page("resources", "Insights", "/", "/insights/", "live", "Insights", "Field notes on shipping AI in regulated work."),
   "Field notes on shipping AI in regulated Australian work: retrieval that cites its sources, evaluation before launch, and choosing where models are hosted.");
 const DEMOS = page("demos", "Demos", "/", "/demos/", "planned", "Demos", "Canned replays of each solution. No live model.");
+// No kit is called free while any kit waits for lawyer review (spec §12 item 6): the page lists all
+// three, so one reviewed kit doesn't make the others free. tests/company-pages.test.mjs holds this.
 const SAFE_USE_KITS = describe(page("resources", "Safe-Use Kits", "/resources/", "/resources/safe-use-kits/", "planned", "Safe-Use Kits",
-  "Free starter kits for accounting, legal and property teams."),
+  "Starter kits for accounting, legal and property teams, each naming its source."),
   "Safe-Use Kits for accounting, legal and property teams: a starting policy, checks and logs for using AI with client or tenant data, each naming its source.");
 const PAY_FOR = page("resources", "What you already pay for", "/resources/", "/resources/what-you-already-pay-for/", "planned", "What you already pay for",
   "Check which AI features your software already includes.");

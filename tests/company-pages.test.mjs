@@ -347,6 +347,51 @@ test("preview /resources/safe-use-kits/: the three kits in order, each pending r
   assert.equal(elementsWith(main, "data-kit-download").length, 0);
 });
 
+// Spec §12 item 6 (Global Constraints; review finding T7-F1): no kit is called free before a lawyer
+// reviews it. While any kit's lawyerReviewedAt is null, no nav one-liner or description and no
+// sentence on any page of either build (its text, its meta and alt text, its JSON-LD) calls a kit
+// free. The kits page lists all three kits, so one reviewed kit doesn't make the others free.
+test("no build calls a kit free while any kit waits for lawyer review (spec §12 item 6)", (t) => {
+  const kitFiles = listFiles(join(ROOT, "src/content/kits"), (rel) => rel.endsWith(".yaml"));
+  assert.ok(kitFiles.length > 0, "no kit in src/content/kits/");
+  const pending = kitFiles.filter((abs) => loadYaml(abs).lawyerReviewedAt === null);
+  if (pending.length === 0) {
+    t.skip("every kit is lawyer-reviewed");
+    return;
+  }
+  const callsAKitFree = (s) => /\bfree\b/i.test(s) && /\bkits?\b/i.test(s);
+  const sentencesOf = (s) => s.replace(/\s+/g, " ").trim().split(/(?<=[.!?;:])\s+/).filter(Boolean);
+  const INLINE = /^(a|abbr|b|bdi|bdo|cite|code|data|dfn|em|i|kbd|mark|q|s|samp|small|span|strong|sub|sup|time|u|var|wbr)$/i;
+  // A page's sentences: each block's text (an inline tag reads as a space, since a span may be styled
+  // as its own line), then its content, alt, title and aria-label attributes, then its JSON-LD strings.
+  const pageSentences = (html) => {
+    const ld = [];
+    const collect = (v) => (typeof v === "string" ? ld.push(v) : v && typeof v === "object" && Object.values(v).forEach(collect));
+    jsonLd(html).forEach(collect);
+    const bare = html.replace(/<!--[\s\S]*?-->/g, "\n").replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, "\n");
+    const attrs = [...bare.matchAll(/\s(?:content|alt|title|aria-label)="([^"]*)"/g)].map((m) => m[1]);
+    const blocks = bare.replace(/<\/?([a-zA-Z][\w-]*)\b[^>]*>/g, (_, name) => (INLINE.test(name) ? " " : "\n")).split("\n");
+    return [...blocks, ...attrs].map(decodeEntities).concat(ld).flatMap(sentencesOf);
+  };
+  const offending = [];
+  for (const p of PAGES) {
+    for (const s of [p.oneLiner, p.description].filter(Boolean).flatMap(sentencesOf)) {
+      if (callsAKitFree(s)) offending.push(`nav.ts ${p.path}: "${s}"`);
+    }
+  }
+  for (const dir of [DIST, DIST_PREVIEW]) {
+    const pages = listFiles(dir, (rel) => rel.endsWith(".html"));
+    assert.ok(pages.length > 0, `${relPath(ROOT, dir)}/ has no page: run \`npm run build && npm run build:preview\` first`);
+    for (const abs of pages) {
+      for (const s of pageSentences(readFileSync(abs, "utf8"))) {
+        if (callsAKitFree(s)) offending.push(`${relPath(ROOT, abs)}: "${s}"`);
+      }
+    }
+  }
+  const distinct = [...new Set(offending.map((o) => o.replace(/^[^:]+: /, "")))];
+  assert.deepEqual(distinct, [], `${offending.length} place(s) call a kit free while ${pending.length} kit(s) wait for lawyer review, first: ${offending.slice(0, 5).join(" | ")}`);
+});
+
 test("CI checks out the full history, so the build-log test can read the commits", () => {
   const ci = parseYaml(source(".github/workflows/ci.yml"));
   const checkout = ci.jobs.test.steps.find((s) => s.uses === "actions/checkout@v5");
