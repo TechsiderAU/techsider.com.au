@@ -12,3 +12,4 @@ One JSON file per canned demo, named by the demo's nav slug (`document-registers
 - Metrics are typed values (`{ "value": …, "unit": "…" }`), never written into free text; CI check 6 flags metric-shaped numbers in strings.
 - Synthetic data stays visibly synthetic: invented names, "Synthetic" in every document title, and no real address, ABN, phone number, or email domain other than `example.com`.
 - Only `*.json` files are loaded; this README is ignored.
+- `document-registers.json` is built, not written by hand: edit the tables and forms in `scripts/demo-register-set.mjs` and run `node scripts/demo-register-set.mjs`, which also writes the demo's two downloads in `public/downloads/`. `tests/register-demo.test.mjs` fails while a committed file differs from what the script builds. The repair limits and management fees it quotes have their own entries in `src/data/banned-phrase-exceptions.json` and `src/data/metric-exceptions.json`.

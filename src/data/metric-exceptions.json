@@ -3,5 +3,8 @@
     "file": "src/data/demos/knowledge-assistant.json",
     "token": "Number 2024/07",
     "reason": "the Victorian guideline's instrument number, in the corpus version and the licence attribution; not a metric"
-  }
+  },
+  { "file": "src/data/demos/document-registers.json", "token": "5.5%", "reason": "a management fee read from a synthetic agreement in the Document Registers demo: document content, not a metric (spec §9.3)" },
+  { "file": "src/data/demos/document-registers.json", "token": "6.6%", "reason": "a management fee read from a synthetic agreement in the Document Registers demo: document content, not a metric (spec §9.3)" },
+  { "file": "src/data/demos/document-registers.json", "token": "7.7%", "reason": "a management fee read from a synthetic agreement in the Document Registers demo: document content, not a metric (spec §9.3)" }
 ]

@@ -1,0 +1,889 @@
+{
+  "solution": "document-registers",
+  "title": "Every value links to the page it came from.",
+  "kind": "register",
+  "provenance": "illustrative",
+  "data": {
+    "documents": [
+      {
+        "id": "ma-01",
+        "title": "Synthetic management agreement MA-01",
+        "template": "Form A (Synthetic Agency One, 2024 edition)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nMANAGEMENT AGREEMENT: Form A (Synthetic Agency One, 2024 edition)\nAgreement number: MA-01\nOwner: Synthetic Owner 01\nManager: Synthetic Agency One\nPremises: Synthetic premises 01\n1. Appointment. The Owner appoints the Manager to let and manage the Premises from 1 March 2025. This agreement continues until either party ends it by written notice.\n2. Letting. The Manager may advertise the Premises, choose a tenant and sign a residential tenancy agreement for the Owner."
+          },
+          {
+            "n": 2,
+            "text": "3. Management fee. The Owner pays the Manager a management fee of 6.6% of all rent collected, deducted before rent is paid to the Owner.\n4. Repairs. The Manager may arrange a repair without first asking the Owner if it costs no more than $500. Above that amount the Manager must get the Owner's approval, except in an emergency."
+          },
+          {
+            "n": 3,
+            "text": "5. Landlord insurance. The Owner keeps landlord insurance for the Premises. Insurer: Synthetic Insurer 1. Policy: SYN-01-LI. Expiry: 31 March 2027.\n6. Owner's authority. By signing, the Owner authorises the Manager to act for the Owner as this agreement sets out.\nSigned by the Owner: signed 14 February 2025\nSigned for the Manager: signed 17 February 2025"
+          }
+        ]
+      },
+      {
+        "id": "ma-02",
+        "title": "Synthetic management agreement MA-02",
+        "template": "Form A (Synthetic Agency One, 2024 edition)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nMANAGEMENT AGREEMENT: Form A (Synthetic Agency One, 2024 edition)\nAgreement number: MA-02\nOwner: Synthetic Owner 02\nManager: Synthetic Agency One\nPremises: Synthetic premises 02\n1. Appointment. The Owner appoints the Manager to let and manage the Premises from 1 July 2025. This agreement continues until either party ends it by written notice.\n2. Letting. The Manager may advertise the Premises, choose a tenant and sign a residential tenancy agreement for the Owner."
+          },
+          {
+            "n": 2,
+            "text": "3. Management fee. The Owner pays the Manager a management fee of 6.6% of all rent collected, deducted before rent is paid to the Owner.\n4. Repairs. The Manager may arrange a repair without first asking the Owner if it costs no more than $800. Above that amount the Manager must get the Owner's approval, except in an emergency."
+          },
+          {
+            "n": 3,
+            "text": "5. Landlord insurance. The Owner keeps landlord insurance for the Premises. Insurer: Synthetic Insurer 2. Policy: SYN-02-LI. Expiry: 30 November 2026.\n6. Owner's authority. By signing, the Owner authorises the Manager to act for the Owner as this agreement sets out.\nSigned by the Owner: signed 2 June 2025\nSigned for the Manager: signed 3 June 2025"
+          }
+        ]
+      },
+      {
+        "id": "ma-03",
+        "title": "Synthetic management agreement MA-03",
+        "template": "Form A (Synthetic Agency One, 2024 edition)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nMANAGEMENT AGREEMENT: Form A (Synthetic Agency One, 2024 edition)\nAgreement number: MA-03\nOwner: Synthetic Owner 03\nManager: Synthetic Agency One\nPremises: Synthetic premises 03\n1. Appointment. The Owner appoints the Manager to let and manage the Premises from 1 October 2024. This agreement continues until either party ends it by written notice.\n2. Letting. The Manager may advertise the Premises, choose a tenant and sign a residential tenancy agreement for the Owner."
+          },
+          {
+            "n": 2,
+            "text": "3. Management fee. The Owner pays the Manager a management fee of 7.7% of all rent collected, deducted before rent is paid to the Owner.\n4. Repairs. The Manager may arrange a repair without first asking the Owner if it costs no more than $500. Above that amount the Manager must get the Owner's approval, except in an emergency."
+          },
+          {
+            "n": 3,
+            "text": "5. Landlord insurance. The Owner keeps landlord insurance for the Premises. Insurer: Synthetic Insurer 1. Policy: SYN-03-LI. Expiry: 15 January 2027.\n6. Owner's authority. By signing, the Owner authorises the Manager to act for the Owner as this agreement sets out.\nSigned by the Owner: signed 20 August 2024\nSigned for the Manager: signed 22 August 2024"
+          }
+        ]
+      },
+      {
+        "id": "ma-04",
+        "title": "Synthetic management agreement MA-04",
+        "template": "Form A (Synthetic Agency One, 2024 edition)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nMANAGEMENT AGREEMENT: Form A (Synthetic Agency One, 2024 edition)\nAgreement number: MA-04\nOwner: Synthetic Owner 04\nManager: Synthetic Agency One\nPremises: Synthetic premises 04\n1. Appointment. The Owner appoints the Manager to let and manage the Premises from 1 May 2025. This agreement continues until either party ends it by written notice.\n2. Letting. The Manager may advertise the Premises, choose a tenant and sign a residential tenancy agreement for the Owner."
+          },
+          {
+            "n": 2,
+            "text": "3. Management fee. The Owner pays the Manager a management fee of 6.6% of all rent collected, deducted before rent is paid to the Owner.\n4. Repairs. The Manager may arrange a repair without first asking the Owner if it costs no more than $1,000. Above that amount the Manager must get the Owner's approval, except in an emergency."
+          },
+          {
+            "n": 3,
+            "text": "5. Landlord insurance. The Owner keeps landlord insurance for the Premises. Insurer: Synthetic Insurer 3. Policy: SYN-04-LI. Expiry: 30 April 2027.\n6. Owner's authority. By signing, the Owner authorises the Manager to act for the Owner as this agreement sets out.\nSigned by the Owner: ______________ Date: ______________\nSigned for the Manager: signed 28 April 2025"
+          }
+        ]
+      },
+      {
+        "id": "ma-05",
+        "title": "Synthetic management agreement MA-05",
+        "template": "Form A (Synthetic Agency One, 2024 edition)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nMANAGEMENT AGREEMENT: Form A (Synthetic Agency One, 2024 edition)\nAgreement number: MA-05\nOwner: Synthetic Owner 05\nManager: Synthetic Agency One\nPremises: Synthetic premises 05\n1. Appointment. The Owner appoints the Manager to let and manage the Premises from 1 October 2025. This agreement continues until either party ends it by written notice.\n2. Letting. The Manager may advertise the Premises, choose a tenant and sign a residential tenancy agreement for the Owner."
+          },
+          {
+            "n": 2,
+            "text": "3. Management fee. The Owner pays the Manager a management fee of 5.5% of all rent collected, deducted before rent is paid to the Owner.\n4. Repairs. The Manager may arrange a repair without first asking the Owner if it costs no more than $500. Above that amount the Manager must get the Owner's approval, except in an emergency."
+          },
+          {
+            "n": 3,
+            "text": "5. Landlord insurance. The Owner keeps landlord insurance for the Premises. Insurer: Synthetic Insurer 2. Policy: SYN-05-LI. Expiry: 31 October 2026.\n6. Owner's authority. By signing, the Owner authorises the Manager to act for the Owner as this agreement sets out.\nSigned by the Owner: signed 9 September 2025\nSigned for the Manager: signed 10 September 2025"
+          }
+        ]
+      },
+      {
+        "id": "ma-06",
+        "title": "Synthetic management agreement MA-06",
+        "template": "Form B (Synthetic Agency One, 2019 edition)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nEXCLUSIVE MANAGEMENT AUTHORITY: Form B (Synthetic Agency One, 2019 edition)\nAuthority number: MA-06\nSCHEDULE\nItem 1. Owner: Synthetic Owner 06\nItem 2. Manager: Synthetic Agency One\nItem 3. Premises: Synthetic premises 06\nItem 4. Start date: 1 April 2019\nItem 5. Management fee: 7.7% of gross rent\nItem 6. Repair limit, for each repair without further approval: $300\nItem 7. Landlord insurance: Synthetic Insurer 2, policy SYN-06-LI, current to 30 September 2026"
+          },
+          {
+            "n": 2,
+            "text": "TERMS\n1. The Owner appoints the Manager on the terms of this authority and its schedule.\n2. The Manager may spend up to the repair limit in Item 6 on any one repair without asking the Owner.\n3. The Owner keeps the landlord insurance in Item 7 current and gives the Manager a copy of each renewal.\n4. Either party may end this authority by written notice.\nEXECUTION\nOwner: signed 11 March 2019\nManager: signed 12 March 2019"
+          }
+        ]
+      },
+      {
+        "id": "ma-07",
+        "title": "Synthetic management agreement MA-07",
+        "template": "Form B (Synthetic Agency One, 2019 edition)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nEXCLUSIVE MANAGEMENT AUTHORITY: Form B (Synthetic Agency One, 2019 edition)\nAuthority number: MA-07\nSCHEDULE\nItem 1. Owner: Synthetic Owner 07\nItem 2. Manager: Synthetic Agency One\nItem 3. Premises: Synthetic premises 07\nItem 4. Start date: 1 December 2020\nItem 5. Management fee: 7.7% of gross rent\nItem 6. Repair limit, for each repair without further approval: $500\nItem 7. Landlord insurance: Synthetic Insurer 3, policy SYN-07-LI, current to 30 June 2026"
+          },
+          {
+            "n": 2,
+            "text": "TERMS\n1. The Owner appoints the Manager on the terms of this authority and its schedule.\n2. The Manager may spend up to the repair limit in Item 6 on any one repair without asking the Owner.\n3. The Owner keeps the landlord insurance in Item 7 current and gives the Manager a copy of each renewal.\n4. Either party may end this authority by written notice.\nEXECUTION\nOwner: signed 4 November 2020\nManager: signed 5 November 2020"
+          }
+        ]
+      },
+      {
+        "id": "ma-08",
+        "title": "Synthetic management agreement MA-08",
+        "template": "Form B (Synthetic Agency One, 2019 edition)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nEXCLUSIVE MANAGEMENT AUTHORITY: Form B (Synthetic Agency One, 2019 edition)\nAuthority number: MA-08\nSCHEDULE\nItem 1. Owner: Synthetic Owner 08\nItem 2. Manager: Synthetic Agency One\nItem 3. Premises: Synthetic premises 08\nItem 4. Start date: 1 June 2021\nItem 5. Management fee: 6.6% of gross rent\nItem 6. Repair limit, for each repair without further approval: $800\nItem 7. Landlord insurance: Synthetic Insurer 1, policy SYN-08-LI, current to 28 February 2027"
+          },
+          {
+            "n": 2,
+            "text": "TERMS\n1. The Owner appoints the Manager on the terms of this authority and its schedule.\n2. The Manager may spend up to the repair limit in Item 6 on any one repair without asking the Owner.\n3. The Owner keeps the landlord insurance in Item 7 current and gives the Manager a copy of each renewal.\n4. Either party may end this authority by written notice.\nEXECUTION\nOwner: signed 17 May 2021\nManager: signed 18 May 2021"
+          }
+        ]
+      },
+      {
+        "id": "ma-09",
+        "title": "Synthetic management agreement MA-09",
+        "template": "Form B (Synthetic Agency One, 2019 edition)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nEXCLUSIVE MANAGEMENT AUTHORITY: Form B (Synthetic Agency One, 2019 edition)\nAuthority number: MA-09\nSCHEDULE\nItem 1. Owner: Synthetic Owner 09\nItem 2. Manager: Synthetic Agency One\nItem 3. Premises: Synthetic premises 09\nItem 4. Start date: 1 February 2022\nItem 5. Management fee: 7.7% of gross rent\nItem 6. Repair limit, for each repair without further approval: $500\nItem 7. Landlord insurance: Synthetic Insurer 3, policy SYN-09-LI, current to 31 July 2027"
+          },
+          {
+            "n": 2,
+            "text": "TERMS\n1. The Owner appoints the Manager on the terms of this authority and its schedule.\n2. The Manager may spend up to the repair limit in Item 6 on any one repair without asking the Owner.\n3. The Owner keeps the landlord insurance in Item 7 current and gives the Manager a copy of each renewal.\n4. Either party may end this authority by written notice.\nEXECUTION\nOwner: signed 23 January 2022\nManager: signed 24 January 2022"
+          }
+        ]
+      },
+      {
+        "id": "ma-10",
+        "title": "Synthetic management agreement MA-10",
+        "template": "Form C (Synthetic Agency Two, from a bought rent roll)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nAGREEMENT TO MANAGE RESIDENTIAL PROPERTY: Form C (Synthetic Agency Two, from a bought rent roll)\nReference: MA-10\nBetween Synthetic Owner 10 (the Owner) and Synthetic Agency Two (the Manager), for Synthetic premises 10.\nThis agreement starts on 1 July 2023 and continues until either party ends it by written notice."
+          },
+          {
+            "n": 2,
+            "text": "PART A: KEY TERMS\nA1. Management fee: 5.5% of rent received.\nA2. Owner's repair limit: the Manager may approve repairs costing up to $______________ each.\nA3. Landlord insurance: Synthetic Insurer 2, policy SYN-10-LI, expiry 31 December 2026."
+          },
+          {
+            "n": 3,
+            "text": "PART B: STANDARD TERMS\nB1. The Owner authorises the Manager to let the premises, collect rent and arrange repairs within the limit in A2.\nB2. The Owner will tell the Manager if the landlord insurance lapses.\nSIGNATURES\nOwner's signature: signed 6 June 2023\nManager's signature: signed 7 June 2023"
+          }
+        ]
+      },
+      {
+        "id": "ma-11",
+        "title": "Synthetic management agreement MA-11",
+        "template": "Form C (Synthetic Agency Two, from a bought rent roll)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nAGREEMENT TO MANAGE RESIDENTIAL PROPERTY: Form C (Synthetic Agency Two, from a bought rent roll)\nReference: MA-11\nBetween Synthetic Owner 11 (the Owner) and Synthetic Agency Two (the Manager), for Synthetic premises 11.\nThis agreement starts on 1 November 2023 and continues until either party ends it by written notice."
+          },
+          {
+            "n": 2,
+            "text": "PART A: KEY TERMS\nA1. Management fee: 5.5% of rent received.\nA2. Owner's repair limit: the Manager may approve repairs costing up to $1,000 each.\nA3. Landlord insurance: Synthetic Insurer 1, policy SYN-11-LI, expiry 31 May 2027."
+          },
+          {
+            "n": 3,
+            "text": "PART B: STANDARD TERMS\nB1. The Owner authorises the Manager to let the premises, collect rent and arrange repairs within the limit in A2.\nB2. The Owner will tell the Manager if the landlord insurance lapses.\nSIGNATURES\nOwner's signature: signed 19 October 2023\nManager's signature: signed 20 October 2023"
+          }
+        ]
+      },
+      {
+        "id": "ma-12",
+        "title": "Synthetic management agreement MA-12",
+        "template": "Form C (Synthetic Agency Two, from a bought rent roll)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.\nAGREEMENT TO MANAGE RESIDENTIAL PROPERTY: Form C (Synthetic Agency Two, from a bought rent roll)\nReference: MA-12\nBetween Synthetic Owner 12 (the Owner) and Synthetic Agency Two (the Manager), for Synthetic premises 12.\nThis agreement starts on 1 May 2024 and continues until either party ends it by written notice."
+          },
+          {
+            "n": 2,
+            "text": "PART A: KEY TERMS\nA1. Management fee: 6.6% of rent received.\nA2. Owner's repair limit: the Manager may approve repairs costing up to $800 each.\nA3. Landlord insurance: Synthetic Insurer 3, policy SYN-12-LI, expiry 31 January 2027."
+          },
+          {
+            "n": 3,
+            "text": "PART B: STANDARD TERMS\nB1. The Owner authorises the Manager to let the premises, collect rent and arrange repairs within the limit in A2.\nB2. The Owner will tell the Manager if the landlord insurance lapses.\nSIGNATURES\nOwner's signature: signed 8 April 2024\nManager's signature: signed 9 April 2024"
+          }
+        ]
+      },
+      {
+        "id": "td-01",
+        "title": "Synthetic trust deed TD-01",
+        "template": "Deed form T1 (long form)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.\nDEED OF SETTLEMENT: SYNTHETIC FAMILY TRUST 01. Deed form T1 (long form).\nDate of this deed: 1 July 2004\nSettlor: Synthetic Settlor 01\nTrustee: Synthetic Trustee Company 01\nThe Settlor has given ten dollars to the Trustee, to hold on the trusts of this deed."
+          },
+          {
+            "n": 2,
+            "text": "Clause 1. Definitions\nAppointor means Synthetic Principal 01, or a person who becomes Appointor under clause 14.\nBeneficiaries means the Principal, the Principal's relatives, and companies and trusts they control.\nPrincipal means Synthetic Principal 01.\nVesting Date means 30 June 2084, or an earlier date the Trustee chooses in writing."
+          },
+          {
+            "n": 3,
+            "text": "Clause 9. Income and capital\n9.1 The Trustee may pay or apply the income of each year for any one or more Beneficiaries, in the shares it decides.\n9.2 The Trustee may pay or apply capital for any one or more Beneficiaries before the Vesting Date.\nClause 9.3 (streaming). The Trustee may make a Beneficiary specifically entitled to a capital gain or a franked distribution."
+          },
+          {
+            "n": 4,
+            "text": "Clause 14. Appointor\nThe Appointor may remove the Trustee and appoint a new trustee by written notice.\nClause 16. Variation\nThe Trustee may vary this deed with the Appointor's written consent, but not to make the Vesting Date later.\nEXECUTION\nSigned by the Settlor: signed 1 July 2004\nExecuted by Synthetic Trustee Company 01: signed 1 July 2004"
+          }
+        ]
+      },
+      {
+        "id": "td-02",
+        "title": "Synthetic trust deed TD-02",
+        "template": "Deed form T1 (long form)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.\nDEED OF SETTLEMENT: SYNTHETIC FAMILY TRUST 02. Deed form T1 (long form).\nDate of this deed: 1 July 2009\nSettlor: Synthetic Settlor 02\nTrustee: Synthetic Trustee Company 02\nThe Settlor has given ten dollars to the Trustee, to hold on the trusts of this deed."
+          },
+          {
+            "n": 2,
+            "text": "Clause 1. Definitions\nAppointor means Synthetic Principal 02, or a person who becomes Appointor under clause 14.\nBeneficiaries means the Principal, the Principal's relatives, and companies and trusts they control.\nPrincipal means Synthetic Principal 02.\nVesting Date means 30 June 2089, or an earlier date the Trustee chooses in writing."
+          },
+          {
+            "n": 3,
+            "text": "Clause 9. Income and capital\n9.1 The Trustee may pay or apply the income of each year for any one or more Beneficiaries, in the shares it decides.\n9.2 The Trustee may pay or apply capital for any one or more Beneficiaries before the Vesting Date.\nClause 9.3 (streaming). The Trustee may make a Beneficiary specifically entitled to a capital gain or a franked distribution."
+          },
+          {
+            "n": 4,
+            "text": "Clause 14. Appointor\nThe Appointor may remove the Trustee and appoint a new trustee by written notice.\nClause 16. Variation\nThe Trustee may vary this deed with the Appointor's written consent, but not to make the Vesting Date later.\nEXECUTION\nSigned by the Settlor: signed 1 July 2009\nExecuted by Synthetic Trustee Company 02: signed 1 July 2009"
+          },
+          {
+            "n": 5,
+            "text": "DEED OF VARIATION: SYNTHETIC FAMILY TRUST 02\nDate of variation: 12 May 2021\nUnder clause 16, the Trustee, with the Appointor's written consent, varies the deed as follows.\nIn clause 1, the definition of Appointor is replaced with: Appointor means Synthetic Principal 07.\nExecuted by Synthetic Trustee Company 02: signed 12 May 2021\nConsent of the Appointor, Synthetic Principal 02: signed 12 May 2021"
+          }
+        ]
+      },
+      {
+        "id": "td-03",
+        "title": "Synthetic trust deed TD-03",
+        "template": "Deed form T1 (long form)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.\nDEED OF SETTLEMENT: SYNTHETIC FAMILY TRUST 03. Deed form T1 (long form).\nDate of this deed: 1 July 2012\nSettlor: Synthetic Settlor 03\nTrustee: Synthetic Trustee Company 03\nThe Settlor has given ten dollars to the Trustee, to hold on the trusts of this deed."
+          },
+          {
+            "n": 2,
+            "text": "Clause 1. Definitions\nAppointor means Synthetic Principal 03, or a person who becomes Appointor under clause 14.\nBeneficiaries means the Principal, the Principal's relatives, and companies and trusts they control.\nPrincipal means Synthetic Principal 03.\nVesting Date means 30 June 2092, or an earlier date the Trustee chooses in writing."
+          },
+          {
+            "n": 3,
+            "text": "Clause 9. Income and capital\n9.1 The Trustee may pay or apply the income of each year for any one or more Beneficiaries, in the shares it decides.\n9.2 The Trustee may pay or apply capital for any one or more Beneficiaries before the Vesting Date.\nClause 9.3 (streaming). The Trustee may make a Beneficiary specifically entitled to a capital gain or a franked distribution."
+          },
+          {
+            "n": 4,
+            "text": "Clause 14. Appointor\nThe Appointor may remove the Trustee and appoint a new trustee by written notice.\nClause 16. Variation\nThe Trustee may vary this deed with the Appointor's written consent, but not to make the Vesting Date later.\nEXECUTION\nSigned by the Settlor: signed 1 July 2012\nExecuted by Synthetic Trustee Company 03: signed 1 July 2012"
+          }
+        ]
+      },
+      {
+        "id": "td-04",
+        "title": "Synthetic trust deed TD-04",
+        "template": "Deed form T2 (short form)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.\nTRUST DEED: SYNTHETIC FAMILY TRUST 04. Deed form T2 (short form). This deed has 3 pages.\nMade on 1 July 1986 by Synthetic Settlor 04, who gives ten dollars to the trustee named below.\nSCHEDULE\nTrustee: Synthetic Trustee Company 04\nAppointor: Synthetic Principal 04\nVesting day: 30 June 2026"
+          },
+          {
+            "n": 2,
+            "text": "DISTRIBUTIONS\nThe trustee may distribute income and capital among the beneficiaries in the shares it decides.\nClause 6.2 (streaming). The trustee may make a beneficiary specifically entitled to a capital gain or a franked distribution.\nVARIATION\nClause 8. The trustee may vary this deed with the appointor's written consent."
+          },
+          {
+            "n": 3,
+            "text": "EXECUTION\nSigned by the settlor: signed 1 July 1986\nSigned for the trustee: signed 1 July 1986"
+          }
+        ]
+      },
+      {
+        "id": "td-05",
+        "title": "Synthetic trust deed TD-05",
+        "template": "Deed form T2 (short form)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.\nTRUST DEED: SYNTHETIC FAMILY TRUST 05. Deed form T2 (short form). This deed has 3 pages.\nMade on 1 July 2016 by Synthetic Settlor 05, who gives ten dollars to the trustee named below.\nSCHEDULE\nTrustee: Synthetic Trustee Company 05\nAppointor: Synthetic Principal 05\nVesting day: 30 June 2096"
+          },
+          {
+            "n": 2,
+            "text": "DISTRIBUTIONS\nThe trustee may distribute income and capital among the beneficiaries in the shares it decides.\nClause 6.2 (streaming). The trustee may make a beneficiary specifically entitled to a capital gain or a franked distribution.\nVARIATION\nClause 8. The trustee may vary this deed with the appointor's written consent."
+          },
+          {
+            "n": 3,
+            "text": "EXECUTION\nSigned by the settlor: signed 1 July 2016\nSigned for the trustee: signed 1 July 2016"
+          }
+        ]
+      },
+      {
+        "id": "td-06",
+        "title": "Synthetic trust deed TD-06",
+        "template": "Deed form T2 (short form)",
+        "pages": [
+          {
+            "n": 1,
+            "text": "SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.\nTRUST DEED: SYNTHETIC FAMILY TRUST 06. Deed form T2 (short form). This deed has 3 pages.\nMade on 1 July 2019 by Synthetic Settlor 06, who gives ten dollars to the trustee named below.\nSCHEDULE\nTrustee: Synthetic Trustee Company 06\nAppointor: Synthetic Principal 06\nVesting day: 30 June 2099"
+          },
+          {
+            "n": 3,
+            "text": "EXECUTION\nSigned by the settlor: signed 1 July 2019\nSigned for the trustee: signed 1 July 2019"
+          }
+        ]
+      }
+    ],
+    "registers": [
+      {
+        "id": "management-agreements",
+        "title": "Management agreement register as at 1 September 2026",
+        "fields": [
+          {
+            "key": "management-fee",
+            "label": "Management fee"
+          },
+          {
+            "key": "repair-limit",
+            "label": "Owner repair limit"
+          },
+          {
+            "key": "landlord-insurance",
+            "label": "Landlord insurance expiry"
+          },
+          {
+            "key": "owner-authority",
+            "label": "Owner's signed authority"
+          }
+        ],
+        "rows": [
+          {
+            "doc": "ma-01",
+            "cells": {
+              "management-fee": {
+                "value": "6.6%",
+                "page": 2,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$500",
+                "page": 2,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "31 March 2027",
+                "page": 3,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Signed 14 February 2025",
+                "page": 3,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "ma-02",
+            "cells": {
+              "management-fee": {
+                "value": "6.6%",
+                "page": 2,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$800",
+                "page": 2,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "30 November 2026",
+                "page": 3,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Signed 2 June 2025",
+                "page": 3,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "ma-03",
+            "cells": {
+              "management-fee": {
+                "value": "7.7%",
+                "page": 2,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$500",
+                "page": 2,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "15 January 2027",
+                "page": 3,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Signed 20 August 2024",
+                "page": 3,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "ma-04",
+            "cells": {
+              "management-fee": {
+                "value": "6.6%",
+                "page": 2,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$1,000",
+                "page": 2,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "30 April 2027",
+                "page": 3,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Not signed",
+                "page": 3,
+                "status": "blocked",
+                "note": "The Owner's signature and date on page 3 are blank, so there is no signed authority to act on."
+              }
+            }
+          },
+          {
+            "doc": "ma-05",
+            "cells": {
+              "management-fee": {
+                "value": "5.5%",
+                "page": 2,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$500",
+                "page": 2,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "31 October 2026",
+                "page": 3,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Signed 9 September 2025",
+                "page": 3,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "ma-06",
+            "cells": {
+              "management-fee": {
+                "value": "7.7%",
+                "page": 1,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$300",
+                "page": 1,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "30 September 2026",
+                "page": 1,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Signed 11 March 2019",
+                "page": 2,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "ma-07",
+            "cells": {
+              "management-fee": {
+                "value": "7.7%",
+                "page": 1,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$500",
+                "page": 1,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "30 June 2026",
+                "page": 1,
+                "status": "review",
+                "note": "The policy expired on 30 June 2026, before this register's date of 1 September 2026. Ask the Owner for the current policy."
+              },
+              "owner-authority": {
+                "value": "Signed 4 November 2020",
+                "page": 2,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "ma-08",
+            "cells": {
+              "management-fee": {
+                "value": "6.6%",
+                "page": 1,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$800",
+                "page": 1,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "28 February 2027",
+                "page": 1,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Signed 17 May 2021",
+                "page": 2,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "ma-09",
+            "cells": {
+              "management-fee": {
+                "value": "7.7%",
+                "page": 1,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$500",
+                "page": 1,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "31 July 2027",
+                "page": 1,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Signed 23 January 2022",
+                "page": 2,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "ma-10",
+            "cells": {
+              "management-fee": {
+                "value": "5.5%",
+                "page": 2,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "Not stated",
+                "page": 2,
+                "status": "review",
+                "note": "The repair limit in item A2 on page 2 is blank. Ask the Owner to set one."
+              },
+              "landlord-insurance": {
+                "value": "31 December 2026",
+                "page": 2,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Signed 6 June 2023",
+                "page": 3,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "ma-11",
+            "cells": {
+              "management-fee": {
+                "value": "5.5%",
+                "page": 2,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$1,000",
+                "page": 2,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "31 May 2027",
+                "page": 2,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Signed 19 October 2023",
+                "page": 3,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "ma-12",
+            "cells": {
+              "management-fee": {
+                "value": "6.6%",
+                "page": 2,
+                "status": "ok"
+              },
+              "repair-limit": {
+                "value": "$800",
+                "page": 2,
+                "status": "ok"
+              },
+              "landlord-insurance": {
+                "value": "31 January 2027",
+                "page": 2,
+                "status": "ok"
+              },
+              "owner-authority": {
+                "value": "Signed 8 April 2024",
+                "page": 3,
+                "status": "ok"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "trust-deeds",
+        "title": "Trust deed register as at 1 September 2026",
+        "fields": [
+          {
+            "key": "trustee",
+            "label": "Trustee"
+          },
+          {
+            "key": "appointor",
+            "label": "Appointor"
+          },
+          {
+            "key": "vesting-date",
+            "label": "Vesting date"
+          },
+          {
+            "key": "variations",
+            "label": "Deed of variation"
+          },
+          {
+            "key": "streaming",
+            "label": "Streaming clause"
+          }
+        ],
+        "rows": [
+          {
+            "doc": "td-01",
+            "cells": {
+              "trustee": {
+                "value": "Synthetic Trustee Company 01",
+                "page": 1,
+                "status": "ok"
+              },
+              "appointor": {
+                "value": "Synthetic Principal 01",
+                "page": 2,
+                "status": "ok"
+              },
+              "vesting-date": {
+                "value": "30 June 2084",
+                "page": 2,
+                "status": "ok"
+              },
+              "variations": {
+                "value": "None found",
+                "page": 4,
+                "status": "ok"
+              },
+              "streaming": {
+                "value": "Clause 9.3",
+                "page": 3,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "td-02",
+            "cells": {
+              "trustee": {
+                "value": "Synthetic Trustee Company 02",
+                "page": 1,
+                "status": "ok"
+              },
+              "appointor": {
+                "value": "Synthetic Principal 07",
+                "page": 5,
+                "status": "review",
+                "note": "The deed of variation on page 5 replaced the Appointor named on page 2, Synthetic Principal 02. For the partner to check before anyone relies on it."
+              },
+              "vesting-date": {
+                "value": "30 June 2089",
+                "page": 2,
+                "status": "ok"
+              },
+              "variations": {
+                "value": "12 May 2021",
+                "page": 5,
+                "status": "ok"
+              },
+              "streaming": {
+                "value": "Clause 9.3",
+                "page": 3,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "td-03",
+            "cells": {
+              "trustee": {
+                "value": "Synthetic Trustee Company 03",
+                "page": 1,
+                "status": "ok"
+              },
+              "appointor": {
+                "value": "Synthetic Principal 03",
+                "page": 2,
+                "status": "ok"
+              },
+              "vesting-date": {
+                "value": "30 June 2092",
+                "page": 2,
+                "status": "ok"
+              },
+              "variations": {
+                "value": "None found",
+                "page": 4,
+                "status": "ok"
+              },
+              "streaming": {
+                "value": "Clause 9.3",
+                "page": 3,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "td-04",
+            "cells": {
+              "trustee": {
+                "value": "Synthetic Trustee Company 04",
+                "page": 1,
+                "status": "ok"
+              },
+              "appointor": {
+                "value": "Synthetic Principal 04",
+                "page": 1,
+                "status": "ok"
+              },
+              "vesting-date": {
+                "value": "30 June 2026",
+                "page": 1,
+                "status": "review",
+                "note": "The vesting day is before this register's date of 1 September 2026. For the partner to review."
+              },
+              "variations": {
+                "value": "None found",
+                "page": 3,
+                "status": "ok"
+              },
+              "streaming": {
+                "value": "Clause 6.2",
+                "page": 2,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "td-05",
+            "cells": {
+              "trustee": {
+                "value": "Synthetic Trustee Company 05",
+                "page": 1,
+                "status": "ok"
+              },
+              "appointor": {
+                "value": "Synthetic Principal 05",
+                "page": 1,
+                "status": "ok"
+              },
+              "vesting-date": {
+                "value": "30 June 2096",
+                "page": 1,
+                "status": "ok"
+              },
+              "variations": {
+                "value": "None found",
+                "page": 3,
+                "status": "ok"
+              },
+              "streaming": {
+                "value": "Clause 6.2",
+                "page": 2,
+                "status": "ok"
+              }
+            }
+          },
+          {
+            "doc": "td-06",
+            "cells": {
+              "trustee": {
+                "value": "Synthetic Trustee Company 06",
+                "page": 1,
+                "status": "ok"
+              },
+              "appointor": {
+                "value": "Synthetic Principal 06",
+                "page": 1,
+                "status": "ok"
+              },
+              "vesting-date": {
+                "value": "30 June 2099",
+                "page": 1,
+                "status": "ok"
+              },
+              "variations": {
+                "value": "None found",
+                "page": 3,
+                "status": "ok"
+              },
+              "streaming": {
+                "value": "Page missing",
+                "page": 1,
+                "status": "blocked",
+                "note": "The file holds pages 1 and 3 of this 3-page deed. Page 2, which holds this form's streaming clause, is missing."
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "download": "/downloads/document-registers-demo-register.csv"
+  }
+}

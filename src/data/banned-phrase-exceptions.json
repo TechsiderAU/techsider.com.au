@@ -18,5 +18,9 @@
   { "file": "src/**", "phrase": "CREST-accredited tester you engage", "reason": "names the third-party tester a client engages, never a Techsider accreditation (spec §3.5 seeded exception, §4.1 import rule 5)" },
   { "file": "dist", "phrase": "CREST-accredited tester you engage", "reason": "names the third-party tester a client engages, never a Techsider accreditation (spec §3.5 seeded exception, §4.1 import rule 5)" },
   { "file": "src/**", "phrase": "CREST-accredited tester the client engages", "reason": "names the third-party tester a client engages, never a Techsider accreditation (spec §3.5 seeded exception, §4.1 import rule 5)" },
-  { "file": "dist", "phrase": "CREST-accredited tester the client engages", "reason": "names the third-party tester a client engages, never a Techsider accreditation (spec §3.5 seeded exception, §4.1 import rule 5)" }
+  { "file": "dist", "phrase": "CREST-accredited tester the client engages", "reason": "names the third-party tester a client engages, never a Techsider accreditation (spec §3.5 seeded exception, §4.1 import rule 5)" },
+  { "file": "src/data/demos/document-registers.json", "phrase": "$300", "reason": "an owner repair limit in a synthetic management agreement in the Document Registers demo: document content, not a price (D4 covers Techsider's offers)" },
+  { "file": "src/data/demos/document-registers.json", "phrase": "$500", "reason": "an owner repair limit in a synthetic management agreement in the Document Registers demo: document content, not a price (D4 covers Techsider's offers)" },
+  { "file": "src/data/demos/document-registers.json", "phrase": "$800", "reason": "an owner repair limit in a synthetic management agreement in the Document Registers demo: document content, not a price (D4 covers Techsider's offers)" },
+  { "file": "src/data/demos/document-registers.json", "phrase": "$1,000", "reason": "an owner repair limit in a synthetic management agreement in the Document Registers demo: document content, not a price (D4 covers Techsider's offers)" }
 ]

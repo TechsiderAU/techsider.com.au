@@ -1,0 +1,520 @@
+Synthetic documents from the Techsider Document Registers demo.
+Every party, premises, policy, date and amount in this file is invented. None of it is a real agreement or trust deed.
+The registers read from them are in document-registers-demo-register.csv.
+
+========================================================================
+Synthetic management agreement MA-01
+Template: Form A (Synthetic Agency One, 2024 edition)
+Document id: ma-01
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+MANAGEMENT AGREEMENT: Form A (Synthetic Agency One, 2024 edition)
+Agreement number: MA-01
+Owner: Synthetic Owner 01
+Manager: Synthetic Agency One
+Premises: Synthetic premises 01
+1. Appointment. The Owner appoints the Manager to let and manage the Premises from 1 March 2025. This agreement continues until either party ends it by written notice.
+2. Letting. The Manager may advertise the Premises, choose a tenant and sign a residential tenancy agreement for the Owner.
+
+--- Page 2 ---
+3. Management fee. The Owner pays the Manager a management fee of 6.6% of all rent collected, deducted before rent is paid to the Owner.
+4. Repairs. The Manager may arrange a repair without first asking the Owner if it costs no more than $500. Above that amount the Manager must get the Owner's approval, except in an emergency.
+
+--- Page 3 ---
+5. Landlord insurance. The Owner keeps landlord insurance for the Premises. Insurer: Synthetic Insurer 1. Policy: SYN-01-LI. Expiry: 31 March 2027.
+6. Owner's authority. By signing, the Owner authorises the Manager to act for the Owner as this agreement sets out.
+Signed by the Owner: signed 14 February 2025
+Signed for the Manager: signed 17 February 2025
+
+========================================================================
+Synthetic management agreement MA-02
+Template: Form A (Synthetic Agency One, 2024 edition)
+Document id: ma-02
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+MANAGEMENT AGREEMENT: Form A (Synthetic Agency One, 2024 edition)
+Agreement number: MA-02
+Owner: Synthetic Owner 02
+Manager: Synthetic Agency One
+Premises: Synthetic premises 02
+1. Appointment. The Owner appoints the Manager to let and manage the Premises from 1 July 2025. This agreement continues until either party ends it by written notice.
+2. Letting. The Manager may advertise the Premises, choose a tenant and sign a residential tenancy agreement for the Owner.
+
+--- Page 2 ---
+3. Management fee. The Owner pays the Manager a management fee of 6.6% of all rent collected, deducted before rent is paid to the Owner.
+4. Repairs. The Manager may arrange a repair without first asking the Owner if it costs no more than $800. Above that amount the Manager must get the Owner's approval, except in an emergency.
+
+--- Page 3 ---
+5. Landlord insurance. The Owner keeps landlord insurance for the Premises. Insurer: Synthetic Insurer 2. Policy: SYN-02-LI. Expiry: 30 November 2026.
+6. Owner's authority. By signing, the Owner authorises the Manager to act for the Owner as this agreement sets out.
+Signed by the Owner: signed 2 June 2025
+Signed for the Manager: signed 3 June 2025
+
+========================================================================
+Synthetic management agreement MA-03
+Template: Form A (Synthetic Agency One, 2024 edition)
+Document id: ma-03
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+MANAGEMENT AGREEMENT: Form A (Synthetic Agency One, 2024 edition)
+Agreement number: MA-03
+Owner: Synthetic Owner 03
+Manager: Synthetic Agency One
+Premises: Synthetic premises 03
+1. Appointment. The Owner appoints the Manager to let and manage the Premises from 1 October 2024. This agreement continues until either party ends it by written notice.
+2. Letting. The Manager may advertise the Premises, choose a tenant and sign a residential tenancy agreement for the Owner.
+
+--- Page 2 ---
+3. Management fee. The Owner pays the Manager a management fee of 7.7% of all rent collected, deducted before rent is paid to the Owner.
+4. Repairs. The Manager may arrange a repair without first asking the Owner if it costs no more than $500. Above that amount the Manager must get the Owner's approval, except in an emergency.
+
+--- Page 3 ---
+5. Landlord insurance. The Owner keeps landlord insurance for the Premises. Insurer: Synthetic Insurer 1. Policy: SYN-03-LI. Expiry: 15 January 2027.
+6. Owner's authority. By signing, the Owner authorises the Manager to act for the Owner as this agreement sets out.
+Signed by the Owner: signed 20 August 2024
+Signed for the Manager: signed 22 August 2024
+
+========================================================================
+Synthetic management agreement MA-04
+Template: Form A (Synthetic Agency One, 2024 edition)
+Document id: ma-04
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+MANAGEMENT AGREEMENT: Form A (Synthetic Agency One, 2024 edition)
+Agreement number: MA-04
+Owner: Synthetic Owner 04
+Manager: Synthetic Agency One
+Premises: Synthetic premises 04
+1. Appointment. The Owner appoints the Manager to let and manage the Premises from 1 May 2025. This agreement continues until either party ends it by written notice.
+2. Letting. The Manager may advertise the Premises, choose a tenant and sign a residential tenancy agreement for the Owner.
+
+--- Page 2 ---
+3. Management fee. The Owner pays the Manager a management fee of 6.6% of all rent collected, deducted before rent is paid to the Owner.
+4. Repairs. The Manager may arrange a repair without first asking the Owner if it costs no more than $1,000. Above that amount the Manager must get the Owner's approval, except in an emergency.
+
+--- Page 3 ---
+5. Landlord insurance. The Owner keeps landlord insurance for the Premises. Insurer: Synthetic Insurer 3. Policy: SYN-04-LI. Expiry: 30 April 2027.
+6. Owner's authority. By signing, the Owner authorises the Manager to act for the Owner as this agreement sets out.
+Signed by the Owner: ______________ Date: ______________
+Signed for the Manager: signed 28 April 2025
+
+========================================================================
+Synthetic management agreement MA-05
+Template: Form A (Synthetic Agency One, 2024 edition)
+Document id: ma-05
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+MANAGEMENT AGREEMENT: Form A (Synthetic Agency One, 2024 edition)
+Agreement number: MA-05
+Owner: Synthetic Owner 05
+Manager: Synthetic Agency One
+Premises: Synthetic premises 05
+1. Appointment. The Owner appoints the Manager to let and manage the Premises from 1 October 2025. This agreement continues until either party ends it by written notice.
+2. Letting. The Manager may advertise the Premises, choose a tenant and sign a residential tenancy agreement for the Owner.
+
+--- Page 2 ---
+3. Management fee. The Owner pays the Manager a management fee of 5.5% of all rent collected, deducted before rent is paid to the Owner.
+4. Repairs. The Manager may arrange a repair without first asking the Owner if it costs no more than $500. Above that amount the Manager must get the Owner's approval, except in an emergency.
+
+--- Page 3 ---
+5. Landlord insurance. The Owner keeps landlord insurance for the Premises. Insurer: Synthetic Insurer 2. Policy: SYN-05-LI. Expiry: 31 October 2026.
+6. Owner's authority. By signing, the Owner authorises the Manager to act for the Owner as this agreement sets out.
+Signed by the Owner: signed 9 September 2025
+Signed for the Manager: signed 10 September 2025
+
+========================================================================
+Synthetic management agreement MA-06
+Template: Form B (Synthetic Agency One, 2019 edition)
+Document id: ma-06
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+EXCLUSIVE MANAGEMENT AUTHORITY: Form B (Synthetic Agency One, 2019 edition)
+Authority number: MA-06
+SCHEDULE
+Item 1. Owner: Synthetic Owner 06
+Item 2. Manager: Synthetic Agency One
+Item 3. Premises: Synthetic premises 06
+Item 4. Start date: 1 April 2019
+Item 5. Management fee: 7.7% of gross rent
+Item 6. Repair limit, for each repair without further approval: $300
+Item 7. Landlord insurance: Synthetic Insurer 2, policy SYN-06-LI, current to 30 September 2026
+
+--- Page 2 ---
+TERMS
+1. The Owner appoints the Manager on the terms of this authority and its schedule.
+2. The Manager may spend up to the repair limit in Item 6 on any one repair without asking the Owner.
+3. The Owner keeps the landlord insurance in Item 7 current and gives the Manager a copy of each renewal.
+4. Either party may end this authority by written notice.
+EXECUTION
+Owner: signed 11 March 2019
+Manager: signed 12 March 2019
+
+========================================================================
+Synthetic management agreement MA-07
+Template: Form B (Synthetic Agency One, 2019 edition)
+Document id: ma-07
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+EXCLUSIVE MANAGEMENT AUTHORITY: Form B (Synthetic Agency One, 2019 edition)
+Authority number: MA-07
+SCHEDULE
+Item 1. Owner: Synthetic Owner 07
+Item 2. Manager: Synthetic Agency One
+Item 3. Premises: Synthetic premises 07
+Item 4. Start date: 1 December 2020
+Item 5. Management fee: 7.7% of gross rent
+Item 6. Repair limit, for each repair without further approval: $500
+Item 7. Landlord insurance: Synthetic Insurer 3, policy SYN-07-LI, current to 30 June 2026
+
+--- Page 2 ---
+TERMS
+1. The Owner appoints the Manager on the terms of this authority and its schedule.
+2. The Manager may spend up to the repair limit in Item 6 on any one repair without asking the Owner.
+3. The Owner keeps the landlord insurance in Item 7 current and gives the Manager a copy of each renewal.
+4. Either party may end this authority by written notice.
+EXECUTION
+Owner: signed 4 November 2020
+Manager: signed 5 November 2020
+
+========================================================================
+Synthetic management agreement MA-08
+Template: Form B (Synthetic Agency One, 2019 edition)
+Document id: ma-08
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+EXCLUSIVE MANAGEMENT AUTHORITY: Form B (Synthetic Agency One, 2019 edition)
+Authority number: MA-08
+SCHEDULE
+Item 1. Owner: Synthetic Owner 08
+Item 2. Manager: Synthetic Agency One
+Item 3. Premises: Synthetic premises 08
+Item 4. Start date: 1 June 2021
+Item 5. Management fee: 6.6% of gross rent
+Item 6. Repair limit, for each repair without further approval: $800
+Item 7. Landlord insurance: Synthetic Insurer 1, policy SYN-08-LI, current to 28 February 2027
+
+--- Page 2 ---
+TERMS
+1. The Owner appoints the Manager on the terms of this authority and its schedule.
+2. The Manager may spend up to the repair limit in Item 6 on any one repair without asking the Owner.
+3. The Owner keeps the landlord insurance in Item 7 current and gives the Manager a copy of each renewal.
+4. Either party may end this authority by written notice.
+EXECUTION
+Owner: signed 17 May 2021
+Manager: signed 18 May 2021
+
+========================================================================
+Synthetic management agreement MA-09
+Template: Form B (Synthetic Agency One, 2019 edition)
+Document id: ma-09
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+EXCLUSIVE MANAGEMENT AUTHORITY: Form B (Synthetic Agency One, 2019 edition)
+Authority number: MA-09
+SCHEDULE
+Item 1. Owner: Synthetic Owner 09
+Item 2. Manager: Synthetic Agency One
+Item 3. Premises: Synthetic premises 09
+Item 4. Start date: 1 February 2022
+Item 5. Management fee: 7.7% of gross rent
+Item 6. Repair limit, for each repair without further approval: $500
+Item 7. Landlord insurance: Synthetic Insurer 3, policy SYN-09-LI, current to 31 July 2027
+
+--- Page 2 ---
+TERMS
+1. The Owner appoints the Manager on the terms of this authority and its schedule.
+2. The Manager may spend up to the repair limit in Item 6 on any one repair without asking the Owner.
+3. The Owner keeps the landlord insurance in Item 7 current and gives the Manager a copy of each renewal.
+4. Either party may end this authority by written notice.
+EXECUTION
+Owner: signed 23 January 2022
+Manager: signed 24 January 2022
+
+========================================================================
+Synthetic management agreement MA-10
+Template: Form C (Synthetic Agency Two, from a bought rent roll)
+Document id: ma-10
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+AGREEMENT TO MANAGE RESIDENTIAL PROPERTY: Form C (Synthetic Agency Two, from a bought rent roll)
+Reference: MA-10
+Between Synthetic Owner 10 (the Owner) and Synthetic Agency Two (the Manager), for Synthetic premises 10.
+This agreement starts on 1 July 2023 and continues until either party ends it by written notice.
+
+--- Page 2 ---
+PART A: KEY TERMS
+A1. Management fee: 5.5% of rent received.
+A2. Owner's repair limit: the Manager may approve repairs costing up to $______________ each.
+A3. Landlord insurance: Synthetic Insurer 2, policy SYN-10-LI, expiry 31 December 2026.
+
+--- Page 3 ---
+PART B: STANDARD TERMS
+B1. The Owner authorises the Manager to let the premises, collect rent and arrange repairs within the limit in A2.
+B2. The Owner will tell the Manager if the landlord insurance lapses.
+SIGNATURES
+Owner's signature: signed 6 June 2023
+Manager's signature: signed 7 June 2023
+
+========================================================================
+Synthetic management agreement MA-11
+Template: Form C (Synthetic Agency Two, from a bought rent roll)
+Document id: ma-11
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+AGREEMENT TO MANAGE RESIDENTIAL PROPERTY: Form C (Synthetic Agency Two, from a bought rent roll)
+Reference: MA-11
+Between Synthetic Owner 11 (the Owner) and Synthetic Agency Two (the Manager), for Synthetic premises 11.
+This agreement starts on 1 November 2023 and continues until either party ends it by written notice.
+
+--- Page 2 ---
+PART A: KEY TERMS
+A1. Management fee: 5.5% of rent received.
+A2. Owner's repair limit: the Manager may approve repairs costing up to $1,000 each.
+A3. Landlord insurance: Synthetic Insurer 1, policy SYN-11-LI, expiry 31 May 2027.
+
+--- Page 3 ---
+PART B: STANDARD TERMS
+B1. The Owner authorises the Manager to let the premises, collect rent and arrange repairs within the limit in A2.
+B2. The Owner will tell the Manager if the landlord insurance lapses.
+SIGNATURES
+Owner's signature: signed 19 October 2023
+Manager's signature: signed 20 October 2023
+
+========================================================================
+Synthetic management agreement MA-12
+Template: Form C (Synthetic Agency Two, from a bought rent roll)
+Document id: ma-12
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL AGREEMENT.
+AGREEMENT TO MANAGE RESIDENTIAL PROPERTY: Form C (Synthetic Agency Two, from a bought rent roll)
+Reference: MA-12
+Between Synthetic Owner 12 (the Owner) and Synthetic Agency Two (the Manager), for Synthetic premises 12.
+This agreement starts on 1 May 2024 and continues until either party ends it by written notice.
+
+--- Page 2 ---
+PART A: KEY TERMS
+A1. Management fee: 6.6% of rent received.
+A2. Owner's repair limit: the Manager may approve repairs costing up to $800 each.
+A3. Landlord insurance: Synthetic Insurer 3, policy SYN-12-LI, expiry 31 January 2027.
+
+--- Page 3 ---
+PART B: STANDARD TERMS
+B1. The Owner authorises the Manager to let the premises, collect rent and arrange repairs within the limit in A2.
+B2. The Owner will tell the Manager if the landlord insurance lapses.
+SIGNATURES
+Owner's signature: signed 8 April 2024
+Manager's signature: signed 9 April 2024
+
+========================================================================
+Synthetic trust deed TD-01
+Template: Deed form T1 (long form)
+Document id: td-01
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.
+DEED OF SETTLEMENT: SYNTHETIC FAMILY TRUST 01. Deed form T1 (long form).
+Date of this deed: 1 July 2004
+Settlor: Synthetic Settlor 01
+Trustee: Synthetic Trustee Company 01
+The Settlor has given ten dollars to the Trustee, to hold on the trusts of this deed.
+
+--- Page 2 ---
+Clause 1. Definitions
+Appointor means Synthetic Principal 01, or a person who becomes Appointor under clause 14.
+Beneficiaries means the Principal, the Principal's relatives, and companies and trusts they control.
+Principal means Synthetic Principal 01.
+Vesting Date means 30 June 2084, or an earlier date the Trustee chooses in writing.
+
+--- Page 3 ---
+Clause 9. Income and capital
+9.1 The Trustee may pay or apply the income of each year for any one or more Beneficiaries, in the shares it decides.
+9.2 The Trustee may pay or apply capital for any one or more Beneficiaries before the Vesting Date.
+Clause 9.3 (streaming). The Trustee may make a Beneficiary specifically entitled to a capital gain or a franked distribution.
+
+--- Page 4 ---
+Clause 14. Appointor
+The Appointor may remove the Trustee and appoint a new trustee by written notice.
+Clause 16. Variation
+The Trustee may vary this deed with the Appointor's written consent, but not to make the Vesting Date later.
+EXECUTION
+Signed by the Settlor: signed 1 July 2004
+Executed by Synthetic Trustee Company 01: signed 1 July 2004
+
+========================================================================
+Synthetic trust deed TD-02
+Template: Deed form T1 (long form)
+Document id: td-02
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.
+DEED OF SETTLEMENT: SYNTHETIC FAMILY TRUST 02. Deed form T1 (long form).
+Date of this deed: 1 July 2009
+Settlor: Synthetic Settlor 02
+Trustee: Synthetic Trustee Company 02
+The Settlor has given ten dollars to the Trustee, to hold on the trusts of this deed.
+
+--- Page 2 ---
+Clause 1. Definitions
+Appointor means Synthetic Principal 02, or a person who becomes Appointor under clause 14.
+Beneficiaries means the Principal, the Principal's relatives, and companies and trusts they control.
+Principal means Synthetic Principal 02.
+Vesting Date means 30 June 2089, or an earlier date the Trustee chooses in writing.
+
+--- Page 3 ---
+Clause 9. Income and capital
+9.1 The Trustee may pay or apply the income of each year for any one or more Beneficiaries, in the shares it decides.
+9.2 The Trustee may pay or apply capital for any one or more Beneficiaries before the Vesting Date.
+Clause 9.3 (streaming). The Trustee may make a Beneficiary specifically entitled to a capital gain or a franked distribution.
+
+--- Page 4 ---
+Clause 14. Appointor
+The Appointor may remove the Trustee and appoint a new trustee by written notice.
+Clause 16. Variation
+The Trustee may vary this deed with the Appointor's written consent, but not to make the Vesting Date later.
+EXECUTION
+Signed by the Settlor: signed 1 July 2009
+Executed by Synthetic Trustee Company 02: signed 1 July 2009
+
+--- Page 5 ---
+DEED OF VARIATION: SYNTHETIC FAMILY TRUST 02
+Date of variation: 12 May 2021
+Under clause 16, the Trustee, with the Appointor's written consent, varies the deed as follows.
+In clause 1, the definition of Appointor is replaced with: Appointor means Synthetic Principal 07.
+Executed by Synthetic Trustee Company 02: signed 12 May 2021
+Consent of the Appointor, Synthetic Principal 02: signed 12 May 2021
+
+========================================================================
+Synthetic trust deed TD-03
+Template: Deed form T1 (long form)
+Document id: td-03
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.
+DEED OF SETTLEMENT: SYNTHETIC FAMILY TRUST 03. Deed form T1 (long form).
+Date of this deed: 1 July 2012
+Settlor: Synthetic Settlor 03
+Trustee: Synthetic Trustee Company 03
+The Settlor has given ten dollars to the Trustee, to hold on the trusts of this deed.
+
+--- Page 2 ---
+Clause 1. Definitions
+Appointor means Synthetic Principal 03, or a person who becomes Appointor under clause 14.
+Beneficiaries means the Principal, the Principal's relatives, and companies and trusts they control.
+Principal means Synthetic Principal 03.
+Vesting Date means 30 June 2092, or an earlier date the Trustee chooses in writing.
+
+--- Page 3 ---
+Clause 9. Income and capital
+9.1 The Trustee may pay or apply the income of each year for any one or more Beneficiaries, in the shares it decides.
+9.2 The Trustee may pay or apply capital for any one or more Beneficiaries before the Vesting Date.
+Clause 9.3 (streaming). The Trustee may make a Beneficiary specifically entitled to a capital gain or a franked distribution.
+
+--- Page 4 ---
+Clause 14. Appointor
+The Appointor may remove the Trustee and appoint a new trustee by written notice.
+Clause 16. Variation
+The Trustee may vary this deed with the Appointor's written consent, but not to make the Vesting Date later.
+EXECUTION
+Signed by the Settlor: signed 1 July 2012
+Executed by Synthetic Trustee Company 03: signed 1 July 2012
+
+========================================================================
+Synthetic trust deed TD-04
+Template: Deed form T2 (short form)
+Document id: td-04
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.
+TRUST DEED: SYNTHETIC FAMILY TRUST 04. Deed form T2 (short form). This deed has 3 pages.
+Made on 1 July 1986 by Synthetic Settlor 04, who gives ten dollars to the trustee named below.
+SCHEDULE
+Trustee: Synthetic Trustee Company 04
+Appointor: Synthetic Principal 04
+Vesting day: 30 June 2026
+
+--- Page 2 ---
+DISTRIBUTIONS
+The trustee may distribute income and capital among the beneficiaries in the shares it decides.
+Clause 6.2 (streaming). The trustee may make a beneficiary specifically entitled to a capital gain or a franked distribution.
+VARIATION
+Clause 8. The trustee may vary this deed with the appointor's written consent.
+
+--- Page 3 ---
+EXECUTION
+Signed by the settlor: signed 1 July 1986
+Signed for the trustee: signed 1 July 1986
+
+========================================================================
+Synthetic trust deed TD-05
+Template: Deed form T2 (short form)
+Document id: td-05
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.
+TRUST DEED: SYNTHETIC FAMILY TRUST 05. Deed form T2 (short form). This deed has 3 pages.
+Made on 1 July 2016 by Synthetic Settlor 05, who gives ten dollars to the trustee named below.
+SCHEDULE
+Trustee: Synthetic Trustee Company 05
+Appointor: Synthetic Principal 05
+Vesting day: 30 June 2096
+
+--- Page 2 ---
+DISTRIBUTIONS
+The trustee may distribute income and capital among the beneficiaries in the shares it decides.
+Clause 6.2 (streaming). The trustee may make a beneficiary specifically entitled to a capital gain or a franked distribution.
+VARIATION
+Clause 8. The trustee may vary this deed with the appointor's written consent.
+
+--- Page 3 ---
+EXECUTION
+Signed by the settlor: signed 1 July 2016
+Signed for the trustee: signed 1 July 2016
+
+========================================================================
+Synthetic trust deed TD-06
+Template: Deed form T2 (short form)
+Document id: td-06
+========================================================================
+
+--- Page 1 ---
+SYNTHETIC DOCUMENT FOR A DEMO. NOT A REAL TRUST DEED.
+TRUST DEED: SYNTHETIC FAMILY TRUST 06. Deed form T2 (short form). This deed has 3 pages.
+Made on 1 July 2019 by Synthetic Settlor 06, who gives ten dollars to the trustee named below.
+SCHEDULE
+Trustee: Synthetic Trustee Company 06
+Appointor: Synthetic Principal 06
+Vesting day: 30 June 2099
+
+--- Page 3 ---
+EXECUTION
+Signed by the settlor: signed 1 July 2019
+Signed for the trustee: signed 1 July 2019
