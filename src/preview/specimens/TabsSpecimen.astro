@@ -1,0 +1,147 @@
+---
+// Preview specimen for /preview/tabs/ (kind "tabs"): two independent Tabs groups, built from the
+// fixtures the way the B2 templates use them. Fixtures are imported statically (see
+// src/preview/gallery.astro).
+// - On carbon: an industry's four workflow stages.
+// - On bone: a solution's packages, as spec §8.3 block 4 lays them out. The generic package
+//   renders first, as a full block and not a tab; then only the launch packages become tabs;
+//   on-request packages follow as one-line "On request" entries; internal packages never render
+//   (spec §4.1). Every tab and full block carries data-package-tab and data-package-status="launch",
+//   and every other rendered package its data-package-status (CI check 10's DOM contract).
+import Tabs from "../../components/ui/Tabs.astro";
+import TabPanel from "../../components/ui/TabPanel.astro";
+import { industryFixture, solutionFixture, SOLUTION_FIXTURE_ID } from "../../fixtures/index.ts";
+
+const workflowPanels = industryFixture.workflow.map((stage, i, all) => ({
+  id: stage.id,
+  label: stage.stage,
+  items: stage.useCases.map((u) => (u.status === "on-request" ? `${u.name} (On request)` : u.name)),
+  next: all[i + 1] ? { id: all[i + 1].id, label: all[i + 1].stage } : undefined,
+}));
+const genericPackage = solutionFixture.genericPackage;
+const launchPackages = solutionFixture.packages.flatMap((p) => (p.status === "launch" ? [p] : []));
+const onRequestPackages = solutionFixture.packages.flatMap((p) => (p.status === "on-request" ? [p] : []));
+const packageItems = (p: typeof genericPackage) => [p.scope, ...p.inclusions, p.timeline];
+const interestHref = `/contact/?interest=${SOLUTION_FIXTURE_ID}`;
+---
+<section id="tab-groups" class="preview-surface" aria-labelledby="tab-groups-heading" data-preview-surface="tabs">
+  <div class="preview-wrap">
+    <h2 id="tab-groups-heading" class="preview-surface-heading">Tab groups</h2>
+    <div class="tabs-specimen">
+      <p class="tabs-specimen-label">Fixture workflow stages</p>
+      <Tabs id="fixture-workflow" label="Fixture workflow stages">
+        {workflowPanels.map((panel) => (
+          <TabPanel id={panel.id} label={panel.label}>
+            <ul class="tabs-specimen-list">
+              {panel.items.map((item) => <li>{item}</li>)}
+            </ul>
+            {panel.next && (
+              <a href={`#${panel.next.id}`} class="tabs-specimen-next">Next stage: {panel.next.label}</a>
+            )}
+          </TabPanel>
+        ))}
+      </Tabs>
+    </div>
+    <div class="tabs-specimen surface-bone" data-package-specimen>
+      <p class="tabs-specimen-label">Fixture packages</p>
+      <section
+        class="package-block"
+        aria-labelledby={`${genericPackage.id}-heading`}
+        data-package-tab
+        data-package-status={genericPackage.status}
+      >
+        <h3 id={`${genericPackage.id}-heading`} class="package-block-heading">{genericPackage.name}</h3>
+        <ul class="tabs-specimen-list">
+          {packageItems(genericPackage).map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+      <Tabs id="fixture-packages" label="Fixture launch packages">
+        {launchPackages.map((p) => (
+          <TabPanel id={p.id} label={p.name}>
+            <div data-package-tab data-package-status={p.status}>
+              <ul class="tabs-specimen-list">
+                {packageItems(p).map((item) => <li>{item}</li>)}
+              </ul>
+            </div>
+          </TabPanel>
+        ))}
+      </Tabs>
+      <ul class="package-on-request">
+        {onRequestPackages.map((p) => (
+          <li data-package-status={p.status}>
+            <span class="package-on-request-label">On request</span>{" "}
+            <a href={interestHref} class="package-on-request-link">{p.name}</a>: {p.oneLiner}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .preview-wrap {
+    max-width: 80rem; /* the shell's max-w-7xl */
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 40rem) {
+    .preview-wrap {
+      padding-inline: 1.5rem;
+    }
+  }
+  .preview-surface {
+    padding-block: 3rem;
+    border-top: 1px solid var(--color-graphite);
+  }
+  .preview-surface-heading {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    text-transform: lowercase;
+  }
+  .tabs-specimen {
+    margin-top: 2rem;
+  }
+  .tabs-specimen.surface-bone {
+    padding: 2rem 1rem;
+  }
+  @media (min-width: 40rem) {
+    .tabs-specimen.surface-bone {
+      padding-inline: 1.5rem;
+    }
+  }
+  .tabs-specimen-label {
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+  .tabs-specimen-list {
+    list-style: square;
+    padding-left: 1.25rem;
+  }
+  .tabs-specimen-next,
+  .package-on-request-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .tabs-specimen-next {
+    margin-top: 0.5rem;
+  }
+  .package-block {
+    margin-bottom: 2rem;
+  }
+  .package-block-heading {
+    margin-bottom: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+  .package-on-request {
+    margin-top: 1.5rem;
+  }
+  .package-on-request-label {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted-dark);
+  }
+</style>

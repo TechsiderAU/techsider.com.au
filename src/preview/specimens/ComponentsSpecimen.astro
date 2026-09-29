@@ -1,0 +1,59 @@
+---
+// Preview specimen for /preview/components/ (kind "components"): every shared component, once on
+// carbon and once inside .surface-bone. GalleryStaticA renders inside each surface section;
+// GalleryStaticB follows both sections and draws its own carbon and bone sections.
+// Fixtures are imported statically (see src/preview/gallery.astro).
+import GalleryStaticA from "../../components/preview/GalleryStaticA.astro";
+import GalleryStaticB from "../../components/preview/GalleryStaticB.astro";
+import {
+  industryFixture, mockPanelFixture, regulatoryFixture, sampleReportFixture, solutionFixture, traceFixture,
+} from "../../fixtures/index.ts";
+
+// Specimens rendered inside the loop suffix their ids with `-${surface.id}` to keep ids unique.
+const surfaces = [
+  { id: "carbon", label: "On carbon", bone: false },
+  { id: "bone", label: "On bone", bone: true },
+];
+---
+{surfaces.map((surface) => (
+  <section
+    id={`surface-${surface.id}`}
+    class:list={["preview-surface", surface.bone && "surface-bone"]}
+    aria-labelledby={`surface-${surface.id}-heading`}
+    data-preview-surface={surface.id}
+  >
+    <div class="preview-wrap">
+      <h2 id={`surface-${surface.id}-heading`} class="preview-surface-heading">{surface.label}</h2>
+      <GalleryStaticA surface={surface.id} faq={surface.bone ? solutionFixture.faq : industryFixture.faq} />
+    </div>
+  </section>
+))}
+
+<GalleryStaticB
+  panel={mockPanelFixture}
+  report={sampleReportFixture}
+  trace={traceFixture}
+  rows={regulatoryFixture.rows}
+/>
+
+<style>
+  .preview-wrap {
+    max-width: 80rem; /* the shell's max-w-7xl */
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 40rem) {
+    .preview-wrap {
+      padding-inline: 1.5rem;
+    }
+  }
+  .preview-surface {
+    padding-block: 3rem;
+    border-top: 1px solid var(--color-graphite);
+  }
+  .preview-surface-heading {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    text-transform: lowercase;
+  }
+</style>

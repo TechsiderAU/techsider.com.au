@@ -3,8 +3,8 @@
 // - every human-readable string says "Fixture" or uses example.com, and every URL points at
 //   example.com, so nothing here can pass for a real organisation, client, document or result;
 // - references between fixtures resolve to the *_FIXTURE_ID constants;
-// - only src/pages/preview/ imports fixtures (a dynamic import behind isPreview()), so no
-//   fixture reaches the production dist/;
+// - only src/preview/ imports fixtures, statically; src/preview/integration.mjs injects the
+//   gallery route into preview builds only, so no fixture reaches the production dist/;
 // - every export is deep-frozen (below): derived fixtures share nested objects, so an in-place
 //   sort or splice in a template or preview page would otherwise change other specimens.
 //   Map, filter or spread a fixture to change it.

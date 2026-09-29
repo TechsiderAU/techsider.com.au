@@ -1,8 +1,8 @@
 ---
 // Preview-only gallery for MockPanel, SampleReport, TracePanel and DataTable, each on carbon and on bone.
-// Rendered by src/pages/preview/[...slug].astro on /preview/components/ and never in production.
-// It imports no fixtures: only the preview route may load src/fixtures/ (Task 4's import guard),
-// so the route passes the fixture data in as props.
+// Rendered by src/preview/specimens/ComponentsSpecimen.astro on /preview/components/ and never in production.
+// It imports no fixtures: only src/preview/ may load src/fixtures/ (the import guard in
+// tests/fixtures.test.mjs), so the specimen passes the fixture data in as props.
 import type { MockPanelData, SampleReportData, TraceData } from "../../content/schemas";
 import MockPanel from "../ui/MockPanel.astro";
 import SampleReport from "../ui/SampleReport.astro";

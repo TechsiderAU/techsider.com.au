@@ -1,6 +1,6 @@
 // Template-preview fixtures: each parses with the same Zod schemas as real content (with
 // plain string refs), references resolve between fixtures, every human-readable string is
-// visibly fictional, and nothing outside the preview route imports them.
+// visibly fictional, and nothing outside src/preview/ (the preview-only gallery) imports them.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -216,8 +216,12 @@ test("every fixture export is deep-frozen, so no page can change a shared specim
 // a side-effect `import "…"`, a dynamic `import("…")`, and `import.meta.glob(…)` (Vite's glob import).
 const FIXTURE_PATH = String.raw`["'\`][^"'\`]*\/fixtures(?:\/[^"'\`]*)?["'\`]`;
 const IMPORTS_FIXTURES = new RegExp(String.raw`(?:\bfrom|\bimport)\s*\(?\s*${FIXTURE_PATH}|\bimport\.meta\.glob\w*\s*\([^)]*?${FIXTURE_PATH}`);
+// Only the lazy forms: a dynamic `import("…")` and `import.meta.glob(…)`.
+const LOADS_FIXTURES_LAZILY = new RegExp(String.raw`\bimport\s*\(\s*${FIXTURE_PATH}|\bimport\.meta\.glob\w*\s*\([^)]*?${FIXTURE_PATH}`);
+const SOURCES = sourceFiles(SRC).map((p) => relative(SRC, p).split(sep).join("/"));
+const sourceText = (rel) => readFileSync(join(SRC, rel), "utf8");
 
-test("only the preview route imports the fixtures", () => {
+test("only src/preview/ imports the fixtures", () => {
   for (const code of [
     'import { kitFixture } from "../fixtures/index.ts";',
     'export * from "../../fixtures/kit.ts";',
@@ -229,9 +233,23 @@ test("only the preview route imports the fixtures", () => {
   for (const code of ['import { x } from "../lib/fixture-names.ts";', "// only the preview route may load src/fixtures/"]) {
     assert.ok(!IMPORTS_FIXTURES.test(code), `the guard flags: ${code}`);
   }
-  const offenders = sourceFiles(SRC)
-    .map((p) => relative(SRC, p).split(sep).join("/"))
-    .filter((rel) => !rel.startsWith("fixtures/") && !rel.startsWith("pages/preview/"))
-    .filter((rel) => IMPORTS_FIXTURES.test(readFileSync(join(SRC, rel), "utf8")));
+  const offenders = SOURCES
+    .filter((rel) => !rel.startsWith("fixtures/") && !rel.startsWith("preview/"))
+    .filter((rel) => IMPORTS_FIXTURES.test(sourceText(rel)));
   assert.deepEqual(offenders, []);
+});
+
+// src/preview/integration.mjs injects the gallery route only into preview builds, so src/preview/
+// imports fixtures statically. A module imported both statically and through import() makes Vite
+// log [WARN] INEFFECTIVE_DYNAMIC_IMPORT, which fails the pristine-build gate.
+test("src/preview/ imports the fixtures statically, never through import() or import.meta.glob", () => {
+  for (const code of ['const fx = await import("../fixtures/index.ts");', 'const all = import.meta.glob("../../fixtures/*.ts");']) {
+    assert.ok(LOADS_FIXTURES_LAZILY.test(code), `the lazy-import guard misses: ${code}`);
+  }
+  for (const code of ['import { solutionFixture } from "../../fixtures/index.ts";', 'import type { PreviewPage } from "../fixtures/index.ts";']) {
+    assert.ok(!LOADS_FIXTURES_LAZILY.test(code), `the lazy-import guard flags: ${code}`);
+  }
+  const preview = SOURCES.filter((rel) => rel.startsWith("preview/"));
+  assert.ok(preview.some((rel) => IMPORTS_FIXTURES.test(sourceText(rel))), "nothing in src/preview/ imports the fixtures");
+  assert.deepEqual(preview.filter((rel) => LOADS_FIXTURES_LAZILY.test(sourceText(rel))), []);
 });

@@ -1,0 +1,140 @@
+---
+// Template-preview gallery: the shared components and the page templates, rendered from
+// fictional fixtures (src/fixtures/). This is not a page in src/pages/: src/preview/integration.mjs
+// injects it as /preview/[...slug] only when TECHSIDER_NAV_PREVIEW=1 (`npm run build:preview` →
+// dist-preview/), so the production build has no /preview/ pages, no fixture data, and none of
+// the gallery's CSS or scripts in dist/_astro/.
+//
+// Here and in every specimen, fixtures are imported statically, never loaded lazily as well: a
+// module imported both statically and dynamically makes Vite log
+// [WARN] INEFFECTIVE_DYNAMIC_IMPORT, which fails the pristine-build gate.
+import type { GetStaticPaths } from "astro";
+import type { AstroComponentFactory } from "astro/runtime/server/index.js";
+import PreviewLayout from "../layouts/PreviewLayout.astro";
+import ComponentsSpecimen from "./specimens/ComponentsSpecimen.astro";
+import TabsSpecimen from "./specimens/TabsSpecimen.astro";
+import { PREVIEW_PAGES, previewPath } from "../fixtures/index.ts";
+import type { PreviewGroup, PreviewKind, PreviewPage } from "../fixtures/index.ts";
+
+export const getStaticPaths = (() =>
+  PREVIEW_PAGES.map((page) => ({
+    params: { slug: page.slug === "" ? undefined : page.slug },
+    props: { page },
+  }))) satisfies GetStaticPaths;
+
+interface Props {
+  page: PreviewPage;
+}
+
+// One specimen per page kind; each B2 task adds one import and one entry. The Record type makes
+// `astro check` fail while a registered kind has no specimen.
+const SPECIMENS: Record<Exclude<PreviewKind, "index">, AstroComponentFactory> = {
+  components: ComponentsSpecimen,
+  tabs: TabsSpecimen,
+};
+
+// The gallery nav lists the index first, then every other page under its group's heading.
+const NAV_GROUPS: { group: Exclude<PreviewGroup, "gallery">; heading: string }[] = [
+  { group: "components", heading: "Components" },
+  { group: "templates", heading: "Templates" },
+];
+
+const { page } = Astro.props;
+const Specimen = page.kind === "index" ? null : SPECIMENS[page.kind];
+const linkOf = (p: PreviewPage) => ({ href: previewPath(p), title: p.title, current: p.slug === page.slug });
+const indexLinks = PREVIEW_PAGES.filter((p) => p.group === "gallery").map(linkOf);
+const navGroups = NAV_GROUPS.map(({ group, heading }) => ({
+  heading,
+  links: PREVIEW_PAGES.filter((p) => p.group === group).map(linkOf),
+})).filter((g) => g.links.length > 0);
+---
+<PreviewLayout title={page.title}>
+  {page.group !== "templates" && (
+    <div class="preview-wrap preview-intro">
+      <h1 class="type-display preview-title">{page.title}</h1>
+      {page.kind === "index" && (
+        <p class="preview-lede">Shared components and page templates, rendered from fictional fixture data for review before real content exists. Not part of the published site.</p>
+      )}
+      <nav aria-label="Template preview pages">
+        <ul class="preview-pages">
+          {indexLinks.map((l) => (
+            <li>
+              <a href={l.href} class="preview-link" aria-current={l.current ? "page" : undefined}>{l.title}</a>
+            </li>
+          ))}
+        </ul>
+        {navGroups.map((g) => (
+          <Fragment>
+            <h2 class="preview-group-heading">{g.heading}</h2>
+            <ul class="preview-pages">
+              {g.links.map((l) => (
+                <li>
+                  <a href={l.href} class="preview-link" aria-current={l.current ? "page" : undefined}>{l.title}</a>
+                </li>
+              ))}
+            </ul>
+          </Fragment>
+        ))}
+      </nav>
+    </div>
+  )}
+  {Specimen && <Specimen />}
+</PreviewLayout>
+
+<style>
+  .preview-wrap {
+    max-width: 80rem; /* the shell's max-w-7xl */
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 40rem) {
+    .preview-wrap {
+      padding-inline: 1.5rem;
+    }
+  }
+  .preview-intro {
+    padding-block: 3rem 2rem;
+  }
+  .preview-title {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+  }
+  .preview-lede {
+    max-width: 60ch;
+    margin-top: 1rem;
+    color: var(--color-muted);
+  }
+  .preview-group-heading {
+    margin-top: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    text-transform: lowercase;
+    color: var(--color-muted);
+  }
+  .preview-pages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin-top: 1.5rem;
+  }
+  .preview-group-heading + .preview-pages {
+    margin-top: 0.25rem;
+  }
+  .preview-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-bone);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .preview-link:hover {
+    color: var(--color-acid);
+  }
+  .preview-link[aria-current="page"] {
+    font-weight: 700;
+    text-decoration-color: var(--color-acid);
+    text-decoration-thickness: 2px;
+  }
+</style>
