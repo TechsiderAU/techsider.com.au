@@ -1,0 +1,56 @@
+---
+// The checker's static view (spec §8.7): every entry of src/data/platform-ai.json, in one DataTable
+// per vendor, under "Vendor facts as at {asAt}". It reads in full without JavaScript, and stays with
+// it as the list the checker reads. Each row links the vendor page that lists the feature and its
+// plans. "Where it's processed" is platform-ai.json's statement word for word, and every entry whose
+// vendor pages don't state a location starts "Not published" (platform-ai.md's convention).
+// On /resources/what-you-already-pay-for/ it fills PayForTemplate's `fallback` slot; on the ⑤ demo
+// page it is the DemoFrame's static transcript.
+import DataTable from "../ui/DataTable.astro";
+import type { CheckerView } from "../../lib/views/checker";
+
+interface Props {
+  view: CheckerView;
+}
+
+const { view } = Astro.props;
+const columns = [
+  { key: "product", label: "Product" },
+  { key: "feature", label: "AI feature" },
+  { key: "inclusion", label: "Included or add-on" },
+  { key: "plans", label: "Plans" },
+  { key: "processed", label: "Where it's processed" },
+  { key: "source", label: "Vendor page" },
+  { key: "checked", label: "Checked" },
+];
+---
+<div class="facts" data-platform-facts>
+  <p class="facts-lede">The checker runs in your browser and makes no network calls: what you tick stays on this page. It reads the vendor facts below, which are built into the page. Each row links to the vendor page that lists the feature and its plans.</p>
+  <p class="facts-as-at" data-facts-as-at>Vendor facts as at <time datetime={view.asAt.iso}>{view.asAt.text}</time></p>
+  {view.vendors.map((g) => (
+    <div class="facts-vendor" data-facts-vendor={g.id}>
+      <DataTable caption={g.vendor} columns={columns} rows={g.rows} rowHeader="product" />
+    </div>
+  ))}
+</div>
+
+<style>
+  .facts {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    min-width: 0;
+  }
+  .facts-lede,
+  .facts-as-at {
+    margin: 0;
+    max-width: 62ch;
+  }
+  .facts-as-at {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .facts-vendor {
+    min-width: 0;
+  }
+</style>

@@ -73,12 +73,12 @@ test("production: planned pages get a null href, and contact links reach the liv
   for (const i of site.industries) assert.equal(i.href, expected(i.path), i.id);
   for (const [key, path] of Object.entries(PAGE_PATHS)) assert.equal(site.page(key).href, expected(path), key);
   for (const id of SOLUTION_IDS) assert.equal(site.demo(id), expected(`/demos/${id}/`), id);
-  // After Phase D Task 5: every hub, every solution and industry page, Services, Evaluation Partner,
-  // Insights, the evaluation method, About and Contact are live. The demos and the checker wait for
-  // later Phase D tasks, the Safe-Use Kits for lawyer review, and Trust and Legal for the owner (spec §12).
+  // After Phase D Task 6: every hub, every solution and industry page, Services, Evaluation Partner,
+  // Insights, the checker (payFor), the evaluation method, About and Contact are live. The demos wait
+  // for Phase D Task 7, the Safe-Use Kits for lawyer review, and Trust and Legal for the owner (spec §12).
   assert.deepEqual(
     Object.keys(PAGE_PATHS).filter((key) => site.page(key).href !== null),
-    ["home", "solutions", "industries", "services", "evaluationPartner", "resources", "insights", "evaluationMethod", "about", "contact"],
+    ["home", "solutions", "industries", "services", "evaluationPartner", "resources", "insights", "payFor", "evaluationMethod", "about", "contact"],
   );
   assert.ok(site.solutions.every((s) => s.href !== null), "a solution page is hidden");
   assert.ok(site.industries.every((i) => i.href !== null), "an industry page is hidden");

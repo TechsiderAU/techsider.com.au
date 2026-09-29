@@ -350,19 +350,24 @@ test("#next: the demo CTA as its heading, then the solution page", () => {
 });
 
 // Phase C Task 7 puts the Resources hub live at /resources/ (tests/company-pages.test.mjs checks
-// its cards), Phase D Task 2 puts the ② demo's frame in the Home's demo band, and Phase D Task 5
-// the evaluation method at /resources/evaluation-method/ (tests/evaluation-method.test.mjs checks
-// the page). The kits page, the checker and the demo pages stay out of production until they go live.
-test("production: resources templates only on the live Resources hub and evaluation method, and only the Home a demo frame", () => {
+// its cards), Phase D Task 2 puts the ② demo's frame in the Home's demo band, Phase D Task 5 the
+// evaluation method at /resources/evaluation-method/ (tests/evaluation-method.test.mjs checks the
+// page), and Phase D Task 6 the checker at /resources/what-you-already-pay-for/, whose hero carries
+// the checker badge (tests/checker.test.mjs checks the page). The kits page and the demo pages stay
+// out of production until they go live.
+test("production: resources templates only on the live Resources hub, evaluation method and checker, and only the Home a demo frame", () => {
+  const CHECKER = "resources/what-you-already-pay-for/index.html";
   const live = {
     'data-template="resources-hub"': "resources/index.html",
     'data-template="evaluation-method"': "resources/evaluation-method/index.html",
+    'data-template="pay-for"': CHECKER,
   };
   for (const f of allHtmlFiles()) {
     const html = readDist(f);
-    for (const hook of ["data-kit", "data-hero-badge", 'data-template="demo"', 'data-template="safe-use-kits"']) {
+    for (const hook of ["data-kit", 'data-template="demo"', 'data-template="safe-use-kits"']) {
       assert.ok(!html.includes(hook), `dist/${f} carries ${hook}`);
     }
+    if (f !== CHECKER) assert.ok(!html.includes("data-hero-badge"), `dist/${f} carries data-hero-badge`);
     for (const [hook, file] of Object.entries(live)) {
       if (f !== file) assert.ok(!html.includes(hook), `dist/${f} carries ${hook}`);
     }

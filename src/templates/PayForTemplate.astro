@@ -1,11 +1,12 @@
 ---
-// What you already pay for (spec §8.7): the client-side checker's page. Body only: a Phase D
-// route passes siteContext(isPreview()) and the vendor data's as-at date, fills the slots and
-// renders this inside BaseLayout. The hero carries the checker badge, always.
+// What you already pay for (spec §8.7): the client-side checker's page. Body only: its route,
+// src/pages/resources/what-you-already-pay-for/[...page].astro, passes siteContext(isPreview()) and
+// the vendor facts' as-at date, fills the slots and renders this inside BaseLayout. The hero carries
+// the checker badge, always.
 // Named slots:
-// - `checker`: the client-side checker (Phase D), which reads src/data/platform-ai.json and makes
-//   no network calls;
-// - `fallback`: the static view that reads in full without JavaScript.
+// - `checker`: PlatformChecker (src/components/demo/), over src/data/platform-ai.json as the route
+//   reads it at build time; it makes no network calls;
+// - `fallback`: PlatformFacts, the full table, which reads without JavaScript.
 // The page is the checker's canonical URL; the ⑤ demo page embeds the same checker (spec §8.8).
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";

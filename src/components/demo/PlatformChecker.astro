@@ -1,0 +1,315 @@
+---
+// The "What you already pay for" checker (spec §8.7; the ⑤ demo, §8.8): a checkbox for each product
+// in src/data/platform-ai.json, grouped by vendor, then the results for the ticked products:
+// - "AI you already pay for": each feature, included or add-on, its plans and its vendor page;
+// - "Where it's processed": platform-ai.json's statement word for word, or "Not published" where
+//   the vendor pages checked don't say (checkerView's processing(), Phase D Review Focus 4);
+// - "What's left for a build": ①, ② and ③, linked through the site context;
+// - "Safe-Use Kits": the kit for each ticked product's industry, while /resources/safe-use-kits/
+//   is shown (view.kits is empty otherwise, and the block isn't rendered).
+// Every result is rendered here at build time, hidden; src/scripts/checker.ts shows the ones for the
+// ticked products, and makes no network call. The status line is the results region's live part:
+// one short summary per tick. Without JavaScript the form and the results stay hidden and the note
+// points to the full table: every page that renders this renders PlatformFacts too.
+// `headingLevel` is the results heading's level, and its blocks' headings sit one below it: 3 inside
+// a PageSection, 2 straight under a page's h1. The ids are fixed, so a page holds one checker.
+import type { CheckerView } from "../../lib/views/checker";
+import { EMPTY_STATUS } from "../../scripts/checker";
+
+interface Props {
+  view: CheckerView;
+  headingLevel: 2 | 3;
+}
+
+const { view, headingLevel } = Astro.props;
+const Heading = `h${headingLevel}` as "h2" | "h3";
+const Block = `h${headingLevel + 1}` as "h3" | "h4";
+const products = view.vendors.flatMap((g) => g.products);
+---
+<div class="checker" data-checker>
+  <p class="checker-nojs" data-checker-nojs>The checker runs in your browser, so it needs JavaScript. Every vendor fact it reads is in the table on this page.</p>
+
+  <fieldset class="checker-form" data-checker-form hidden>
+    <legend class="checker-legend">Tick the software you pay for</legend>
+    <div class="checker-vendors">
+      {view.vendors.map((g) => (
+        <fieldset class="checker-vendor" data-checker-vendor={g.id}>
+          <legend class="checker-vendor-name">{g.vendor}</legend>
+          {g.products.map((p) => (
+            <label class="checker-option">
+              <input
+                type="checkbox"
+                id={`checker-product-${p.id}`}
+                name="product"
+                value={p.id}
+                data-checker-product={p.id}
+                data-categories={p.categories.join(" ")}
+              />
+              <span>{p.name}</span>
+            </label>
+          ))}
+        </fieldset>
+      ))}
+    </div>
+  </fieldset>
+
+  <section class="checker-results" data-checker-results aria-labelledby="checker-results-heading" hidden>
+    <Heading id="checker-results-heading" class="checker-heading">Your results</Heading>
+    <p class="checker-status" data-checker-status role="status" aria-live="polite">{EMPTY_STATUS}</p>
+
+    <div class="checker-block" data-checker-section="features" hidden>
+      <Block class="checker-block-heading">AI you already pay for</Block>
+      <ul class="checker-list">
+        {products.map((p) => (
+          <li class="checker-product" data-checker-features data-product={p.id} hidden>
+            <p class="checker-product-name">{p.label}</p>
+            <ul class="checker-features">
+              {p.features.map((f) => (
+                <li class="checker-feature" data-checker-feature data-included={f.included}>
+                  <p class="checker-feature-text">{f.text}</p>
+                  <p class="checker-meta">
+                    <span class="checker-tag" data-inclusion={f.included}>{f.inclusion}</span>
+                    <span>Plans: {f.plans.join(", ")}</span>
+                  </p>
+                  <p class="checker-source">
+                    Vendor page: <a class="checker-link" href={f.source.href}>{f.source.host}</a>, checked <time datetime={f.checked.iso}>{f.checked.text}</time>
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="checker-block" data-checker-section="processing" hidden>
+      <Block class="checker-block-heading">Where it's processed</Block>
+      <p class="checker-note">"Not published" means the vendor pages we checked don't say where its AI processing runs for Australian customers.</p>
+      <dl class="checker-where">
+        {products.map((p) => (
+          <div class="checker-where-item" data-checker-where data-product={p.id} hidden>
+            <dt class="checker-product-name">{p.label}</dt>
+            {p.processing.map((w) => (
+              <dd class:list={["checker-processing", w.status === "not-published" && "checker-tag"]} data-processing={w.status}>{w.text}</dd>
+            ))}
+          </div>
+        ))}
+      </dl>
+    </div>
+
+    <div class="checker-block" data-checker-section="build" hidden>
+      <Block class="checker-block-heading">What's left for a build</Block>
+      <p class="checker-note">Use what you already pay for first. If a job is still left over, one of these builds may cover it.</p>
+      <ul class="checker-links">
+        {view.builds.map((b) => (
+          <li data-checker-build>
+            {b.href === null ? <span class="checker-link-name">{b.number} {b.name}</span> : <a class="checker-link checker-link-name" href={b.href}>{b.number} {b.name}</a>}
+            <span>{b.oneLiner}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {view.kits.length > 0 && (
+      <div class="checker-block" data-checker-section="kits" hidden>
+        <Block class="checker-block-heading">Safe-Use Kits</Block>
+        <p class="checker-note">Read the kit for your industry before client or tenant data goes into these features. Each kit shows its review status.</p>
+        <ul class="checker-links">
+          {view.kits.map((k) => (
+            <li data-checker-kit={k.category} hidden>
+              <a class="checker-link checker-link-name" href={k.href}>{k.title}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </section>
+</div>
+
+<script>
+  import { initChecker } from "../../scripts/checker";
+  initChecker();
+</script>
+
+<style>
+  /* Hairlines and muted text follow the surface, as DataTable's do: graphite and muted on carbon,
+     bone-line and muted-dark on bone, and graphite and muted again inside a dark island in a bone
+     section (the ⑤ demo frame). */
+  .checker {
+    --checker-line: var(--color-graphite);
+    --checker-muted: var(--color-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  :global(.surface-bone) .checker {
+    --checker-line: var(--color-bone-line);
+    --checker-muted: var(--color-muted-dark);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .checker {
+    --checker-line: var(--color-graphite);
+    --checker-muted: var(--color-muted);
+  }
+  .checker p {
+    margin: 0;
+  }
+  .checker-nojs,
+  .checker-note {
+    max-width: 62ch;
+    color: var(--checker-muted);
+  }
+  .checker-form,
+  .checker-vendor {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .checker-legend {
+    padding: 0;
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+  .checker-vendors {
+    display: grid;
+    gap: 1.5rem 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  }
+  .checker-vendor-name {
+    padding: 0;
+    margin-bottom: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--checker-muted);
+  }
+  /* The whole label is the target: at least 44px tall (spec §6.6). */
+  .checker-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    cursor: pointer;
+  }
+  .checker-option input {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    accent-color: var(--color-acid);
+  }
+  :global(.surface-bone) .checker-option input {
+    accent-color: var(--color-carbon);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .checker-option input {
+    accent-color: var(--color-acid);
+  }
+  .checker-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;
+  }
+  .checker-heading {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .checker-status {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .checker-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--checker-line);
+  }
+  .checker-block-heading {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+  .checker-list,
+  .checker-features,
+  .checker-links {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .checker-product,
+  .checker-feature {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .checker-product-name {
+    font-weight: 600;
+  }
+  .checker-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.75rem;
+    font-size: 0.875rem;
+    color: var(--checker-muted);
+  }
+  .checker-source {
+    font-size: 0.875rem;
+    color: var(--checker-muted);
+  }
+  /* "Included", "Add-on" and "Not published" are text in an outlined tag, never a colour alone (spec §6.6). */
+  .checker-tag {
+    display: inline-block;
+    justify-self: start;
+    padding: 0.125rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: inherit;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+  }
+  .checker-where {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+  .checker-where-item {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .checker-processing {
+    margin: 0;
+    max-width: 72ch;
+  }
+  .checker-links > li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.75rem;
+  }
+  .checker-link-name {
+    font-weight: 600;
+  }
+  /* Every link is a 44px target (spec §6.6). */
+  .checker-link {
+    display: inline-flex;
+    align-items: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .checker-link:hover {
+    text-decoration-thickness: 2px;
+  }
+</style>

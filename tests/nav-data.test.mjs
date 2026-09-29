@@ -113,9 +113,9 @@ test("industry footer labels read 'AI for {short name}'", () => {
 });
 
 // Phases C and D put pages live task by task, and each task that flips pages extends this pin.
-// After Phase D Task 5: Phase C's live set (every hub, every solution and industry page, Services,
-// Evaluation Partner, Insights, About and Contact) and the evaluation method.
-test("the live pages after Phase D Task 5", () => {
+// After Phase D Task 6: Phase C's live set (every hub, every solution and industry page, Services,
+// Evaluation Partner, Insights, About and Contact), the evaluation method and the checker.
+test("the live pages after Phase D Task 6", () => {
   const [solutions, industries] = NAV_GROUPS.map((g) => g.items.map((p) => p.path));
   assert.deepEqual(
     PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(),
@@ -124,7 +124,7 @@ test("the live pages after Phase D Task 5", () => {
       "/solutions/", ...solutions,
       "/industries/", ...industries,
       "/services/", "/services/evaluation-partner/",
-      "/resources/", "/insights/", "/resources/evaluation-method/",
+      "/resources/", "/insights/", "/resources/what-you-already-pay-for/", "/resources/evaluation-method/",
       "/about/", "/contact/",
     ].sort(),
   );
@@ -153,10 +153,10 @@ test("production nav shows only live pages; preview shows every group", () => {
   assert.equal(industries.hubHref, "/industries/");
   assert.deepEqual(industries.items.map((i) => i.path), NAV_GROUPS[1].items.map((i) => i.path));
   // Phase C Task 7: every hub is live, and About lists only Contact. Resources lists Insights and,
-  // from Phase D Task 5, the evaluation method.
+  // from Phase D Tasks 5 and 6, the checker and the evaluation method, in nav order.
   assert.deepEqual(prod.map((g) => g.hubHref), ["/solutions/", "/industries/", "/services/", "/resources/", "/about/"]);
   const byId = Object.fromEntries(prod.map((g) => [g.id, g]));
-  assert.deepEqual(byId.resources.items.map((i) => i.path), ["/insights/", "/resources/evaluation-method/"]);
+  assert.deepEqual(byId.resources.items.map((i) => i.path), ["/insights/", "/resources/what-you-already-pay-for/", "/resources/evaluation-method/"]);
   assert.deepEqual(byId.about.items.map((i) => i.path), ["/contact/"], "Trust and Legal wait for the owner (spec §12)");
   assert.deepEqual(byId.resources.anchors, []);
   assert.equal(byId.services.anchors.length, 3);
@@ -193,6 +193,7 @@ test("no-JS links, footer and legal row only point at shown pages", () => {
   assert.deepEqual(prod[1].links, NAV_GROUPS[1].items.map((i) => ({ label: footerLabel(i), href: i.path })));
   assert.deepEqual(prod.find((c) => c.title === "Resources").links, [
     { label: "Insights", href: "/insights/" },
+    { label: "What you already pay for", href: "/resources/what-you-already-pay-for/" },
     { label: "Evaluation method", href: "/resources/evaluation-method/" },
   ]);
   assert.deepEqual(prod.find((c) => c.title === "Company").links, [
