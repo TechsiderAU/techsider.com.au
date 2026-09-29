@@ -1,0 +1,15 @@
+---
+// /preview/templates/solution-evaluation/: the ④-like fixture solution. Block 4 is titled
+// "Engagements", the independence policy renders, an internal package must not, and the sample
+// report fills the hero's demo slot with its fixed caption (spec §8.3, §9.1).
+import SolutionTemplate from "../../templates/SolutionTemplate.astro";
+import SampleReport from "../../components/ui/SampleReport.astro";
+import { solutionView } from "../../lib/views/solution.ts";
+import { fixtureSite, sampleReportFixture, servicesFixture, solutionFixtures } from "../../fixtures/index.ts";
+
+const id = "fixture-solution-4";
+const view = solutionView({ id, data: solutionFixtures[id], shared: servicesFixture, site: fixtureSite });
+---
+<SolutionTemplate view={view}>
+  <SampleReport slot="demo" report={sampleReportFixture} />
+</SolutionTemplate>

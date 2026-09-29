@@ -1,0 +1,12 @@
+---
+// /preview/templates/solution-switch-on/: the ⑤-like fixture solution. No program block, one
+// launch package, and no package onshore, so every block shows the processing note and none the
+// onshore pillar (spec §3.2). Its demo is the checker (Phase D), so the demo slot stays empty.
+import SolutionTemplate from "../../templates/SolutionTemplate.astro";
+import { solutionView } from "../../lib/views/solution.ts";
+import { fixtureSite, servicesFixture, solutionFixtures } from "../../fixtures/index.ts";
+
+const id = "fixture-solution-5";
+const view = solutionView({ id, data: solutionFixtures[id], shared: servicesFixture, site: fixtureSite });
+---
+<SolutionTemplate view={view} />

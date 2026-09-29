@@ -35,9 +35,20 @@ test("the preview registry lists the gallery index, components and tabs pages, e
       ["components", "components", "components"],
       ["tabs", "tabs", "components"],
       ["page-kit", "page-kit", "components"],
+      ["templates/solution", "solution", "templates"],
+      ["templates/solution-evaluation", "solution-evaluation", "templates"],
+      ["templates/solution-switch-on", "solution-switch-on", "templates"],
     ],
   );
-  assert.deepEqual(PREVIEW_PAGES.map(previewPath), ["/preview/", "/preview/components/", "/preview/tabs/", "/preview/page-kit/"]);
+  assert.deepEqual(PREVIEW_PAGES.map(previewPath), [
+    "/preview/",
+    "/preview/components/",
+    "/preview/tabs/",
+    "/preview/page-kit/",
+    "/preview/templates/solution/",
+    "/preview/templates/solution-evaluation/",
+    "/preview/templates/solution-switch-on/",
+  ]);
   assert.equal(new Set(PREVIEW_PAGES.map((p) => p.kind)).size, PREVIEW_PAGES.length, "a kind is registered twice");
   for (const p of PREVIEW_PAGES) {
     assert.match(p.title, /\bFixture\b/, `"${p.title}" is not visibly fictional`);

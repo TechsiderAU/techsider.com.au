@@ -1,0 +1,29 @@
+---
+// /preview/templates/solution/: the ①-like fixture solution. A generic package, two launch
+// packages (tabs; one of them not onshore), an on-request package and an internal one, which
+// must not render. The hero's demo slot holds a plain placeholder figure until DemoFrame exists.
+import SolutionTemplate from "../../templates/SolutionTemplate.astro";
+import { solutionView } from "../../lib/views/solution.ts";
+import { fixtureSite, servicesFixture, solutionFixtures } from "../../fixtures/index.ts";
+
+const id = "fixture-solution";
+const view = solutionView({ id, data: solutionFixtures[id], shared: servicesFixture, site: fixtureSite });
+---
+<SolutionTemplate view={view}>
+  <figure slot="demo" class="demo-placeholder" data-demo-placeholder>Fixture demo slot</figure>
+</SolutionTemplate>
+
+<style>
+  .demo-placeholder {
+    display: grid;
+    place-items: center;
+    min-height: 10rem;
+    margin: 0;
+    padding: 1.5rem;
+    border: 1px dashed var(--color-muted);
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-muted);
+  }
+</style>
