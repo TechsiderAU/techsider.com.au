@@ -143,6 +143,17 @@ test("services data: the go/no-go gate is a decision you make, and every §4.5 i
   for (const re of INCLUSIONS) assert.equal(SERVICES.standardInclusions.filter((s) => re.test(s)).length, 1, String(re));
 });
 
+test("services data: Prove spans the one-week Audit and the Two-Week Trial, and no entry offer prints a spec note (C2-T2-F1, C2-T2-F2)", () => {
+  // A mid-market client may take the Audit (one week), the Trial (two weeks) or both, on one page.
+  assert.match(SERVICES.services.find((s) => s.id === "admin-hours-audit").what, /^One week\b/);
+  assert.equal(SERVICES.services.find((s) => s.id === "two-week-trial").name, "Two-Week Trial on Your Own Files");
+  assert.equal(SERVICES.phases.find((p) => p.id === "prove").duration, "1–3 weeks");
+  // Spec §4.3's "(no school kit)" explains the table; the page says what the school gets.
+  for (const o of SERVICES.entryOffers) {
+    for (const s of [o.buyer, o.entry, o.then]) assert.doesNotMatch(s, /\(no [^)]*\)|\bno school kit\b/, s);
+  }
+});
+
 test("services data: the independence policy states spec §4.4's five points, adversarial testing is never in-house, and only a judge in use is calibrated", () => {
   const POINTS = [
     /never issue an independent evaluation of a system we built, configured or advised on for the same client/,

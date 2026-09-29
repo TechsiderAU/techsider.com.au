@@ -15,7 +15,7 @@ export const SERVICES: ServicesData = {
     {
       id: "prove",
       name: "Prove",
-      duration: "1–2 weeks",
+      duration: "1–3 weeks",
       summary: "Test one job on your own files, or on public or synthetic data, against an error rate agreed before work starts.",
       deliverables: [
         "An hours map and baseline, with each job marked build, queue or park (Admin Hours Audit)",
@@ -185,7 +185,7 @@ export const SERVICES: ServicesData = {
     {
       buyer: "Independent school or group",
       entry: "Trial of the staff Policy & Procedure Assistant",
-      then: "AI Switch-On (no school kit); an evaluation of AI tools you've deployed",
+      then: "AI Switch-On for the software you already use; an evaluation of AI tools you've deployed",
     },
     {
       buyer: "Prime, internal-audit co-source firm, law firm or SI",
