@@ -3,6 +3,9 @@
 // (planned, in a production build) gets `href: null`, and templates render a null href as
 // plain text, never as <a>. src/fixtures/site.ts builds the gallery's SiteContext in the same
 // shape. Node-importable: nav.ts and fixed-copy.ts have no imports.
+// The context is read-only and siteContext() freezes it, as src/fixtures/index.ts freezes the
+// gallery's fixtureSite: map, filter or spread a list to change it, never sort it in place, so a
+// template behaves the same in the gallery and in a real build.
 import { PAGES, SITE, footerLabel, isShown, type PageEntry } from "../data/nav.ts";
 import { EXTRA_INTERESTS } from "./fixed-copy.ts";
 
@@ -13,25 +16,25 @@ export interface Link {
 
 export interface SolutionLink {
   /** The nav slug, e.g. "document-registers". */
-  id: string;
+  readonly id: string;
   /** "①".."⑤" from CIRCLED, in spec §4.1 order. */
-  number: string;
-  shortName: string;
-  fullName: string;
-  oneLiner: string;
+  readonly number: string;
+  readonly shortName: string;
+  readonly fullName: string;
+  readonly oneLiner: string;
   /** Always the page path. */
-  path: string;
+  readonly path: string;
   /** The path when the page is shown, else null. */
-  href: string | null;
+  readonly href: string | null;
 }
 
 export interface IndustryLink {
-  id: string;
-  shortName: string;
-  fullName: string;
-  footerLabel: string;
-  path: string;
-  href: string | null;
+  readonly id: string;
+  readonly shortName: string;
+  readonly fullName: string;
+  readonly footerLabel: string;
+  readonly path: string;
+  readonly href: string | null;
 }
 
 export type PageKey =
@@ -40,11 +43,11 @@ export type PageKey =
   | "about" | "trust" | "legal" | "privacy" | "websiteTerms" | "contact";
 
 export interface PageLink {
-  key: PageKey;
-  label: string;
-  oneLiner?: string;
-  path: string;
-  href: string | null;
+  readonly key: PageKey;
+  readonly label: string;
+  readonly oneLiner?: string;
+  readonly path: string;
+  readonly href: string | null;
 }
 
 export interface ContactQuery {
@@ -54,18 +57,18 @@ export interface ContactQuery {
 
 export interface SiteContext {
   /** All 5, in spec §4.1 order. */
-  solutions: SolutionLink[];
+  readonly solutions: readonly SolutionLink[];
   /** All 9, in spec §5 order. */
-  industries: IndustryLink[];
+  readonly industries: readonly IndustryLink[];
   /** Insights, Demos, Safe-Use Kits, What you already pay for, Evaluation method (nav order). */
-  resources: PageLink[];
+  readonly resources: readonly PageLink[];
   /** href is null when the page isn't shown. Throws on an unknown key. */
   page(key: PageKey): PageLink;
   /** That solution's demo page when shown, else null. Throws on an unknown solution id. */
   demo(solutionId: string): string | null;
   /** "/contact/?interest=x" | "/contact/?industry=y" | "/contact/" while /contact/ is shown, else `mailto:${email}`. */
   contact(query?: ContactQuery): string;
-  email: string;
+  readonly email: string;
 }
 
 export const CIRCLED = ["①", "②", "③", "④", "⑤"] as const;
@@ -130,20 +133,18 @@ export function siteContext(preview: boolean): SiteContext {
   if (solutionEntries.length !== CIRCLED.length) {
     throw new Error(`nav.ts lists ${solutionEntries.length} solutions; CIRCLED numbers ${CIRCLED.length}`);
   }
-  const solutions: SolutionLink[] = solutionEntries.map((p, i) => {
+  const solutions: readonly SolutionLink[] = Object.freeze(solutionEntries.map((p, i) => {
     if (!p.oneLiner) throw new Error(`nav.ts: ${p.path} has no oneLiner`);
-    return { id: idOf(p), number: CIRCLED[i], shortName: p.shortName, fullName: p.fullName, oneLiner: p.oneLiner, path: p.path, href: hrefOf(p) };
-  });
-  const industries: IndustryLink[] = PAGES.filter((p) => p.base === "/industries/").map((p) => ({
-    id: idOf(p), shortName: p.shortName, fullName: p.fullName, footerLabel: footerLabel(p), path: p.path, href: hrefOf(p),
+    return Object.freeze({ id: idOf(p), number: CIRCLED[i], shortName: p.shortName, fullName: p.fullName, oneLiner: p.oneLiner, path: p.path, href: hrefOf(p) });
   }));
+  const industries: readonly IndustryLink[] = Object.freeze(PAGES.filter((p) => p.base === "/industries/").map((p) => Object.freeze({
+    id: idOf(p), shortName: p.shortName, fullName: p.fullName, footerLabel: footerLabel(p), path: p.path, href: hrefOf(p),
+  })));
 
   const pages = new Map<PageKey, PageLink>();
   for (const [key, path] of Object.entries(PAGE_PATHS) as [PageKey, string][]) {
     const p = entryAt(path);
-    const link: PageLink = { key, label: p.shortName, path: p.path, href: hrefOf(p) };
-    if (p.oneLiner) link.oneLiner = p.oneLiner;
-    pages.set(key, link);
+    pages.set(key, Object.freeze({ key, label: p.shortName, ...(p.oneLiner ? { oneLiner: p.oneLiner } : {}), path: p.path, href: hrefOf(p) }));
   }
   const page = (key: PageKey): PageLink => {
     const link = pages.get(key);
@@ -151,10 +152,10 @@ export function siteContext(preview: boolean): SiteContext {
     return link;
   };
 
-  return {
+  const context: SiteContext = {
     solutions,
     industries,
-    resources: RESOURCE_KEYS.map(page),
+    resources: Object.freeze(RESOURCE_KEYS.map(page)),
     page,
     demo(solutionId) {
       if (!solutions.some((s) => s.id === solutionId)) throw new Error(`demo(): unknown solution "${solutionId}"`);
@@ -167,6 +168,7 @@ export function siteContext(preview: boolean): SiteContext {
     },
     email: SITE.email,
   };
+  return Object.freeze(context);
 }
 
 export function solutionLink(site: SiteContext, id: string): SolutionLink {

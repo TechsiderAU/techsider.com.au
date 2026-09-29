@@ -68,9 +68,7 @@ function page(key: PageKey): PageLink {
   if (!Object.hasOwn(PAGE_PATH, key)) throw new Error(`Unknown page key "${key}"`);
   const path = PAGE_PATH[key];
   const { label, oneLiner } = nav.page(key);
-  const link: PageLink = { key, label, path, href: NOT_SHOWN.includes(key) ? null : path };
-  if (oneLiner) link.oneLiner = oneLiner;
-  return link;
+  return { key, label, ...(oneLiner ? { oneLiner } : {}), path, href: NOT_SHOWN.includes(key) ? null : path };
 }
 
 export const fixtureSite: SiteContext = {

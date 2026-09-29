@@ -231,3 +231,23 @@ test("fixtureSite: its solution and industry copy is visibly fictional, and inde
   assert.ok(Object.isFrozen(fixtureSite) && Object.isFrozen(fixtureSite.solutions[0]) && Object.isFrozen(fixtureSite.industries));
   assert.throws(() => { fixtureSite.solutions[0].href = "/solutions/"; }, TypeError);
 });
+
+// Review finding T4-F5: the gallery's fixtureSite is deep-frozen (src/fixtures/index.ts), so a
+// template that sorted a SiteContext list in place would throw in the gallery and silently reorder
+// the nav's lists in a real build. siteContext() freezes its lists and links too.
+test("siteContext() is frozen like fixtureSite, so an in-place change fails the same way on both surfaces", () => {
+  for (const preview of [false, true]) {
+    const site = siteContext(preview);
+    assert.ok(Object.isFrozen(site), `preview=${preview}: the context`);
+    for (const [name, list] of Object.entries({ solutions: site.solutions, industries: site.industries, resources: site.resources })) {
+      assert.ok(Object.isFrozen(list), `preview=${preview}: ${name}`);
+      for (const link of list) assert.ok(Object.isFrozen(link), `preview=${preview}: ${name} ${link.path}`);
+    }
+    for (const key of Object.keys(PAGE_PATHS)) assert.ok(Object.isFrozen(site.page(key)), `preview=${preview}: page("${key}")`);
+    assert.throws(() => site.solutions.sort((a, b) => a.id.localeCompare(b.id)), TypeError);
+    assert.throws(() => site.resources.splice(0, 1), TypeError);
+    assert.throws(() => { site.industries[0].href = "/industries/"; }, TypeError);
+    assert.throws(() => { site.page("contact").href = "/elsewhere/"; }, TypeError);
+  }
+  assert.throws(() => fixtureSite.solutions.sort((a, b) => a.id.localeCompare(b.id)), TypeError);
+});
