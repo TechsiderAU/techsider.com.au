@@ -1,163 +1,58 @@
 ---
-import { demoScript } from "../lib/demoScript";
-const [main, abstain] = demoScript.turns;
-const transcript = [main, abstain];
+// The legacy Home's demo band (spec §8.1 block 4, §9.4), until Phase D Task 8 moves the Home to
+// HomeTemplate and its demo slot. It now runs the ② Knowledge Assistant on the Phase D engine
+// (src/components/demo/AssistantDemo.astro, which loads src/data/demos/knowledge-assistant.json);
+// #demo stays, since the header's "See a demo" falls back to it while /demos/ is planned.
+import AssistantDemo from "./demo/AssistantDemo.astro";
 ---
-<section id="demo" class="px-6 py-24 md:py-32 border-b border-border">
-  <div class="max-w-5xl mx-auto">
-    <p class="text-xs uppercase tracking-[0.2em] text-accent font-medium mb-4">See it work</p>
-    <h2 class="font-serif font-normal text-3xl md:text-4xl leading-[1.15] text-text max-w-[26ch] mb-4">
-      Production RAG, doing the unglamorous part.
-    </h2>
-    <p class="text-text-mute text-base leading-relaxed max-w-[58ch] mb-6">
-      A scripted walkthrough of a retrieval system answering a regulated question — with citations you can open, a visible trace, and an honest refusal when the answer isn't in the source.
+<section id="demo" class="legacy-demo">
+  <div class="legacy-demo-inner">
+    <p class="legacy-demo-eyebrow">See it work</p>
+    <h2 class="legacy-demo-title">Production RAG, doing the unglamorous part.</h2>
+    <p class="legacy-demo-lede">
+      A scripted replay of a cited assistant answering staff questions from public documents: the passages it retrieved, answers with citations you can open, a refusal when the documents don't hold the answer, and a false answer caught by the acceptance test (not independent). It runs in your browser, with no live model.
     </p>
-
-    <p class="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-text-dim border border-border rounded-full px-3 py-1.5 mb-6">
-      <span class="w-1.5 h-1.5 rounded-full bg-accent" aria-hidden="true"></span>
-      Scripted illustrative demo — runs entirely in your browser, no live model or backend
-    </p>
-
-    <div class="rounded-xl border border-border bg-bg-elev overflow-hidden" data-demo-root>
-      <div class="px-4 py-2.5 border-b border-border text-[11px] text-text-dim bg-bg-deep/40">
-        Source corpus: {demoScript.doc}
-      </div>
-
-      <div class="grid md:grid-cols-[1fr_18rem]">
-        <div class="p-5 md:p-6 min-h-[18rem]">
-          <div data-demo-controls hidden class="flex flex-wrap gap-2 mb-5">
-            <button type="button" data-demo-pause
-              class="text-xs font-semibold border border-border-soft text-text px-3 py-1.5 rounded hover:border-accent transition-colors disabled:opacity-50">
-              Pause
-            </button>
-            <button type="button" data-demo-skip
-              class="text-xs font-semibold border border-border-soft text-text px-3 py-1.5 rounded hover:border-accent transition-colors disabled:opacity-50">
-              Skip to result
-            </button>
-            <button type="button" data-demo-replay
-              class="text-xs font-semibold bg-accent text-accent-ink px-3 py-1.5 rounded hover:opacity-90 transition-opacity">
-              ▶ Replay
-            </button>
-          </div>
-          <p role="status" data-demo-status class="sr-only"></p>
-          <div data-demo-static>
-            {transcript.map((turn) => (
-              <div class="mb-6 last:mb-0">
-                <p class="text-[11px] uppercase tracking-[0.14em] text-text-dim mb-1">Analyst</p>
-                <p class="text-text font-medium mb-3">{turn.question}</p>
-                <p class="text-[11px] uppercase tracking-[0.14em] text-text-dim mb-1">
-                  {turn.abstained ? "Assistant — abstained" : "Assistant"}
-                </p>
-                <p class="text-text-mute text-sm leading-relaxed">
-                  {turn.answer.map((seg) => (
-                    <Fragment>
-                      {seg.text}
-                      {seg.cite ? (
-                        <a href={`#demo-src-${seg.cite}`} class="text-accent align-super text-[10px] no-underline ml-0.5">[{seg.cite}]</a>
-                      ) : null}
-                    </Fragment>
-                  ))}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div data-demo-stage hidden></div>
-        </div>
-
-        <aside class="border-t md:border-t-0 md:border-l border-border p-5 md:p-6 bg-bg-deep/30" data-demo-sources>
-          <p class="text-[11px] uppercase tracking-[0.14em] text-text-dim mb-3">Sources</p>
-          {main.sources.map((s) => (
-            <div id={`demo-src-${s.cite}`} data-demo-src={s.cite} class="mb-4 last:mb-0 scroll-mt-24 rounded-md -mx-2 px-2 py-1.5 transition-colors">
-              <p class="text-[11px] text-accent font-semibold mb-1">[{s.cite}] {s.label}</p>
-              <p class="text-text-dim text-xs leading-relaxed">{s.text}</p>
-            </div>
-          ))}
-          <p class="text-[10px] text-text-dim mt-4 leading-relaxed">
-            Public reference data. Your engagement runs on your own corpus and infrastructure.
-          </p>
-        </aside>
-      </div>
-
-      <details class="border-t border-border px-5 md:px-6 py-3" data-demo-trace>
-        <summary class="cursor-pointer text-text-mute text-xs uppercase tracking-[0.14em]">Trace &amp; evals</summary>
-        <div class="mt-3 grid sm:grid-cols-2 gap-5">
-          <div>
-            <p class="text-[11px] uppercase tracking-[0.14em] text-text-dim mb-2">Pipeline</p>
-            <ul class="space-y-1.5">
-              {main.trace.map((step) => (
-                <li class="text-xs text-text-mute flex justify-between gap-3">
-                  <span><span class="text-text">{step.label}</span> — {step.detail}</span>
-                  <span class="text-text-dim tabular-nums whitespace-nowrap">{step.ms} ms</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p class="text-[11px] uppercase tracking-[0.14em] text-text-dim mb-2">Evals</p>
-            <ul class="space-y-1.5 text-xs text-text-mute">
-              <li>Groundedness: <span class="text-text">{main.evals.groundedness}</span></li>
-              <li>Faithfulness: <span class="text-text">{main.evals.faithfulness}</span></li>
-              <li>Retrieval recall: <span class="text-text">{main.evals.recall}</span></li>
-            </ul>
-          </div>
-        </div>
-        <p class="mt-3 text-[11px] text-text-dim">Illustrative values: scripted demo, not a measured run.</p>
-      </details>
-    </div>
+    <AssistantDemo level={3} />
   </div>
 </section>
 
-<script>
-  import { initDemo } from "../scripts/demo";
-  initDemo();
-</script>
-
 <style>
-  :global([data-demo-stage] .demo-turn) { margin-bottom: 1.5rem; }
-  :global([data-demo-stage] .demo-role) {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--color-text-dim);
-    margin-bottom: 0.25rem;
+  /* Tokens only (the legacy aliases go in Phase D Task 8): bone text on the page's carbon. */
+  .legacy-demo {
+    padding: 6rem 1.5rem;
+    border-bottom: 1px solid var(--color-graphite);
   }
-  :global([data-demo-stage] .demo-q) { color: var(--color-text); font-weight: 500; margin-bottom: 0.75rem; }
-  :global([data-demo-stage] .demo-a) { color: var(--color-text-mute); font-size: 0.875rem; line-height: 1.7; }
-  :global([data-demo-stage] .demo-retrieve) {
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 0.6rem 0.75rem;
-    margin-bottom: 0.9rem;
-    background: var(--color-bg-deep);
+  @media (min-width: 48rem) {
+    .legacy-demo {
+      padding-block: 8rem;
+    }
   }
-  :global([data-demo-stage] .demo-chunk) {
-    display: flex;
-    gap: 0.6rem;
-    align-items: baseline;
-    margin-top: 0.4rem;
+  .legacy-demo-inner {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 64rem;
+    margin-inline: auto;
+  }
+  .legacy-demo-eyebrow {
+    margin: 0;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-acid);
   }
-  :global([data-demo-stage] .demo-chunk-score) {
-    font-variant-numeric: tabular-nums;
-    color: var(--color-accent);
+  .legacy-demo-title {
+    max-width: 26ch;
+    margin: 0;
+    font-size: clamp(1.875rem, 1.5rem + 1.5vw, 2.25rem);
     font-weight: 600;
-    flex-shrink: 0;
+    line-height: 1.15;
+    color: var(--color-bone);
   }
-  :global([data-demo-stage] .demo-chunk-text) { color: var(--color-text-dim); }
-  :global(.demo-cite) {
-    color: var(--color-accent);
-    font-size: 10px;
-    vertical-align: super;
-    margin-left: 1px;
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 0;
-  }
-  :global(.demo-cite:hover) { text-decoration: underline; }
-  :global([data-demo-src].demo-src-active) {
-    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
-    box-shadow: inset 2px 0 0 var(--color-accent);
+  .legacy-demo-lede {
+    max-width: 58ch;
+    margin: 0;
+    line-height: 1.6;
+    color: var(--color-muted);
   }
 </style>

@@ -1,0 +1,27 @@
+---
+// The replay controls of every engine-backed demo (spec §6.5, §8.8): Pause/Resume, "Skip to
+// result" and Replay, in that order. DemoEngine places them before the animated stage in DOM
+// order. They ship hidden, so a visitor without JavaScript never meets a dead button, and
+// src/scripts/demo-engine.ts reveals them when a run starts. Replay is never disabled; the engine
+// disables Pause and Skip only when a run has ended, moving focus to Replay first if either held it.
+// Each button is a .btn, so it is at least 44px tall (spec §6.6).
+---
+<div class="demo-controls" data-demo-controls role="group" aria-label="Replay controls" hidden>
+  <button type="button" class="btn btn-secondary" data-demo-pause>Pause</button>
+  <button type="button" class="btn btn-secondary" data-demo-skip>Skip to result</button>
+  <button type="button" class="btn btn-primary" data-demo-replay>Replay</button>
+</div>
+
+<style>
+  /* The [hidden] attribute still wins: Tailwind's preflight hides [hidden] with !important. */
+  .demo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  /* A disabled control is exempt from the contrast minimum, but still reads as unavailable. */
+  .demo-controls .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>

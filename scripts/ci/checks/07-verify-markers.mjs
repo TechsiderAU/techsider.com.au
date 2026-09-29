@@ -7,8 +7,9 @@ import { lineAt, listFiles, readText, relPath, result } from "../lib.mjs";
 
 export const NAME = "07-verify-markers";
 /**
- * Where copy and data live: layouts hold site-wide copy (BaseLayout) and lib holds demo copy
- * (demoScript). src/fixtures/ is fictional preview data and is not scanned.
+ * Where copy and data live: layouts hold site-wide copy (BaseLayout) and lib holds fixed copy
+ * (fixed-copy.ts, and the ② demo's words in assistant-copy.ts). src/fixtures/ is fictional preview
+ * data and is not scanned.
  */
 export const SCOPES = ["src/content", "src/data", "src/pages", "src/components", "src/layouts", "src/lib"];
 const TEXT_FILE = /\.(astro|md|mdx|ya?ml|json|ts|tsx|js|mjs|html|css|svg|txt)$/;

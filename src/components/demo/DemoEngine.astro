@@ -1,0 +1,48 @@
+---
+// The `engine` slot of an engine-backed DemoFrame (spec §8.8, §9.1): [data-demo-root], holding the
+// replay controls, then the animated stage, then the visually hidden announcement log, in that DOM
+// order. The stage ships hidden and aria-hidden, and is never a live region; the log is the one
+// polite live region. The frame's `transcript` slot holds the static transcript, which is the
+// demo's final state: src/scripts/demo-engine.ts swaps the stage in for it while a run plays.
+// The script below boots every demo on the page. Each kind's renderer and data file load only when
+// its demo scrolls into view, as their own chunks (spec §11.4); the ① register and ③ inbox demos
+// add their loaders beside the assistant's.
+import DemoControls from "./DemoControls.astro";
+
+interface Props {
+  /** The demo's kind, which picks its renderer and data file. */
+  kind: "assistant";
+}
+
+const { kind } = Astro.props;
+---
+<div class="demo-root" data-demo-root data-demo-kind={kind}>
+  <DemoControls />
+  <div class="demo-stage" data-demo-stage aria-hidden="true" hidden></div>
+  <div class="sr-only" data-demo-log aria-live="polite"></div>
+</div>
+
+<script>
+  import { bootDemos } from "../../scripts/demo-engine.ts";
+  import type { AssistantData } from "../../content/schemas.ts";
+
+  bootDemos({
+    assistant: async () => {
+      const [{ assistantRenderer }, file] = await Promise.all([
+        import("../../scripts/demo/assistant.ts"),
+        import("../../data/demos/knowledge-assistant.json"),
+      ]);
+      // The build validates this file against the demo schema (src/content.config.ts), and
+      // AssistantDemo renders its transcript from the same file.
+      return assistantRenderer(file.default.data as unknown as AssistantData);
+    },
+  });
+</script>
+
+<style>
+  .demo-root {
+    display: grid;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+</style>

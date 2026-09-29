@@ -70,7 +70,7 @@ test("07: the same markers are errors in gate mode", async () => {
   assert.deepEqual(r.warnings, []);
 });
 
-test("07: layouts and lib hold copy too (BaseLayout's site-wide text, demoScript's demo copy)", async () => {
+test("07: layouts and lib hold copy too (BaseLayout's site-wide text, the fixed copy in src/lib)", async () => {
   const t = tree({
     "src/layouts/FixtureLayout.astro": "<footer>Fixture footer ⚑ check the ABN</footer>\n",
     "src/lib/fixtureScript.ts": 'export const line = "Fixture demo line";\nexport const note = "VERIFY the Fixture figure";\n',

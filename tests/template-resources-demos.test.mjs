@@ -355,15 +355,17 @@ test("#next: the demo CTA as its heading, then the solution page", () => {
 });
 
 // Phase C Task 7 puts the Resources hub live at /resources/ (tests/company-pages.test.mjs checks
-// its cards). The kits page, the checker, the evaluation method and the demos stay out of
-// production until their pages go live.
-test("production: only /resources/ carries resources or demos template markup, and that is the hub", () => {
+// its cards), and Phase D Task 2 puts the ② demo's frame in the Home's demo band. The kits page,
+// the checker, the evaluation method and the demo pages stay out of production until they go live.
+test("production: only /resources/ carries resources template markup (the hub), and only the Home a demo frame", () => {
   for (const f of allHtmlFiles()) {
     const html = readDist(f);
-    for (const hook of ["data-demo-frame", "data-kit", "data-hero-badge", 'data-template="demo"', 'data-template="safe-use-kits"']) {
+    for (const hook of ["data-kit", "data-hero-badge", 'data-template="demo"', 'data-template="safe-use-kits"']) {
       assert.ok(!html.includes(hook), `dist/${f} carries ${hook}`);
     }
     if (f !== "resources/index.html") assert.ok(!html.includes('data-template="resources-hub"'), `dist/${f} carries the Resources hub`);
+    const frames = startTags(html).filter((t) => "data-demo-frame" in t.attrs).length;
+    assert.equal(frames, f === "index.html" ? 1 : 0, `dist/${f} carries ${frames} demo frame(s)`);
   }
   assert.ok(readDist("resources/index.html").includes('data-template="resources-hub"'), "dist/resources/index.html doesn't render the Resources hub");
 });

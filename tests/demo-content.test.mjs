@@ -2,8 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readDist, visibleText } from "./helpers.mjs";
 
-// The static (no-JS) transcript and the Sources panel are both server-rendered,
-// so these assertions cover what every visitor, and a crawler, sees.
+// The Home's ② demo band renders its static transcript, sources included, on the server (the
+// replay only types the same text over it), so these assertions cover what every visitor, and a
+// crawler, sees. The CPS 230 pins are the spec §9.4 corrections, carried in the demo's second
+// scenario (src/data/demos/knowledge-assistant.json).
 const home = visibleText(readDist("index.html"));
 
 test("critical-operations definition is cited as ¶34 under APRA's heading", () => {
@@ -33,11 +35,13 @@ test("service-provider notice (¶60) is mentioned as a separate obligation", () 
   assert.match(home, /20 business days/);
 });
 
-test("demo metrics are labelled illustrative", () => {
-  assert.match(home, /Illustrative values: scripted demo, not a measured run\./);
+test("demo metrics are labelled illustrative, on the frame and above the transcript", () => {
+  assert.match(home, /Illustrative data/);
+  assert.match(home, /Scores and timings are illustrative: a scripted replay, not a measured run\./);
 });
 
-test("demo is described as scripted, not recorded", () => {
+test("demo is described as a scripted replay, not a recording", () => {
   assert.doesNotMatch(home, /Recorded illustrative demo|recorded walkthrough/i);
-  assert.match(home, /Scripted illustrative demo/);
+  assert.match(home, /Canned replay · synthetic or public data/);
+  assert.match(home, /A scripted replay of a cited assistant/);
 });
