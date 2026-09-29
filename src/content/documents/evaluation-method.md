@@ -52,7 +52,7 @@ You keep a reproducible evidence bundle:
 - the versioned test set and its labels;
 - the model and deployment identifiers, prompts and parameters, where the platform exposes them;
 - timestamps, raw outputs and grader outputs, with hashes;
-- a replay script that runs in your own cloud subscription. The graders run there too, so test data and results stay with you; the system under test handles each question where its vendor runs it, and the report records that location.
+- a replay script that runs in your own cloud subscription. The graders run there too, so test data and results stay with you; the system under test handles each question where its vendor runs it, and the report records the vendor's published processing location, with its date.
 
 The harness and the question set are handed over, with a training session for your data, risk or second-line team, so you can re-run the test without us.
 

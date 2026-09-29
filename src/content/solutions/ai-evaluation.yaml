@@ -89,11 +89,10 @@ packages:
       such as a Copilot Studio agent leaving pilot or a contact-centre summary tool.
     scope: >-
       One system and one use case, the full method and the evidence bundle, with the harness handed
-      over. For financial services it's an independent validation of the use case; for law firms, an
-      AI accuracy test on your own matters.
+      over.
     inclusions:
       - A test plan with thresholds agreed before testing starts
-      - For financial services, recall on complaint recognition, hardship-related complaints and vulnerability cues, each reported on its own, with every miss listed
+      - "For financial services, an independent validation of the use case: recall on complaint recognition, hardship-related complaints and vulnerability cues, each reported on its own, with every miss listed"
       - The Independent Evaluation Report, with the failure list and findings rated to your risk matrix
       - Control-test scripts for your GRC, where you use one, in a format agreed at scoping
     clientTime: >-
@@ -108,8 +107,8 @@ packages:
       continue.
     onshoreNote: >-
       The test runs in your own environment, and the graders run in your own subscription. The
-      system under test runs where its vendor runs it, and the report records that location with its
-      date.
+      system under test runs where its vendor runs it, and the report records the vendor's published
+      processing location, with its date.
   - id: scribe-clinical-ai-evaluation
     name: Scribe & Clinical AI Evaluation
     status: launch
@@ -170,7 +169,8 @@ packages:
       whether to continue.
     onshoreNote: >-
       Each tool runs in an account your organisation controls, so its vendor's processing location
-      applies; the report records each one with its date. The graders run in your own subscription.
+      applies; the report records each vendor's published processing location, with its date. The
+      graders run in your own subscription.
     precondition: Each vendor gives your organisation trial or pilot access.
   - id: model-change-regression
     name: Model-Change Regression
@@ -201,7 +201,7 @@ packages:
     onshoreNote: >-
       The test set and the replay script live and run in your own subscription, so test data and
       results stay with you. The system under test processes each test question where its vendor runs
-      it, and the report records that location with its date.
+      it, and the report records the vendor's published processing location, with its date.
   - id: tender-ai-claims-verification
     name: Tender AI-Claims Verification
     status: launch
@@ -260,7 +260,8 @@ packages:
       whether to continue.
     onshoreNote: >-
       The review reads configuration and logs in your environment with read-only access. The agent
-      platform keeps its vendor's processing location, which the report records with its date.
+      platform runs where its vendor runs it, and the report records the vendor's published
+      processing location, with its date.
   - id: soci-ai-risk-evidence
     name: SOCI AI Risk Evidence
     status: on-request
@@ -300,7 +301,7 @@ whereItRuns:
   note: >-
     Testing runs in your own environment, and the graders run in your own subscription, so test data
     and results stay with you. The system under test processes test questions where its vendor runs
-    it, and the report records that location with its date.
+    it, and the report records the vendor's published processing location, with its date.
 independencePolicy: true
 platformFirst: >-
   If your AI runs as a Copilot Studio agent, use its built-in agent evaluation for routine re-tests
@@ -344,5 +345,5 @@ faq:
     a: >-
       Not to us. The test runs in your environment, and the graders run in your own subscription, so
       test data and results stay with you. The system under test processes each test question where
-      its vendor runs it, as in normal use, and the report records that location. While your approvals
-      run, testing can start on public or synthetic data.
+      its vendor runs it, as in normal use, and the report records the vendor's published processing
+      location, with its date. While your approvals run, testing can start on public or synthetic data.

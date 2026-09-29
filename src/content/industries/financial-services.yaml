@@ -125,7 +125,7 @@ faq:
   - q: Can we give your report to the board or APRA as a formal opinion?
     a: No. It's findings, not an assurance opinion, and it isn't an ASAE 3000 or ASRE engagement. What you table, and how, is your decision.
   - q: Does customer data leave our environment?
-    a: Not to us. The harness and graders run in your own Microsoft or AWS subscription. The vendor's system processes each test case where it runs in normal use, and the data note records where that is. If a grader would need a model outside Australia, we tell you before it runs.
+    a: Not to us. The harness and graders run in your own Microsoft or AWS subscription. The vendor's system processes each test case where it runs in normal use, and the data note records the vendor's published processing location, with its date. If a grader would need a model outside Australia, we tell you before it runs.
   - q: Do we need to onboard you as a new supplier?
     a: Not necessarily. Through our Evaluation Partner route, the work can run under a firm you've already onboarded, such as your internal-audit co-source. How CPS 230 applies is your call.
   - q: Our vendor won't give model-change notice. Can testing make up for that?

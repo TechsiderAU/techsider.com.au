@@ -35,7 +35,7 @@ obligationChips:
   - { label: "Qld: a FAIRA when evaluating AI", row: qld-ai-governance-faira, jurisdiction: qld }
   - { label: "NSW councils: IPP 9 accuracy check", row: nsw-ppip-ipp9, jurisdiction: local }
   - { label: "Qld councils: QPPs apply", row: qld-ip-act-qpp, jurisdiction: local }
-  - { label: AI-generated records are State records, row: local-nsw-state-records-ai, jurisdiction: local }
+  - { label: "NSW councils: AI-generated State records", row: local-nsw-state-records-ai, jurisdiction: local }
   - { label: "Vic councils: AI recordkeeping policy", row: local-vic-prov-ai-records, jurisdiction: local }
   - { label: "Qld councils: records in any format", row: local-qld-public-records, jurisdiction: local }
 # Every access path is verified in the dossier's "Works alongside" tables (fetched 2026-09-29). A system's
@@ -66,7 +66,7 @@ dontDo:
   - We don't build a general staff chat assistant to replace the one you already run.
   - We don't do adversarial testing in-house. A CREST-accredited tester you engage does it.
   - We don't sell AI policy paperwork, such as AI use-case registers or transparency statements.
-  - We don't evaluate a system we built, configured or advised on for the same agency.
+  - We don't independently evaluate a system we built, configured or advised on for the same agency.
 problem:
   from: AI tools reach daily staff use before a dedicated risk assessment is done or monitoring controls are in place.
   to: Each use case leaves pilot with a measured test on your own questions, its failures listed, and a re-test when the model changes.
@@ -157,6 +157,6 @@ faq:
   - q: Will you red-team or penetration-test our AI agents?
     a: No. The Agentic AI Control Evaluation is a configuration review. Where prompt-injection or tool-misuse testing is needed, a CREST-accredited tester you engage does it, under written rules of engagement.
   - q: Does our test data leave our environment?
-    a: Not to us. The test and its graders run in your own subscription. The system under test handles each question where its vendor runs it, as in normal use, and the report records that location. While your privacy and security assessments run, we start on public or synthetic data in a Feasibility Sprint.
+    a: Not to us. The test and its graders run in your own subscription. The system under test handles each question where its vendor runs it, as in normal use, and the report records the vendor's published processing location, with its date. While your privacy and security assessments run, we start on public or synthetic data in a Feasibility Sprint.
   - q: We're a council. What do you design around?
-    a: "Your state's privacy and records rules, listed with their sources in the Local government section: the PPIP Act and State Records Act in NSW, PROV's recordkeeping policy in Victoria, and the Information Privacy Act and Public Records Act in Queensland."
+    a: "Your state's privacy and records rules, listed with their sources in the Local government section: the PPIP Act and State Records Act in NSW, PROV's recordkeeping policy for Victorian records, and the Information Privacy Act and Public Records Act in Queensland."

@@ -12,7 +12,7 @@ flagshipUseCases:
   - name: Trust Deed & Client Structure Register
     solution: document-registers
     status: launch
-  # ⚑ owner: the accounting Safe-Use Kit must be lawyer-reviewed and published before this page launches (spec §12 item 6; research index A1)
+  # ⚑ owner: the accounting Safe-Use Kit must be lawyer-reviewed and published before the Accounting page or the Industries hub launches (spec §12 item 6; research index A1)
   - name: Admin Hours Audit + Switch-On, with the accounting Safe-Use Kit
     solution: ai-switch-on
     status: launch

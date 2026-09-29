@@ -245,6 +245,31 @@ test("the shared inclusions and delivery choice (c) hold on every solution page 
   assert.match(c.body, /\bWhere we build part of it\b/);
 });
 
+test("a package card shown on several industry pages frames no one audience in its scope (C4-T4-F5)", () => {
+  // An industry page's package card shows the package's scope as its summary (industryView), so a
+  // package several industries recommend keeps its audience framing out of the scope.
+  const IND = fileURLToPath(new URL("../src/content/industries/", import.meta.url));
+  const shownOn = new Map();
+  for (const f of readdirSync(IND).filter((x) => x.endsWith(".yaml"))) {
+    for (const p of parseYaml(readFileSync(`${IND}${f}`, "utf8")).packages) {
+      const key = `${p.solution}/${p.package}`;
+      shownOn.set(key, new Set([...(shownOn.get(key) ?? []), f.replace(/\.yaml$/, "")]));
+    }
+  }
+  const report = DATA["ai-evaluation"].packages.find((p) => p.id === "independent-evaluation-report");
+  assert.ok(shownOn.get("ai-evaluation/independent-evaluation-report").size >= 2, "the report is recommended on several industry pages");
+  let checked = 0;
+  for (const id of IDS) {
+    for (const p of launchOf(DATA[id])) {
+      if ((shownOn.get(`${id}/${p.id}`)?.size ?? 0) < 2) continue;
+      checked += 1;
+      assert.doesNotMatch(p.scope, /\bfor (?:financial services|law firms|councils|agencies|schools|health services)\b/i, `${id} ${p.id}: "${p.scope}"`);
+    }
+  }
+  assert.ok(checked >= 3, `only ${checked} shared cards checked`);
+  assert.equal(report.scope, "One system and one use case, the full method and the evidence bundle, with the harness handed over.");
+});
+
 test("a solution with packages for government and enterprise offers their entry offer beside the mid-market Trial (C3-T3-F2; spec §3.4, §4.2)", () => {
   const serving = IDS.filter((id) => launchOf(DATA[id]).some((p) => p.buyers.includes("enterprise-government")));
   assert.deepEqual(serving, ["knowledge-assistant", "ai-evaluation"]);

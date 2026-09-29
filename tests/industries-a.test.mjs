@@ -282,3 +282,57 @@ test("CI checks 01, 02, 04, 06, 08 and 11 pass on dist/, and none reports these 
     assert.deepEqual(warnings.filter((w) => mine.test(w) && !fromCard(w)), [], id);
   }
 });
+
+// ---------- the final whole-branch review's fixes (C4-T4, C6-T6-F3) ----------
+
+/** Every string in a value, however deep. */
+const stringsOf = (v) => (typeof v === "string" ? [v] : Array.isArray(v) ? v.flatMap(stringsOf) : v && typeof v === "object" ? Object.values(v).flatMap(stringsOf) : []);
+const sentencesOf = (s) => s.split(/(?<=[.?!])\s+/);
+
+test("Government: each Local chip names its state, in 40 characters or fewer (C4-T4-F6)", () => {
+  const local = industry("government").obligationChips.filter((c) => c.jurisdiction === "local");
+  assert.ok(local.length >= 4);
+  for (const c of local) {
+    assert.match(c.label, /^(?:NSW|Vic|Qld) councils: /, `the Local chip "${c.label}" reads as general`);
+    assert.ok(c.label.length <= 40, `"${c.label}" is over 40 characters`);
+  }
+});
+
+test("Government: the independence line and the council FAQ say only what the page shows (C4-T4-F1, C4-T4-F2)", () => {
+  // The page's own evidence rows name acceptance tests (spec §4.4): what we never do is an
+  // independent evaluation of our own work, so no industry page says we don't evaluate it at all.
+  for (const f of readdirSync(join(ROOT, "src/content/industries")).filter((x) => x.endsWith(".yaml"))) {
+    for (const s of stringsOf(readYaml(`src/content/industries/${f}`))) {
+      assert.doesNotMatch(s, /\b(?:don't|do not|never|won't) evaluate\b/i, `${f}: "${s}"`);
+    }
+  }
+  assert.ok(industry("government").dontDo.includes("We don't independently evaluate a system we built, configured or advised on for the same agency."));
+  // The Local section lists Victoria's PROV records rule only, so the council FAQ names no Victorian privacy rule.
+  const council = industry("government").faq.find((f) => /council/i.test(f.q));
+  assert.match(council.a, /\bPROV's recordkeeping policy for Victorian records\b/);
+  assert.doesNotMatch(council.a, /\bin Victoria\b/);
+  const vic = rows("government").filter((r) => r.jurisdictions.includes("local") && /^local-vic-/.test(r.id)).map((r) => r.id);
+  assert.deepEqual(vic, ["local-vic-prov-ai-records"]);
+});
+
+test("the report or data note records the vendor's published processing location, never a per-request one (C4-T4-F4)", () => {
+  const sources = [
+    ...["government", "financial-services"].map((id) => [`src/content/industries/${id}.yaml`, stringsOf(readYaml(`src/content/industries/${id}.yaml`))]),
+    ...SOLUTION_IDS.map((id) => [`src/content/solutions/${id}.yaml`, stringsOf(readYaml(`src/content/solutions/${id}.yaml`))]),
+    ["src/content/documents/evaluation-method.md", [readFileSync(join(ROOT, "src/content/documents/evaluation-method.md"), "utf8")]],
+  ];
+  let checked = 0;
+  for (const [file, strings] of sources) {
+    for (const s of strings.flatMap(sentencesOf).filter((x) => /\b(?:report|data note) records\b/.test(x) && /\blocation\b|\bwhere that is\b/.test(x))) {
+      checked += 1;
+      assert.match(s, /\bpublish(?:ed|es)\b/, `${file}: "${s}"`);
+    }
+  }
+  assert.ok(checked >= 10, `only ${checked} sentences checked`);
+});
+
+test("Accounting: the A1 kit marker covers the Industries hub, which shows the same package name (C6-T6-F3)", () => {
+  const lines = readFileSync(join(ROOT, "src/content/industries/accounting.yaml"), "utf8").split("\n");
+  const at = lines.findIndex((l) => l.includes("- name: Admin Hours Audit + Switch-On, with the accounting Safe-Use Kit"));
+  assert.equal(lines[at - 1].trim(), "# ⚑ owner: the accounting Safe-Use Kit must be lawyer-reviewed and published before the Accounting page or the Industries hub launches (spec §12 item 6; research index A1)");
+});
