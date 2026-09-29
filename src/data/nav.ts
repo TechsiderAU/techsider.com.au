@@ -104,8 +104,10 @@ function describe(entry: PageEntry, description: string): PageEntry {
 }
 
 const HOME = describe(page("home", "Home", "/", "/", "live", "Techsider"),
-  "AI that ships. Measured before it ships. We design, build and run AI solutions for Australian organisations, from accounting practices to federal agencies.");
-const NOT_FOUND = page("system", "Not found", "/", "/404", "planned");
+  "AI that ships. Measured before it ships. We design, build and run AI solutions for Australian organisations, from 40-person practices to federal agencies.");
+// Always built: GitHub Pages serves dist/404.html for any path it has no file for.
+const NOT_FOUND = describe(page("system", "Not found", "/", "/404", "live"),
+  "No page lives at this address. It may be mistyped or out of date. Follow a link below to a section of the Techsider site, or report the broken link by email.");
 
 const SOLUTIONS_HUB = page("solutions", "Solutions", "/", "/solutions/", "planned");
 const SOLUTIONS = [

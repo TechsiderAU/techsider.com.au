@@ -101,43 +101,64 @@ Templates never import fixtures: the specimens pass fixture data in, together wi
 Every page type has a body-only template in `src/templates/`. Its logic lives in a pure TypeScript view builder in `src/lib/views/`, unit-tested with fixtures. A route stays thin:
 
 1. Put the content in its collection or typed data file, where the schemas validate it.
-2. Add the route under `src/pages/`. It loads the content, builds the view with the page's builder, passing `siteContext(isPreview())` from `src/lib/site.ts` so that every link follows the nav, and renders the template inside `BaseLayout` with `pageTitle()` and `pageDescription()` from `src/lib/meta.ts` as the title and the meta description. `BaseLayout` has no default description, so `astro check` fails a route that leaves it out. Fixed copy, such as the disclaimers and badges, comes from `src/lib/fixed-copy.ts`, never from content.
-3. Write the page's `description` in `src/data/nav.ts`, the single source of page identity: unique, and 150–160 characters (spec §11.3). `pageDescription()` fails the build without one, and `tests/meta.test.mjs` requires one of every live page.
-4. Set the page's `status` to `"live"` in `src/data/nav.ts`. Until then the production nav leaves the page out, every link to it renders as plain text, and contact links fall back to email.
+2. Add the route under `src/pages/`, with the helpers in `src/lib/pages.ts`. A single page is a `[...page].astro` file in its own directory (`src/pages/services/[...page].astro` serves `/services/`), whose `getStaticPaths` returns `singletonPaths()` for its path; a collection page is an `[id].astro` file, whose `getStaticPaths` builds the ids `shownIds()` gives for its hub. Either way a page is built only while the nav shows it. The route loads the content, builds the view with the page's builder, passing `siteContext(isPreview())` from `src/lib/site.ts` so that every link follows the nav, and renders the template inside `BaseLayout` with `pageTitle()` and `pageDescription()` from `src/lib/meta.ts` as the title and the meta description. `BaseLayout` has no default description, so `astro check` fails a route that leaves it out. Fixed copy, such as the disclaimers and badges, comes from `src/lib/fixed-copy.ts`, never from content.
+3. Write the page's meta description in `src/data/nav.ts`, the single source of page identity, by wrapping its entry in `describe(page(…), "…")`: unique, and 150–160 characters (spec §11.3). `pageDescription()` fails the build without one, and `tests/meta.test.mjs` requires one of every live page and holds each built page to its own.
+4. Set the page's `status` to `"live"` in `src/data/nav.ts`. Until then the production build leaves the page out, the nav skips it, every link to it renders as plain text, and contact links fall back to email.
 
-`src/pages/insights/index.astro` is a working example. A solution page's route looks like this:
+`src/pages/404.astro` and `src/pages/insights/index.astro` are working examples. A single page's route is short:
+
+```astro
+---
+// src/pages/services/[...page].astro
+import type { GetStaticPaths } from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ServicesTemplate from "../../templates/ServicesTemplate.astro";
+import { isPreview } from "../../data/nav";
+import { SERVICES } from "../../data/services"; // the typed Services data (servicesData in page-schemas.ts)
+import { pageDescription, pageTitle } from "../../lib/meta";
+import { pageAt, singletonPaths } from "../../lib/pages";
+import { siteContext } from "../../lib/site";
+
+export const getStaticPaths = (() => singletonPaths("/services/")) satisfies GetStaticPaths;
+
+const page = pageAt("/services/");
+---
+<BaseLayout title={pageTitle(page)} description={pageDescription(page)}>
+  <ServicesTemplate services={SERVICES} site={siteContext(isPreview())} />
+</BaseLayout>
+```
+
+A collection page builds the shown ids that have content:
 
 ```astro
 ---
 // src/pages/solutions/[id].astro
+import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import SolutionTemplate from "../../templates/SolutionTemplate.astro";
-import { PAGES, isPreview } from "../../data/nav";
-import { services } from "../../data/services"; // the typed Services data (servicesData in page-schemas.ts)
+import { isPreview } from "../../data/nav";
+import { SERVICES } from "../../data/services";
 import { pageDescription, pageTitle } from "../../lib/meta";
-import { siteContext, solutionLink } from "../../lib/site";
+import { pageAt, shownIds } from "../../lib/pages";
+import { siteContext } from "../../lib/site";
 import { solutionView } from "../../lib/views/solution";
 
-export async function getStaticPaths() {
-  const site = siteContext(isPreview());
+export const getStaticPaths = (async () => {
   const entries = await getCollection("solutions");
-  // Only the pages the nav shows: a planned solution isn't built in production.
-  return entries
-    .filter((entry) => solutionLink(site, entry.id).href !== null)
-    .map((entry) => ({ params: { id: entry.id }, props: { entry } }));
-}
+  return shownIds("/solutions/").map((id) => {
+    const entry = entries.find((e) => e.id === id);
+    if (!entry) throw new Error(`/solutions/${id}/ is shown, but src/content/solutions/${id}.yaml doesn't exist`);
+    return { params: { id }, props: { entry } };
+  });
+}) satisfies GetStaticPaths;
 
 const { entry } = Astro.props;
-const site = siteContext(isPreview());
-const page = PAGES.find((p) => p.path === solutionLink(site, entry.id).path);
-if (!page) throw new Error(`${entry.id} has no nav entry`);
-const view = solutionView({ id: entry.id, data: entry.data, shared: services, site });
+const page = pageAt(`/solutions/${entry.id}/`);
+const view = solutionView({ id: entry.id, data: entry.data, shared: SERVICES, site: siteContext(isPreview()) });
 ---
 <BaseLayout title={pageTitle(page)} description={pageDescription(page)}>
-  <SolutionTemplate view={view}>
-    <Fragment slot="demo"><!-- the solution's canned demo --></Fragment>
-  </SolutionTemplate>
+  <SolutionTemplate view={view} />
 </BaseLayout>
 ```
 
@@ -184,7 +205,7 @@ Then enable "Enforce HTTPS" once the cert provisions.
 - `src/layouts/`: `BaseLayout.astro` (the shell), `PostLayout.astro` (one insight) and `PreviewLayout.astro` (the gallery only).
 - `src/components/site/`: the header and the footer. `src/components/ui/`: the shared components. `src/components/page/`: the page kit that templates are built from.
 - `src/templates/`: the page templates.
-- `src/lib/`: the site context, page titles, fixed copy, JSON-LD and smaller helpers, with the view builders in `src/lib/views/`.
+- `src/lib/`: the site context, the route helpers (`src/lib/pages.ts`), page titles and descriptions, fixed copy, JSON-LD and smaller helpers, with the view builders in `src/lib/views/`.
 - `src/pages/`: the routes.
 - `src/preview/`: the `/preview/` gallery, in preview builds only. `src/fixtures/`: its data.
 - `src/scripts/`: the client scripts (nav, mobile menu, tabs, demo playback).

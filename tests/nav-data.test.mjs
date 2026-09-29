@@ -112,8 +112,9 @@ test("industry footer labels read 'AI for {short name}'", () => {
   assert.equal(footerLabel(legal), "AI for legal & professional");
 });
 
-test("Phase A: only Home and Insights are live", () => {
-  assert.deepEqual(PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(), ["/", "/insights/"]);
+// Phase C puts pages live task by task; each task that flips a status adds its paths here.
+test("the live pages: Home, the 404 and Insights", () => {
+  assert.deepEqual(PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(), ["/", "/404", "/insights/"]);
 });
 
 test("production nav shows only live pages; preview shows every group", () => {
