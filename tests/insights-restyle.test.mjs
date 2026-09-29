@@ -10,6 +10,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { allHtmlFiles, readDist, visibleText } from "./helpers.mjs";
 import { elements, elementsWith, readFrontmatter, startTags } from "../scripts/ci/lib.mjs";
+import { INSIGHT_TYPE_LABEL } from "../src/content/schemas.ts";
 import { PAGES, SITE } from "../src/data/nav.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -34,6 +35,9 @@ const classesOf = (el) => (el.attrs.class ?? "").split(/\s+/).filter(Boolean);
 const text = (html) => visibleText(html).trim();
 const DATE = /^\d{1,2} [A-Z][a-z]+ \d{4}$/;
 const shortName = (path) => PAGES.find((p) => p.path === path).shortName;
+// PostLayout's eyebrow is the type's label in lower case, not its id: "reference-scenario" reads
+// "[ reference scenario ]".
+const eyebrowOf = (type) => `[ ${INSIGHT_TYPE_LABEL[type].toLowerCase()} ]`;
 // Spec §10.1: the first solution reference, else the first industry, else plain "Talk to us".
 function expectedClosing({ solutions = [], industries = [] }) {
   if (solutions.length > 0) {
@@ -91,6 +95,8 @@ test("index: a bone 'All posts' section lists every published post as an Insight
 });
 
 test("posts: a carbon hero with the breadcrumb, the type eyebrow, the title as the one H1 and the meta line", () => {
+  assert.deepEqual(Object.keys(INSIGHT_TYPE_LABEL).map(eyebrowOf), ["[ article ]", "[ reference scenario ]", "[ platform guide ]"],
+    "the eyebrow expectation reads each type's label, not its id");
   for (const { id, fm } of POSTS) {
     const html = readDist(`insights/${id}/index.html`);
     assert.match(html, new RegExp(`<title>${fm.title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\| Techsider</title>`), id);
@@ -106,7 +112,7 @@ test("posts: a carbon hero with the breadcrumb, the type eyebrow, the title as t
     assert.ok(hero.inner.includes(h1s[0].outer), `${id}: the H1 is in the hero`);
     assert.equal(text(h1s[0].inner), fm.title);
     assert.ok(!classesOf(h1s[0]).includes("type-display"), `${id}: a post title is a sentence, not display caps`);
-    assert.equal(text(elements(hero.inner, (t) => t.attrs.class === "page-hero-eyebrow")[0].inner), `[ ${fm.type} ]`);
+    assert.equal(text(elements(hero.inner, (t) => t.attrs.class === "page-hero-eyebrow")[0].inner), eyebrowOf(fm.type), `${id}: type eyebrow`);
     const meta = one(hero.inner, "data-post-meta", id);
     const times = elements(meta.inner, (t) => t.name === "time");
     assert.equal(times[0].attrs.datetime, new Date(fm.publishDate).toISOString().slice(0, 10), `${id}: published`);
