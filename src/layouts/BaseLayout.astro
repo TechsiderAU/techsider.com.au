@@ -7,18 +7,25 @@ import { jsonLd } from "../lib/json-ld";
 
 interface Props {
   title?: string;
-  description?: string;
+  /**
+   * The page's own meta description (spec §11.3: unique, 150–160 characters). Required, with no
+   * default: a route passes pageDescription(entry) from src/lib/meta.ts (a post passes its own), so
+   * no page falls back to shared copy.
+   */
+  description: string;
   /** Adds <meta name="robots" content="noindex"> (template previews; later, the 404). */
   noindex?: boolean;
 }
 
 const {
   title = "Techsider — Enterprise AI for Australian business",
-  description = "Techsider builds production LLM platforms, retrieval systems, and AI agents for Australia's regulated industries — vendor-neutral, sovereign by default, and you own the code.",
+  description,
   noindex = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+// The Organization carries no description: the page's meta description describes the page, and
+// would give the one organisation a different description on every page.
 const organization = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -26,7 +33,6 @@ const organization = {
   url: "https://techsider.com.au",
   email: "admin@techsider.com.au",
   areaServed: "AU",
-  description,
   knowsAbout: ["LLM Ops", "Retrieval-Augmented Generation", "AI Agents"],
 };
 ---

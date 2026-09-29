@@ -10,9 +10,16 @@ import Demo from "../components/Demo.astro";
 import Insights from "../components/Insights.astro";
 import Faq from "../components/Faq.astro";
 import Contact from "../components/Contact.astro";
+import { PAGES } from "../data/nav";
+import { pageDescription } from "../lib/meta";
+
+// The legacy Home body until Phase C's HomeTemplate route replaces it; its meta description is the
+// Home page's own, from nav.ts.
+const home = PAGES.find((p) => p.path === "/");
+if (home === undefined) throw new Error("nav.ts has no page at /");
 ---
 
-<BaseLayout>
+<BaseLayout description={pageDescription(home)}>
   <Hero />
   <TrustStrip />
   <Services />

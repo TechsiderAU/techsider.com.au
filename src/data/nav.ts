@@ -22,6 +22,13 @@ export interface PageEntry {
   group: Group;
   status: Status;
   oneLiner?: string;
+  /**
+   * The page's meta description (spec §11.3): unique across the site, 150–160 characters. A route
+   * passes it to BaseLayout through pageDescription() (src/lib/meta.ts), which fails the build when
+   * it is missing, and tests/meta.test.mjs requires one of every live page. Write it when the page
+   * goes live.
+   */
+  description?: string;
 }
 
 export interface Anchor {
@@ -90,7 +97,14 @@ function page(group: Group, shortName: string, base: string, path: string, statu
   return entry;
 }
 
-const HOME = page("home", "Home", "/", "/", "live", "Techsider");
+/** Sets a page's meta description (PageEntry.description), which pageDescription() checks. */
+function describe(entry: PageEntry, description: string): PageEntry {
+  entry.description = description;
+  return entry;
+}
+
+const HOME = describe(page("home", "Home", "/", "/", "live", "Techsider"),
+  "AI that ships. Measured before it ships. We design, build and run AI solutions for Australian organisations, from accounting practices to federal agencies.");
 const NOT_FOUND = page("system", "Not found", "/", "/404", "planned");
 
 const SOLUTIONS_HUB = page("solutions", "Solutions", "/", "/solutions/", "planned");
@@ -126,7 +140,8 @@ const EVALUATION_PARTNER = page("services", "Evaluation Partner", "/services/", 
   "An independent evaluation workstream under your existing prime or adviser.");
 
 const RESOURCES_HUB = page("resources", "Resources", "/", "/resources/", "planned");
-const INSIGHTS = page("resources", "Insights", "/", "/insights/", "live", "Insights", "Field notes on shipping AI in regulated work.");
+const INSIGHTS = describe(page("resources", "Insights", "/", "/insights/", "live", "Insights", "Field notes on shipping AI in regulated work."),
+  "Field notes on shipping AI in regulated Australian work: retrieval that cites its sources, evaluation before launch, and choosing where models are hosted.");
 const DEMOS = page("demos", "Demos", "/", "/demos/", "planned", "Demos", "Canned replays of each solution. No live model.");
 const SAFE_USE_KITS = page("resources", "Safe-Use Kits", "/resources/", "/resources/safe-use-kits/", "planned", "Safe-Use Kits",
   "Free starter kits for accounting, legal and property teams.");

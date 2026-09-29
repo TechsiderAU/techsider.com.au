@@ -9,7 +9,7 @@ import PageHero from "../../components/page/PageHero.astro";
 import PageSection from "../../components/page/PageSection.astro";
 import InsightCard from "../../components/page/InsightCard.astro";
 import { PAGES, isPreview } from "../../data/nav";
-import { pageTitle } from "../../lib/meta";
+import { pageDescription, pageTitle } from "../../lib/meta";
 import { siteContext } from "../../lib/site";
 import { insightCards } from "../../lib/views/insights";
 
@@ -19,10 +19,7 @@ const entry = PAGES.find((p) => p.path === insights.path);
 if (entry === undefined) throw new Error(`nav.ts has no page at ${insights.path}`);
 const cards = insightCards(await getCollection("insights"), site);
 ---
-<BaseLayout
-  title={pageTitle(entry)}
-  description="Field notes on production LLM systems, RAG, agents, and AI data sovereignty for Australian regulated industries."
->
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
   <PageHero title="Insights." eyebrow="resources" sub={insights.oneLiner} />
   <PageSection id="posts" title="All posts">
     <ul class="post-list" data-post-list>

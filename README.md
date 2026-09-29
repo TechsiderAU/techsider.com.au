@@ -101,8 +101,9 @@ Templates never import fixtures: the specimens pass fixture data in, together wi
 Every page type has a body-only template in `src/templates/`. Its logic lives in a pure TypeScript view builder in `src/lib/views/`, unit-tested with fixtures. A route stays thin:
 
 1. Put the content in its collection or typed data file, where the schemas validate it.
-2. Add the route under `src/pages/`. It loads the content, builds the view with the page's builder, passing `siteContext(isPreview())` from `src/lib/site.ts` so that every link follows the nav, and renders the template inside `BaseLayout` with `pageTitle()` from `src/lib/meta.ts` as the title. Fixed copy, such as the disclaimers and badges, comes from `src/lib/fixed-copy.ts`, never from content.
-3. Set the page's `status` to `"live"` in `src/data/nav.ts`, the single source of page identity. Until then the production nav leaves the page out, every link to it renders as plain text, and contact links fall back to email.
+2. Add the route under `src/pages/`. It loads the content, builds the view with the page's builder, passing `siteContext(isPreview())` from `src/lib/site.ts` so that every link follows the nav, and renders the template inside `BaseLayout` with `pageTitle()` and `pageDescription()` from `src/lib/meta.ts` as the title and the meta description. `BaseLayout` has no default description, so `astro check` fails a route that leaves it out. Fixed copy, such as the disclaimers and badges, comes from `src/lib/fixed-copy.ts`, never from content.
+3. Write the page's `description` in `src/data/nav.ts`, the single source of page identity: unique, and 150–160 characters (spec §11.3). `pageDescription()` fails the build without one, and `tests/meta.test.mjs` requires one of every live page.
+4. Set the page's `status` to `"live"` in `src/data/nav.ts`. Until then the production nav leaves the page out, every link to it renders as plain text, and contact links fall back to email.
 
 `src/pages/insights/index.astro` is a working example. A solution page's route looks like this:
 
@@ -114,7 +115,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import SolutionTemplate from "../../templates/SolutionTemplate.astro";
 import { PAGES, isPreview } from "../../data/nav";
 import { services } from "../../data/services"; // the typed Services data (servicesData in page-schemas.ts)
-import { pageTitle } from "../../lib/meta";
+import { pageDescription, pageTitle } from "../../lib/meta";
 import { siteContext, solutionLink } from "../../lib/site";
 import { solutionView } from "../../lib/views/solution";
 
@@ -133,7 +134,7 @@ const page = PAGES.find((p) => p.path === solutionLink(site, entry.id).path);
 if (!page) throw new Error(`${entry.id} has no nav entry`);
 const view = solutionView({ id: entry.id, data: entry.data, shared: services, site });
 ---
-<BaseLayout title={pageTitle(page)}>
+<BaseLayout title={pageTitle(page)} description={pageDescription(page)}>
   <SolutionTemplate view={view}>
     <Fragment slot="demo"><!-- the solution's canned demo --></Fragment>
   </SolutionTemplate>
@@ -177,7 +178,7 @@ Then enable "Enforce HTTPS" once the cert provisions.
 
 ## Where things live
 
-- `src/data/nav.ts`: every page's names, path, group and status (`live` or `planned`).
+- `src/data/nav.ts`: every page's names, path, group, status (`live` or `planned`) and meta description.
 - `src/content/`: the content collections (insights, solutions, industries, kits, documents) and their schemas.
 - `src/data/`: typed data (regulatory rows, demos, traces, harness runs) and the CI exception lists.
 - `src/layouts/`: `BaseLayout.astro` (the shell), `PostLayout.astro` (one insight) and `PreviewLayout.astro` (the gallery only).
