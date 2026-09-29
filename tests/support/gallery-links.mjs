@@ -10,13 +10,16 @@
 //   while the insights route builds one page per real post only;
 // - a reviewed fixture kit's download: a real kit's file ships from public/downloads/, and a
 //   fixture file there would reach the production dist/;
+// - the register fixture's two downloads, for the same reason: the real ① demo's files ship from
+//   public/downloads/;
 // - a fragment on a stand-in page: fixtureSite points several fixture solutions (or industries) at
 //   one specimen page, which renders only one of them. A link to another one's package tab or
 //   regulatory row names an id that only that entity's own page would have.
 import { isExternal } from "../../scripts/ci/lib.mjs";
 import {
-  fixtureSite, industryFixtures, insightFixtures, kitFixture, pendingKitFixture, regulatoryFixtures, solutionFixtures,
+  demoFixture, fixtureSite, industryFixtures, insightFixtures, kitFixture, pendingKitFixture, regulatoryFixtures, solutionFixtures,
 } from "../../src/fixtures/index.ts";
+import { downloadsOf } from "../../src/lib/register.ts";
 
 /**
  * The fixture solution or industry that each entity specimen renders (the B2 blueprint's specimen
@@ -61,14 +64,16 @@ export function rowAnchors(regulatory) {
  *   regulatory: Record<string, { rows: { id: string }[] }>,
  *   insights: { id: string, data: { draft?: boolean } }[],
  *   kits: { lawyerReviewedAt: Date | null, download: string }[],
+ *   registers?: { download: string }[],
  *   specimens?: Record<string, { kind: "solution" | "industry", id: string }>,
  * }} input
  * @returns {{ paths: Set<string>, fragments: Map<string, Set<string>> }}
  */
-export function galleryOnlyDestinations({ site, solutions, industries, regulatory, insights, kits, specimens = SPECIMEN_ENTITY }) {
+export function galleryOnlyDestinations({ site, solutions, industries, regulatory, insights, kits, registers = [], specimens = SPECIMEN_ENTITY }) {
   const paths = new Set([
     ...insights.filter((post) => post.data.draft !== true).map((post) => `/insights/${post.id}/`),
     ...kits.filter((kit) => kit.lawyerReviewedAt !== null).map((kit) => kit.download),
+    ...registers.flatMap((data) => Object.values(downloadsOf(data))),
   ]);
   const fragments = new Map();
   const add = (path, ids) => fragments.set(path, new Set([...(fragments.get(path) ?? []), ...ids]));
@@ -93,6 +98,7 @@ export const GALLERY_ONLY = galleryOnlyDestinations({
   regulatory: regulatoryFixtures,
   insights: insightFixtures,
   kits: [kitFixture, pendingKitFixture],
+  registers: [demoFixture.data],
 });
 
 /**

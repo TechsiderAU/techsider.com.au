@@ -10,9 +10,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { matchesGlob } from "../scripts/ci/lib.mjs";
+import { readPreviewDist, visibleText } from "./helpers.mjs";
+import { h, installDocument } from "./support/fake-dom.mjs";
+import { decodeEntities, elements, elementsWith, matchesGlob } from "../scripts/ci/lib.mjs";
 import { AS_AT, buildRegisterDemo, dayOf } from "../scripts/demo-register-set.mjs";
 import { makeDemoSchema, plainRef } from "../src/content/schemas.ts";
+import { demoFixture } from "../src/fixtures/index.ts";
+import { createPlayback } from "../src/scripts/playback.ts";
+import { registerRenderer } from "../src/scripts/demo/register.ts";
 import {
   REPLAY_INTRO, announcedSteps, documentsText, downloadsOf, findValue, markSegments, pageAnchor, rangesOn, registerCsv,
   registerSteps, registerView,
@@ -238,4 +243,189 @@ test("the downloads are the register as CSV and the documents as text, exactly a
 
 test("downloadsOf rejects a download path it can't pair with a documents file", () => {
   assert.throws(() => downloadsOf({ ...DATA, download: "/downloads/demo.txt" }), /must be \/downloads\/<name>-register\.csv/);
+});
+
+// ---------- the replay, on the fake DOM ----------
+
+/**
+ * A demo frame whose transcript carries the hooks RegisterTranscript renders (the gallery tests
+ * below check the real markup has them), built from `data`, with `selected` the register shown.
+ * It has an id, a link, a labelled list and a button, as the transcript does, for the copy to disarm.
+ */
+function frameOver(data, selected) {
+  const views = data.registers.map((r) => registerView(data, r.id));
+  const registers = views.map((view) => {
+    const lines = registerSteps(view);
+    return h(
+      "div",
+      { "data-register": view.id, "data-register-summary": lines.at(-1), ...(view.id === selected ? {} : { hidden: "" }) },
+      h("table", {}, h("tbody", {}, ...view.rows.map((row, i) =>
+        h("tr", { "data-register-row": row.doc.id, "data-register-announce": lines[i], ...(row.flagged.length > 0 ? { "data-register-flagged": "" } : {}) },
+          h("th", {}, row.doc.title),
+          ...row.cells.map((c) => h("td", {}, h("a", { href: `#register-${row.doc.id}-p${c.page}`, "data-register-cell": c.id }, c.value))))))),
+      h("p", { id: `register-${view.id}-queue` }, "Exception queue"),
+      h("ul", { "aria-labelledby": `register-${view.id}-queue` }, ...view.queue.map(({ cell }) => h("li", { "data-register-queue-item": cell.id }, cell.value))),
+    );
+  });
+  const transcript = h("div", { "data-register-transcript": "" },
+    h("div", { "data-register-switch": "" }, ...views.map((v) => h("button", { "data-register-choice": v.id }, v.title))),
+    ...registers,
+    h("p", { id: "register-panel-title", tabindex: "-1" }, "Source page"));
+  const stage = h("div", { "data-demo-stage": "" });
+  installDocument(h("body", {}, h("figure", { "data-demo-frame": "" }, h("div", {}, stage), h("div", { "data-demo-transcript": "" }, transcript))));
+  return { stage, transcript };
+}
+
+async function runAll(stage, pb) {
+  const lines = [];
+  for await (const step of registerRenderer.steps(stage, pb)) lines.push(step.announce);
+  return lines;
+}
+
+test("the replay announces each flagged row of the register the toggle chose, in order, then its summary (the step sequence over the real data)", async () => {
+  assert.equal(registerRenderer.intro, REPLAY_INTRO);
+  for (const view of [MA, TD]) {
+    const { stage } = frameOver(DATA, view.id);
+    assert.deepEqual(await runAll(stage, createPlayback({ instant: true })), announcedSteps(view), view.id);
+  }
+});
+
+test("the stage holds one copy of the transcript that can't take focus: no ids, no link targets, no live buttons, and every row shown at the end", async () => {
+  const { stage, transcript } = frameOver(DATA, MA.id);
+  await runAll(stage, createPlayback({ instant: true }));
+  const copies = stage.querySelectorAll("[data-register-replay]");
+  assert.equal(copies.length, 1);
+  assert.equal(stage.querySelectorAll("[data-register-transcript]").length, 0, "the copy keeps the transcript's hook");
+  for (const attr of ["id", "aria-labelledby", "tabindex"]) assert.equal(stage.querySelectorAll(`[${attr}]`).length, 0, `the copy keeps ${attr}`);
+  // The copy has every link and button the transcript has (so the two checks after these aren't vacuous), all disarmed.
+  const links = stage.querySelectorAll("a");
+  const buttons = stage.querySelectorAll("button");
+  assert.equal(links.length, transcript.querySelectorAll("a").length, "the copy lost a link");
+  assert.equal(buttons.length, transcript.querySelectorAll("button").length, "the copy lost a button");
+  assert.ok(links.length > 0 && buttons.length > 0);
+  assert.ok(links.every((a) => a.getAttribute("href") === null), "a link in the stage still has a target");
+  assert.ok(buttons.every((b) => b.disabled), "a button in the stage is still live");
+  assert.equal(stage.querySelectorAll(".rg-pending").length, 0, "the finished replay leaves a value hidden");
+  assert.equal(copies[0].querySelectorAll("tr").length, MA.rows.length + TD.rows.length);
+  // The transcript itself is untouched.
+  assert.equal(transcript.querySelectorAll("[id]").length, 1 + 2);
+  assert.ok(transcript.querySelectorAll("a").every((a) => a.getAttribute("href") !== null));
+});
+
+test("a cancelled run stops drawing at once: the rows after it stay hidden and nothing more is announced", async () => {
+  const { stage } = frameOver(DATA, MA.id);
+  const pb = createPlayback();
+  const run = registerRenderer.steps(stage, pb);
+  const first = run.next(); // draws the copy, shows the first row's document, then waits
+  pb.cancel();
+  assert.deepEqual(await first, { value: undefined, done: true });
+  const rows = stage.querySelectorAll("tr[data-register-row]");
+  assert.equal(rows.length, MA.rows.length + TD.rows.length);
+  assert.ok(!rows[0].classList.contains("rg-pending"), "the first document isn't shown");
+  assert.ok(rows.slice(1, MA.rows.length).every((row) => row.classList.contains("rg-pending")), "a later row was drawn after the cancel");
+});
+
+// ---------- the gallery page: the engine slot and the static transcript ----------
+
+const FIXTURE = demoFixture.data;
+const FIXTURE_VIEWS = FIXTURE.registers.map((r) => registerView(FIXTURE, r.id));
+const text = (html) => visibleText(html).trim();
+const html = () => readPreviewDist("preview/templates/demo/index.html");
+const one = (inner, attr, value) => {
+  const found = elementsWith(inner, attr, value);
+  assert.equal(found.length, 1, `expected one [${attr}${value === undefined ? "" : `="${value}"`}], found ${found.length}`);
+  return found[0];
+};
+const cellAttrs = (cell) => ({
+  href: `#${pageAnchor("register", cell.id.split(":")[0], cell.page)}`,
+  "data-page": String(cell.page),
+  "data-label": cell.label,
+  "data-value": cell.value,
+  "data-status": cell.status,
+  ...(cell.note ? { "data-note": cell.note } : {}),
+});
+/** Markup to text with tags removed outright, so "[<span>review</span>]" reads "[review]". */
+const inline = (s) => decodeEntities(s.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
+const pick = (attrs, keys) => Object.fromEntries(keys.filter((k) => k in attrs).map((k) => [k, decodeEntities(attrs[k])]));
+const CELL_KEYS = ["href", "data-page", "data-label", "data-value", "data-status", "data-note"];
+
+test("gallery: the engine slot is DemoEngine for a register demo, and the transcript's toggle and side panel wait for JavaScript", () => {
+  const frame = one(html(), "data-demo-frame");
+  const root = one(one(frame.inner, "data-demo-engine").inner, "data-demo-root");
+  assert.equal(root.attrs["data-demo-kind"], "register");
+  const transcript = one(one(frame.inner, "data-demo-transcript").inner, "data-register-transcript");
+  const toggle = one(transcript.inner, "data-register-switch");
+  assert.ok("hidden" in toggle.attrs, "the toggle shows without JavaScript");
+  const choices = elementsWith(toggle.inner, "data-register-choice");
+  assert.deepEqual(choices.map((b) => [b.attrs["data-register-choice"], b.attrs["aria-pressed"], text(b.inner)]),
+    FIXTURE_VIEWS.map((v, i) => [v.id, String(i === 0), v.title]));
+  const panel = one(transcript.inner, "data-register-panel");
+  assert.ok("hidden" in panel.attrs, "the side panel shows without JavaScript");
+  const title = one(panel.inner, "data-register-panel-title");
+  assert.equal(panel.attrs["aria-labelledby"], title.attrs.id);
+  assert.equal(title.attrs.tabindex, "-1");
+  assert.ok(!("hidden" in one(transcript.inner, "data-register-docs").attrs), "the page list is hidden without JavaScript");
+});
+
+test("gallery: each register's rows carry their announcements and mark the flagged ones, and every value links to its page with what the side panel needs", () => {
+  const transcript = one(html(), "data-register-transcript");
+  const ids = new Set(elements(transcript.inner, (t) => t.attrs.id !== undefined).map((t) => t.attrs.id));
+  for (const view of FIXTURE_VIEWS) {
+    const register = one(transcript.inner, "data-register", view.id);
+    const lines = registerSteps(view);
+    assert.equal(decodeEntities(register.attrs["data-register-summary"]), lines.at(-1));
+    assert.equal(text(elements(register.inner, (t) => t.name === "caption")[0].inner), view.title);
+    const rows = elementsWith(register.inner, "data-register-row");
+    assert.deepEqual(rows.map((r) => [r.attrs["data-register-row"], decodeEntities(r.attrs["data-register-announce"])]), view.rows.map((row, i) => [row.doc.id, lines[i]]));
+    // Only a row with a flagged value is marked for the replay to announce (Review Focus 1).
+    assert.deepEqual(rows.map((r) => "data-register-flagged" in r.attrs), view.rows.map((row) => row.flagged.length > 0));
+    rows.forEach((tr, i) => {
+      const row = view.rows[i];
+      // The row header reads "<title> · <template>": the dot is aria-hidden and a space follows it, so
+      // its accessible name is the title, then the template, never run together (ledger ruling R4).
+      const [th] = elements(tr.inner, (t) => t.name === "th");
+      const [sep] = elements(th.inner, (t) => t.attrs["aria-hidden"] === "true");
+      assert.equal(inline(th.inner), `${row.doc.title} · ${row.doc.template}`, `${row.doc.id}: row header`);
+      assert.equal(inline(sep?.inner ?? ""), "·", `${row.doc.id}: no aria-hidden separator`);
+      assert.equal(inline(th.inner.replace(sep.outer, "")), `${row.doc.title} ${row.doc.template}`, `${row.doc.id}: row header's name`);
+      const links = elementsWith(tr.inner, "data-register-cell");
+      assert.deepEqual(links.map((a) => a.attrs["data-register-cell"]), row.cells.map((c) => c.id));
+      links.forEach((a, j) => {
+        const cell = row.cells[j];
+        assert.deepEqual(pick(a.attrs, CELL_KEYS), cellAttrs(cell), cell.id);
+        assert.ok(ids.has(a.attrs.href.slice(1)), `${a.attrs.href} lands on no id`);
+        assert.equal(inline(a.inner), cell.status === "ok" ? `${cell.value}, page ${cell.page}` : `[${cell.status}] ${cell.value}, page ${cell.page}`);
+      });
+    });
+    const entries = elementsWith(register.inner, "data-register-queue-item");
+    assert.deepEqual(entries.map((li) => li.attrs["data-register-queue-item"]), view.queue.map(({ cell }) => cell.id));
+    entries.forEach((li, i) => {
+      const { row, cell } = view.queue[i];
+      const [link] = elementsWith(li.inner, "data-register-open");
+      assert.deepEqual(pick(link.attrs, CELL_KEYS), cellAttrs(cell), cell.id);
+      assert.ok(inline(li.inner).startsWith(`${row.doc.title}, ${cell.label}: [${cell.status}] ${cell.value}`), cell.id);
+      if (cell.note) assert.ok(inline(li.inner).endsWith(cell.note), `${cell.id}: no note`);
+    });
+  }
+  const downloads = elements(transcript.inner, (t) => t.name === "a" && "download" in t.attrs).map((a) => a.attrs.href);
+  assert.deepEqual(downloads, Object.values(downloadsOf(FIXTURE)));
+});
+
+test("gallery: every page of every document is in the transcript, with each value read from it marked and named", () => {
+  const transcript = one(html(), "data-register-transcript");
+  for (const doc of FIXTURE.documents) {
+    for (const page of doc.pages) {
+      const block = one(transcript.inner, "id", pageAnchor("register", doc.id, page.n));
+      assert.equal(block.attrs["data-register-page"], `${doc.id}:${page.n}`);
+      assert.equal(decodeEntities(block.attrs["data-page-title"]), `${doc.title}, page ${page.n}`);
+      const pageText = one(block.inner, "data-register-page-text");
+      assert.equal(decodeEntities(pageText.inner.replace(/<[^>]+>/g, "")), page.text);
+      const marks = elements(pageText.inner, (t) => t.name === "mark").map((m) => [decodeEntities(m.inner), m.attrs["data-register-marks"]]);
+      assert.deepEqual(marks, rangesOn(FIXTURE_VIEWS, doc.id, page.n).sort((a, b) => a.start - b.start).map((r) => [page.text.slice(r.start, r.end), r.cells.join(" ")]), `${doc.id} p${page.n}`);
+    }
+  }
+  // The fixture exercises the panel: a value on its page, and a value its page doesn't have.
+  const cells = FIXTURE_VIEWS.flatMap((v) => v.rows.flatMap((row) => row.cells));
+  assert.ok(cells.some((c) => c.status === "ok" && c.at !== null), "no ok fixture value sits on its page");
+  assert.ok(cells.some((c) => c.status !== "ok" && c.note !== null), "no flagged fixture value has a note");
 });

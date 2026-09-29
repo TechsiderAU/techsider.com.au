@@ -93,6 +93,16 @@ export class FakeElement {
   focus() {
     if (!this.disabled) globalThis.document.activeElement = this;
   }
+  /** A copy: attributes, classes, hidden and disabled, and with `deep` the whole subtree (Phase D Task 3's replay copies its transcript). */
+  cloneNode(deep = false) {
+    const copy = new FakeElement(this.tagName.toLowerCase());
+    copy.attributes = new Map(this.attributes);
+    copy.classes = new Set(this.classes);
+    copy.hidden = this.hidden;
+    copy.disabled = this.disabled;
+    if (deep) copy.append(...this.childNodes.map((n) => (n instanceof FakeElement ? n.cloneNode(true) : new FakeText(n.data))));
+    return copy;
+  }
   contains(node) {
     for (let n = node; n; n = n.parentNode) if (n === this) return true;
     return false;

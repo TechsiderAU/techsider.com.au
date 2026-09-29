@@ -15,9 +15,10 @@ import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { elements, hrefsIn, startTags } from "../scripts/ci/lib.mjs";
 import { PAGES } from "../src/data/nav.ts";
 import {
-  PREVIEW_PAGES, fixtureSite, industryFixtures, insightFixtures, kitFixture, pendingKitFixture, previewPath,
+  PREVIEW_PAGES, demoFixture, fixtureSite, industryFixtures, insightFixtures, kitFixture, pendingKitFixture, previewPath,
   regulatoryFixtures, solutionFixtures,
 } from "../src/fixtures/index.ts";
+import { downloadsOf } from "../src/lib/register.ts";
 import {
   GALLERY_ONLY, SPECIMEN_ENTITY, galleryOnlyDestinations, internalLinks, linkProblems, packageIds, rowAnchors,
 } from "./support/gallery-links.mjs";
@@ -97,12 +98,13 @@ test("each solution and industry specimen renders the fixture entity SPECIMEN_EN
   }
 });
 
-test("the gallery-only destinations: published fixture posts, the reviewed kit's download, and each stand-in page's guest ids", () => {
+test("the gallery-only destinations: published fixture posts, the reviewed kit's download, the register fixture's downloads, and each stand-in page's guest ids", () => {
   const { paths, fragments } = GALLERY_ONLY;
   const published = insightFixtures.filter((post) => post.data.draft !== true);
   const drafts = insightFixtures.filter((post) => post.data.draft === true);
   assert.ok(published.length > 0 && drafts.length > 0, "the insight fixtures need a published post and a draft");
-  assert.deepEqual([...paths].sort(), [...published.map((post) => `/insights/${post.id}/`), kitFixture.download].sort());
+  const registerDownloads = Object.values(downloadsOf(demoFixture.data));
+  assert.deepEqual([...paths].sort(), [...published.map((post) => `/insights/${post.id}/`), kitFixture.download, ...registerDownloads].sort());
   assert.ok(!paths.has(pendingKitFixture.download), "the pending kit has a download to allow");
   // An allowance never stands in for a page of the gallery or of the real site: those must be built.
   for (const path of paths) {

@@ -1,23 +1,16 @@
 ---
-// Preview specimen for /preview/templates/demo/: the register demo fixture. Its transcript slot
-// holds the fixture's first register as a DataTable, which reads in full without JavaScript: one
-// row per document, one column per field, and each cell's value with its status in words; the
-// engine slot (Phase D) holds a placeholder. The frame carries the fixture's declared provenance
-// ("illustrative"), so it shows the "Illustrative data" label.
+// Preview specimen for /preview/templates/demo/: the ① register demo on the register fixture, as
+// its demo page renders it. The engine slot is DemoEngine (kind "register"), whose replay copies the
+// transcript, so it replays whatever data the transcript shows; the transcript slot is
+// RegisterTranscript, the demo's final state, which reads in full without JavaScript. The frame
+// carries the fixture's declared provenance ("illustrative"), so it shows the "Illustrative data"
+// label.
 // Fixtures are imported statically (see src/preview/gallery.astro).
 import DemoTemplate from "../../templates/DemoTemplate.astro";
-import DataTable from "../../components/ui/DataTable.astro";
+import DemoEngine from "../../components/demo/DemoEngine.astro";
+import RegisterTranscript from "../../components/demo/RegisterTranscript.astro";
 import { demoFixture, fixtureSite } from "../../fixtures/index.ts";
 import { refId, solutionLink } from "../../lib/site";
-
-const { documents, registers } = demoFixture.data;
-const [register] = registers;
-const titleOf = (id: string) => documents.find((d) => d.id === id)?.title ?? id;
-const columns = [{ key: "document", label: "Document" }, ...register.fields.map((f) => ({ key: f.key, label: f.label }))];
-const rows = register.rows.map((row) => ({
-  document: titleOf(row.doc),
-  ...Object.fromEntries(register.fields.map((f) => [f.key, `${row.cells[f.key].value} (${row.cells[f.key].status})`])),
-}));
 ---
 <DemoTemplate
   solution={solutionLink(fixtureSite, refId(demoFixture.solution))}
@@ -25,17 +18,6 @@ const rows = register.rows.map((row) => ({
   report={null}
   site={fixtureSite}
 >
-  <p slot="engine" class="specimen-slot" data-engine-placeholder>Fixture engine slot</p>
-  <DataTable slot="transcript" caption={register.title} columns={columns} rows={rows} rowHeader="document" />
+  <DemoEngine slot="engine" kind="register" />
+  <RegisterTranscript slot="transcript" data={demoFixture.data} />
 </DemoTemplate>
-
-<style>
-  .specimen-slot {
-    margin: 0;
-    padding: 1.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    border: 1px dashed var(--color-muted);
-    border-radius: 8px;
-  }
-</style>

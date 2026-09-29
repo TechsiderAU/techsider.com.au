@@ -73,9 +73,11 @@ for (const width of [390, 1280]) {
       const label = frame.locator(":scope > [data-provenance-label]");
       await expect(label).toHaveText("Illustrative data");
       await expect(label).toBeVisible();
-      const transcript = frame.locator("[data-demo-transcript]");
-      await expect(transcript).toBeVisible();
-      expect((await badge.boundingBox()).y, kind).toBeLessThan((await transcript.boundingBox()).y);
+      // With JavaScript the register demo's replay can hold the transcript's place (Phase D Task 3), so
+      // the engine slot is what shows under the badge there; the ④-like demo is static.
+      const body = frame.locator(kind === "demo" ? "[data-demo-engine]" : "[data-demo-transcript]");
+      await expect(body).toBeVisible();
+      expect((await badge.boundingBox()).y, kind).toBeLessThan((await body.boundingBox()).y);
     }
   });
 
@@ -85,16 +87,11 @@ for (const width of [390, 1280]) {
     await page.goto(path("demo"));
     const frame = page.getByRole("figure", { name: demoFixture.title });
     await expect(frame.locator("[data-demo-badge]")).toBeVisible();
-    const { documents, registers: [register] } = demoFixture.data;
-    const table = frame.locator("[data-demo-transcript]").getByRole("table", { name: register.title });
-    await expect(table).toBeVisible();
-    const rows = table.getByRole("row");
-    await expect(rows).toHaveCount(register.rows.length + 1);
-    for (const [i, row] of register.rows.entries()) {
-      const r = rows.nth(i + 1);
-      await expect(r).toBeVisible();
-      await expect(r).toContainText(documents.find((d) => d.id === row.doc).title);
-      for (const cell of Object.values(row.cells)) for (const value of [cell.value, cell.status]) await expect(r).toContainText(value);
+    // Each register is a table of its documents; tests/e2e/register-demo.spec.mjs checks its links, pages and downloads.
+    for (const register of demoFixture.data.registers) {
+      const table = frame.locator("[data-demo-transcript]").getByRole("table", { name: register.title });
+      await expect(table).toBeVisible();
+      await expect(table.getByRole("row")).toHaveCount(register.rows.length + 1);
     }
     await page.goto(path("demo-report"));
     await expect(page.locator("[data-demo-transcript] [data-trace-panel]")).toBeVisible();

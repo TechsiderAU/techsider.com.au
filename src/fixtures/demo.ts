@@ -7,15 +7,23 @@ import type { DemoOf } from "../content/schemas.ts";
 
 export const DEMO_FIXTURE_ID = "fixture-demo";
 
-const doc = (n: number, title: string, template: string) => ({
+// Each page names itself, then carries the values the registers read from it, so the register
+// demo's side panel has a value to highlight (Phase D Task 3). "Fixture value missing" is on no
+// page: it records a signature the page doesn't have.
+const doc = (n: number, title: string, template: string, lines: [string[], string[]]) => ({
   id: `fixture-doc-${n}`,
   title,
   template,
   pages: [
-    { n: 1, text: `Fixture page one of ${title}` },
-    { n: 2, text: `Fixture page two of ${title}` },
+    { n: 1, text: [`Fixture page one of ${title}`, ...lines[0]].join("\n") },
+    { n: 2, text: [`Fixture page two of ${title}`, ...lines[1]].join("\n") },
   ],
 });
+const AGREEMENT_PAGE_ONE = ["Fixture repair limit: Fixture value present"];
+const DEED_PAGES: [string[], string[]] = [
+  ["Fixture trustee: Fixture trustee name"],
+  ["Fixture vesting: Fixture vesting date", "Fixture appointor: Fixture appointor name"],
+];
 
 const FIELDS = [
   { key: "fixture-repair-limit", label: "Fixture repair limit" },
@@ -35,12 +43,12 @@ export const demoFixture: DemoOf<"register"> = {
   provenance: "illustrative",
   data: {
     documents: [
-      doc(1, "Fixture agreement A", "Fixture template A"),
-      doc(2, "Fixture agreement B", "Fixture template A"),
-      doc(3, "Fixture agreement C", "Fixture template B"),
-      doc(4, "Fixture deed D", "Fixture deed template"),
-      doc(5, "Fixture deed E", "Fixture deed template"),
-      doc(6, "Fixture deed F", "Fixture deed template"),
+      doc(1, "Fixture agreement A", "Fixture template A", [AGREEMENT_PAGE_ONE, ["Fixture landlord insurance: Fixture value current", "Fixture signed authority: Fixture value signed"]]),
+      doc(2, "Fixture agreement B", "Fixture template A", [AGREEMENT_PAGE_ONE, ["Fixture landlord insurance: Fixture value expired", "Fixture signed authority: Fixture value signed"]]),
+      doc(3, "Fixture agreement C", "Fixture template B", [AGREEMENT_PAGE_ONE, ["Fixture landlord insurance: Fixture value current", "Fixture signed authority: Fixture line left blank"]]),
+      doc(4, "Fixture deed D", "Fixture deed template", DEED_PAGES),
+      doc(5, "Fixture deed E", "Fixture deed template", DEED_PAGES),
+      doc(6, "Fixture deed F", "Fixture deed template", DEED_PAGES),
     ],
     registers: [
       {

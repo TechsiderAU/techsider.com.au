@@ -10,8 +10,8 @@
 import DemoControls from "./DemoControls.astro";
 
 interface Props {
-  /** The demo's kind, which picks its renderer and data file. */
-  kind: "assistant";
+  /** The demo's kind, which picks its renderer (and, for the assistant, its data file). */
+  kind: "assistant" | "register";
 }
 
 const { kind } = Astro.props;
@@ -36,6 +36,8 @@ const { kind } = Astro.props;
       // AssistantDemo renders its transcript from the same file.
       return assistantRenderer(file.default.data as unknown as AssistantData);
     },
+    // The ① replay reads the frame's own static transcript, so it loads no data file.
+    register: async () => (await import("../../scripts/demo/register.ts")).registerRenderer,
   });
 </script>
 

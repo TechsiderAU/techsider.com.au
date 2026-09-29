@@ -289,21 +289,16 @@ test("demo pages: the frame shows its badge first, then the engine slot, the sta
     assert.ok(!("hidden" in badge.attrs) && badge.attrs["aria-hidden"] !== "true" && !/sr-only/.test(badge.attrs.class ?? ""), `${kind}: the badge is hidden`);
     assert.equal(at("data-demo-badge"), 1, `${kind}: the badge is not the frame's first child`);
     assert.ok(at("data-demo-engine") > at("data-demo-badge") && at("data-demo-transcript") > at("data-demo-engine"), `${kind}: slot order`);
-    assert.equal(byAttr(frame, "data-engine-placeholder").length, 1);
+    // Phase D Task 3 puts DemoEngine in the register demo's engine slot; the ④-like demo keeps its placeholder.
+    assert.equal(byAttr(frame, "data-engine-placeholder").length, kind === "demo" ? 0 : 1, `${kind}: engine placeholder`);
+    assert.equal(byAttr(frame, "data-demo-root").length, kind === "demo" ? 1 : 0, `${kind}: replay root`);
     const captions = elements(frame, (tag) => tag.name === "figcaption");
     assert.equal(text(captions.at(-1).inner), title);
   }
+  // One table per register, captioned with its title; tests/register-demo.test.mjs checks the rest.
   const [transcript] = byAttr(template("demo"), "data-demo-transcript");
-  const [table] = byAttr(transcript.inner, "data-data-table");
-  assert.ok(table, "the register demo's transcript has no table");
-  // The specimen renders the fixture's first register: one row per document, one column per field.
-  const { documents, registers: [register] } = demoFixture.data;
-  assert.equal(text(elements(table.inner, (t) => t.name === "caption")[0].inner), register.title);
-  const rows = elements(table.inner, (t) => t.name === "tr" && t.attrs.role === "row").slice(1);
-  assert.deepEqual(
-    rows.map((r) => text(elements(r.inner, (t) => t.name === "th")[0].inner)),
-    register.rows.map((r) => documents.find((d) => d.id === r.doc).title),
-  );
+  const tables = elements(transcript.inner, (t) => t.name === "table");
+  assert.deepEqual(tables.map((t) => text(elements(t.inner, (e) => e.name === "caption")[0].inner)), demoFixture.data.registers.map((r) => r.title));
   const [reportTranscript] = byAttr(template("demo-report"), "data-demo-transcript");
   assert.equal(byAttr(reportTranscript.inner, "data-trace-panel").length, 1, "the ④ transcript has no trace");
 });

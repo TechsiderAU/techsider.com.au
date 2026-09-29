@@ -1,0 +1,401 @@
+---
+// The ① Document Registers demo's static transcript (spec §8.8, §9.1 ①): the `transcript` slot of
+// its DemoFrame, complete without JavaScript, and the demo's final state after a replay or a skip.
+// - Without JavaScript: both registers in full, each value a link to the page it came from; each
+//   register's exception queue with its notes; every page of every synthetic document, with the
+//   values read from it marked; and the two downloads.
+// - With JavaScript (src/scripts/demo/register-transcript.ts, which runs under reduced motion too):
+//   a toggle shows one register at a time, and a value opens its page in the side panel, highlighted,
+//   instead of jumping to the page list, which is then hidden.
+// - The replay (src/scripts/demo/register.ts) copies this markup into the engine's stage and reveals
+//   the chosen register row by row, so it reads the announcements written here
+//   (data-register-announce on the rows marked data-register-flagged, and data-register-summary)
+//   and shows exactly what the transcript shows.
+// No headings: the frame sits straight under a hero's h1, and the tables carry captions.
+// `idPrefix` starts every id here: the page anchors (pageAnchor()), the panel and the queue labels.
+import { downloadsOf, markSegments, pageAnchor, rangesOn, registerSteps, registerView, type RegisterData } from "../../lib/register";
+
+interface Props {
+  data: RegisterData;
+  idPrefix?: string;
+}
+
+const { data, idPrefix = "register" } = Astro.props;
+const views = data.registers.map((r) => registerView(data, r.id));
+const downloads = downloadsOf(data);
+const href = (docId: string, page: number) => `#${pageAnchor(idPrefix, docId, page)}`;
+const panelTitle = `${idPrefix}-panel-title`;
+const valuesIn = (view: (typeof views)[number]) => view.rows.reduce((n, row) => n + row.cells.length, 0);
+---
+<div class="rg" data-register-transcript>
+  <p class="rg-intro">{data.documents.length} synthetic documents: every party, premises, date and amount is invented. Each value links to the page it came from.</p>
+  <div class="rg-switch" role="group" aria-label="Register" data-register-switch hidden>
+    {views.map((view, i) => (
+      <button type="button" class="rg-button" aria-pressed={i === 0 ? "true" : "false"} data-register-choice={view.id}>{view.title}</button>
+    ))}
+  </div>
+  <div class="rg-body">
+    <div class="rg-main">
+      {views.map((view) => {
+        const steps = registerSteps(view);
+        const queueLabel = `${idPrefix}-${view.id}-queue`;
+        return (
+          <div class="rg-register" data-register={view.id} data-register-summary={steps.at(-1)}>
+            <table class="rg-table" role="table">
+              <caption>{view.title}</caption>
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th scope="col" role="columnheader">Document</th>
+                  {view.fields.map((f) => <th scope="col" role="columnheader">{f.label}</th>)}
+                </tr>
+              </thead>
+              <tbody role="rowgroup">
+                {view.rows.map((row, i) => (
+                  <tr role="row" data-register-row={row.doc.id} data-register-announce={steps[i]} data-register-flagged={row.flagged.length > 0 ? "" : undefined}>
+                    <th scope="row" role="rowheader">{row.doc.title}<span class="rg-sep" aria-hidden="true"> ·</span>{" "}<span class="rg-template">{row.doc.template}</span></th>
+                    {row.cells.map((cell) => (
+                      <td role="cell" data-status={cell.status}>
+                        <span class="rg-label" aria-hidden="true">{cell.label}</span>
+                        <a
+                          class="rg-cell"
+                          href={href(row.doc.id, cell.page)}
+                          data-register-cell={cell.id}
+                          data-page={cell.page}
+                          data-label={cell.label}
+                          data-value={cell.value}
+                          data-status={cell.status}
+                          data-note={cell.note ?? undefined}
+                        >
+                          {cell.status !== "ok" && (
+                            <Fragment><span class="rg-status" data-status={cell.status}><span aria-hidden="true">[</span>{cell.status}<span aria-hidden="true">]</span></span>{" "}</Fragment>
+                          )}
+                          {cell.value}<span class="sr-only">, page {cell.page}</span>
+                        </a>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div class="rg-queue">
+              <p class="rg-label-line" id={queueLabel}>Exception queue: {view.queue.length} of {valuesIn(view)} values</p>
+              {view.queue.length > 0 && (
+                <ul aria-labelledby={queueLabel}>
+                  {view.queue.map(({ row, cell }) => (
+                    <li data-register-queue-item={cell.id}>
+                      <a
+                        class="rg-cell"
+                        href={href(row.doc.id, cell.page)}
+                        data-register-open={cell.id}
+                        data-page={cell.page}
+                        data-label={cell.label}
+                        data-value={cell.value}
+                        data-status={cell.status}
+                        data-note={cell.note ?? undefined}
+                      >
+                        {row.doc.title}, {cell.label}: <span class="rg-status" data-status={cell.status}><span aria-hidden="true">[</span>{cell.status}<span aria-hidden="true">]</span></span> {cell.value}
+                      </a>
+                      {cell.note && <p class="rg-queue-note">{cell.note}</p>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+    <section class="rg-panel" aria-labelledby={panelTitle} data-register-panel hidden>
+      <p class="rg-panel-title" id={panelTitle} tabindex="-1" data-register-panel-title>Source page</p>
+      <p class="rg-panel-hint" data-register-hint>Select a value to open the page it came from, with the value highlighted.</p>
+    </section>
+  </div>
+  <div class="rg-docs" data-register-docs>
+    <p class="rg-label-line">The synthetic documents</p>
+    {data.documents.map((doc) => (
+      <div class="rg-doc" data-register-doc={doc.id}>
+        <p class="rg-doc-title">{doc.title}</p>
+        <p class="rg-label-line">{doc.template}</p>
+        {doc.pages.map((page) => (
+          <div
+            class="rg-page"
+            id={pageAnchor(idPrefix, doc.id, page.n)}
+            data-register-page={`${doc.id}:${page.n}`}
+            data-page-title={`${doc.title}, page ${page.n}`}
+            data-doc-template={doc.template}
+          >
+            <p class="rg-page-label">{doc.title}, page {page.n}</p>
+            <p class="rg-text" data-register-page-text>{markSegments(page.text, rangesOn(views, doc.id, page.n)).map((s) =>
+              s.cells.length > 0 ? <mark data-register-marks={s.cells.join(" ")}>{s.text}</mark> : s.text)}</p>
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+  <p class="rg-downloads">
+    <a class="rg-link" href={downloads.register} download>Download the register (CSV)</a>
+    <a class="rg-link" href={downloads.documents} download>Download the documents (text)</a>
+  </p>
+</div>
+
+<script>
+  import { enhanceRegisterTranscripts } from "../../scripts/demo/register-transcript.ts";
+  enhanceRegisterTranscripts();
+</script>
+
+<style>
+  /* The frame is a carbon island, so these use spec §6.1's carbon pairs. The replay copies this
+     markup, Astro's scope attributes included, so these rules style its stage too; the side panel's
+     contents are built in the browser, so their rules are :global under .rg-panel. */
+  .rg,
+  .rg-body,
+  .rg-main,
+  .rg-register,
+  .rg-queue,
+  .rg-docs,
+  .rg-doc {
+    display: grid;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+  .rg-main {
+    position: relative; /* holds the visually hidden header rows below 48rem */
+  }
+  .rg-queue,
+  .rg-doc {
+    gap: 0.5rem;
+  }
+  /* The replay's not-yet-read rows, values and queue entries: hidden, but holding their place. */
+  .rg-pending {
+    visibility: hidden;
+  }
+  @media (min-width: 64rem) {
+    [data-register-enhanced] .rg-body {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      align-items: start;
+    }
+  }
+  .rg-intro,
+  .rg-label-line,
+  .rg-queue-note,
+  .rg-doc-title,
+  .rg-downloads {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+  .rg-label-line,
+  .rg-queue-note {
+    color: var(--color-muted);
+  }
+  .rg-label-line {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+  .rg-doc-title {
+    font-weight: 700;
+  }
+  .rg-switch,
+  .rg-downloads {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+  .rg-switch {
+    gap: 0.5rem;
+  }
+  .rg-queue ul {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* The table, as DataTable lays it out: rows only, and cards below 48rem (spec §8.12). */
+  .rg-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+  .rg-table caption {
+    padding-bottom: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    text-align: left;
+    color: var(--color-muted);
+  }
+  .rg-table th,
+  .rg-table td {
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+  .rg-table thead th {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+  /* A row header reads "<title> · <template>" as one run of text. The dot is aria-hidden and a space
+     follows it, so the header's name is the title, then the template, never run together. */
+  .rg-sep,
+  .rg-template,
+  .rg-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+  .rg-label {
+    display: block;
+  }
+  @media (width < 48rem) {
+    .rg-table,
+    .rg-table caption,
+    .rg-table tbody,
+    .rg-table th,
+    .rg-table td {
+      display: block;
+    }
+    .rg-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .rg-table tbody tr {
+      display: grid;
+      gap: 0.25rem;
+      padding-block: 0.875rem;
+      border-top: 1px solid var(--color-graphite);
+    }
+  }
+  @media (width >= 48rem) {
+    .rg-table th,
+    .rg-table td {
+      padding: 0.5rem 0.75rem 0.5rem 0;
+      border-bottom: 1px solid var(--color-graphite);
+    }
+    .rg-label {
+      display: none;
+    }
+  }
+  /* Values, queue entries and downloads are 44px targets (spec §6.6); a value's status is words in
+     brackets, never colour alone (§6.6). */
+  .rg-cell,
+  .rg-link {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .rg-cell[aria-current="true"] {
+    text-decoration-color: var(--color-acid);
+    text-decoration-thickness: 3px;
+  }
+  .rg-status,
+  .rg-panel :global(.rg-status) {
+    font-family: var(--font-mono);
+  }
+  .rg-status[data-status="review"],
+  .rg-panel :global(.rg-status[data-status="review"]) {
+    color: var(--color-review);
+  }
+  .rg-status[data-status="blocked"],
+  .rg-panel :global(.rg-status[data-status="blocked"]) {
+    color: var(--color-blocked);
+  }
+  /* The toggle and Back: 44px, and the pressed register marked by weight and a bar, not colour alone. */
+  .rg-button,
+  .rg-panel :global(.rg-button) {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.875rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    text-align: left;
+    color: var(--color-bone);
+    border: 1px solid var(--color-graphite);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .rg-button[aria-pressed="true"] {
+    font-weight: 700;
+    border-color: var(--color-acid);
+    box-shadow: inset 0 -3px 0 var(--color-acid);
+  }
+  .rg-panel {
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--color-graphite);
+    border-radius: 8px;
+  }
+  @media (min-width: 64rem) {
+    .rg-panel {
+      position: sticky;
+      top: 5.5rem;
+    }
+  }
+  .rg-panel-title,
+  .rg-panel-hint,
+  .rg-panel :global(:is(.rg-panel-meta, .rg-panel-field, .rg-panel-note)) {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+  .rg-panel-title {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .rg-panel :global(.rg-panel-meta) {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+  }
+  /* A page: in the list, and cloned into the panel. The list's page a link lands on is outlined, so
+     the jump reads without colour alone. */
+  .rg-page {
+    padding: 0.875rem;
+    background: var(--color-graphite);
+    border: 2px solid transparent;
+    border-radius: 6px;
+  }
+  .rg-page:target {
+    border-color: var(--color-acid);
+  }
+  .rg-page-label {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+  }
+  .rg-text {
+    margin: 0;
+    padding: 0.875rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: var(--color-graphite);
+    border-radius: 6px;
+  }
+  .rg-page .rg-text {
+    padding: 0;
+  }
+  .rg-text mark {
+    padding-inline: 0.125em;
+    color: var(--color-carbon);
+    background: var(--color-acid);
+  }
+</style>
