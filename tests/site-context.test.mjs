@@ -72,11 +72,11 @@ test("production: planned pages get a null href, and contact links fall back to 
   for (const i of site.industries) assert.equal(i.href, expected(i.path), i.id);
   for (const [key, path] of Object.entries(PAGE_PATHS)) assert.equal(site.page(key).href, expected(path), key);
   for (const id of SOLUTION_IDS) assert.equal(site.demo(id), expected(`/demos/${id}/`), id);
-  // Home, Services, Evaluation Partner and Insights are the live pages with a key, so a live page
-  // links to them and to nothing else, and every contact link is the email address. Phase C
-  // updates these pins as it puts pages live.
-  assert.deepEqual(Object.keys(PAGE_PATHS).filter((key) => site.page(key).href !== null), ["home", "services", "evaluationPartner", "insights"]);
-  assert.ok(site.solutions.every((s) => s.href === null), "a solution page is shown");
+  // Phase C puts pages live task by task, and the loops above hold every href to nav.ts. From Task 3
+  // the Solutions hub and all five solution pages link; industry pages stay plain text, and every
+  // contact link stays the email address, while those pages are planned.
+  assert.equal(site.page("solutions").href, "/solutions/");
+  assert.ok(site.solutions.every((s) => s.href === s.path), "a solution page isn't shown");
   assert.ok(site.industries.every((i) => i.href === null), "an industry page is shown");
   const mailto = `mailto:${SITE.email}`;
   assert.equal(site.contact(), mailto);
@@ -127,8 +127,15 @@ test("refId reads a plain id and Astro's { id, collection } reference", () => {
 
 test("crumbs start at Home and leave out hubs that aren't shown", () => {
   const current = { label: "Document Registers", path: "/solutions/document-registers/" };
+  // The Demos hub is planned until Phase D, so it drops out of a production trail.
+  assert.deepEqual(crumbs(siteContext(false), ["demos", { label: "Document Registers", path: "/demos/document-registers/" }]), [
+    { label: "Home", href: "/" },
+    { label: "Document Registers", href: "/demos/document-registers/" },
+  ]);
+  // The Solutions hub is live from Phase C Task 3, so it stays.
   assert.deepEqual(crumbs(siteContext(false), ["solutions", current]), [
     { label: "Home", href: "/" },
+    { label: "Solutions", href: "/solutions/" },
     { label: "Document Registers", href: "/solutions/document-registers/" },
   ]);
   assert.deepEqual(crumbs(siteContext(true), ["solutions", current]), [

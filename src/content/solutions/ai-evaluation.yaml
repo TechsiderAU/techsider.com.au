@@ -1,0 +1,336 @@
+# ④ Independent AI Evaluation: /solutions/ai-evaluation/ (spec §4.1 ④, §4.4, §8.3).
+# The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
+# fill byIndustry and matrix; Phase D adds demo (the sample report in the hero). Block 4 is titled
+# "Engagements" and the page publishes the independence policy (spec §4.4, §8.3).
+# Every package is onshore: false. The test runs in the client's environment, but the system under
+# test runs where its vendor runs it, so the page shows where data is processed instead (spec §3.2).
+# ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
+job: >-
+  Tests one AI system you bought, licensed or had built elsewhere, for one use case, on your own
+  questions and cases in your own environment. The method is set out in advance, and the thresholds
+  are agreed before testing starts.
+artefact: >-
+  An Independent Evaluation Report: findings rated to your risk matrix and mapped to the instrument
+  you report to, with an explicit list of failures. You also get a reproducible evidence bundle and a
+  replay script that runs in your own subscription, so your team can re-run the test without us.
+forLine: Government agencies, APRA-regulated entities, law firms and health services
+needProfiles:
+  - title: A pilot is about to scale.
+    body: >-
+      Your Copilot agent or vendor tool is leaving pilot, and your accountable official wants evidence
+      before a wider rollout. The report measures its failures on your own cases.
+  - title: The vendor may have changed the model.
+    body: >-
+      Where your contract gives no audit rights or notice of model changes, a test set on your own
+      cases shows whether the results changed. Your team re-runs it whenever the model may have changed.
+  - title: You're choosing between vendors.
+    body: >-
+      Shortlisted tools run on the same questions from your own work, side by side, before you sign.
+      In a tender, the test comes with a probity note.
+  - title: Agents are about to act in your systems.
+    body: >-
+      Before the agents you run touch case or customer systems, a configuration review checks their
+      identity, permissions, approval gates and logging.
+byIndustry: []
+genericPackage:
+  id: one-system-one-use-case
+  name: One system, one use case
+  status: launch
+  onshore: false
+  buyers: [enterprise-government, mid-market]
+  forWhom: >-
+    An agency, APRA-regulated entity, law firm or health service with one AI system it bought,
+    licensed or had built elsewhere, and one use case to test before relying on it.
+  scope: >-
+    One AI system and one use case, tested on your own questions and cases in your own environment,
+    with thresholds agreed before testing and the same written method throughout.
+  inclusions:
+    - A sample size chosen and explained, with confidence intervals on every result
+    - Ground truth built with your own experts, and their agreement measured
+    - LLM-judge graders calibrated against human labels
+    - False answers and false refusals reported separately, with an explicit list of failures
+    - Findings rated to your risk matrix and mapped to the instrument you report to
+    - A reproducible evidence bundle, with a replay script that runs in your own subscription
+    - The harness handed over, with a session for your data or risk team
+  clientTime: >-
+    A named owner who agrees the thresholds, time from one or two people who know the cases to label
+    examples, and read-only access to the system in your environment or a test environment. Hours
+    are stated at scoping.
+  timeline: >-
+    3–5 weeks. For government, approvals run in parallel in Week 0 while testing starts on public or
+    synthetic data.
+  outOfScope:
+    - "Audit opinions: the report is findings, not an assurance opinion, and not an ASAE 3000 or ASRE engagement"
+    - Any system Techsider built, configured or advised on for you
+    - Adversarial testing in-house. Where it's needed, it's done by a CREST-accredited tester you engage.
+    - "The decision to deploy: your accountable official makes it"
+  gate: >-
+    Once the test set and thresholds are agreed, and before any testing, you decide whether to
+    continue. The test set is yours either way.
+  onshoreNote: >-
+    The test runs in your own environment, and the graders run in your own subscription, so test
+    data and results stay with you. The system under test processes each test question where its
+    vendor runs it, as it does in normal use, and the report records that vendor's published
+    processing location with its date.
+packages:
+  - id: independent-evaluation-report
+    name: Independent Evaluation Report
+    status: launch
+    onshore: false
+    buyers: [enterprise-government]
+    forWhom: >-
+      Agencies, APRA-regulated entities and law firms with one AI system to test before it scales,
+      such as a Copilot Studio agent leaving pilot or a contact-centre summary tool.
+    scope: >-
+      One system and one use case, the full method and the evidence bundle, with the harness handed
+      over. For financial services it's an independent validation of the use case; for law firms, an
+      AI accuracy test on your own matters.
+    inclusions:
+      - A test plan with thresholds agreed before testing starts
+      - For financial services, recall on complaint recognition, hardship-related complaints and vulnerability cues, each reported on its own, with every miss listed
+      - The Independent Evaluation Report, with the failure list and findings rated to your risk matrix
+      - Control-test scripts for your GRC, where you use one, in a format agreed at scoping
+    clientTime: >-
+      A use-case owner, one or two people who know the cases for labelling, and read-only access in
+      your environment. Hours are stated at scoping.
+    timeline: 3–5 weeks.
+    outOfScope:
+      - "The decision to deploy: your accountable official makes it"
+      - Any system Techsider built, configured or advised on for you
+    gate: >-
+      Once the test plan and thresholds are agreed, and before testing starts, you decide whether to
+      continue.
+    onshoreNote: >-
+      The test runs in your own environment, and the graders run in your own subscription. The
+      system under test runs where its vendor runs it, and the report records that location with its
+      date.
+  - id: scribe-clinical-ai-evaluation
+    name: Scribe & Clinical AI Evaluation
+    status: launch
+    onshore: false
+    buyers: [enterprise-government]
+    forWhom: >-
+      Health services and GP groups choosing, rolling out or already using a digital scribe or other
+      clinical AI product.
+    scope: >-
+      The health form of the Independent Evaluation Report: selection against the TGA, Ahpra and
+      ACSQHC guidance, local validation on your own specialties, omission audits and a monitoring
+      plan for after go-live. We evaluate these products; we never build them.
+    inclusions:
+      - Tests on scripted consultations from your own specialties, with omissions counted
+      - Ground truth from clinicians at your service, with their agreement measured
+      - A scope test that flags any diagnosis, test or treatment in a note that the clinician never said
+      - A monitoring plan after go-live, with the test set to re-run whenever the product may have changed
+    clientTime: >-
+      A clinical lead to agree thresholds, clinicians' time to script and grade test consultations,
+      and access to the product in a test environment. Hours are stated at scoping.
+    timeline: 3–5 weeks.
+    outOfScope:
+      - Building scribes, or anything that interprets clinical conversations
+      - Clinical coding, discharge summaries and imaging AI, which we evaluate rather than build
+      - "The decision to use a product: your clinical governance makes it"
+    gate: >-
+      Once the scripted consultations and thresholds are agreed, and before testing starts, you
+      decide whether to continue.
+    onshoreNote: >-
+      Testing runs on scripted consultations, in the product's test environment or your own. The
+      product sends audio or text wherever its vendor processes it, and the report records that
+      vendor's published processing location with its date.
+  - id: vendor-ai-evaluation
+    name: Vendor AI Evaluation
+    status: launch
+    onshore: false
+    buyers: [enterprise-government]
+    forWhom: >-
+      Buyers comparing 1–3 vendor AI tools before contract, such as law firms weighing legal AI tools
+      or agencies buying an AI-enabled upgrade.
+    scope: >-
+      1–3 vendor tools tested before you sign, side by side, on your own content and questions, in
+      accounts your organisation controls.
+    inclusions:
+      - The same question set run through each tool, side by side
+      - Every raw answer, graded, with unsupported citations listed
+      - Findings on each tool, rated to your risk matrix
+      - The test set, ready to re-run after contract
+    clientTime: >-
+      People who know the work to write and grade questions, and a procurement or practice lead to
+      agree thresholds. Hours are stated at scoping.
+    timeline: 2–4 weeks.
+    outOfScope:
+      - "Holding vendor accounts ourselves: each tool runs in an account you control"
+      - Negotiating, buying or reselling licences
+    gate: >-
+      Once the question set and thresholds are agreed, and before any tool is tested, you decide
+      whether to continue.
+    onshoreNote: >-
+      Each tool runs in an account your organisation controls, so its vendor's processing location
+      applies; the report records each one with its date. The graders run in your own subscription.
+    precondition: Each vendor gives your organisation trial or pilot access.
+  - id: model-change-regression
+    name: Model-Change Regression
+    status: launch
+    onshore: false
+    buyers: [enterprise-government]
+    forWhom: >-
+      Organisations that rely on vendor AI with no audit rights or notice of model changes in the
+      contract, such as contact-centre AI at an APRA-regulated entity.
+    scope: >-
+      A test set on your own cases that your team re-runs whenever the model may have changed, with
+      each run compared with the last. We set it up; your team runs it.
+    inclusions:
+      - A labelled test set on your own cases, with a baseline run on the current model
+      - A replay script that runs in your own subscription
+      - A comparison of each re-run with the baseline, with every change listed
+      - Training for your second-line or data team to run it
+    clientTime: >-
+      People who know the cases to label a sample, and a control owner to agree thresholds. Hours
+      are stated at scoping.
+    timeline: 2–4 weeks to set up. Your team runs it after that, with support if you want it.
+    outOfScope:
+      - "Running the re-tests for you as a standing control: your team owns and runs them"
+      - Routine re-tests that a platform's built-in evaluation already covers
+    gate: >-
+      Once the test set and thresholds are agreed, and before the baseline run, you decide whether to
+      continue.
+    onshoreNote: >-
+      The test set and the replay script live and run in your own subscription, so test data and
+      results stay with you. The system under test processes each test question where its vendor runs
+      it, and the report records that location with its date.
+  - id: tender-ai-claims-verification
+    name: Tender AI-Claims Verification
+    status: launch
+    onshore: false
+    buyers: [enterprise-government]
+    forWhom: >-
+      Government buyers assessing the AI claimed in tender responses before contract.
+    scope: >-
+      The government form of the Vendor AI Evaluation: the AI claimed in each tender response is
+      tested on your own questions, with a probity note and sign-off from your procurement lead.
+    inclusions:
+      - A probity note agreed with your procurement lead before testing
+      - The same questions run through each tendered tool, side by side
+      - Findings on each claim tested, with every failure listed
+    clientTime: >-
+      A procurement lead for probity sign-off, and subject-matter staff to write and grade
+      questions. Hours are stated at scoping.
+    timeline: 2–4 weeks, inside your procurement timetable.
+    outOfScope:
+      - "The procurement decision: your evaluation panel makes it"
+      - Advice on procurement rules
+    gate: >-
+      Once the probity note, question set and thresholds are agreed, and before any tool is tested,
+      you decide whether to continue.
+    onshoreNote: >-
+      Each tendered tool runs where its vendor runs it, and the report records that vendor's
+      published processing location with its date. The graders run in your own subscription.
+    precondition: >-
+      Your procurement lead signs off the probity note, and each tenderer gives access to its tool
+      for the test.
+  - id: agentic-ai-control-evaluation
+    name: Agentic AI Control Evaluation
+    status: launch
+    onshore: false
+    buyers: [enterprise-government]
+    forWhom: >-
+      Agencies and financial-services entities with Copilot Studio or other agents leaving pilot.
+    scope: >-
+      A configuration review of your agents' identity, permissions, approval gates and logging,
+      before they act in case or customer systems. It is not an attack. Adversarial testing is done
+      by a CREST-accredited tester you engage.
+    inclusions:
+      - Each agent's identity, and the access it holds
+      - The tools and permissions each agent can use, against what its job needs
+      - Approval gates, the kill switch and logging, checked in your configuration
+      - Findings rated to your risk matrix, mapped to the framework you report to
+    clientTime: >-
+      A platform owner to walk through the configuration, read-only admin access to the agent
+      platform, and your risk matrix. Hours are stated at scoping.
+    timeline: 2–3 weeks.
+    outOfScope:
+      - Prompt-injection, tool-misuse or other adversarial testing, which a CREST-accredited tester you engage does under written rules of engagement
+      - "Changing your configuration: you get findings, and your platform team makes the changes"
+    gate: >-
+      Once the scope and your risk matrix are agreed, and before the review starts, you decide
+      whether to continue.
+    onshoreNote: >-
+      The review reads configuration and logs in your environment with read-only access. The agent
+      platform keeps its vendor's processing location, which the report records with its date.
+  - id: soci-ai-risk-evidence
+    name: SOCI AI Risk Evidence
+    status: on-request
+    oneLiner: >-
+      Maps each AI use a utility or energy business runs to the relevant CIRMP rule items, and gives
+      its risk team the data-flow maps, access lists and test reports behind each finding.
+  - id: failure-scenario-fallback-test
+    name: AI Failure-Scenario & Fallback Test
+    status: internal
+    oneLiner: Kept internal until it's piloted with one client.
+packagesHeading: Engagements
+program:
+  title: Independent validation and control testing
+  summary: >-
+    Repeat evaluations across several AI systems, built into the validation and control testing you
+    already run. It can be delivered as a workstream under your internal-audit co-source firm, law
+    firm or prime.
+  duration: Per program, phased by system
+  bullets:
+    - Validation and revalidation of each AI system, tiered to your model-risk framework
+    - Control-test scripts for your GRC, in a format agreed at scoping
+    - A harness your internal audit can re-perform
+    - Harness training for your second-line, risk or data teams
+howWeTest:
+  summary: >-
+    On this page the test is the product. Every engagement follows the same written method, with
+    thresholds agreed before testing starts.
+  bullets:
+    - The sample size, with its rationale and confidence intervals
+    - Ground truth, how it's built and by whom, and how often the raters agree
+    - LLM-judge graders calibrated against human labels
+    - Thresholds agreed before testing
+    - False answers and false refusals reported separately
+    - An explicit list of failures, not only a score
+whereItRuns:
+  choices: [your-account, platform-you-license]
+  note: >-
+    Testing runs in your own environment, and the graders run in your own subscription, so test data
+    and results stay with you. The system under test processes test questions where its vendor runs
+    it, and the report records that location with its date.
+independencePolicy: true
+platformFirst: >-
+  If your AI runs as a Copilot Studio agent, use its built-in agent evaluation for routine re-tests
+  first: you can re-run the same test set after each change. If Copilot Studio's built-in evaluation
+  answers your question, we'll say so. Bring us in when you need an independent test on your own
+  labelled cases.
+dontDo:
+  - We never do adversarial testing in-house. Where it's needed, it's done by a CREST-accredited tester you engage.
+  - We don't sign off systems as safe to deploy. The report is findings, not an assurance opinion.
+  - We don't write AI policy paperwork or build a GRC or register product. Findings go into the tools you already run.
+matrix: {}
+faq:
+  - q: You have no clients. Why should we trust your evaluation?
+    a: >-
+      You shouldn't take it on trust. We have no clients yet, so you judge the method instead: how
+      the sample size is chosen, how ground truth is built, how often raters agree, and thresholds
+      agreed before testing. Every engagement hands over the test set and a replay script that runs
+      in your subscription, so your team can re-run it and check our work.
+  - q: Will your report tell us the system is safe to deploy?
+    a: >-
+      No. You get findings, not an assurance opinion, and it isn't an ASAE 3000 engagement. Each
+      finding is rated to your risk matrix and mapped to the instrument you use. Your accountable
+      official decides whether to deploy, on measured evidence rather than a demo.
+  - q: Do you evaluate systems you built, or take fees from vendors you evaluate?
+    a: >-
+      No. We never issue an independent evaluation of a system we built, configured or advised on for
+      the same client. We take no resale margin or referral fees from vendors we evaluate, and we
+      disclose any vendor relationship.
+  - q: Can we engage you through a firm we already use?
+    a: >-
+      Yes. The Evaluation Partner route delivers the same evaluation as a subcontract workstream
+      under your existing prime, internal-audit co-source firm, law firm or systems integrator. The
+      scope, method and deliverables stay the same, and the independence policy still applies.
+  - q: Does test data leave our environment?
+    a: >-
+      Not to us. The test runs in your environment, and the graders run in your own subscription, so
+      test data and results stay with you. The system under test processes each test question where
+      its vendor runs it, as in normal use, and the report records that location. While your approvals
+      run, testing can start on public or synthetic data.

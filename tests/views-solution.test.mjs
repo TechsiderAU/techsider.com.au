@@ -99,8 +99,10 @@ test("solutionView names the solution from the site context and links the hero, 
 test("on the production site context every planned page is plain text or email; on the preview context, a link", () => {
   const data = { ...solutionFixtures["fixture-solution"], byIndustry: ["accounting", "government"] };
   const live = view("document-registers", data, siteContext(false));
+  // The Solutions hub is live from Phase C Task 3, so the production trail keeps it.
   assert.deepEqual(live.breadcrumb, [
     { label: "Home", href: "/" },
+    { label: "Solutions", href: "/solutions/" },
     { label: "Document Registers", href: "/solutions/document-registers/" },
   ]);
   assert.deepEqual(live.ctas, { primary: { label: "Talk to us about Document Registers", href: MAILTO }, secondary: null });

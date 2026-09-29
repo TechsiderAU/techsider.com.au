@@ -1,0 +1,24 @@
+---
+// The Solutions hub (spec §8.2) at /solutions/, built while nav.ts shows it: the five solutions by
+// job, the solution × industry matrix and every launch package by buyer, from the solutions
+// collection and this build's SiteContext. Matrix cells stay "—" until the industry tasks fill
+// each solution's matrix.
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SolutionsHubTemplate from "../../templates/SolutionsHubTemplate.astro";
+import { isPreview } from "../../data/nav";
+import { pageDescription, pageTitle } from "../../lib/meta";
+import { pageAt, singletonPaths } from "../../lib/pages";
+import { siteContext } from "../../lib/site";
+import { solutionsHubView } from "../../lib/views/hubs";
+
+export const getStaticPaths = (() => singletonPaths("/solutions/")) satisfies GetStaticPaths;
+
+const entry = pageAt("/solutions/");
+const solutions = Object.fromEntries((await getCollection("solutions")).map((e) => [e.id, e.data]));
+const view = solutionsHubView({ solutions, site: siteContext(isPreview()) });
+---
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
+  <SolutionsHubTemplate view={view} />
+</BaseLayout>

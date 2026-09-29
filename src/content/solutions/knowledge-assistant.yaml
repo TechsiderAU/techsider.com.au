@@ -1,0 +1,204 @@
+# ② Cited Knowledge Assistant: /solutions/knowledge-assistant/ (spec §4.1 ②, §8.3).
+# The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
+# fill byIndustry and matrix; Phase D adds demo. The launch package shows its two audience variants
+# as the two tabs (spec §8.3).
+# ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
+job: >-
+  Answers staff questions from one collection of your own manuals, policies or procedures, and shows
+  the document, section and version it used. When the documents don't support an answer, it says
+  "not in our documents" instead of guessing.
+artefact: >-
+  An assistant your staff reach inside Microsoft 365 where you license it, or on the web, that keeps
+  the permissions staff already have. You also get a test report on 50–100 questions your staff
+  wrote, with false answers counted separately from false refusals.
+forLine: Manufacturers, independent schools, non-clinical health teams and councils
+needProfiles:
+  - title: The answer is in the manual, somewhere.
+    body: >-
+      Staff ask the same procedure questions every week, and the person who knows is busy. The
+      assistant answers from your own documents and shows the page.
+  - title: A wrong answer costs more than no answer.
+    body: >-
+      A confident wrong answer on a procedure or policy does harm. The assistant says "not in our
+      documents" when the collection is silent, and the test counts both kinds of error.
+  - title: Your crews work in more than one language.
+    body: >-
+      Answers can come in the language a worker asks in, with the English step and page shown. Each
+      language is tested separately.
+byIndustry: []
+genericPackage:
+  id: one-manual-one-team
+  name: One manual, one team
+  status: launch
+  onshore: false
+  buyers: [mid-market, enterprise-government]
+  forWhom: >-
+    A team whose staff ask the same questions of one collection of manuals, policies or procedures,
+    and need answers that show their source.
+  scope: >-
+    One collection for one user group, delivered inside Microsoft 365 (Copilot, SharePoint or Teams)
+    where you license it, otherwise on the web.
+  inclusions:
+    - Ingestion and clean-up of the collection, with the current version of each document marked
+    - Permission mapping, so staff get answers only from documents they can already open
+    - Refusal behaviour tuned to the collection
+    - An acceptance test of 50–100 questions written with your staff
+    - An admin guide on adding a document, and a staff briefing
+  clientTime: >-
+    A document owner for about 2 hours a week, 5–10 staff writing test questions for about an hour
+    each, and access to the collection.
+  timeline: >-
+    4–6 weeks, with a pilot group live around week 4 and go-live after the acceptance test.
+  outOfScope:
+    - Questions about matter files, ERP data or live records
+    - Legal research, clinical advice and student-facing chat
+    - Procedures already held in a platform whose own AI answers from them
+  gate: >-
+    Before go-live, you see the pilot's results on 50–100 staff-written questions against the
+    thresholds agreed in week 1, and you decide whether to roll it out.
+  onshoreNote: >-
+    Delivered on the web, the search index and the model run in an Australian region, in your own
+    account or one we manage. Delivered inside Microsoft 365, Microsoft sets where model calls are
+    processed, and its published statement says they may run outside Australia; the data note quotes
+    it with its date.
+packages:
+  - id: sop-work-instruction-assistant
+    name: SOP & Work-Instruction Assistant
+    status: launch
+    onshore: true
+    buyers: [mid-market]
+    forWhom: >-
+      Manufacturers, and resources and utilities field crews, whose SOPs, work instructions and OEM
+      manuals sit outside the safety platform.
+    scope: >-
+      One collection of SOPs, work instructions and OEM manuals for one site, line or crew, reached on
+      the web. Answers show the step and page used, can come in the language the worker asks in with
+      the English step alongside, and say so when the procedure is silent.
+    inclusions:
+      - Ingestion and clean-up of the collection, with the current version of each document marked
+      - Permission mapping, so staff get answers only from documents they can already open
+      - Refusal behaviour tuned to the collection, so it says when the SOP is silent
+      - Answers in each language you choose, each tested separately
+      - An admin guide on adding a document, and a staff briefing
+    clientTime: >-
+      A document owner for about 2 hours a week, 5–10 staff writing test questions for about an hour
+      each, and access to the collection.
+    timeline: >-
+      4–6 weeks, with a pilot group live around week 4 and go-live after the acceptance test.
+    outOfScope:
+      - SOP questions about procedures that already live in SafetyCulture (now Mitti), where you try its own AI Assistant first
+      - Questions about your ERP data
+      - Offline answers, because the index and the model run in the cloud
+    gate: >-
+      Before go-live, you see the pilot's results on 50–100 questions your crews wrote against the
+      thresholds agreed in week 1, and you decide whether to roll it out.
+    onshoreNote: >-
+      The search index and the model run in an Australian region, in your own Microsoft or AWS
+      account or in one we manage, and staff reach the assistant on the web from a phone, tablet or
+      desktop. If the model you want isn't offered in an Australian region, you hear that before you
+      decide.
+  - id: policy-procedure-assistant
+    name: Policy & Procedure Assistant
+    status: launch
+    onshore: false
+    buyers: [mid-market, enterprise-government]
+    forWhom: >-
+      Councils, independent schools, non-clinical health services and financial-services procedure
+      teams whose staff ask questions of a policy and procedure library.
+    scope: >-
+      One policy and procedure library for one staff group, delivered inside Microsoft 365 (Copilot,
+      SharePoint or Teams) where you license it, otherwise on the web. Answers cite the policy,
+      section and version, and say "not in our documents" when the library is silent.
+    inclusions:
+      - Ingestion and clean-up of the library, with the current version of each policy marked
+      - Permission mapping, so staff get answers only from policies they can already open
+      - Refusal behaviour tuned to the library
+      - An admin guide on adding and retiring a policy, and a staff briefing
+    clientTime: >-
+      A policy owner for about 2 hours a week, 5–10 staff writing test questions for about an hour
+      each, and access to the library.
+    timeline: >-
+      4–6 weeks, with a pilot group live around week 4 and go-live after the acceptance test.
+    outOfScope:
+      - "Clinical advice: a health service's library is non-clinical only"
+      - Student records and student-facing chat
+      - Decisions about people, which stay with your staff
+    gate: >-
+      Before go-live, you see the pilot's results on 50–100 staff-written questions against the
+      thresholds agreed in week 1, and you decide whether to roll it out.
+    onshoreNote: >-
+      Inside Microsoft 365, Microsoft sets where model calls are processed, and its published
+      statement says they may run outside Australia; the data note quotes it with its date. The parts
+      we build, such as a search index, run in an Australian region in your account or one we manage.
+  - id: ask-the-firm-manual
+    name: Ask the Firm Manual
+    status: on-request
+    oneLiner: >-
+      Answers staff questions at larger accounting and law firms from the firm manual, precedents and
+      procedures, not matter files, and shows the page it used.
+  - id: pm-procedures-assistant
+    name: PM Procedures & Onboarding Assistant
+    status: on-request
+    oneLiner: >-
+      Answers new property managers' questions from your procedures manual, with the page shown.
+packagesHeading: Packages
+program:
+  title: Measured knowledge layer
+  summary: >-
+    One tested, permission-aware source of cited answers that the assistants your staff already use,
+    such as Microsoft Copilot, can call through a connector.
+  duration: 12 weeks, in three 4-week phases
+  bullets:
+    - "Prove: one collection, with thresholds agreed before testing"
+    - "Harden: permissions, logging, and a re-test on every model change"
+    - "Hand over: the runbook, the test kit and a session for your team"
+    - A retention and disposal position for logs
+howWeTest:
+  summary: >-
+    Every assistant is tested on 50–100 questions your staff write, with pass thresholds agreed in
+    week 1, before anyone relies on it.
+  bullets:
+    - Correct answers, and whether the cited page says what the answer claims
+    - "False answers, counted on their own: confident answers your documents don't support"
+    - "False refusals, counted on their own: \"not in our documents\" when the answer was there"
+    - "The sample size in plain words: at 50 questions, one miss moves the rate by 2 points"
+    - A re-test on the same questions when the AI model changes
+whereItRuns:
+  choices: [your-account, managed, platform-you-license]
+  note: >-
+    On the web, the assistant runs in your own Microsoft or AWS account in an Australian region, or
+    in one we manage. Inside Microsoft 365, it works through the Copilot you already license, and the
+    search index we build stays in an Australian region.
+independencePolicy: false
+platformFirst: >-
+  If your staff have Microsoft Copilot licences, SharePoint's built-in AI can already answer from a
+  document library within each person's permissions, and SafetyCulture (now Mitti) has an AI
+  Assistant whose own examples include SOP questions. Try them first. If Copilot already does this
+  well enough, we'll say so.
+dontDo:
+  - We don't build a chat platform. Inside Microsoft 365, the assistant uses the Copilot you already license.
+  - We don't answer from matter files or ERP data, or rebuild SOP answers already inside SafetyCulture (now Mitti).
+  - We don't give clinical advice or build student-facing chat.
+matrix: {}
+faq:
+  - q: We already have Copilot. Why would we need this?
+    a: >-
+      You may not. If Copilot or SharePoint already answers your staff's questions well enough,
+      we'll say so. What we add is a test on questions your staff write, with false answers and false
+      refusals counted separately, and an assistant tuned to say "not in our documents" instead of
+      guessing.
+  - q: Will it show staff documents they can't already open?
+    a: >-
+      No. The assistant keeps the permissions staff already have, so each person gets answers only
+      from documents they can open today. Permission mapping is part of every build.
+  - q: Have you built this for another organisation?
+    a: >-
+      No. Techsider has no clients yet, and this page describes a packaged offer, not a delivered
+      engagement. You can start with a Two-Week Trial on questions your own staff write, and see the
+      error rate before you rely on anything.
+  - q: Where is our data processed?
+    a: >-
+      It depends on where the assistant lives. On the web, the index and the model run in an
+      Australian region, in your account or ours. Inside Microsoft 365, Microsoft sets where model
+      calls are processed, and we show you what it publishes, including that they may run outside
+      Australia.

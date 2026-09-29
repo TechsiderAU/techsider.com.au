@@ -1,11 +1,12 @@
 // The solution template (spec §8.3) as the preview build renders it from the fixtures:
 // /preview/templates/solution/ (①-like), solution-evaluation (④-like, the sample report in the
 // hero) and solution-switch-on (⑤-like). The package markup is CI check 10's DOM contract.
-// tests/e2e/solution-template.spec.mjs covers the tabs, no-JS, axe and 320px behaviour.
+// tests/e2e/solution-template.spec.mjs covers the tabs, no-JS, axe and 320px behaviour, and
+// tests/solutions-pages.test.mjs covers the live solution pages in the production build.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
-import { allHtmlFiles, readDist, readPreviewDist, visibleText } from "./helpers.mjs";
+import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { elements, elementsWith, startTags } from "../scripts/ci/lib.mjs";
 import { run as packageStatusCheck } from "../scripts/ci/checks/10-package-status.mjs";
 import { PREVIEW_PAGES } from "../src/fixtures/preview-pages.ts";
@@ -333,12 +334,5 @@ test("ids are unique in <main>, and every in-page reference (aria-labelledby, #f
         assert.ok(all.has(tag.attrs.href.slice(1)), `${PAGES[id]}: href="${tag.attrs.href}" has no target`);
       }
     }
-  }
-});
-
-test("production dist/ has no solution template or package markup", () => {
-  for (const file of allHtmlFiles()) {
-    const html = readDist(file);
-    assert.doesNotMatch(html, /data-template="solution"|data-package-tab|data-package-status/, file);
   }
 });

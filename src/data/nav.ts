@@ -109,18 +109,24 @@ const HOME = describe(page("home", "Home", "/", "/", "live", "Techsider"),
 const NOT_FOUND = describe(page("system", "Not found", "/", "/404", "live"),
   "No page lives at this address. It may be mistyped or out of date. Follow a link below to a section of the Techsider site, or report the broken link by email.");
 
-const SOLUTIONS_HUB = page("solutions", "Solutions", "/", "/solutions/", "planned");
+const SOLUTIONS_HUB = describe(page("solutions", "Solutions", "/", "/solutions/", "live"),
+  "Five AI solutions for Australian organisations: document registers, cited assistants, draft-for-approval automation, independent evaluation and AI switch-on.");
 const SOLUTIONS = [
-  page("solutions", "Document Registers", "/solutions/", "/solutions/document-registers/", "planned", "Document Registers & Evidence Packs",
+  describe(page("solutions", "Document Registers", "/solutions/", "/solutions/document-registers/", "live", "Document Registers & Evidence Packs",
     "PDFs your team reads by hand, turned into a register you can check."),
-  page("solutions", "Knowledge Assistant", "/solutions/", "/solutions/knowledge-assistant/", "planned", "Cited Knowledge Assistant",
+    "Turn the documents your team reads by hand into a register you can check, with every field linked to its page and an error rate measured on your own answer key."),
+  describe(page("solutions", "Knowledge Assistant", "/solutions/", "/solutions/knowledge-assistant/", "live", "Cited Knowledge Assistant",
     "Answers from your own manuals, with the page it used."),
-  page("solutions", "Draft-for-Approval", "/solutions/", "/solutions/draft-for-approval/", "planned", "Draft-for-Approval Automation",
+    "An assistant that answers staff questions from your own manuals and policies, shows the page it used, and says so when the answer isn't in your documents."),
+  describe(page("solutions", "Draft-for-Approval", "/solutions/", "/solutions/draft-for-approval/", "live", "Draft-for-Approval Automation",
     "One back-office job, drafted for a person to approve."),
-  page("solutions", "AI Evaluation", "/solutions/", "/solutions/ai-evaluation/", "planned", "Independent AI Evaluation",
+    "Automate one back-office job across your systems. It sorts, summarises, drafts and routes; a person approves anything sent, changed or decided. Tested first."),
+  describe(page("solutions", "AI Evaluation", "/solutions/", "/solutions/ai-evaluation/", "live", "Independent AI Evaluation",
     "Independent tests of AI you bought or had built elsewhere."),
-  page("solutions", "AI Switch-On", "/solutions/", "/solutions/ai-switch-on/", "planned", "AI Switch-On & Safe Use",
+    "Independent tests of AI you bought or had built elsewhere, on your own questions in your own environment, with every failure listed and a kit you can re-run."),
+  describe(page("solutions", "AI Switch-On", "/solutions/", "/solutions/ai-switch-on/", "live", "AI Switch-On & Safe Use",
     "Value from the AI already inside software you pay for."),
+    "Get value from the AI already inside the software you pay for: set it up with ground rules, train staff, and measure the hours saved at day 30, in your units."),
 ];
 
 const INDUSTRIES_HUB = page("industries", "Industries", "/", "/industries/", "planned");

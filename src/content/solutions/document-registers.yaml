@@ -1,0 +1,246 @@
+# ① Document Registers & Evidence Packs: /solutions/document-registers/ (spec §4.1 ①, §8.3).
+# The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
+# fill byIndustry and matrix; Phase D adds demo.
+# ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
+job: >-
+  Reads one family of documents your team checks by hand, such as trust deeds or management
+  agreements, and fills a fixed field list for each one. Anything missing, unsigned, expired,
+  conflicting or amended goes to a short review queue.
+artefact: >-
+  A register delivered as a spreadsheet, a CSV or an import your destination system accepts, with
+  every field linked to the page it came from. You also get the error rate for each field, measured
+  on documents your own seniors already know.
+forLine: Accounting practices and property-management groups that read documents by hand
+needProfiles:
+  - title: Your team keeps re-reading the same documents.
+    body: >-
+      Staff open the same deeds and agreements again to find the same few fields. The register
+      reads each document once and links every value to its page.
+  - title: You have to show where each answer came from.
+    body: >-
+      A partner, auditor or principal wants the source, not a summary. Every field links to its
+      page, so a senior can check 50 rows in about half a day.
+  - title: You have no IT team to run new software.
+    body: >-
+      The register reads your documents read-only and adds no new login. You get a spreadsheet, a
+      CSV or an import your system already accepts.
+byIndustry: []
+genericPackage:
+  id: one-document-family
+  name: One document family, one register
+  status: launch
+  onshore: true
+  buyers: [mid-market]
+  forWhom: >-
+    A team that reads one kind of document by hand, such as deeds, agreements, leases, approvals or
+    certificates, and needs the answers in a register it can check.
+  scope: >-
+    One document family and one fixed field list. You agree the fields and the error rate you'll
+    accept; the register is tested on an answer key of 30–50 documents your seniors already know,
+    then run over the full set.
+  inclusions:
+    - A Two-Week Trial on your answer key, with the error rate for each field and every miss listed
+    - The full run over the rest of the document family
+    - An exception queue for documents that are missing, unsigned, expired, conflicting or amended
+    - Every field linked to the page it came from
+    - Delivery as a spreadsheet, a CSV or an import your destination system accepts
+    - Instructions for running new documents through the register after handover
+  clientTime: >-
+    A senior for about a day to build and check the answer key, about half a day to check 50 output
+    rows, two one-hour meetings for the process owner, and read-only access to the document store.
+    Confirmed at scoping.
+  timeline: >-
+    Week 0: the field list, the agreed error rate and the answer key. Weeks 1–2: the Two-Week Trial,
+    ending in a go/no-go. Weeks 3–5: the full run, the exception queue and delivery. Week 6:
+    handover.
+  outOfScope:
+    - "Legal interpretation: a flag such as \"streaming clause present, see p. 14\" is for your partner or lawyer to decide"
+    - Identity verification, screening, and final due-diligence or compliance decisions
+    - Bookkeeping capture of bills and receipts
+    - Writing to a trust ledger or any other record in your systems
+  gate: >-
+    At the end of the Two-Week Trial you see the error rate for each field on your own answer key,
+    with every miss listed, and you decide whether to continue.
+  onshoreNote: >-
+    Runs in your own Microsoft or AWS account, or in an environment we manage, with document reading
+    and model inference in an Australian region. The data note records the model provider's
+    retention, abuse-monitoring and human-review settings. If the model a job needs isn't offered in
+    an Australian region, you hear that before you decide.
+packages:
+  - id: trust-deed-register
+    name: Trust Deed & Client Structure Register
+    status: launch
+    onshore: true
+    buyers: [mid-market]
+    forWhom: >-
+      Accounting practices and networks whose client trust details sit in deeds and deeds of
+      variation that seniors read by hand.
+    scope: >-
+      Every trust deed and deed of variation in your client book, read into one register: trustee,
+      appointor, beneficiary classes, vesting date and amendment history, with streaming and
+      distribution clauses flagged for partner attention.
+    inclusions:
+      - The fields above for each deed, each linked to its page
+      - A flag on each streaming or distribution clause, with its page, for the partner
+      - An exception queue for deeds that are missing, unsigned or changed by a deed of variation
+      - Deeds matched to clients from a read-only copy of your client list
+      - Delivery as a spreadsheet or CSV
+    clientTime: >-
+      A senior for about a day to build an answer key of 30–50 deeds they already know, and about
+      half a day to check 50 output rows. Read-only access to where the deeds live.
+    timeline: >-
+      5–6 weeks after Week 0. The Two-Week Trial runs in a quieter window: November to early
+      December, or April to May.
+    outOfScope:
+      - "Interpreting a deed, or legal or tax advice: every flag is for the partner to decide"
+      - Identity verification and customer due-diligence decisions, which stay with your compliance officer and your due-diligence tool
+      - Writing register fields back into Karbon or Xero Practice Manager
+    gate: >-
+      After the Trial, you see the error rate for each field on deeds your seniors already know,
+      with every miss listed, and you decide whether to run the rest.
+    onshoreNote: >-
+      Deeds are read, and the model runs, in an Australian region: in your own Microsoft or AWS
+      account, or in an environment we manage. The data note names every processor, what each keeps
+      and for how long.
+  - id: management-agreement-register
+    name: Management Agreement & Rent Roll Register
+    status: launch
+    onshore: true
+    buyers: [mid-market]
+    forWhom: >-
+      Residential property-management groups that need to know what every signed management
+      agreement says, including on a rent roll they're buying.
+    scope: >-
+      Every signed management agreement read into one register: management fee, owner repair limit,
+      signed authorities, landlord insurance and expiry, with missing, unsigned or out-of-date
+      agreements flagged. The Rent Roll Due Diligence variant runs the same register over the
+      agreements of a roll you're acquiring.
+    inclusions:
+      - The fields above for each agreement, each linked to its page
+      - An exception queue for agreements that are missing, unsigned or out of date
+      - The Rent Roll Due Diligence variant, on the agreements of a roll you're buying
+      - Delivery as a spreadsheet or CSV, for a property manager to act on in your own system
+    clientTime: >-
+      A senior property manager for about a day to build an answer key of 30–50 agreements they
+      already know, about half a day to check 50 output rows, and read-only access to where signed
+      agreements are stored.
+    timeline: >-
+      5–6 weeks: Week 0 for the answer key, a Two-Week Trial ending in a go/no-go, three weeks for
+      the full run and delivery, and handover in week 6.
+    outOfScope:
+      - Writing to your trust ledger, making payments or disbursements, or changing a rental record in PropertyMe
+      - Tenant reply drafting, rental-law questions and supplier-bill reading, which your property platform may already do
+      - "Compliance decisions: flagged agreements are for a property manager to resolve"
+    gate: >-
+      After the Trial, you see the error rate for each field on agreements your senior staff already
+      know, with every miss listed, and you decide whether to run the full portfolio.
+    onshoreNote: >-
+      Agreements are read, and the model runs, in an Australian region: in your own Microsoft or AWS
+      account, or in an environment we manage. Before work starts, the data note maps every place
+      owner and tenant information will land, with the retention you set for each copy.
+  - id: permit-conditions-register
+    name: Approval & Permit Conditions Register
+    status: on-request
+    oneLiner: >-
+      Turns each condition of a resources, energy or utilities approval into a register row linked to
+      its page, starting with a Two-Week Trial on one approval.
+  - id: trust-audit-prep-pack
+    name: Trust Audit Prep Pack
+    status: on-request
+    oneLiner: >-
+      Checks sampled disbursements against invoice and owner approval from read-only exports, and
+      lists what's missing for your auditor. It isn't an audit, and it never touches the ledger.
+  - id: bond-claim-evidence-pack
+    name: Bond Claim Evidence Pack
+    status: on-request
+    oneLiner: >-
+      Links each claimed item to its condition-report page, photo and receipt, in one draft a
+      property manager checks.
+  - id: compliance-certificate-register
+    name: Compliance Certificate Register
+    status: on-request
+    oneLiner: >-
+      Reads compliance certificates, such as smoke-alarm and pool certificates, into one register of
+      expiry dates. The rules for each state are checked when the package is scoped.
+  - id: lease-abstract-critical-dates
+    name: Lease Abstract & Critical Dates
+    status: on-request
+    oneLiner: >-
+      Abstracts each commercial lease into a register of key terms and critical dates, each linked to
+      its page.
+  - id: compliance-dossier-builder
+    name: Compliance Dossier Builder
+    status: on-request
+    oneLiner: >-
+      Pulls the evidence a customer audit, food-safety audit or GMP inspection asks for into a
+      register linked to its pages. It points at your controlled documents and doesn't replace them.
+  - id: credentialing-referral-registers
+    name: Credentialing & Referral Intake Registers
+    status: on-request
+    oneLiner: >-
+      Reads credentialing documents from outside Ahpra's register, such as college fellowships and
+      scope-of-practice letters, or referrals that arrive as PDFs or faxes, into a register a person
+      checks. Administrative only: a person makes every credentialing or referral decision.
+  - id: assessor-pre-screening-pack
+    name: Pre-screening Pack for Assessors
+    status: internal
+    oneLiner: Offered only after an evaluation relationship, with the delegate deciding.
+packagesHeading: Packages
+program:
+  title: Registers program
+  summary: >-
+    Several document families, each with its own agreed error rate and review threshold, phased one
+    family at a time.
+  duration: 8–12 weeks
+  bullets:
+    - An agreed error rate and review threshold for each document family
+    - A review screen where your staff clear the exception queue
+    - A retention and disposal position for extracted data and logs
+    - A check that flags documents on a template the register hasn't seen before
+howWeTest:
+  summary: >-
+    Every register is tested on an answer key your own seniors build from documents they already
+    know, before anyone relies on it.
+  bullets:
+    - The error rate for each field on the answer key, with every miss listed
+    - How often the register says "not found" when the document does contain the answer
+    - How many documents land in the exception queue, and why
+    - A re-test on the same answer key when the AI model changes, with old and new results side by side
+whereItRuns:
+  choices: [your-account, managed]
+  note: >-
+    The register runs in your own Microsoft or AWS account in an Australian region, or in an
+    Australian region we manage. It never runs inside a vendor's platform, and every processing step,
+    model inference included, is designed to run in an Australian region.
+independencePolicy: false
+platformFirst: >-
+  If your need is due diligence on one client at a time, check what your AML platform already reads:
+  First AML's AI document reader, for example, reads trust deeds inside each case. A register earns
+  its place across the whole book, field by field, with an error rate measured on your own answer
+  key, with a go/no-go before you rely on it.
+dontDo:
+  - We don't write to trust ledgers or any other record. Registers are read-only on your systems.
+  - We don't make compliance or due-diligence decisions, or give legal or tax advice.
+  - We don't rebuild bookkeeping capture, identity verification, or anything your platform already reads well enough.
+matrix: {}
+faq:
+  - q: Have you built this for another firm?
+    a: >-
+      No. Techsider has no clients yet, and this page describes a packaged offer, not a delivered
+      engagement. That's why every register starts with a Two-Week Trial on 30–50 documents your
+      seniors already know: you see the error rate for each field, and every miss, before you decide
+      whether to continue.
+  - q: Will it change anything in our systems?
+    a: >-
+      No. The register reads your documents read-only and adds no new login. It's delivered as a
+      spreadsheet, a CSV or an import file, and a person on your team decides what to load and when.
+  - q: Who checks the documents it flags?
+    a: >-
+      Your staff do. Anything missing, unsigned, expired or conflicting goes to a short exception
+      queue, each item linked to its page, and a person decides what to do about it. The register
+      never makes the decision.
+  - q: What happens when the AI model changes?
+    a: >-
+      The test on your answer key is re-run before the new model is used, and you see old and new
+      results side by side. If the error rate gets worse, you decide whether to switch. The answer key
+      and test kit are yours, so you can re-run them without us.

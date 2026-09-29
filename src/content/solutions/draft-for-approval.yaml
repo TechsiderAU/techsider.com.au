@@ -1,0 +1,153 @@
+# ③ Draft-for-Approval Automation: /solutions/draft-for-approval/ (spec §4.1 ③, §8.3).
+# The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
+# fill byIndustry and matrix; Phase D adds demo. No ③ package is in the launch set, so the page shows
+# the generic package and the on-request list. Prior-year variance flags stay off: their platform
+# overlap is unverified.
+# ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
+job: >-
+  Handles one repetitive back-office job across the two or three systems it spans: it sorts,
+  summarises, drafts and routes. Anything that would be sent, changed or decided waits for a person
+  to approve it.
+artefact: >-
+  A working automation for one named job, with an approval gate, a trace log of every step and a
+  kill switch. You also get its results on 50–100 of your own past cases, with every mis-route and
+  bad draft shown.
+forLine: Mid-market operations teams, usually after a first register or assistant
+needProfiles:
+  - title: One job eats hours across several systems.
+    body: >-
+      A shared inbox, the SMS line and your practice or property system each hold part of the job.
+      The automation sorts and drafts between them, and a person approves the result.
+  - title: Nothing should go out without a person.
+    body: >-
+      Every outbound message and every record change waits at an approval gate. The autonomy level is
+      agreed in writing before the build.
+  - title: Your platform's own tools don't reach it.
+    body: >-
+      If the job lives inside one system, that system's own tools come first, and we'll say so. This
+      package is for the gaps between systems.
+byIndustry: []
+genericPackage:
+  id: one-job-drafts-for-approval
+  name: One job, drafts for approval
+  status: launch
+  onshore: true
+  buyers: [mid-market]
+  forWhom: >-
+    An operations lead with one repetitive back-office job that crosses two or three systems, such as
+    a shared inbox, an SMS line and your practice or property system.
+  scope: >-
+    One workflow across up to 2–3 systems. The automation sorts, summarises, drafts and routes, and
+    an approval gate holds every outbound or record-changing action until a person approves it.
+  inclusions:
+    - A map of the workflow as it runs today
+    - The autonomy level, agreed in writing
+    - An approval gate on every outbound or record-changing action
+    - A test on 50–100 of your past cases, showing mis-routes and bad drafts
+    - A trace log of every step, and a kill switch
+    - A permission review, with least-privilege access, read-only wherever the system's own access is read-only
+  clientTime: >-
+    A process owner for about 2 hours a week, historical examples of the job, and a least-privilege
+    service account.
+  timeline: 5–6 weeks, from the workflow map to go-live after the test on past cases.
+  outOfScope:
+    - "Autonomous customer-facing actions: a person approves everything that goes out"
+    - Voice calls or voice bots
+    - Jobs that live inside one system whose own tools cover them, such as XeroForce (when generally available), Karbon AI, Copilot Studio or PropertyMe Automation Studio. We'll tell you to use those.
+  gate: >-
+    Before go-live, you see how the automation handled 50–100 of your past cases, with every
+    mis-route and bad draft, and you decide whether it goes live.
+  onshoreNote: >-
+    The automation, and the model it calls, run in an Australian region, in your own Microsoft or AWS
+    account or in one we manage. A draft that lands in a system you already license is stored where
+    that vendor stores your other records, and the data note records what the vendor publishes about
+    that location, or that it publishes none.
+packages:
+  - id: shared-inbox-triage
+    name: Shared Inbox & After-Hours Triage
+    status: on-request
+    oneLiner: >-
+      Sorts, summarises and routes the mail and after-hours SMS that land outside PropertyMe, and a
+      property manager actions each item in PropertyMe.
+  - id: ato-letter-sorter
+    name: ATO Letter Sorter
+    status: on-request
+    oneLiner: >-
+      Reads each ATO letter for the action and due date, matches it to the right job and drafts the
+      reply for a person to approve, for practices without an ATO document feed.
+  - id: shift-handover-field-report
+    name: Shift-Handover & Field-Report
+    status: on-request
+    oneLiner: >-
+      Drafts the shift record from the several systems a handover pulls from, for a supervisor to
+      approve.
+  - id: fault-to-work-order
+    name: Fault-to-Work-Order
+    status: on-request
+    oneLiner: >-
+      Turns a fault note, failed inspection item or maintenance alert from one system into a draft
+      maintenance request in another, for a planner to approve.
+  - id: rfq-quote-prep
+    name: RFQ & Quote Prep
+    status: on-request
+    oneLiner: >-
+      Drafts quote lines and open questions from requests with drawings and specifications your ERP's
+      built-in AI doesn't read, for an estimator to check, complete and send.
+packagesHeading: Packages
+program:
+  title: Supervised multi-step automation
+  summary: >-
+    Several connected jobs under one set of controls. Offered only alongside an evaluation by a party
+    other than Techsider.
+  duration: 12 weeks
+  bullets:
+    - A register of every automation, with its owner and autonomy level
+    - Its own identity and least-privilege access for each automation
+    - A review of every tool and permission each automation can use
+    - Monitoring and an incident runbook
+howWeTest:
+  summary: >-
+    Every automation is tested on 50–100 of your own past cases before go-live, with success
+    measured in your own units.
+  bullets:
+    - Every mis-route and bad draft, each one shown
+    - The items it passed to a person because they were ambiguous
+    - Time saved in your own units, such as hours a week, against a baseline taken before the build, such as an Admin Hours Audit's
+    - A re-test on the same cases when the AI model changes
+whereItRuns:
+  choices: [your-account, managed]
+  note: >-
+    The automation runs in your own Microsoft or AWS account in an Australian region, or in an
+    Australian region we manage. It reaches each system through that system's own access, and where
+    that access is read-only, the automation stays read-only.
+independencePolicy: false
+platformFirst: >-
+  If the job lives inside one system, use that system's own tools first: Copilot Studio, Karbon AI,
+  PropertyMe Automation Studio, or XeroForce (when generally available). We build only for jobs that
+  cross systems no single vendor's tools reach.
+dontDo:
+  - We don't build autonomous actions. Nothing is sent, changed or decided without a person's approval.
+  - We don't build voice bots or customer-facing chat.
+  - We don't rebuild a job your platform's own tools already handle.
+matrix: {}
+faq:
+  - q: Will it send anything on its own?
+    a: >-
+      No. Every outbound message and every change to a record waits at an approval gate until a
+      person approves it. The autonomy level is agreed in writing before the build, and a kill switch
+      stops the automation at any time.
+  - q: Our platform is adding AI. Won't it do this soon?
+    a: >-
+      It might, and if it does, use it. If a job lives inside one system whose own tools cover it,
+      we'll say so at the Fit Call and point you to them. This package is for jobs that cross systems
+      no single vendor's tools reach, such as a shared inbox outside your property system.
+  - q: How do we know it works before it goes live?
+    a: >-
+      It's tested on 50–100 of your own past cases before go-live, and you see every mis-route and
+      bad draft. Success is measured in your own units, such as hours a week, against a baseline
+      taken before the build.
+  - q: Have you built this for anyone else?
+    a: >-
+      No. Techsider has no clients yet, and this page describes a packaged offer, not a delivered
+      engagement. That's why the test on your own past cases comes before go-live, and you decide
+      whether it goes live.

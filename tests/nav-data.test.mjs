@@ -112,25 +112,34 @@ test("industry footer labels read 'AI for {short name}'", () => {
   assert.equal(footerLabel(legal), "AI for legal & professional");
 });
 
-// Phase C puts pages live task by task; each task that flips a status adds its paths here.
-test("the live pages: Home, the 404, Services, Evaluation Partner and Insights", () => {
-  assert.deepEqual(
-    PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(),
-    ["/", "/404", "/insights/", "/services/", "/services/evaluation-partner/"],
-  );
+// Phase C puts pages live task by task, and each task that flips pages extends this pin.
+test("Phase C: the live pages after Task 3", () => {
+  assert.deepEqual(PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(), [
+    "/", "/404", "/insights/",
+    "/services/", "/services/evaluation-partner/",
+    "/solutions/", "/solutions/ai-evaluation/", "/solutions/ai-switch-on/", "/solutions/document-registers/",
+    "/solutions/draft-for-approval/", "/solutions/knowledge-assistant/",
+  ].sort());
 });
 
 test("production nav shows only live pages; preview shows every group", () => {
   const prod = visibleGroups(false);
-  assert.deepEqual(prod.map((g) => g.id), ["services", "resources"]);
-  // Services is live with its hub, so its panel carries Evaluation Partner and the phase anchors.
-  assert.equal(prod[0].hubHref, "/services/");
-  assert.deepEqual(prod[0].items.map((i) => i.path), ["/services/evaluation-partner/"]);
-  assert.deepEqual(prod[0].anchors.map((a) => a.href), ["/services/#prove", "/services/#build", "/services/#run"]);
-  // Resources has no hub page yet: a plain label whose panel lists Insights.
-  assert.equal(prod[1].hubHref, null);
-  assert.deepEqual(prod[1].items.map((i) => i.path), ["/insights/"]);
-  assert.deepEqual(prod[1].anchors, []);
+  // A group shows when its hub or one of its items is live; a hub that isn't live gives a plain
+  // label, and its anchors go with it.
+  const expected = NAV_GROUPS.map((g) => {
+    const hubLive = g.hub.status === "live";
+    return {
+      id: g.id,
+      hubHref: hubLive ? g.hub.path : null,
+      items: g.items.filter((i) => i.status === "live").map((i) => i.path),
+      anchors: hubLive ? g.anchors : [],
+    };
+  }).filter((g) => g.hubHref !== null || g.items.length > 0);
+  assert.deepEqual(prod.map((g) => ({ id: g.id, hubHref: g.hubHref, items: g.items.map((i) => i.path), anchors: g.anchors })), expected);
+  // Phase C Task 3: the Solutions hub and its five pages are live, so Solutions leads the nav.
+  assert.equal(prod[0].id, "solutions");
+  assert.equal(prod[0].hubHref, "/solutions/");
+  assert.deepEqual(prod[0].items.map((i) => i.path), NAV_GROUPS[0].items.map((i) => i.path));
   const pre = visibleGroups(true);
   assert.deepEqual(pre.map((g) => g.id), ["solutions", "industries", "services", "resources", "about"]);
   assert.equal(pre[0].hubHref, "/solutions/");
@@ -144,11 +153,14 @@ test("CTAs fall back while their target page is unbuilt", () => {
 });
 
 test("no-JS links, footer and legal row only point at shown pages", () => {
-  assert.deepEqual(noJsLinks(false), [{ label: "Services", href: "/services/" }, { label: "Insights", href: "/insights/" }]);
-  assert.deepEqual(footerColumns(false), [
-    { title: "Services", links: [{ label: "Services", href: "/services/" }, { label: "Evaluation Partner", href: "/services/evaluation-partner/" }] },
-    { title: "Resources", links: [{ label: "Insights", href: "/insights/" }] },
-  ]);
+  const live = (href) => PAGES.find((p) => p.path === href)?.status === "live";
+  for (const l of noJsLinks(false)) assert.ok(live(l.href), `no-JS row: ${l.href}`);
+  for (const c of footerColumns(false)) for (const l of c.links) assert.ok(live(l.href), `footer ${c.title}: ${l.href}`);
+  // Phase C Task 3: the no-JS row reaches the Solutions hub, and the footer's first column lists
+  // all five solution pages.
+  assert.deepEqual(noJsLinks(false)[0], { label: "Solutions", href: "/solutions/" });
+  assert.deepEqual(footerColumns(false)[0], { title: "Solutions", links: NAV_GROUPS[0].items.map((i) => ({ label: i.shortName, href: i.path })) });
+  assert.ok(noJsLinks(false).some((l) => l.href === "/insights/"));
   assert.deepEqual(legalLinks(false), []);
   assert.equal(footerColumns(true).length, 5);
 });

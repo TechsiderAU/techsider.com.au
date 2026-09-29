@@ -118,7 +118,8 @@ test("homeView: in a production build, planned pages fall back to mailto, #demo 
   assert.equal(live.demo.allHref, null);
   // Evaluation Partner is live (Phase C Task 2), so the enterprise route's partner line links to it.
   assert.equal(live.routes.evaluationPartnerHref, "/services/evaluation-partner/");
-  assert.ok(live.solutions.every((s) => s.href === null));
+  // The solution pages are live from Phase C Task 3, so their rows link.
+  assert.deepEqual(live.solutions.map((s) => s.href), prod.solutions.map((s) => s.path));
   assert.ok(live.industrySwitcher.every((i) => i.href === null));
   assert.ok(live.industries.every((i) => i.href === null));
   // Insights is live, so its link stays.

@@ -1,0 +1,159 @@
+# ⑤ AI Switch-On & Safe Use: /solutions/ai-switch-on/ (spec §4.1 ⑤, §8.3). Mid-market only.
+# The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
+# fill byIndustry and matrix; Phase D adds demo (the "What you already pay for" checker). No program
+# (spec §8.3). Every package is onshore: false, because the vendor sets where processing runs.
+# Kits are named, never described as reviewed: they stay unpublished until a lawyer reviews them.
+# ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
+job: >-
+  Gets value from the AI already inside software you pay for, such as Microsoft 365, Xero, Karbon,
+  Dext or PropertyMe. It configures the features you already own, applies the Safe-Use Kit for your
+  industry where one is published, trains staff and measures the hours saved.
+artefact: >-
+  An hours map of where staff time goes, the features you already own set up and in use, trained
+  staff, and an hours-saved report at day 30 in your own units.
+forLine: Principals and operations leads at 20–300-staff firms with no IT team
+needProfiles:
+  - title: Your software may already include AI you don't use.
+    body: >-
+      Practice, property and office platforms now include AI features, and owning them isn't using
+      them. Switch-On finds the ones you own, sets them up and trains your staff.
+  - title: You need ground rules before staff use it.
+    body: >-
+      Where a Safe-Use Kit for your industry is published, Switch-On applies it as is. Your own
+      adviser approves any consent, engagement-letter or policy wording.
+  - title: You want to know it saved time.
+    body: >-
+      The Audit sets a baseline of where staff hours go. Day 30 measures the hours saved against it,
+      in your own units.
+byIndustry: []
+genericPackage:
+  id: switch-on-in-3-weeks
+  name: Switch-on in 3 weeks
+  status: launch
+  onshore: false
+  buyers: [mid-market]
+  forWhom: >-
+    A firm of 20–300 staff with no IT team, whose software already includes AI features it hasn't
+    set up or measured.
+  scope: >-
+    Week 1: an Admin Hours Audit. Weeks 2–3: configure the AI features you already own, apply the
+    published Safe-Use Kit for your industry where there is one, and train staff. Day 30: an
+    hours-saved report.
+  inclusions:
+    - An hours map of where staff time goes, and which of it the tools you own could take on
+    - A build, queue or park call on everything else
+    - Set-up of the AI features you already license, directly or with your IT provider
+    - The published Safe-Use Kit for accounting, legal or property applied as is, where your industry has one
+    - Staff training
+    - An hours-saved report at day 30, measured against the Audit baseline in your own units
+  clientTime: >-
+    An operations lead for about 3 hours a week, admin access or your IT provider's help, and 2–3
+    staff to keep a one-week time log.
+  timeline: 3 weeks, plus the day-30 report.
+  outOfScope:
+    - Buying or reselling licences
+    - Device management and Microsoft 365 administration, which stay with your IT provider
+    - "Building anything: a build is scoped after the Audit"
+    - "Drafting or tailoring legal wording: your own adviser approves any consent, engagement-letter or policy text"
+  gate: >-
+    After the Week 1 Audit, you see the hours map and the build, queue or park call, and you decide
+    whether to go ahead with Switch-On.
+  onshoreNote: >-
+    Switch-On uses AI inside tools you already license, so each vendor sets where processing
+    happens. The data note shows what each vendor publishes about its processing location, with the
+    date it was checked, or says that it publishes none.
+packages:
+  - id: admin-hours-audit-switch-on
+    name: Admin Hours Audit + Switch-On
+    status: launch
+    onshore: false
+    buyers: [mid-market]
+    forWhom: >-
+      Accounting practices, property-management groups, law firms and independent schools that want
+      the AI they already license set up with ground rules and measured.
+    scope: >-
+      The Admin Hours Audit takes 1 week and maps where staff hours go. Switch-On takes 2–3 weeks: it
+      configures features you already own, applies the relevant Safe-Use Kit as published, where one
+      has been published, trains staff and measures the hours saved at day 30.
+    inclusions:
+      - The Audit's hours map, with build, queue or park for each task
+      - The baseline any later build is measured against
+      - Set-up of the AI already in your practice, property or office software, such as Karbon AI's email summaries and suggested replies, or Reply with AiMe on PropertyMe's Advanced or Premier plan
+      - "The published Safe-Use Kit for accounting, legal or property, applied as is. Other industries work to their own AI policy."
+      - Staff training, and the day-30 hours-saved report
+    clientTime: >-
+      An operations lead for about 3 hours a week, admin access or your IT provider's help, and 2–3
+      staff to keep a one-week time log.
+    timeline: 1 week for the Audit, 2–3 weeks for Switch-On, then the day-30 report.
+    outOfScope:
+      - Connecting a general AI assistant to client or tenant data through a platform connector
+      - Buying or reselling licences
+      - "Building anything: a build is scoped after the Audit"
+      - "Tailoring kit wording: your own adviser approves any change"
+    gate: >-
+      After the Audit, you decide whether to go ahead with Switch-On, and you keep the hours map
+      either way.
+    onshoreNote: >-
+      Every feature Switch-On sets up runs inside a platform you already license, where the vendor
+      sets the processing location. Many vendors don't publish where AI processing runs for
+      Australian customers, and the data note says so vendor by vendor, with the date it was checked.
+  - id: private-workspace
+    name: Private Workspace
+    status: on-request
+    oneLiner: >-
+      A private AI workspace in an Australian region, in your account or managed by us, for firms whose
+      data rules bar the general AI tools they have and who hold no suitable licence.
+  - id: citation-verification-log
+    name: Citation Verification & AI-Use Disclosure Log
+    status: on-request
+    oneLiner: >-
+      A record for court work of who checked each authority, against which source and when, and which
+      sections came from AI. The lawyer still does the checking.
+packagesHeading: Packages
+howWeTest:
+  summary: Switch-On is measured in hours, against the baseline the Audit sets.
+  bullets:
+    - A one-week time log from 2–3 staff before anything changes
+    - The same measure at day 30, in your own units, such as hours a week
+whereItRuns:
+  choices: [platform-you-license]
+  note: >-
+    Switch-On works only inside platforms you already license, so each vendor sets where your data
+    is processed. The Private Workspace, on request, is the option for work that has to stay in an
+    Australian region.
+independencePolicy: false
+platformFirst: >-
+  Check what you already pay for before you buy anything new: many practice, property and office
+  platforms now include AI features. If your platform already covers the job you bring to the Fit
+  Call, we'll say so and stop there.
+dontDo:
+  - We don't sell or resell software licences.
+  - "We don't draft or tailor legal wording: your own adviser approves any consent, engagement-letter or policy text."
+  - We don't administer Microsoft 365 or manage devices. That stays with your IT provider.
+  - We don't independently evaluate a tool we set up for you. Someone else should.
+matrix: {}
+faq:
+  - q: Can't we switch these features on ourselves?
+    a: >-
+      You can. Switch-On is for firms without an IT team, or the time to work out which features fit
+      which tasks. It starts with a one-week Audit of where staff hours go, and it ends with the hours
+      saved measured at day 30.
+  - q: Where is our data processed?
+    a: >-
+      Inside the platforms you already license, where each vendor sets the processing location. Many
+      vendors don't publish where AI processing runs for Australian customers. The data note tells
+      you, vendor by vendor, what each publishes and when it was checked.
+  - q: What is a Safe-Use Kit?
+    a: >-
+      A starter set for accounting, legal or property teams, such as consent wording, a one-page AI
+      use policy and a verification log. Each kit is published only after review by an Australian
+      legal practitioner, and Switch-On applies it as published. Your own adviser approves any change.
+  - q: Will you evaluate the tools you switch on?
+    a: >-
+      Not independently. We never issue an independent evaluation of a system we configured for the
+      same client, so our own tests on it are labelled "acceptance test (not independent)".
+  - q: Have you done this for other firms?
+    a: >-
+      No. Techsider has no clients yet, and this page describes a packaged offer, not a delivered
+      engagement. That's why the first week is an Audit you can stop after, and you keep the hours
+      map either way.
