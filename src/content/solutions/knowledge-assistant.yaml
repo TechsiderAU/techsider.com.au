@@ -210,8 +210,9 @@ faq:
   - q: Have you built this for another organisation?
     a: >-
       No. Techsider has no clients yet, and this page describes a packaged offer, not a delivered
-      engagement. You can start with a Two-Week Trial on questions your own staff write, and see the
-      error rate before you rely on anything.
+      engagement. You can start with the Two-Week Trial on Your Own Files, on questions your own staff
+      write, or, for government and enterprise, the Feasibility Sprint on public or synthetic data.
+      Either way, you see the error rate before you rely on anything.
   - q: Where is our data processed?
     a: >-
       It depends on where the assistant lives. On the web, the index and the model run in an

@@ -19,6 +19,8 @@ const DATA = Object.fromEntries(IDS.map((id) => [id, schema.parse(parseYaml(RAW[
 const OWNER_MARKER = "# ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)";
 const MID = ["mid-market"];
 const ENT = ["enterprise-government"];
+/** Spec §3.4: the solutions whose every package is for mid-market buyers. */
+const MID_MARKET_SOLUTIONS = ["document-registers", "draft-for-approval", "ai-switch-on"];
 
 // The blueprint's canonical package set: [id, name, buyers] for launch packages, [id, name] otherwise.
 const CANON = {
@@ -243,9 +245,23 @@ test("the shared inclusions and delivery choice (c) hold on every solution page 
   assert.match(c.body, /\bWhere we build part of it\b/);
 });
 
+test("a solution with packages for government and enterprise offers their entry offer beside the mid-market Trial (C3-T3-F2; spec §3.4, §4.2)", () => {
+  const serving = IDS.filter((id) => launchOf(DATA[id]).some((p) => p.buyers.includes("enterprise-government")));
+  assert.deepEqual(serving, ["knowledge-assistant", "ai-evaluation"]);
+  for (const id of MID_MARKET_SOLUTIONS) assert.ok(!serving.includes(id), id);
+  let offered = 0;
+  for (const id of serving) {
+    for (const f of DATA[id].faq.filter((x) => /\bTwo-Week Trial\b/.test(x.a))) {
+      offered += 1;
+      assert.match(f.a, /\bthe Two-Week Trial on Your Own Files\b/, `${id}: "${f.q}"`);
+      assert.match(f.a, /\bfor government and enterprise, the Feasibility Sprint on public or synthetic data\b/, `${id}: "${f.q}"`);
+    }
+  }
+  assert.ok(offered >= 1, "② offers an entry in its FAQ");
+});
+
 test("language rules: nothing held, keep-off, priced or overclaimed, and no 'agents' on the mid-market solutions", () => {
   const everywhere = [
-    [/\bsprint\b/i, "sprint (§3.4)"],
     [/\btenancy\b/i, "tenancy (§3.4)"],
     [/\bAPRA audit\b/i, "APRA audit (§3.4)"],
     [/\b(monthly|per month|retainer)\b/i, "billing cadence (§3.4, D4)"],
@@ -259,6 +275,10 @@ test("language rules: nothing held, keep-off, priced or overclaimed, and no 'age
   for (const id of IDS) {
     const copy = copyOf(id);
     for (const [re, why] of everywhere) assert.doesNotMatch(copy, re, `${id}: ${why}`);
+    // "sprint" appears only inside "Feasibility Sprint", the government and enterprise entry offer,
+    // and that never on a mid-market solution (spec §3.4; tests/content-language.test.mjs's MID_MARKET).
+    const sprintless = MID_MARKET_SOLUTIONS.includes(id) ? copy : copy.replace(/\bFeasibility Sprint\b/g, "");
+    assert.doesNotMatch(sprintless, /\bsprint\b/i, `${id}: sprint (§3.4)`);
     for (const m of copy.matchAll(/generally available/g)) {
       assert.equal(copy.slice(m.index - "XeroForce (when ".length, m.index + "generally available)".length), "XeroForce (when generally available)", `${id}: "generally available" outside the ruling 11 wording`);
     }
