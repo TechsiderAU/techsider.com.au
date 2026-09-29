@@ -62,11 +62,15 @@ export const contactData = z.strictObject({
   replyTime: z.string(), // written once: /contact/ and /contact/sent/ read it, and no other page states a reply time (spec §8.11)
   // null until Phase E: the page then shows the email fallback only. https only: the form posts personal data.
   formEndpoint: z.url({ protocol: /^https$/ }).nullable(),
-  formProvider: z.strictObject({ name: z.string(), country: z.string() }),
+  // null until Phase E chooses the form provider: no placeholder names one before then (blueprint
+  // ruling 16). A form endpoint needs it, because the collection notice names it (spec §10.2).
+  formProvider: z.strictObject({ name: z.string(), country: z.string() }).nullable(),
   emailProvider: z.strictObject({ name: z.string(), country: z.string() }),
   subProcessors: z.array(z.strictObject({ entity: z.string(), purpose: z.string(), country: z.string(), data: z.string() })).min(2),
   whatNext: z.array(z.string()).min(3),
   deflection: z.array(z.strictObject({ title: z.string(), body: z.string(), email: z.email() })).min(3),
+}).refine((c) => c.formEndpoint === null || c.formProvider !== null, {
+  message: "a form endpoint needs its form provider: the collection notice names it (spec §10.2)", path: ["formProvider"],
 });
 
 export const trustData = z.strictObject({

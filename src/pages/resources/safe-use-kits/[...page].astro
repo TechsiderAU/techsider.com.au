@@ -1,0 +1,34 @@
+---
+// /resources/safe-use-kits/ (spec §8.7), built only while nav.ts shows the page (singletonPaths in
+// src/lib/pages.ts): SafeUseKitsTemplate over the three kits (accounting, legal, property). Planned
+// while every kit waits for lawyer review (spec §12 item 6), because a page of pending kits would
+// be a "coming soon" page (spec §7.1); a production build that would show it with no reviewed kit
+// fails instead.
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import SafeUseKitsTemplate from "../../../templates/SafeUseKitsTemplate.astro";
+import { isPreview } from "../../../data/nav";
+import { pageDescription, pageTitle } from "../../../lib/meta";
+import { pageAt, singletonPaths } from "../../../lib/pages";
+import { siteContext } from "../../../lib/site";
+
+export const getStaticPaths = (() => singletonPaths("/resources/safe-use-kits/")) satisfies GetStaticPaths;
+
+// The kits in the order the page lists them (spec §8.7).
+const KIT_ORDER = ["accounting", "legal", "property"];
+
+const entry = pageAt("/resources/safe-use-kits/");
+const collection = await getCollection("kits");
+const kits = KIT_ORDER.map((id) => {
+  const kit = collection.find((k) => k.id === id);
+  if (kit === undefined) throw new Error(`src/content/kits/${id}.yaml is missing`);
+  return { id: kit.id, data: kit.data };
+});
+if (!isPreview() && kits.every((kit) => kit.data.lawyerReviewedAt === null)) {
+  throw new Error("/resources/safe-use-kits/ is shown in a production build, but no kit is lawyer-reviewed: keep the page planned until one is (spec §7.1, §12 item 6)");
+}
+---
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
+  <SafeUseKitsTemplate kits={kits} site={siteContext(isPreview())} />
+</BaseLayout>

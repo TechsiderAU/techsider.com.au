@@ -1,0 +1,30 @@
+---
+// /legal/website-terms/ (spec §8.11), built only while nav.ts shows the page (singletonPaths in
+// src/lib/pages.ts): the website terms (src/content/documents/website-terms.md) through
+// DocumentTemplate, under Home › Legal. A draft for legal review, so the page stays planned; a
+// production build that would render the draft fails instead, so it can't publish before its
+// review (spec §12 item 5; blueprint ruling 17).
+import type { GetStaticPaths } from "astro";
+import { getEntry, render } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import DocumentTemplate from "../../../templates/DocumentTemplate.astro";
+import { isPreview } from "../../../data/nav";
+import { pageDescription, pageTitle } from "../../../lib/meta";
+import { pageAt, singletonPaths } from "../../../lib/pages";
+import { crumbs, siteContext } from "../../../lib/site";
+
+export const getStaticPaths = (() => singletonPaths("/legal/website-terms/")) satisfies GetStaticPaths;
+
+const entry = pageAt("/legal/website-terms/");
+const doc = await getEntry("documents", "website-terms");
+if (doc === undefined) throw new Error("src/content/documents/website-terms.md is missing");
+if (doc.data.draft && !isPreview()) {
+  throw new Error("/legal/website-terms/ is shown in a production build while website-terms.md is a draft: publish it only after its legal review (spec §12 item 5)");
+}
+const { Content } = await render(doc);
+---
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
+  <DocumentTemplate doc={doc.data} breadcrumb={crumbs(siteContext(isPreview()), ["legal", "websiteTerms"])}>
+    <Content />
+  </DocumentTemplate>
+</BaseLayout>

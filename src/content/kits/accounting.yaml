@@ -1,0 +1,20 @@
+# The accounting Safe-Use Kit (spec §8.7): based on TPB(GS) 55/2026, with a client-permission
+# clause, an AI use policy and a verification log. It waits for review by an Australian legal
+# practitioner, so lawyerReviewedAt stays null, the kits page shows no download, and no file exists
+# at the download path until the review is done (spec §12 item 6; blueprint ruling 18).
+# ⚑ owner: lawyer review of the accounting kit before any page links it (spec §12 item 6)
+# ⚑ owner: the reviewed kit quotes the TPB's "may" on the forms client permission can take, and doesn't promise that any one form is enough (accounting dossier, row tpb-code-item-6)
+industry: accounting
+title: Accounting Safe-Use Kit
+summary: "A starter kit for practices using AI in tax and accounting work, based on the Tax Practitioners Board's guidance on AI, TPB(GS) 55/2026."
+contents:
+  - "A client-permission clause for your engagement terms, for your own adviser to approve, which quotes TPB(GS) 55/2026 on the forms that permission may take"
+  - "An AI use policy for staff: the tools you approve, what client information may go into each, and who checks the output"
+  - "A verification log for AI output: what was checked, against which source, by whom and when"
+source:
+  label: "Tax Practitioners Board, TPB(GS) 55/2026"
+  url: https://www.tpb.gov.au/tpbgs-552026-use-artificial-intelligence-and-code-professional-conduct
+  asAt: 2026-07-22
+asAt: 2026-09-29
+lawyerReviewedAt: null
+download: /downloads/accounting-safe-use-kit.pdf

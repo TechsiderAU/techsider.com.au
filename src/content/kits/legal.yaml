@@ -1,0 +1,22 @@
+# The legal Safe-Use Kit (spec §8.7): aligned to the legal regulators' joint statement on AI and to
+# the AI practice notes of the Supreme Courts of NSW and Victoria and the County Court of Victoria
+# (legal dossier). The joint statement covers New South Wales, Victoria and Western Australia only,
+# and nothing for Queensland is verified, so the kit says which jurisdictions it covers. It waits for review by an Australian legal
+# practitioner: lawyerReviewedAt stays null and no file exists at the download path (spec §12 item 6).
+# ⚑ owner: lawyer review of the legal kit before any page links it (spec §12 item 6)
+# ⚑ owner: add the Federal Court's GPN-AI once its live page is checked in a browser (blueprint ruling 1)
+industry: legal-and-professional
+title: Legal Safe-Use Kit
+summary: "A starter kit for firms in New South Wales, Victoria and Western Australia using AI in legal work, aligned to the regulators' joint statement of 6 December 2024 and to the AI practice notes of the Supreme Courts of NSW and Victoria and the County Court of Victoria."
+contents:
+  - "An AI use policy for your firm: the tools you approve, who may use them, for what, and with what client information"
+  - "A confidentiality check for each tool: where inputs are stored and processed, and whether the provider keeps them or trains on them"
+  - "A citation-check log for court documents: each authority, the source it was checked against, who checked it and when"
+  - "Notes on the AI practice notes of the Supreme Court of NSW (SC Gen 23), the Supreme Court of Victoria (SC Gen 25) and the County Court of Victoria (PNCCV 1-2026)"
+source:
+  label: "Law Society of NSW, Legal Practice Board of WA and Victorian Legal Services Board and Commissioner, joint statement on AI in legal practice"
+  url: https://lsbc.vic.gov.au/news-updates/news/statement-use-artificial-intelligence-australian-legal-practice
+  asAt: 2024-12-06
+asAt: 2026-09-29
+lawyerReviewedAt: null
+download: /downloads/legal-safe-use-kit.pdf

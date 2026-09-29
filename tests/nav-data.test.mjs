@@ -112,17 +112,22 @@ test("industry footer labels read 'AI for {short name}'", () => {
   assert.equal(footerLabel(legal), "AI for legal & professional");
 });
 
-// Phase C puts pages live task by task, and each task that flips pages extends this pin.
-test("Phase C: the live pages after Task 6", () => {
-  assert.deepEqual(PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(), [
-    "/", "/404", "/insights/",
-    "/services/", "/services/evaluation-partner/",
-    "/solutions/", "/solutions/ai-evaluation/", "/solutions/ai-switch-on/", "/solutions/document-registers/",
-    "/solutions/draft-for-approval/", "/solutions/knowledge-assistant/",
-    "/industries/", "/industries/government/", "/industries/financial-services/", "/industries/accounting/",
-    "/industries/education/", "/industries/manufacturing/", "/industries/real-estate/",
-    "/industries/healthcare/", "/industries/resources-and-energy/", "/industries/legal-and-professional/",
-  ].sort());
+// Phase C puts pages live task by task, and each task that flips pages extends this pin. After
+// Task 7: every hub, every solution and industry page, Services, Evaluation Partner, Insights,
+// About and Contact.
+test("Phase C: the live pages after Task 7", () => {
+  const [solutions, industries] = NAV_GROUPS.map((g) => g.items.map((p) => p.path));
+  assert.deepEqual(
+    PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(),
+    [
+      "/", "/404",
+      "/solutions/", ...solutions,
+      "/industries/", ...industries,
+      "/services/", "/services/evaluation-partner/",
+      "/resources/", "/insights/",
+      "/about/", "/contact/",
+    ].sort(),
+  );
 });
 
 test("production nav shows only live pages; preview shows every group", () => {
@@ -147,33 +152,50 @@ test("production nav shows only live pages; preview shows every group", () => {
   const industries = prod.find((g) => g.id === "industries");
   assert.equal(industries.hubHref, "/industries/");
   assert.deepEqual(industries.items.map((i) => i.path), NAV_GROUPS[1].items.map((i) => i.path));
+  // Phase C Task 7: every hub is live. Resources lists only Insights, and About only Contact.
+  assert.deepEqual(prod.map((g) => g.hubHref), ["/solutions/", "/industries/", "/services/", "/resources/", "/about/"]);
+  const byId = Object.fromEntries(prod.map((g) => [g.id, g]));
+  assert.deepEqual(byId.resources.items.map((i) => i.path), ["/insights/"]);
+  assert.deepEqual(byId.about.items.map((i) => i.path), ["/contact/"], "Trust and Legal wait for the owner (spec §12)");
+  assert.deepEqual(byId.resources.anchors, []);
+  assert.equal(byId.services.anchors.length, 3);
   const pre = visibleGroups(true);
   assert.deepEqual(pre.map((g) => g.id), ["solutions", "industries", "services", "resources", "about"]);
   assert.equal(pre[0].hubHref, "/solutions/");
   assert.equal(pre[2].anchors.length, 3);
 });
 
-test("CTAs fall back while their target page is unbuilt", () => {
-  assert.deepEqual(resolveCta(CTAS.talk, false), { label: "Talk to us", href: `mailto:${SITE.email}` });
+test("CTAs fall back while their target page is unbuilt: Talk to us reaches the live /contact/, See a demo falls back", () => {
+  assert.deepEqual(resolveCta(CTAS.talk, false), { label: "Talk to us", href: "/contact/" });
   assert.deepEqual(resolveCta(CTAS.talk, true), { label: "Talk to us", href: "/contact/" });
   assert.deepEqual(resolveCta(CTAS.demo, false), { label: "See a demo", href: "/#demo" });
+  assert.deepEqual(resolveCta(CTAS.demo, true), { label: "See a demo", href: "/demos/" });
+  assert.equal(CTAS.talk.fallbackHref, `mailto:${SITE.email}`, "the fallback a planned /contact/ would use");
 });
 
 test("no-JS links, footer and legal row only point at shown pages", () => {
   const live = (href) => PAGES.find((p) => p.path === href)?.status === "live";
   for (const l of noJsLinks(false)) assert.ok(live(l.href), `no-JS row: ${l.href}`);
   for (const c of footerColumns(false)) for (const l of c.links) assert.ok(live(l.href), `footer ${c.title}: ${l.href}`);
-  // Phase C Task 3: the no-JS row reaches the Solutions hub, and the footer's first column lists
-  // all five solution pages.
-  assert.deepEqual(noJsLinks(false)[0], { label: "Solutions", href: "/solutions/" });
-  assert.deepEqual(footerColumns(false)[0], { title: "Solutions", links: NAV_GROUPS[0].items.map((i) => ({ label: i.shortName, href: i.path })) });
-  // Phase C Task 6: with its hub live, the no-JS row carries one Industries link in place of the
-  // industry pages, and the footer's Industries column lists all nine.
-  assert.deepEqual(noJsLinks(false).filter((l) => l.href.startsWith("/industries/")), [{ label: "Industries", href: "/industries/" }]);
-  assert.deepEqual(footerColumns(false).find((c) => c.title === "Industries").links,
-    NAV_GROUPS[1].items.map((i) => ({ label: footerLabel(i), href: i.path })));
-  assert.ok(noJsLinks(false).some((l) => l.href === "/insights/"));
-  assert.deepEqual(legalLinks(false), []);
+  // Phase C Task 7: every nav hub is live, so the no-JS row is the five hubs (Insights is reached
+  // through /resources/), and the footer has all five columns.
+  assert.deepEqual(noJsLinks(false), [
+    { label: "Solutions", href: "/solutions/" },
+    { label: "Industries", href: "/industries/" },
+    { label: "Services", href: "/services/" },
+    { label: "Resources", href: "/resources/" },
+    { label: "About", href: "/about/" },
+  ]);
+  const prod = footerColumns(false);
+  assert.deepEqual(prod.map((c) => c.title), ["Solutions", "Industries", "Services", "Resources", "Company"]);
+  assert.deepEqual(prod[0].links, NAV_GROUPS[0].items.map((i) => ({ label: i.shortName, href: i.path })));
+  assert.deepEqual(prod[1].links, NAV_GROUPS[1].items.map((i) => ({ label: footerLabel(i), href: i.path })));
+  assert.deepEqual(prod.find((c) => c.title === "Resources").links, [{ label: "Insights", href: "/insights/" }]);
+  assert.deepEqual(prod.find((c) => c.title === "Company").links, [
+    { label: "About", href: "/about/" },
+    { label: "Contact", href: "/contact/" },
+  ]);
+  assert.deepEqual(legalLinks(false), [], "the legal documents are drafts until reviewed (spec §12 item 5)");
   assert.equal(footerColumns(true).length, 5);
 });
 

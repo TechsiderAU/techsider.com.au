@@ -24,6 +24,16 @@ test("Phase C Task 3: the Solutions hub leads the production nav", () => {
   expect(GROUPS[0].hubHref).toBe("/solutions/");
 });
 
+test("Phase C Task 7: every hub is live, and Talk to us leads to the live /contact/", async ({ page }) => {
+  expect(GROUPS.map((g) => g.hubHref)).toEqual(["/solutions/", "/industries/", "/services/", "/resources/", "/about/"]);
+  expect(TALK.href).toBe("/contact/");
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/");
+  await page.locator("body > header").getByRole("link", { name: TALK.label }).click();
+  await expect(page).toHaveURL(/\/contact\/$/);
+  await expect(page.locator("h1")).toHaveText("Tell us what you're trying to fix.");
+});
+
 test.describe("desktop", () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 

@@ -1,8 +1,8 @@
 // The restyled Insights pages in the production build (Phase B2 Task 13, spec §8.9): the index is a
 // carbon PageHero plus a bone "All posts" section of InsightCards; each post is a carbon PageHero
 // (breadcrumb, type eyebrow, sentence-case H1, meta line), a bone Prose body and the §10.1
-// contextual closing prompt, with BlogPosting JSON-LD (§11.3). /contact/ is still planned, so
-// every contact link is the email address. No legacy colour alias or serif class survives.
+// contextual closing prompt, with BlogPosting JSON-LD (§11.3). /contact/ is live (Phase C Task 7),
+// so each closing link is /contact/ with the post's query. No legacy colour alias or serif class survives.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
@@ -11,10 +11,9 @@ import { fileURLToPath } from "node:url";
 import { allHtmlFiles, readDist, visibleText } from "./helpers.mjs";
 import { elements, elementsWith, readFrontmatter, startTags } from "../scripts/ci/lib.mjs";
 import { INSIGHT_TYPE_LABEL } from "../src/content/schemas.ts";
-import { PAGES, SITE } from "../src/data/nav.ts";
+import { PAGES } from "../src/data/nav.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
-const MAILTO = `mailto:${SITE.email}`;
 const INSIGHTS = PAGES.find((p) => p.path === "/insights/");
 
 // Published posts from their frontmatter, newest first (ties by id), as the index lists them.
@@ -41,12 +40,18 @@ const eyebrowOf = (type) => `[ ${INSIGHT_TYPE_LABEL[type].toLowerCase()} ]`;
 // Spec §10.1: the first solution reference, else the first industry, else plain "Talk to us".
 function expectedClosing({ solutions = [], industries = [] }) {
   if (solutions.length > 0) {
-    return { label: `Talk to us about ${shortName(`/solutions/${solutions[0]}/`)}`, prompt: `> talk_to_us --about=${solutions[0]}` };
+    return {
+      label: `Talk to us about ${shortName(`/solutions/${solutions[0]}/`)}`, prompt: `> talk_to_us --about=${solutions[0]}`,
+      href: `/contact/?interest=${solutions[0]}`,
+    };
   }
   if (industries.length > 0) {
-    return { label: `Talk to us about AI for ${shortName(`/industries/${industries[0]}/`).toLowerCase()}`, prompt: `> talk_to_us --about=${industries[0]}` };
+    return {
+      label: `Talk to us about AI for ${shortName(`/industries/${industries[0]}/`).toLowerCase()}`, prompt: `> talk_to_us --about=${industries[0]}`,
+      href: `/contact/?industry=${industries[0]}`,
+    };
   }
-  return { label: "Talk to us", prompt: "> talk_to_us" };
+  return { label: "Talk to us", prompt: "> talk_to_us", href: "/contact/" };
 }
 
 test("the insights pages are the index plus one page per published post", () => {
@@ -124,8 +129,8 @@ test("posts: a carbon hero with the breadcrumb, the type eyebrow, the title as t
   }
 });
 
-test("posts: the body is Prose on bone, then the contextual closing prompt, a mailto while /contact/ is planned", () => {
-  assert.equal(PAGES.find((p) => p.path === "/contact/").status, "planned", "/contact/ is live: its links are no longer a mailto");
+test("posts: the body is Prose on bone, then the contextual closing prompt, linked to the live /contact/", () => {
+  assert.equal(PAGES.find((p) => p.path === "/contact/").status, "live", "/contact/ is planned: its links fall back to a mailto");
   for (const { id, fm } of POSTS) {
     const html = main(readDist(`insights/${id}/index.html`));
     const body = elements(html, (t) => classesOf(t).includes("post-body"))[0];
@@ -138,7 +143,7 @@ test("posts: the body is Prose on bone, then the contextual closing prompt, a ma
     assert.equal(links.length, 1);
     const expected = expectedClosing(fm);
     assert.equal(text(links[0].inner), expected.label, `${id}: contextual CTA label`);
-    assert.equal(links[0].attrs.href, MAILTO, `${id}: the CTA is not the mailto fallback`);
+    assert.equal(links[0].attrs.href, expected.href, `${id}: contextual CTA link`);
     assert.equal(text(elements(prompt.inner, (t) => t.name === "p")[0].inner), expected.prompt);
     // Industry chips render only for a post that names industries.
     assert.equal(elementsWith(body.inner, "data-chip-row").length, (fm.industries ?? []).length > 0 ? 1 : 0);

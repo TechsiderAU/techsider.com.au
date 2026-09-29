@@ -10,7 +10,8 @@ import { DELIVERY_LETTER } from "../src/lib/fixed-copy.ts";
 import { fixtureSite, servicesFixture, solutionFixtures } from "../src/fixtures/index.ts";
 
 const IDS = ["fixture-solution", "fixture-solution-2", "fixture-solution-3", "fixture-solution-4", "fixture-solution-5"];
-const MAILTO = "mailto:admin@techsider.com.au";
+// /contact/ is live (Phase C Task 7): a production contact link for ① carries its interest.
+const TALK_REGISTERS = "/contact/?interest=document-registers";
 const view = (id, data = solutionFixtures[id], site = fixtureSite) => solutionView({ id, data, shared: servicesFixture, site });
 const byStatus = (data, status) => data.packages.filter((p) => p.status === status);
 
@@ -60,7 +61,7 @@ test("a PackageView carries every §4.5 and §4.6 field, with a null preconditio
   assert.ok(preconditions.some((p) => typeof p === "string"), "no fixture package with a precondition");
 });
 
-test("on-request entries link to the contact page with the solution preselected, or to email while it is planned", () => {
+test("on-request entries link to the contact page with the solution preselected", () => {
   const data = solutionFixtures["fixture-solution"];
   const gallery = packageViews("fixture-solution", data, fixtureSite).onRequest;
   assert.ok(gallery.length > 0);
@@ -69,7 +70,7 @@ test("on-request entries link to the contact page with the solution preselected,
     assert.equal(p.oneLiner, byStatus(data, "on-request").find((q) => q.id === p.id).oneLiner);
   }
   assert.equal(packageViews("document-registers", data, siteContext(true)).onRequest[0].href, "/contact/?interest=document-registers");
-  assert.equal(packageViews("document-registers", data, siteContext(false)).onRequest[0].href, MAILTO);
+  assert.equal(packageViews("document-registers", data, siteContext(false)).onRequest[0].href, TALK_REGISTERS);
 });
 
 test("packageViews refuses a package id used twice, because package ids are page anchors", () => {
@@ -96,7 +97,7 @@ test("solutionView names the solution from the site context and links the hero, 
   assert.deepEqual(IDS.map((id) => view(id).number), ["①", "②", "③", "④", "⑤"]);
 });
 
-test("on the production site context every planned page is plain text or email; on the preview context, a link", () => {
+test("on the production site context every planned page is plain text and contact links reach /contact/; on the preview context, every page is a link", () => {
   const data = { ...solutionFixtures["fixture-solution"], byIndustry: ["accounting", "government"] };
   const live = view("document-registers", data, siteContext(false));
   // The Solutions hub is live from Phase C Task 3, so the production trail keeps it.
@@ -105,12 +106,12 @@ test("on the production site context every planned page is plain text or email; 
     { label: "Solutions", href: "/solutions/" },
     { label: "Document Registers", href: "/solutions/document-registers/" },
   ]);
-  assert.deepEqual(live.ctas, { primary: { label: "Talk to us about Document Registers", href: MAILTO }, secondary: null });
-  assert.equal(live.closing.href, MAILTO);
+  assert.deepEqual(live.ctas, { primary: { label: "Talk to us about Document Registers", href: TALK_REGISTERS }, secondary: null });
+  assert.equal(live.closing.href, TALK_REGISTERS);
   assert.equal(live.howWeTest.methodHref, null);
   // Accounting and Government are live from Phase C Task 4, so their By industry chips link.
   assert.deepEqual(live.byIndustry, [{ label: "Accounting", href: "/industries/accounting/" }, { label: "Government", href: "/industries/government/" }]);
-  for (const p of live.onRequest) assert.equal(p.href, MAILTO);
+  for (const p of live.onRequest) assert.equal(p.href, TALK_REGISTERS);
 
   const preview = view("document-registers", data, siteContext(true));
   assert.deepEqual(preview.breadcrumb.map((c) => c.href), ["/", "/solutions/", "/solutions/document-registers/"]);

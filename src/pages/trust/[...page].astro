@@ -1,0 +1,23 @@
+---
+// /trust/ (spec §8.11), built only while nav.ts shows the page (singletonPaths in src/lib/pages.ts).
+// TrustTemplate over the Trust data (src/data/trust.ts), the contact data's sub-processors and the
+// Services data's independence policy. Planned until the owner confirms Part A (spec §12 item 1)
+// and Phase E ships /.well-known/security.txt.
+import type { GetStaticPaths } from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import TrustTemplate from "../../templates/TrustTemplate.astro";
+import { isPreview } from "../../data/nav";
+import { CONTACT } from "../../data/contact";
+import { SERVICES } from "../../data/services";
+import { TRUST } from "../../data/trust";
+import { pageDescription, pageTitle } from "../../lib/meta";
+import { pageAt, singletonPaths } from "../../lib/pages";
+import { siteContext } from "../../lib/site";
+
+export const getStaticPaths = (() => singletonPaths("/trust/")) satisfies GetStaticPaths;
+
+const entry = pageAt("/trust/");
+---
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
+  <TrustTemplate trust={TRUST} contact={CONTACT} services={SERVICES} site={siteContext(isPreview())} />
+</BaseLayout>

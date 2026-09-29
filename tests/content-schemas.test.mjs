@@ -553,6 +553,14 @@ test("page data: contact takes a form endpoint URL or null, and real email addre
   bad(contactData, { ...CONTACT, subProcessors: CONTACT.subProcessors.slice(0, 1) }, "one sub-processor");
 });
 
+test("page data: the form provider is null until a form endpoint needs one (blueprint ruling 16, spec §10.2)", () => {
+  assert.equal(ok(contactData, { ...CONTACT, formEndpoint: null, formProvider: null }, "no endpoint and no form provider").formProvider, null);
+  ok(contactData, { ...CONTACT, formEndpoint: null }, "a form provider named before the endpoint exists");
+  bad(contactData, { ...CONTACT, formProvider: null }, "a form endpoint with no form provider for the collection notice");
+  const { formProvider, ...unset } = CONTACT;
+  bad(contactData, unset, "form provider left out rather than null");
+});
+
 test("page data: every Trust FAQ answer is 30–110 words (spec §8.11)", () => {
   const data = ok(trustData, TRUST, "trust");
   assert.ok(data.asAt instanceof Date && data.faq[0].asAt instanceof Date);

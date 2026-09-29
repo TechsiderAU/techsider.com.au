@@ -1,0 +1,20 @@
+# The property Safe-Use Kit (spec §8.7): tenant data, built around Victoria's renter-information
+# rules (real-estate dossier, row vic-renter-information). It waits for review by an Australian
+# legal practitioner: lawyerReviewedAt stays null and no file exists at the download path
+# (spec §12 item 6).
+# ⚑ owner: lawyer review of the property kit before any page links it (spec §12 item 6)
+# ⚑ owner: the review answers whether sending renter information to an AI provider is a disclosure under Vic RTA s 505BD (index A3), and the kit's tenant-data rule follows that answer; the kit covers no connection between an AI assistant and your property-management software until then (blueprint ruling 9)
+industry: real-estate
+title: Property Safe-Use Kit
+summary: "A starter kit for property-management teams using AI with renter and applicant information, built around the renter-information rules in Victoria's Residential Tenancies Act."
+contents:
+  - "A tenant-data rule for staff: which AI tools may see renter or applicant information, and which may not"
+  - "A checklist that maps every place renter information lands when an AI tool is used, including copies, extracted fields, indexes and logs"
+  - "A deletion schedule that applies the destruction dates you must meet to every copy, not only the original"
+source:
+  label: "Residential Tenancies Act 1997 (Vic), ss 505BA–505BE"
+  url: https://www.legislation.vic.gov.au/in-force/acts/residential-tenancies-act-1997
+  asAt: 2026-09-09
+asAt: 2026-09-29
+lawyerReviewedAt: null
+download: /downloads/property-safe-use-kit.pdf

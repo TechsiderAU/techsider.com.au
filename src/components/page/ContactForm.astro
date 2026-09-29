@@ -26,6 +26,9 @@ if (endpoint === null) {
 const MESSAGE_MAX = 1000;
 const privacyHref = site.page("privacy").href;
 const { formProvider, emailProvider } = contact;
+if (formProvider === null) {
+  throw new Error("ContactForm: contact.formProvider is null; the collection notice names the form provider, so the form needs one (spec §10.2)");
+}
 const selects = [
   {
     id: "contact-industry",

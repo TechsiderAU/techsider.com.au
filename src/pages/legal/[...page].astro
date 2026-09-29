@@ -1,0 +1,35 @@
+---
+// /legal/ (spec §8.11), built only while nav.ts shows the page (singletonPaths in src/lib/pages.ts):
+// the Legal hub, listing the privacy policy and the website terms. Planned until a lawyer has
+// reviewed them (spec §12 item 5); the preview build lists the drafts. A production build lists
+// reviewed documents only: were the hub live while both are drafts, it would have nothing to list,
+// and legalHubDocs() would fail the build.
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import LegalHubTemplate from "../../templates/LegalHubTemplate.astro";
+import { isPreview } from "../../data/nav";
+import { pageDescription, pageTitle } from "../../lib/meta";
+import { pageAt, singletonPaths } from "../../lib/pages";
+import { siteContext, type PageKey } from "../../lib/site";
+import type { LegalDoc } from "../../lib/views/company";
+
+export const getStaticPaths = (() => singletonPaths("/legal/")) satisfies GetStaticPaths;
+
+// The legal documents, in the order the hub lists them, each with the key of its page.
+const LEGAL_DOCUMENTS: [id: string, key: PageKey][] = [["privacy", "privacy"], ["website-terms", "websiteTerms"]];
+
+const entry = pageAt("/legal/");
+const preview = isPreview();
+const site = siteContext(preview);
+const documents = await getCollection("documents");
+const docs: LegalDoc[] = LEGAL_DOCUMENTS.flatMap(([id, key]) => {
+  const doc = documents.find((d) => d.id === id);
+  if (doc === undefined) throw new Error(`src/content/documents/${id}.md is missing`);
+  if (doc.data.draft && !preview) return [];
+  return [{ title: doc.data.title, summary: doc.data.summary, href: site.page(key).href, lastUpdated: doc.data.lastUpdated }];
+});
+---
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
+  <LegalHubTemplate docs={docs} site={site} />
+</BaseLayout>

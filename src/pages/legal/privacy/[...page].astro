@@ -1,0 +1,30 @@
+---
+// /legal/privacy/ (spec §8.11), built only while nav.ts shows the page (singletonPaths in
+// src/lib/pages.ts): the APP-style privacy policy (src/content/documents/privacy.md) through
+// DocumentTemplate, under Home › Legal. A draft for legal review, so the page stays planned; a
+// production build that would render the draft fails instead, so it can't publish before its
+// review (spec §12 item 5; blueprint ruling 17).
+import type { GetStaticPaths } from "astro";
+import { getEntry, render } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import DocumentTemplate from "../../../templates/DocumentTemplate.astro";
+import { isPreview } from "../../../data/nav";
+import { pageDescription, pageTitle } from "../../../lib/meta";
+import { pageAt, singletonPaths } from "../../../lib/pages";
+import { crumbs, siteContext } from "../../../lib/site";
+
+export const getStaticPaths = (() => singletonPaths("/legal/privacy/")) satisfies GetStaticPaths;
+
+const entry = pageAt("/legal/privacy/");
+const doc = await getEntry("documents", "privacy");
+if (doc === undefined) throw new Error("src/content/documents/privacy.md is missing");
+if (doc.data.draft && !isPreview()) {
+  throw new Error("/legal/privacy/ is shown in a production build while privacy.md is a draft: publish it only after its legal review (spec §12 item 5)");
+}
+const { Content } = await render(doc);
+---
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
+  <DocumentTemplate doc={doc.data} breadcrumb={crumbs(siteContext(isPreview()), ["legal", "privacy"])}>
+    <Content />
+  </DocumentTemplate>
+</BaseLayout>

@@ -104,17 +104,17 @@ test("homeView: the 45-day boundary, decided at the build time it is given", () 
   assert.equal(homeView(input({ insights: drafts })).insights.mode, "link");
 });
 
-test("homeView: in a production build, planned pages fall back to mailto, #demo and plain text", () => {
+test("homeView: in a production build, planned pages fall back to #demo and plain text, and Talk to us reaches /contact/", () => {
   // Re-key the fixture sets onto the real nav ids: siteContext(false) shows only the live pages.
   const prod = siteContext(false);
   const solutions = Object.fromEntries(prod.solutions.map((s, i) => [s.id, Object.values(solutionFixtures)[i]]));
   const industries = Object.fromEntries(prod.industries.map((s, i) => [s.id, Object.values(industryFixtures)[i]]));
   const live = homeView(input({ solutions, industries, site: prod }));
   assert.deepEqual(live.hero.ctas, {
-    primary: { label: "Talk to us", href: `mailto:${SITE.email}` },
+    primary: { label: "Talk to us", href: "/contact/" },
     secondary: { label: "See a demo", href: "#demo" },
   });
-  assert.equal(live.closing.href, `mailto:${SITE.email}`);
+  assert.equal(live.closing.href, "/contact/");
   assert.equal(live.demo.allHref, null);
   // Evaluation Partner is live (Phase C Task 2), so the enterprise route's partner line links to it.
   assert.equal(live.routes.evaluationPartnerHref, "/services/evaluation-partner/");

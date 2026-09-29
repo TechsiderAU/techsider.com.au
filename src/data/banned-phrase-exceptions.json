@@ -1,4 +1,6 @@
 [
+  { "file": "src/content/documents/evaluation-method.md", "phrase": "not an assurance opinion", "reason": "spec §3.5 seeded exception: the ④ disclaimer, in the published evaluation method" },
+  { "file": "src/content/documents/evaluation-method.md", "phrase": "CREST-accredited tester you engage", "reason": "spec §3.5 seeded exception: names a third-party tester's accreditation, not ours (spec §4.1 import rule 5)" },
   { "file": "src/content/industries/*.yaml", "phrase": "CREST-accredited tester you engage", "reason": "names a third-party tester's accreditation, not ours, in industry copy (spec §3.5 seeded exception; §4.1 import rule 5)" },
   { "file": "src/content/industries/*.yaml", "phrase": "not an assurance opinion", "reason": "the ④ disclaimer in industry FAQs (spec §3.5 seeded exception)" },
   { "file": "src/data/regulatory/government.json", "phrase": "Victorian Government AI Assurance Framework", "reason": "proper name of a Victorian Government instrument (Phase C ruling 2; verify-register §8)" },

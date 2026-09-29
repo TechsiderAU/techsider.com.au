@@ -159,25 +159,33 @@ const EVALUATION_PARTNER = describe(page("services", "Evaluation Partner", "/ser
   "An independent evaluation workstream under your existing prime or adviser."),
   "Independent AI evaluation under your contract, for primes, internal-audit co-source firms, law firms and SIs, with findings rated to your client's risk matrix.");
 
-const RESOURCES_HUB = page("resources", "Resources", "/", "/resources/", "planned");
+const RESOURCES_HUB = describe(page("resources", "Resources", "/", "/resources/", "live"),
+  "Free resources from Techsider for Australian teams putting AI to work in regulated industries: field notes on retrieval, evaluation and where models run.");
 const INSIGHTS = describe(page("resources", "Insights", "/", "/insights/", "live", "Insights", "Field notes on shipping AI in regulated work."),
   "Field notes on shipping AI in regulated Australian work: retrieval that cites its sources, evaluation before launch, and choosing where models are hosted.");
 const DEMOS = page("demos", "Demos", "/", "/demos/", "planned", "Demos", "Canned replays of each solution. No live model.");
-const SAFE_USE_KITS = page("resources", "Safe-Use Kits", "/resources/", "/resources/safe-use-kits/", "planned", "Safe-Use Kits",
-  "Free starter kits for accounting, legal and property teams.");
+const SAFE_USE_KITS = describe(page("resources", "Safe-Use Kits", "/resources/", "/resources/safe-use-kits/", "planned", "Safe-Use Kits",
+  "Free starter kits for accounting, legal and property teams."),
+  "Safe-Use Kits for accounting, legal and property teams: a starting policy, checks and logs for using AI with client or tenant data, each naming its source.");
 const PAY_FOR = page("resources", "What you already pay for", "/resources/", "/resources/what-you-already-pay-for/", "planned", "What you already pay for",
   "Check which AI features your software already includes.");
 const EVAL_METHOD = page("resources", "Evaluation method", "/resources/", "/resources/evaluation-method/", "planned", "Evaluation method",
   "How we test AI, published so you can re-run it.");
 const RESOURCES_ITEMS = [INSIGHTS, DEMOS, SAFE_USE_KITS, PAY_FOR, EVAL_METHOD];
 
-const ABOUT = page("about", "About", "/", "/about/", "planned");
-const TRUST = page("about", "Trust", "/", "/trust/", "planned");
-const LEGAL = page("legal", "Legal", "/", "/legal/", "planned");
-const CONTACT = page("contact", "Contact", "/", "/contact/", "planned");
+const ABOUT = describe(page("about", "About", "/", "/about/", "live"),
+  "Why Techsider exists, the principles behind the systems it builds, how the work runs from a first test to handover, and a dated log of building this site.");
+const TRUST = describe(page("about", "Trust", "/", "/trust/", "planned"),
+  "How Techsider's website and email handle your information today, the independence policy behind every evaluation, security answers, and our own use of AI.");
+const LEGAL = describe(page("legal", "Legal", "/", "/legal/", "planned"),
+  "Techsider's legal documents: the privacy policy for the information you send us, and the terms for using techsider.com.au, each with the date it last changed.");
+const CONTACT = describe(page("contact", "Contact", "/", "/contact/", "live"),
+  "Tell Techsider what you're trying to fix with AI. Email us, then expect a reply, a 30-minute Fit Call, an NDA if you want one, and then a written proposal.");
 
-const PRIVACY = page("legal", "Privacy", "/legal/", "/legal/privacy/", "planned", "Privacy policy");
-const WEBSITE_TERMS = page("legal", "Website terms", "/legal/", "/legal/website-terms/", "planned");
+const PRIVACY = describe(page("legal", "Privacy", "/legal/", "/legal/privacy/", "planned", "Privacy policy"),
+  "How Techsider collects, uses, stores and discloses the personal information you send us, which services handle it, and how to ask about it or have it corrected.");
+const WEBSITE_TERMS = describe(page("legal", "Website terms", "/legal/", "/legal/website-terms/", "planned"),
+  "The terms for using techsider.com.au: general information, not advice; what the canned demos are; who owns the content; and how links to other sites work.");
 const CONTACT_SENT = page("contact", "Sent", "/contact/", "/contact/sent/", "planned", "Message sent");
 const DEMO_PAGES = SOLUTIONS.map((s) => page("demos", s.shortName, "/demos/", `/demos/${slugify(s.shortName)}/`, "planned", `${s.fullName} demo`));
 

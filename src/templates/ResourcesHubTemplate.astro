@@ -1,8 +1,10 @@
 ---
-// Resources hub (spec §7.1 /resources/, §8.7). Body only: a Phase C route passes
-// siteContext(isPreview()) and renders this inside BaseLayout. One LinkCard per free resource, in
-// nav order, with its nav label and one-liner; a resource whose page isn't shown yet is a card
-// with no link. The terminal prompt closes the page.
+// Resources hub (spec §7.1 /resources/, §8.7). Body only: src/pages/resources/[...page].astro
+// passes siteContext(isPreview()) and renders this inside BaseLayout. One LinkCard per free
+// resource whose page this build shows, in nav order, with its nav label and one-liner. A resource
+// that isn't shown gets no card: an unlinked card would describe a resource nobody can open yet,
+// which is a "coming soon" (spec §7.1). With no resource shown the hub has nothing to list, so the
+// build fails instead of rendering an empty section. The terminal prompt closes the page.
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import LinkCard from "../components/page/LinkCard.astro";
@@ -14,13 +16,17 @@ interface Props {
 }
 
 const { site } = Astro.props;
+const shown = site.resources.filter((r) => r.href !== null);
+if (shown.length === 0) {
+  throw new Error("ResourcesHubTemplate: no resource page is shown, so the hub has nothing to list. Show /resources/ only once a resource page is shown.");
+}
 ---
 <div class="template" data-template="resources-hub">
   <PageHero title="Resources." highlight="Resources" breadcrumb={crumbs(site, ["resources"])} />
 
   <PageSection id="resources" title="Free resources">
     <ul class="resources-grid">
-      {site.resources.map((r) => (
+      {shown.map((r) => (
         <li data-resource={r.key}>
           <LinkCard title={r.label} body={r.oneLiner} href={r.href} />
         </li>

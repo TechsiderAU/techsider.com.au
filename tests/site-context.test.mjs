@@ -1,6 +1,7 @@
 // SiteContext (Phase B2 scope ruling 4: links never dangle). A production build gives every
-// planned page a null href and sends contact links to the email address; a preview build gives
-// every page its path. fixtureSite is the gallery's context: fictional ids and names, hrefs into
+// planned page a null href, and would send contact links to the email address while /contact/ is
+// planned (it is live from Phase C Task 7); a preview build gives every page its path.
+// fixtureSite is the gallery's context: fictional ids and names, hrefs into
 // the gallery, and two deliberately hidden links. Review Focus 2 is pinned here.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -65,24 +66,26 @@ test("every page key names its nav page, with the nav label and one-liner", () =
   assert.throws(() => site.page("pricing"), /Unknown page key "pricing"/);
 });
 
-test("production: planned pages get a null href, and contact links fall back to mailto", () => {
+test("production: planned pages get a null href, and contact links reach the live /contact/", () => {
   const site = siteContext(false);
   const expected = (path) => (navAt(path).status === "live" ? path : null);
   for (const s of site.solutions) assert.equal(s.href, expected(s.path), s.id);
   for (const i of site.industries) assert.equal(i.href, expected(i.path), i.id);
   for (const [key, path] of Object.entries(PAGE_PATHS)) assert.equal(site.page(key).href, expected(path), key);
   for (const id of SOLUTION_IDS) assert.equal(site.demo(id), expected(`/demos/${id}/`), id);
-  // Phase C puts pages live task by task, and the loops above hold every href to nav.ts. From Task 3
-  // the Solutions hub and all five solution pages link; from Task 6, the Industries hub and all nine
-  // industry pages do too. Every contact link stays the email address while /contact/ is planned.
-  assert.equal(site.page("solutions").href, "/solutions/");
-  assert.ok(site.solutions.every((s) => s.href === s.path), "a solution page isn't shown");
-  assert.deepEqual(site.industries.filter((i) => i.href !== null).map((i) => i.id), site.industries.map((i) => i.id));
-  assert.equal(site.page("industries").href, "/industries/");
-  const mailto = `mailto:${SITE.email}`;
-  assert.equal(site.contact(), mailto);
-  assert.equal(site.contact({ interest: "ai-evaluation" }), mailto);
-  assert.equal(site.contact({ industry: "government" }), mailto);
+  // After Phase C Task 7: every hub, every solution and industry page, Services, Evaluation Partner,
+  // Insights, About and Contact are live. The demos, the Safe-Use Kits, the checker and the
+  // evaluation method wait for Phase D; Trust and Legal wait for the owner (spec §12).
+  assert.deepEqual(
+    Object.keys(PAGE_PATHS).filter((key) => site.page(key).href !== null),
+    ["home", "solutions", "industries", "services", "evaluationPartner", "resources", "insights", "about", "contact"],
+  );
+  assert.ok(site.solutions.every((s) => s.href !== null), "a solution page is hidden");
+  assert.ok(site.industries.every((i) => i.href !== null), "an industry page is hidden");
+  assert.ok(SOLUTION_IDS.every((id) => site.demo(id) === null), "a demo page is shown before Phase D");
+  assert.equal(site.contact(), "/contact/");
+  assert.equal(site.contact({ interest: "ai-evaluation" }), "/contact/?interest=ai-evaluation");
+  assert.equal(site.contact({ industry: "government" }), "/contact/?industry=government");
 });
 
 test("preview: every page, demo and contact link is its real path", () => {
@@ -106,7 +109,7 @@ test("a contact link carries one key: interest wins over industry, and unknown v
   assert.throws(() => site.contact({ interest: "fit-call" }), /unknown interest "fit-call"/);
   assert.throws(() => site.contact({ industry: "document-registers" }), /unknown industry "document-registers"/);
   assert.throws(() => site.contact({ interest: "not-sure", industry: "nowhere" }), /unknown industry "nowhere"/);
-  // Production validates too, so a typo fails the build even while the link is a mailto.
+  // Production validates too, so a typo fails the build.
   assert.throws(() => siteContext(false).contact({ interest: "typo" }), /unknown interest "typo"/);
   assert.equal(contactQuery(site), "");
   assert.equal(contactQuery(site, { industry: "healthcare" }), "?industry=healthcare");
@@ -150,10 +153,16 @@ test("crumbs start at Home and leave out hubs that aren't shown", () => {
     { label: "Insights", href: "/insights/" },
     { label: "A post", href: "/insights/a-post/" },
   ]);
-  // Two hidden hubs in a row both drop out; "home" never repeats Home.
+  // A live hub stays and a hidden one drops out; "home" never repeats Home.
   assert.deepEqual(crumbs(siteContext(false), ["home", "resources", "demos", { label: "X", path: "/demos/x/" }]), [
     { label: "Home", href: "/" },
+    { label: "Resources", href: "/resources/" },
     { label: "X", href: "/demos/x/" },
+  ]);
+  // Two hidden hubs in a row both drop out.
+  assert.deepEqual(crumbs(siteContext(false), ["demos", "trust", { label: "Y", path: "/y/" }]), [
+    { label: "Home", href: "/" },
+    { label: "Y", href: "/y/" },
   ]);
   // The last item is the current page, so it stays even when its key isn't shown.
   assert.deepEqual(crumbs(siteContext(false), ["legal", "privacy"]), [

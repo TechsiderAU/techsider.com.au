@@ -1,18 +1,16 @@
 // The insight post view (spec §8.9): the breadcrumb, the §10.1 contextual closing CTA, the
 // illustrative label (§9.3) and the BlogPosting JSON-LD (§11.3). The CTA follows the post's
 // references: the first solution, else the first industry, else plain "Talk to us". Links come from
-// the SiteContext, so a production build sends every CTA to the email address while /contact/ is
-// planned, and a preview build sends it to /contact/ with the query string.
+// the SiteContext; /contact/ is live (Phase C Task 7), so both builds send the CTA to /contact/ with
+// the query string.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { SITE } from "../src/data/nav.ts";
 import { SCENARIO_LABEL } from "../src/lib/fixed-copy.ts";
 import { jsonLd } from "../src/lib/json-ld.ts";
 import { siteContext } from "../src/lib/site.ts";
 import { postView } from "../src/lib/views/post.ts";
 
 const SITE_URL = "https://techsider.com.au";
-const MAILTO = `mailto:${SITE.email}`;
 const PUBLISHED = new Date("2026-06-09T00:00:00Z");
 const post = (data = {}, id = "test-post") => ({
   id,
@@ -43,8 +41,8 @@ test("postView: the card, page title, breadcrumb and dates of a published post",
   assert.equal(view({ updatedDate: updated }).updated, updated);
 });
 
-test("postView: a post with no references closes with plain 'Talk to us', a mailto while /contact/ is planned", () => {
-  assert.deepEqual(view().closing, { command: "talk_to_us", label: "Talk to us", href: MAILTO });
+test("postView: a post with no references closes with plain 'Talk to us', linked to /contact/", () => {
+  assert.deepEqual(view().closing, { command: "talk_to_us", label: "Talk to us", href: "/contact/" });
   assert.deepEqual(view({}, true).closing, { command: "talk_to_us", label: "Talk to us", href: "/contact/" });
 });
 
@@ -59,10 +57,10 @@ test("postView: the first solution reference wins, then the first industry (spec
     command: "talk_to_us", args: "--about=financial-services",
     label: "Talk to us about AI for financial services", href: "/contact/?industry=financial-services",
   });
-  // Production: the label stays contextual, the link falls back to the email address.
+  // Production: the label stays contextual, and the link carries the same query as the preview's.
   assert.equal(view(both).closing.label, "Talk to us about Knowledge Assistant");
-  assert.equal(view(both).closing.href, MAILTO);
-  assert.equal(view(industries).closing.href, MAILTO);
+  assert.equal(view(both).closing.href, "/contact/?interest=knowledge-assistant");
+  assert.equal(view(industries).closing.href, "/contact/?industry=financial-services");
   // Astro's reference() gives { id, collection }; refId reads both shapes.
   const refs = { solutions: [{ id: "ai-evaluation", collection: "solutions" }], industries: [{ id: "government", collection: "industries" }] };
   assert.equal(view(refs, true).closing.href, "/contact/?interest=ai-evaluation");

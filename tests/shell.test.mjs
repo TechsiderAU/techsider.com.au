@@ -4,7 +4,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readDist, allHtmlFiles } from "./helpers.mjs";
-import { footerColumns } from "../src/data/nav.ts";
+import { footerColumns, noJsLinks } from "../src/data/nav.ts";
 
 const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
 const pages = allHtmlFiles().filter((f) => f.endsWith("index.html"));
@@ -95,12 +95,15 @@ test("the link resolver maps paths as GitHub Pages serves them", () => {
   assert.ok(!hasId('<a href="#demo">', "demo"));
 });
 
-test("production: the no-JS basic link row is in every header and reaches Insights (Review Focus 1)", () => {
+test("production: the no-JS basic link row is in every header and reaches every live hub (Review Focus 1)", () => {
+  // Every nav hub is live from Phase C Task 7, so the row holds the five hubs; Insights sits on /resources/.
+  const hubs = noJsLinks(false).map((l) => l.href);
+  assert.deepEqual(hubs, ["/solutions/", "/industries/", "/services/", "/resources/", "/about/"]);
   for (const f of pages) {
     const row = basicRow(region(readDist(f), "header"));
     assert.ok(row, `${f}: no <nav aria-label="Main (basic)"> in the header`);
     assert.match(row.match(/^<nav\b[^>]*>/)[0], /class="[^"]*\bnojs-only\b/, `${f}: the basic row is not no-JS only`);
-    assert.match(row, /<a[^>]*href="\/insights\/"/, `${f}: the basic row has no link to /insights/`);
+    for (const href of hubs) assert.match(row, new RegExp(`<a[^>]*href="${escapeRe(href)}"`), `${f}: the basic row has no link to ${href}`);
   }
 });
 

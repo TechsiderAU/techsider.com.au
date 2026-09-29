@@ -6,7 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { positioningData, servicesData } from "../src/content/page-schemas.ts";
+import { aboutData, contactData, positioningData, servicesData, trustData } from "../src/content/page-schemas.ts";
 
 const DATA_DIR = fileURLToPath(new URL("../src/data/", import.meta.url));
 /** src/data/*.ts modules that aren't page data: the page registry (names, paths, statuses, descriptions), with its own tests. */
@@ -15,6 +15,9 @@ const NOT_PAGE_DATA = ["nav.ts"];
 const MODULES = [
   ["positioning.ts", "POSITIONING", positioningData],
   ["services.ts", "SERVICES", servicesData],
+  ["about.ts", "ABOUT", aboutData],
+  ["contact.ts", "CONTACT", contactData],
+  ["trust.ts", "TRUST", trustData],
 ];
 
 test("every page-data module in src/data/ is listed here with its schema", () => {

@@ -349,13 +349,16 @@ test("#next: the demo CTA as its heading, then the solution page", () => {
   }
 });
 
-// B2 ships templates to the gallery only (scope ruling 1). Phase C, which adds the real routes,
-// replaces this test with checks on the live pages.
-test("production: no resources or demos template markup reaches dist/", () => {
+// Phase C Task 7 puts the Resources hub live at /resources/ (tests/company-pages.test.mjs checks
+// its cards). The kits page, the checker, the evaluation method and the demos stay out of
+// production until their pages go live.
+test("production: only /resources/ carries resources or demos template markup, and that is the hub", () => {
   for (const f of allHtmlFiles()) {
     const html = readDist(f);
-    for (const hook of ["data-demo-frame", "data-kit", "data-hero-badge", 'data-template="resources-hub"', 'data-template="demo"']) {
+    for (const hook of ["data-demo-frame", "data-kit", "data-hero-badge", 'data-template="demo"', 'data-template="safe-use-kits"']) {
       assert.ok(!html.includes(hook), `dist/${f} carries ${hook}`);
     }
+    if (f !== "resources/index.html") assert.ok(!html.includes('data-template="resources-hub"'), `dist/${f} carries the Resources hub`);
   }
+  assert.ok(readDist("resources/index.html").includes('data-template="resources-hub"'), "dist/resources/index.html doesn't render the Resources hub");
 });

@@ -1,0 +1,24 @@
+---
+// /about/ (spec §8.10): AboutTemplate over the About data (src/data/about.ts), the positioning
+// origin line (src/data/positioning.ts) and this build's insight cards. Live from Phase C.
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import AboutTemplate from "../../templates/AboutTemplate.astro";
+import { isPreview } from "../../data/nav";
+import { ABOUT } from "../../data/about";
+import { POSITIONING } from "../../data/positioning";
+import { pageDescription, pageTitle } from "../../lib/meta";
+import { pageAt, singletonPaths } from "../../lib/pages";
+import { siteContext } from "../../lib/site";
+import { insightCards } from "../../lib/views/insights";
+
+export const getStaticPaths = (() => singletonPaths("/about/")) satisfies GetStaticPaths;
+
+const entry = pageAt("/about/");
+const site = siteContext(isPreview());
+const insights = insightCards(await getCollection("insights"), site);
+---
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
+  <AboutTemplate about={ABOUT} positioning={POSITIONING} insights={insights} site={site} />
+</BaseLayout>
