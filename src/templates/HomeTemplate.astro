@@ -271,8 +271,15 @@ const routeColumns = [
     font-family: var(--font-mono);
     font-size: 0.9375rem;
   }
-  [data-surface="carbon"] .home-more-link {
+  /* On the carbon demo band the underline takes carbon's secondary token (muted, not the
+     bone-only muted-dark). The surface is PageSection's <section>, outside this component's
+     scope, so the ancestor is :global(). This rule ties with .home-more-link:hover and comes
+     later, so the hover state is restated for carbon. */
+  :global([data-surface="carbon"]) .home-more-link {
     text-decoration-color: var(--color-muted);
+  }
+  :global([data-surface="carbon"]) .home-more-link:hover {
+    text-decoration-color: currentColor;
   }
 
   /* Two ways in (bone): two columns from 48rem. */

@@ -13,6 +13,9 @@ const NARROW = { width: 390, height: 844 };
 // The spec §7.1 Home anchors, which the header CTA (/#demo) and older inbound links rely on.
 const ANCHORS = ["services", "approach", "industries", "demo", "insights", "faq", "contact"];
 const ACID = "rgb(200, 255, 46)";
+// The secondary-text tokens of the spec §6.1 pairs: muted on carbon, muted-dark on bone.
+const MUTED = "rgb(154, 154, 148)";
+const MUTED_DARK = "rgb(92, 91, 85)";
 
 const axe = (page) => new AxeBuilder({ page }).include("main").withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]);
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -92,7 +95,7 @@ test("the latest insights show 3 cards while recent, and only the All insights l
   await expect(page.locator("#insights").getByRole("link", { name: "All insights" })).toBeVisible();
 });
 
-test("every link the Home template draws itself is a 44px tap target at 390px", async ({ page }) => {
+test("every link the Home template draws itself is a 44px tap target at 390px, underlined in its surface's token pair", async ({ page }) => {
   await page.setViewportSize(NARROW);
   await page.goto(HOME);
   const links = page.locator(
@@ -104,4 +107,13 @@ test("every link the Home template draws itself is a 44px tap target at 390px", 
     const box = await link.boundingBox();
     expect(box.height, await link.textContent()).toBeGreaterThanOrEqual(44);
   }
+  // "All demos" sits on the carbon demo band, so its underline is muted (7.0:1), never the
+  // bone-only muted-dark (2.9:1 on carbon); "All insights" on bone keeps muted-dark. Hover
+  // still turns the underline to the link's own colour.
+  const underline = (link) => link.evaluate((el) => getComputedStyle(el).textDecorationColor);
+  const allDemos = page.locator("#demo [data-all-demos]");
+  expect(await underline(allDemos)).toBe(MUTED);
+  expect(await underline(page.locator("#insights [data-all-insights]"))).toBe(MUTED_DARK);
+  await allDemos.hover();
+  expect(await underline(allDemos)).toBe(await allDemos.evaluate((el) => getComputedStyle(el).color));
 });
