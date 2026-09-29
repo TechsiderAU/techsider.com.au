@@ -67,7 +67,7 @@ problem:
   from: Lawyers reach for general-purpose AI and check each answer by hand, often in workplaces with no AI guidelines.
   to: Your firm chooses its AI on a test of your own matters, and keeps a record of every check on court work.
   source:
-    label: VLSB+C, Generative AI Use in the Legal Profession
+    label: VLSB+C, Generative AI Use in the Legal Profession (2025 Victorian Lawyer Census)
     url: https://lsbc.vic.gov.au/research-centre/what-we-do/publications/generative-ai-use-legal-profession-findings-2025-victorian
     asAt: 2026-04-20
 workflow:

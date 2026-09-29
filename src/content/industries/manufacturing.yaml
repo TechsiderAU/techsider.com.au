@@ -40,7 +40,7 @@ worksAlongside:
   - system: "SharePoint SOP libraries"
     method: read-only
     verified: 2026-09-29
-  - system: "SafetyCulture (now Mitti)"
+  - system: "SafetyCulture (now Mitti), Premium or Enterprise plan"
     method: read-only
     verified: 2026-09-29
   - system: "SAP S/4HANA maintenance notifications"

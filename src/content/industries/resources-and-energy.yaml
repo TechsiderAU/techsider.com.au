@@ -37,7 +37,7 @@ worksAlongside:
   - system: Oracle Aconex
     method: read-only
     verified: 2026-09-29
-  - system: Mitti (by SafetyCulture)
+  - system: Mitti (by SafetyCulture), Premium or Enterprise plan
     method: read-only
     verified: 2026-09-29
   - system: IBM Maximo

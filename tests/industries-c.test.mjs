@@ -258,3 +258,23 @@ test("cross-links (spec §7.4): each solution lists, in nav order, exactly the i
     }
   }
 });
+
+// ---------- the final whole-branch review's fixes (C6-T6) ----------
+
+test("a read-only system label carries the plan or add-on its API needs (C6-T6-F1)", () => {
+  // Research: Mitti's API requires the "Mitti Premium Plan or Enterprise Plan" (resources dossier,
+  // fact-check); Halaxy's API is an add-on on the practice's account (healthcare dossier). Without
+  // them there is no read-only access to label.
+  const labels = INDUSTRY_IDS.flatMap((id) => industryData(id).worksAlongside.map((w) => [id, w.system]));
+  const mitti = labels.filter(([, s]) => /\bMitti\b/.test(s));
+  const halaxy = labels.filter(([, s]) => /\bHalaxy\b/.test(s));
+  assert.ok(mitti.length >= 2 && halaxy.length >= 1, "the Mitti and Halaxy labels moved");
+  for (const [id, s] of mitti) assert.match(s, /, Premium or Enterprise plan$/, `${id}: "${s}"`);
+  for (const [id, s] of halaxy) assert.equal(s, "Halaxy (with the API add-on)", id);
+});
+
+test("Legal & professional: the problem's source names the Victorian Lawyer Census it rests on (C6-T6-F2)", () => {
+  const { source } = industryData("legal-and-professional").problem;
+  assert.match(source.url, /2025-victorian$/);
+  assert.equal(source.label, "VLSB+C, Generative AI Use in the Legal Profession (2025 Victorian Lawyer Census)");
+});

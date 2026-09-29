@@ -32,7 +32,7 @@ worksAlongside:
   - system: Microsoft SharePoint
     method: read-only
     verified: 2026-09-29
-  - system: Halaxy
+  - system: Halaxy (with the API add-on)
     method: read-only
     verified: 2026-09-29
   - system: Cliniko
