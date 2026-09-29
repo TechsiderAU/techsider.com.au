@@ -1,8 +1,12 @@
 // The "What you already pay for" checker's view (spec §8.7; the ⑤ demo, §8.8). A pure view builder:
 // the route parses src/data/platform-ai.json with platformAiFile and passes it here with the build's
-// SiteContext, and node tests run it on the real file. It groups the entries for PlatformChecker (a
-// checkbox per product, grouped by vendor, and each product's results) and for PlatformFacts (the
-// no-JS table, one per vendor), in the file's order.
+// SiteContext, and node tests run it on the real file. It groups the entries by vendor and then by
+// product, in the file's order, for PlatformChecker (one checkbox per vendor, whose results list every
+// product and feature under it) and for PlatformFacts (the no-JS table, one per vendor).
+// The vendor is what a visitor ticks because it is what they know they pay. A product name in the file
+// is the research's name for a feature family, not something bought on its own: a vendor's included
+// chat and its add-on can sit under near-identical names, so a checkbox per product name would show a
+// visitor part of what their plan includes, or an add-on where the plan includes the feature.
 // A processing location is platform-ai.json's attributed statement of what the vendor publishes
 // ("Microsoft says …"), and the page never rewrites or summarises it: one that starts with
 // "Not published" shows as exactly that, and any other shows verbatim, so the page never states a
@@ -50,16 +54,10 @@ export interface CheckerFeature {
   checked: DateLabel;
 }
 
+/** One product name under a vendor: a heading inside the vendor's results, never a checkbox of its own. */
 export interface CheckerProduct {
-  /** The checkbox value and the results' data-product: slugify(product), unique across vendors. */
-  id: string;
-  vendor: string;
   /** The product as platform-ai.json names it (the current names, after platform-ai.md's renames). */
   name: string;
-  /** The name with its vendor in front when the name doesn't start with it: "Xero: JAX chat". */
-  label: string;
-  /** The kit categories of its entries, in first-seen order; empty for a general product. */
-  categories: KitCategory[];
   features: CheckerFeature[];
   /** Its entries' processing locations, each distinct one once, in order. */
   processing: Processing[];
@@ -76,9 +74,14 @@ export type FactRow = {
   checked: string;
 };
 
+/** One vendor: one checkbox, one results group and one no-JS table. */
 export interface VendorGroup {
+  /** The checkbox value and the results' data-vendor: slugify(vendor), unique. */
   id: string;
   vendor: string;
+  /** The kit categories of its entries, in first-seen order; empty for a general vendor. */
+  categories: KitCategory[];
+  /** Its product names in first-seen order, each with its features and processing locations. */
   products: CheckerProduct[];
   rows: FactRow[];
 }
@@ -104,7 +107,7 @@ export interface CheckerView {
   vendors: VendorGroup[];
   /** ①, ② and ③: what's left for a build once the platform's own AI is in use. */
   builds: BuildLink[];
-  /** One per kit category a product has, while /resources/safe-use-kits/ is shown; else none. */
+  /** One per kit category a vendor has, while /resources/safe-use-kits/ is shown; else none. */
   kits: KitLink[];
 }
 
@@ -127,25 +130,23 @@ const isKitCategory = (c: PlatformAiEntry["category"]): c is KitCategory => c !=
 
 export function checkerView(file: PlatformAiFile, site: SiteContext): CheckerView {
   const vendors: VendorGroup[] = [];
-  const products = new Map<string, CheckerProduct>();
   for (const e of file.entries) {
     let group = vendors.find((g) => g.vendor === e.vendor);
     if (group === undefined) {
-      group = { id: slugify(e.vendor), vendor: e.vendor, products: [], rows: [] };
+      const id = slugify(e.vendor);
+      const twin = vendors.find((g) => g.id === id);
+      if (twin !== undefined) {
+        throw new Error(`platform-ai.json: the vendors "${twin.vendor}" and "${e.vendor}" share the id "${id}"; name each vendor once`);
+      }
+      group = { id, vendor: e.vendor, categories: [], products: [], rows: [] };
       vendors.push(group);
     }
-    const id = slugify(e.product);
-    let product = products.get(id);
-    if (product !== undefined && product.vendor !== e.vendor) {
-      throw new Error(`platform-ai.json: "${e.product}" is listed under both ${product.vendor} and ${e.vendor}; name each product once`);
-    }
+    let product = group.products.find((p) => p.name === e.product);
     if (product === undefined) {
-      const label = e.product.startsWith(e.vendor) ? e.product : `${e.vendor}: ${e.product}`;
-      product = { id, vendor: e.vendor, name: e.product, label, categories: [], features: [], processing: [] };
-      products.set(id, product);
+      product = { name: e.product, features: [], processing: [] };
       group.products.push(product);
     }
-    if (isKitCategory(e.category) && !product.categories.includes(e.category)) product.categories.push(e.category);
+    if (isKitCategory(e.category) && !group.categories.includes(e.category)) group.categories.push(e.category);
     const where = processing(e.processingLocation);
     if (!product.processing.some((p) => p.text === where.text)) product.processing.push(where);
     const url = new URL(e.source);
@@ -165,7 +166,7 @@ export function checkerView(file: PlatformAiFile, site: SiteContext): CheckerVie
   }
 
   const kitsPage = site.page("safeUseKits").href;
-  const served = KIT_CATEGORIES.filter((c) => [...products.values()].some((p) => p.categories.includes(c)));
+  const served = KIT_CATEGORIES.filter((c) => vendors.some((g) => g.categories.includes(c)));
   return {
     asAt: dateLabel(file.asAt),
     vendors,

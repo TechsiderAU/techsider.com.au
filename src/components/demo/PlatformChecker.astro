@@ -1,14 +1,16 @@
 ---
-// The "What you already pay for" checker (spec §8.7; the ⑤ demo, §8.8): a checkbox for each product
-// in src/data/platform-ai.json, grouped by vendor, then the results for the ticked products:
-// - "AI you already pay for": each feature, included or add-on, its plans and its vendor page;
-// - "Where it's processed": platform-ai.json's statement word for word, or "Not published" where
+// The "What you already pay for" checker (spec §8.7; the ⑤ demo, §8.8): a checkbox for each vendor
+// in src/data/platform-ai.json, then the results for the ticked vendors, each listing every product
+// name and feature the file has under the vendor (a product name is the research's name for a feature
+// family, not something a visitor knows they pay for, so it is never a checkbox; see checkerView):
+// - "AI you already pay for": each feature by product, included or add-on, its plans and its vendor page;
+// - "Where it's processed": each product's statement word for word, or "Not published" where
 //   the vendor pages checked don't say (checkerView's processing(), Phase D Review Focus 4);
 // - "What's left for a build": ①, ② and ③, linked through the site context;
-// - "Safe-Use Kits": the kit for each ticked product's industry, while /resources/safe-use-kits/
+// - "Safe-Use Kits": the kit for each ticked vendor's industry, while /resources/safe-use-kits/
 //   is shown (view.kits is empty otherwise, and the block isn't rendered).
 // Every result is rendered here at build time, hidden; src/scripts/checker.ts shows the ones for the
-// ticked products, and makes no network call. The status line is the results region's live part:
+// ticked vendors, and makes no network call. The status line is the results region's live part:
 // one short summary per tick. Without JavaScript the form and the results stay hidden and the note
 // points to the full table: every page that renders this renders PlatformFacts too.
 // `headingLevel` is the results heading's level, and its blocks' headings sit one below it: 3 inside
@@ -24,31 +26,25 @@ interface Props {
 const { view, headingLevel } = Astro.props;
 const Heading = `h${headingLevel}` as "h2" | "h3";
 const Block = `h${headingLevel + 1}` as "h3" | "h4";
-const products = view.vendors.flatMap((g) => g.products);
 ---
 <div class="checker" data-checker>
   <p class="checker-nojs" data-checker-nojs>The checker runs in your browser, so it needs JavaScript. Every vendor fact it reads is in the table on this page.</p>
 
   <fieldset class="checker-form" data-checker-form hidden>
-    <legend class="checker-legend">Tick the software you pay for</legend>
+    <legend class="checker-legend">Tick each vendor you pay for</legend>
     <div class="checker-vendors">
       {view.vendors.map((g) => (
-        <fieldset class="checker-vendor" data-checker-vendor={g.id}>
-          <legend class="checker-vendor-name">{g.vendor}</legend>
-          {g.products.map((p) => (
-            <label class="checker-option">
-              <input
-                type="checkbox"
-                id={`checker-product-${p.id}`}
-                name="product"
-                value={p.id}
-                data-checker-product={p.id}
-                data-categories={p.categories.join(" ")}
-              />
-              <span>{p.name}</span>
-            </label>
-          ))}
-        </fieldset>
+        <label class="checker-option">
+          <input
+            type="checkbox"
+            id={`checker-vendor-${g.id}`}
+            name="vendor"
+            value={g.id}
+            data-checker-vendor={g.id}
+            data-categories={g.categories.join(" ")}
+          />
+          <span>{g.vendor}</span>
+        </label>
       ))}
     </div>
   </fieldset>
@@ -59,21 +55,29 @@ const products = view.vendors.flatMap((g) => g.products);
 
     <div class="checker-block" data-checker-section="features" hidden>
       <Block class="checker-block-heading">AI you already pay for</Block>
+      <p class="checker-note">Every AI feature listed for the vendors you ticked, by product. Check each feature's plans against your own.</p>
       <ul class="checker-list">
-        {products.map((p) => (
-          <li class="checker-product" data-checker-features data-product={p.id} hidden>
-            <p class="checker-product-name">{p.label}</p>
-            <ul class="checker-features">
-              {p.features.map((f) => (
-                <li class="checker-feature" data-checker-feature data-included={f.included}>
-                  <p class="checker-feature-text">{f.text}</p>
-                  <p class="checker-meta">
-                    <span class="checker-tag" data-inclusion={f.included}>{f.inclusion}</span>
-                    <span>Plans: {f.plans.join(", ")}</span>
-                  </p>
-                  <p class="checker-source">
-                    Vendor page: <a class="checker-link" href={f.source.href}>{f.source.host}</a>, checked <time datetime={f.checked.iso}>{f.checked.text}</time>
-                  </p>
+        {view.vendors.map((g) => (
+          <li class="checker-vendor-result" data-checker-features data-vendor={g.id} hidden>
+            <p class="checker-vendor-name">{g.vendor}</p>
+            <ul class="checker-products">
+              {g.products.map((p) => (
+                <li class="checker-product" data-checker-product>
+                  <p class="checker-product-name">{p.name}</p>
+                  <ul class="checker-features">
+                    {p.features.map((f) => (
+                      <li class="checker-feature" data-checker-feature data-included={f.included}>
+                        <p class="checker-feature-text">{f.text}</p>
+                        <p class="checker-meta">
+                          <span class="checker-tag" data-inclusion={f.included}>{f.inclusion}</span>
+                          <span>Plans: {f.plans.join(", ")}</span>
+                        </p>
+                        <p class="checker-source">
+                          Vendor page: <a class="checker-link" href={f.source.href}>{f.source.host}</a>, checked <time datetime={f.checked.iso}>{f.checked.text}</time>
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
                 </li>
               ))}
             </ul>
@@ -85,16 +89,23 @@ const products = view.vendors.flatMap((g) => g.products);
     <div class="checker-block" data-checker-section="processing" hidden>
       <Block class="checker-block-heading">Where it's processed</Block>
       <p class="checker-note">"Not published" means the vendor pages we checked don't say where its AI processing runs for Australian customers.</p>
-      <dl class="checker-where">
-        {products.map((p) => (
-          <div class="checker-where-item" data-checker-where data-product={p.id} hidden>
-            <dt class="checker-product-name">{p.label}</dt>
-            {p.processing.map((w) => (
-              <dd class:list={["checker-processing", w.status === "not-published" && "checker-tag"]} data-processing={w.status}>{w.text}</dd>
-            ))}
-          </div>
+      <ul class="checker-list">
+        {view.vendors.map((g) => (
+          <li class="checker-vendor-result" data-checker-where data-vendor={g.id} hidden>
+            <p class="checker-vendor-name">{g.vendor}</p>
+            <dl class="checker-where">
+              {g.products.map((p) => (
+                <div class="checker-where-item">
+                  <dt class="checker-product-name">{p.name}</dt>
+                  {p.processing.map((w) => (
+                    <dd class:list={["checker-processing", w.status === "not-published" && "checker-tag"]} data-processing={w.status}>{w.text}</dd>
+                  ))}
+                </div>
+              ))}
+            </dl>
+          </li>
         ))}
-      </dl>
+      </ul>
     </div>
 
     <div class="checker-block" data-checker-section="build" hidden>
@@ -160,8 +171,7 @@ const products = view.vendors.flatMap((g) => g.products);
     max-width: 62ch;
     color: var(--checker-muted);
   }
-  .checker-form,
-  .checker-vendor {
+  .checker-form {
     min-width: 0;
     margin: 0;
     padding: 0;
@@ -175,15 +185,8 @@ const products = view.vendors.flatMap((g) => g.products);
   }
   .checker-vendors {
     display: grid;
-    gap: 1.5rem 2rem;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
-  }
-  .checker-vendor-name {
-    padding: 0;
-    margin-bottom: 0.25rem;
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    color: var(--checker-muted);
+    gap: 0 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
   }
   /* The whole label is the target: at least 44px tall (spec §6.6). */
   .checker-option {
@@ -236,6 +239,7 @@ const products = view.vendors.flatMap((g) => g.products);
     font-weight: 600;
   }
   .checker-list,
+  .checker-products,
   .checker-features,
   .checker-links {
     display: grid;
@@ -244,11 +248,25 @@ const products = view.vendors.flatMap((g) => g.products);
     padding: 0;
     list-style: none;
   }
+  .checker-vendor-result,
   .checker-product,
   .checker-feature {
     display: grid;
     gap: 0.5rem;
     min-width: 0;
+  }
+  .checker-vendor-result {
+    gap: 0.75rem;
+  }
+  .checker-vendor-name {
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+  /* A vendor's product names sit one step in, on a hairline: they belong to the vendor ticked. */
+  .checker-products,
+  .checker-where {
+    padding-left: 1rem;
+    border-left: 1px solid var(--checker-line);
   }
   .checker-product-name {
     font-weight: 600;

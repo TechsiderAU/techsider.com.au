@@ -8,29 +8,34 @@ import { NOT_PUBLISHED, checkerView } from "../../src/lib/views/checker.ts";
 import { EMPTY_STATUS, statusText } from "../../src/scripts/checker.ts";
 
 // The "What you already pay for" checker in a browser (spec §8.7), on the preview build, where the
-// Safe-Use Kits page is shown, so the kit links render: ticking and unticking, one status change per
-// tick, Review Focus 4 with every product ticked, the kit links, the keyboard, axe at 390px and 1280px
-// with the results open, no request while it runs, and the full table without JavaScript.
+// Safe-Use Kits page is shown, so the kit links render: ticking and unticking a vendor (one checkbox
+// each, whose results hold every feature listed under it), one status change per tick, Review Focus 4
+// with every vendor ticked, the kit links, the keyboard, axe at 390px and 1280px with the results open,
+// no request while it runs, and the full table without JavaScript.
 // tests/e2e/prod-checker.spec.mjs covers the production page; tests/checker.test.mjs the markup.
 const PATH = "/resources/what-you-already-pay-for/";
 const WCAG = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
 const FILE = platformAiFile.parse(JSON.parse(readFileSync(new URL("../../src/data/platform-ai.json", import.meta.url), "utf8")));
 const VIEW = checkerView(FILE, siteContext(true));
-const PRODUCTS = VIEW.vendors.flatMap((g) => g.products);
-const box = (page, p) => page.locator(`[data-checker-product="${p.id}"]`);
+const VENDORS = VIEW.vendors;
+const box = (page, g) => page.locator(`[data-checker-vendor="${g.id}"]`);
+/** A vendor's features, product by product, as its one tick shows them. */
+const featuresOf = (g) => g.products.flatMap((p) => p.features);
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-/** [included, add-on] feature counts over `products`, as statusText() takes them. */
-function tally(products) {
-  const features = products.flatMap((p) => p.features);
+/** [included, add-on] feature counts over `vendors`, as statusText() takes them. */
+function tally(vendors) {
+  const features = vendors.flatMap(featuresOf);
   const included = features.filter((f) => f.included === "included").length;
   return [included, features.length - included];
 }
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-// Two products the walk-through ticks: one with several features, and another with an add-on.
-const SEVERAL = PRODUCTS.find((p) => p.features.length > 1);
-const ADD_ON = PRODUCTS.find((p) => p !== SEVERAL && p.features.some((f) => f.included === "add-on"));
+// Two vendors the walk-through ticks: one that sells features both ways, included and add-on, under
+// several product names (Microsoft, as at the facts' date), and another.
+const MIXED = VENDORS.find((g) => g.products.length > 1 && new Set(featuresOf(g).map((f) => f.included)).size === 2);
+const OTHER = VENDORS.find((g) => g !== MIXED);
 
-test("ticking shows a product's features, where it's processed and what's left for a build; unticking hides them", async ({ page }) => {
+test("ticking a vendor shows every feature listed under it, included and add-on, where each product's AI is processed and what's left for a build; unticking hides them", async ({ page }) => {
+  expect(MIXED, "no vendor in platform-ai.json sells AI both included and as an add-on").toBeTruthy();
   await page.goto(PATH);
   const checker = page.locator("[data-checker]");
   await expect(checker.locator("[data-checker-nojs]")).toBeHidden();
@@ -40,26 +45,32 @@ test("ticking shows a product's features, where it's processed and what's left f
   const sections = checker.locator("[data-checker-section]");
   for (const section of await sections.all()) await expect(section).toBeHidden();
 
-  await box(page, SEVERAL).check();
-  const features = checker.locator(`[data-checker-features][data-product="${SEVERAL.id}"]`);
+  await box(page, MIXED).check();
+  const features = checker.locator(`[data-checker-features][data-vendor="${MIXED.id}"]`);
   await expect(features).toBeVisible();
-  await expect(features.locator(".checker-feature-text")).toHaveText(SEVERAL.features.map((f) => f.text));
-  await expect(features.locator("[data-inclusion]")).toHaveText(SEVERAL.features.map((f) => f.inclusion));
-  await expect(checker.locator(`[data-checker-where][data-product="${SEVERAL.id}"] dd`)).toHaveText(SEVERAL.processing.map((w) => w.text));
+  // One tick: every product and feature listed under the vendor, each tagged Included or Add-on.
+  await expect(features.locator(".checker-product-name")).toHaveText(MIXED.products.map((p) => p.name));
+  await expect(features.locator(".checker-feature-text")).toHaveText(featuresOf(MIXED).map((f) => f.text));
+  await expect(features.locator("[data-inclusion]")).toHaveText(featuresOf(MIXED).map((f) => f.inclusion));
+  await expect(features.locator('[data-inclusion="included"]')).not.toHaveCount(0);
+  await expect(features.locator('[data-inclusion="add-on"]')).not.toHaveCount(0);
+  const where = checker.locator(`[data-checker-where][data-vendor="${MIXED.id}"]`);
+  await expect(where.locator("dt")).toHaveText(MIXED.products.map((p) => p.name));
+  await expect(where.locator("dd")).toHaveText(MIXED.products.flatMap((p) => p.processing.map((w) => w.text)));
   const builds = checker.locator('[data-checker-section="build"]').getByRole("link");
   await expect(builds).toHaveText(VIEW.builds.map((b) => `${b.number} ${b.name}`));
   for (const [i, b] of VIEW.builds.entries()) await expect(builds.nth(i)).toHaveAttribute("href", b.href);
-  await expect(status).toHaveText(statusText(1, ...tally([SEVERAL])));
-  await expect(checker.locator(`[data-checker-features][data-product="${ADD_ON.id}"]`)).toBeHidden();
+  await expect(status).toHaveText(statusText(1, ...tally([MIXED])));
+  await expect(checker.locator(`[data-checker-features][data-vendor="${OTHER.id}"]`)).toBeHidden();
 
-  await box(page, ADD_ON).check();
-  await expect(checker.locator(`[data-checker-features][data-product="${ADD_ON.id}"]`)).toBeVisible();
-  await expect(status).toHaveText(statusText(2, ...tally([SEVERAL, ADD_ON])));
-  await box(page, SEVERAL).uncheck();
+  await box(page, OTHER).check();
+  await expect(checker.locator(`[data-checker-features][data-vendor="${OTHER.id}"]`)).toBeVisible();
+  await expect(status).toHaveText(statusText(2, ...tally([MIXED, OTHER])));
+  await box(page, MIXED).uncheck();
   await expect(features).toBeHidden();
-  await expect(checker.locator(`[data-checker-where][data-product="${SEVERAL.id}"]`)).toBeHidden();
-  await expect(status).toHaveText(statusText(1, ...tally([ADD_ON])));
-  await box(page, ADD_ON).uncheck();
+  await expect(where).toBeHidden();
+  await expect(status).toHaveText(statusText(1, ...tally([OTHER])));
+  await box(page, OTHER).uncheck();
   await expect(status).toHaveText(EMPTY_STATUS);
   for (const section of await sections.all()) await expect(section).toBeHidden();
 });
@@ -76,46 +87,47 @@ test("the status line is the one live region, and it changes once per tick", asy
       for (const _ of records) window.__statusChanges.push(status.textContent);
     }).observe(status, { childList: true, characterData: true, subtree: true });
   });
-  await box(page, SEVERAL).check();
-  await box(page, ADD_ON).check();
-  await box(page, ADD_ON).uncheck();
+  await box(page, MIXED).check();
+  await box(page, OTHER).check();
+  await box(page, OTHER).uncheck();
   await expect.poll(() => page.evaluate(() => window.__statusChanges)).toEqual([
-    statusText(1, ...tally([SEVERAL])),
-    statusText(2, ...tally([SEVERAL, ADD_ON])),
-    statusText(1, ...tally([SEVERAL])),
+    statusText(1, ...tally([MIXED])),
+    statusText(2, ...tally([MIXED, OTHER])),
+    statusText(1, ...tally([MIXED])),
   ]);
 });
 
-test("Review Focus 4: with every product ticked, each location reads 'Not published' or its recorded statement", async ({ page }) => {
+test("Review Focus 4: with every vendor ticked, each location reads 'Not published' or its recorded statement", async ({ page }) => {
   await page.goto(PATH);
-  for (const p of PRODUCTS) await box(page, p).check();
-  await expect(page.locator("[data-checker-status]")).toHaveText(statusText(PRODUCTS.length, ...tally(PRODUCTS)));
-  for (const p of PRODUCTS) {
-    const where = page.locator(`[data-checker-where][data-product="${p.id}"]`);
+  for (const g of VENDORS) await box(page, g).check();
+  await expect(page.locator("[data-checker-status]")).toHaveText(statusText(VENDORS.length, ...tally(VENDORS)));
+  for (const g of VENDORS) {
+    const where = page.locator(`[data-checker-where][data-vendor="${g.id}"]`);
     await expect(where).toBeVisible();
-    await expect(where.locator("dt")).toHaveText(p.label);
-    await expect(where.locator("dd")).toHaveText(p.processing.map((w) => w.text));
+    await expect(where.locator(".checker-vendor-name")).toHaveText(g.vendor);
+    await expect(where.locator("dt")).toHaveText(g.products.map((p) => p.name));
+    await expect(where.locator("dd")).toHaveText(g.products.flatMap((p) => p.processing.map((w) => w.text)));
   }
-  const unpublished = PRODUCTS.flatMap((p) => p.processing).filter((w) => w.status === "not-published");
+  const unpublished = VENDORS.flatMap((g) => g.products.flatMap((p) => p.processing)).filter((w) => w.status === "not-published");
   await expect(page.locator('[data-checker-where] dd[data-processing="not-published"]')).toHaveText(unpublished.map(() => NOT_PUBLISHED));
 });
 
-test("each kit link follows the ticked products' industries, and lands on its kit", async ({ page }) => {
+test("each kit link follows the ticked vendors' industries, and lands on its kit", async ({ page }) => {
   expect(VIEW.kits.map((k) => k.category)).toEqual(["accounting", "legal", "property"]);
   for (const kit of VIEW.kits) {
-    const product = PRODUCTS.find((p) => p.categories.includes(kit.category));
+    const vendor = VENDORS.find((g) => g.categories.includes(kit.category));
     await page.goto(PATH);
-    await box(page, product).check();
+    await box(page, vendor).check();
     await expect(page.locator('[data-checker-section="kits"]')).toBeVisible();
     const link = page.locator(`[data-checker-kit="${kit.category}"]`).getByRole("link", { name: kit.title, exact: true });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", kit.href);
-    for (const other of VIEW.kits.filter((k) => !product.categories.includes(k.category))) {
-      await expect(page.locator(`[data-checker-kit="${other.category}"]`), `${product.id} shows the ${other.category} kit`).toBeHidden();
+    for (const other of VIEW.kits.filter((k) => !vendor.categories.includes(k.category))) {
+      await expect(page.locator(`[data-checker-kit="${other.category}"]`), `${vendor.id} shows the ${other.category} kit`).toBeHidden();
     }
   }
-  const general = PRODUCTS.find((p) => p.categories.length === 0);
-  expect(general, "platform-ai.json has no general product").toBeTruthy();
+  const general = VENDORS.find((g) => g.categories.length === 0);
+  expect(general, "platform-ai.json has no general vendor").toBeTruthy();
   await page.goto(PATH);
   await box(page, general).check();
   await expect(page.locator('[data-checker-section="build"]')).toBeVisible();
@@ -123,7 +135,7 @@ test("each kit link follows the ticked products' industries, and lands on its ki
 
   const [kit] = VIEW.kits;
   await page.goto(PATH);
-  await box(page, PRODUCTS.find((p) => p.categories.includes(kit.category))).check();
+  await box(page, VENDORS.find((g) => g.categories.includes(kit.category))).check();
   await page.locator(`[data-checker-kit="${kit.category}"]`).getByRole("link").click();
   await expect(page).toHaveURL(new RegExp(`${escapeRe(kit.href)}$`));
   await expect(page.locator(`#kit-${kit.category}`)).toBeInViewport();
@@ -132,7 +144,7 @@ test("each kit link follows the ticked products' industries, and lands on its ki
 test("the keyboard reaches the first checkbox with a visible ring, Space ticks it, and the next key moves to the next checkbox", async ({ page, browserName }) => {
   const { next } = focusKeys(browserName);
   await page.goto(PATH);
-  const [first, second] = PRODUCTS;
+  const [first, second] = VENDORS;
   let reached = false;
   for (let i = 0; i < 80 && !reached; i++) {
     await page.keyboard.press(next);
@@ -149,20 +161,20 @@ test("the keyboard reaches the first checkbox with a visible ring, Space ticks i
 });
 
 for (const width of [390, 1280]) {
-  test(`no axe violations at ${width}px, with nothing ticked and with every product ticked`, async ({ page }) => {
+  test(`no axe violations at ${width}px, with nothing ticked and with every vendor ticked`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(PATH);
     expect((await new AxeBuilder({ page }).withTags(WCAG).analyze()).violations, "nothing ticked").toEqual([]);
-    for (const p of PRODUCTS) await box(page, p).check();
+    for (const g of VENDORS) await box(page, g).check();
     await expect(page.locator('[data-checker-section="kits"]')).toBeVisible();
-    expect((await new AxeBuilder({ page }).withTags(WCAG).analyze()).violations, "every product ticked").toEqual([]);
+    expect((await new AxeBuilder({ page }).withTags(WCAG).analyze()).violations, "every vendor ticked").toEqual([]);
   });
 }
 
-test("with every product ticked the page doesn't scroll sideways at 320px, and every link and checkbox label is a 44px target", async ({ page }) => {
+test("with every vendor ticked the page doesn't scroll sideways at 320px, and every link and checkbox label is a 44px target", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 700 });
   await page.goto(PATH);
-  for (const p of PRODUCTS) await box(page, p).check();
+  for (const g of VENDORS) await box(page, g).check();
   await expect(page.locator('[data-checker-section="kits"]')).toBeVisible();
   expect(await overflow(page)).toBeLessThanOrEqual(0);
   // Spec §6.6: a tap target is at least 44px in both dimensions.
@@ -173,7 +185,7 @@ test("with every product ticked the page doesn't scroll sideways at 320px, and e
         const r = el.getBoundingClientRect();
         return { name: el.textContent.replace(/\s+/g, " ").trim(), w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10 };
       }));
-  expect(targets.length, "no visible link or label in the checker").toBeGreaterThan(PRODUCTS.length);
+  expect(targets.length, "no visible link or label in the checker").toBeGreaterThan(VENDORS.length);
   expect(targets.filter((t) => t.w < 44 || t.h < 44)).toEqual([]);
 });
 
@@ -183,8 +195,8 @@ test("nothing leaves the page while the checker runs: no request but the site's 
   const origin = new URL(page.url()).origin;
   const requests = [];
   page.on("request", (r) => requests.push({ url: r.url(), type: r.resourceType() }));
-  for (const p of PRODUCTS) await box(page, p).check();
-  for (const p of PRODUCTS) await box(page, p).uncheck();
+  for (const g of VENDORS) await box(page, g).check();
+  for (const g of VENDORS) await box(page, g).uncheck();
   await expect(page.locator("[data-checker-status]")).toHaveText(EMPTY_STATUS);
   expect(requests.filter((r) => r.type !== "font" || new URL(r.url).origin !== origin)).toEqual([]);
 });
