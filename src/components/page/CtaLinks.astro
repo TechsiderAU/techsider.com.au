@@ -1,0 +1,59 @@
+---
+// A page's call-to-action pair (spec §10.1): the primary as a lime button, the secondary as an
+// outline button, in a row that wraps. A null or missing link renders nothing, so a template can
+// pass `site.demo(id)` straight through; with neither link the component renders no element.
+// Labels wrap instead of overflowing (the global .btn is nowrap), so a long "Talk to us about …"
+// still fits at 320px.
+import type { Link } from "../../lib/site";
+
+interface Props {
+  primary?: Link | null;
+  secondary?: Link | null;
+}
+
+const { primary, secondary } = Astro.props;
+---
+{(primary || secondary) && (
+  <div class="cta-links" data-cta-links>
+    {primary && <a href={primary.href} class="btn btn-primary cta-link">{primary.label}</a>}
+    {secondary && <a href={secondary.href} class="btn btn-secondary cta-link cta-secondary">{secondary.label}</a>}
+  </div>
+)}
+
+<style>
+  .cta-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .cta-link {
+    min-width: 2.75rem;
+    max-width: 100%;
+    padding-block: 0.5rem;
+    line-height: 1.3;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /* On bone: the primary keeps its lime fill behind carbon text; the secondary is a carbon
+     outline with carbon text (acid is never text on bone, spec §6.1). */
+  :global(.surface-bone) .cta-secondary {
+    color: var(--color-carbon);
+    box-shadow: inset 0 0 0 1px var(--color-carbon);
+  }
+  :global(.surface-bone) .cta-secondary:hover {
+    color: var(--color-carbon);
+    box-shadow: inset 0 0 0 2px var(--color-carbon);
+  }
+
+  /* A dark island (bg-carbon / bg-graphite) inside a bone section is a dark surface again. */
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .cta-secondary {
+    color: var(--color-bone);
+    box-shadow: inset 0 0 0 1px var(--color-graphite);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .cta-secondary:hover {
+    color: var(--color-acid);
+  }
+</style>

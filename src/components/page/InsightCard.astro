@@ -1,0 +1,167 @@
+---
+// One insight as a LinkCard-style card (spec §8.9): the type as a lower-case bracket tag with the
+// date and reading time ("[article] · 20 September 2026 · 6 min read"), the title linked to the
+// post, the description, then the industry chips. The title link stretches over the card; the
+// industry chips sit above that stretched link, so each chip is its own target. An industry whose
+// page isn't shown has a null href and renders as a plain-text chip.
+// Dates are shown in UTC: content dates are calendar dates, parsed as UTC midnight.
+import type { InsightCardView } from "../../lib/views/insights";
+import BracketChip from "../ui/BracketChip.astro";
+
+interface Props {
+  card: InsightCardView;
+  level?: 2 | 3;
+}
+
+const { card, level = 3 } = Astro.props;
+const Heading = `h${level}` as "h2" | "h3";
+const isoDate = card.date.toISOString().slice(0, 10);
+const shownDate = card.date.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+---
+<article class="insight-card" data-insight-card>
+  <p class="insight-card-meta"><BracketChip label={card.typeLabel.toLowerCase()} /> · <time datetime={isoDate}>{shownDate}</time> · {card.minutes} min read</p>
+  <Heading class:list={["insight-card-title", `insight-card-title-${level}`]}>
+    <a href={card.href} class="insight-card-link">{card.title}</a>
+  </Heading>
+  <p class="insight-card-description">{card.description}</p>
+  {card.industries.length > 0 && (
+    <ul class="insight-card-industries" aria-label="Industries">
+      {card.industries.map((industry) => (
+        <li><BracketChip label={industry.label} href={industry.href ?? undefined} /></li>
+      ))}
+    </ul>
+  )}
+</article>
+
+<style>
+  .insight-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 1.25rem;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    border: 1px solid var(--color-graphite);
+    border-radius: 8px;
+  }
+  .insight-card-meta {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+  .insight-card-title {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .insight-card-title-2 {
+    font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  }
+  .insight-card-title-3 {
+    font-size: 1.25rem;
+  }
+  .insight-card-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted);
+    text-underline-offset: 4px;
+  }
+  /* The stretched link: the whole card opens the post. */
+  .insight-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .insight-card-description {
+    margin: 0;
+    line-height: 1.55;
+  }
+  .insight-card-industries {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Chip links sit above the stretched title link, so each stays its own target. */
+  .insight-card-industries :global(a) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .insight-card:hover,
+  .insight-card:focus-within {
+    border-color: var(--color-acid);
+  }
+  .insight-card:hover .insight-card-link {
+    text-decoration-color: currentColor;
+  }
+  .insight-card::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    background: var(--color-acid);
+    opacity: 0;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .insight-card:hover::before,
+    .insight-card:focus-within::before {
+      animation: insight-card-scan 1.1s ease-out 1 both;
+    }
+  }
+  @keyframes insight-card-scan {
+    from {
+      top: 0;
+      opacity: 1;
+    }
+    to {
+      top: 100%;
+      opacity: 0;
+    }
+  }
+
+  :global(.surface-bone) .insight-card {
+    border-color: var(--color-bone-line);
+  }
+  :global(.surface-bone) .insight-card-meta {
+    color: var(--color-muted-dark);
+  }
+  :global(.surface-bone) .insight-card-link {
+    text-decoration-color: var(--color-muted-dark);
+  }
+  :global(.surface-bone) .insight-card:hover,
+  :global(.surface-bone) .insight-card:focus-within {
+    border-color: var(--color-carbon);
+  }
+  :global(.surface-bone) .insight-card::before {
+    background: var(--color-acid-deep);
+  }
+
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .insight-card {
+    border-color: var(--color-graphite);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .insight-card-meta {
+    color: var(--color-muted);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .insight-card-link {
+    text-decoration-color: var(--color-muted);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .insight-card:hover,
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .insight-card:focus-within {
+    border-color: var(--color-acid);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .insight-card::before {
+    background: var(--color-acid);
+  }
+</style>

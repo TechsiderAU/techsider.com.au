@@ -1,0 +1,135 @@
+---
+// The page hero (spec §6.4, §8): full-bleed carbon with the scan-line texture, content in the
+// 80rem container. It renders the page's one <h1>, so a template renders exactly one PageHero.
+// In order: breadcrumb, bracket eyebrow, decorative prompt line, H1 (with at most one highlighted
+// word), proof line, sub, then the CTAs and the default slot in `ctaPosition` order.
+// The header also carries bg-carbon, so it stays a dark island if it ever sits inside
+// .surface-bone (the gallery shows it there): lime focus rings and carbon-surface colours.
+import type { Link } from "../../lib/site";
+import { splitHighlight } from "../../lib/highlight";
+import Breadcrumb from "../ui/Breadcrumb.astro";
+import BracketChip from "../ui/BracketChip.astro";
+import CtaLinks from "./CtaLinks.astro";
+
+interface Props {
+  title: string;
+  highlight?: string;
+  display?: boolean;
+  eyebrow?: string;
+  prompt?: { command: string; args?: string };
+  sub?: string;
+  proofLine?: string;
+  breadcrumb?: Link[];
+  ctas?: { primary?: Link | null; secondary?: Link | null };
+  ctaPosition?: "before-slot" | "after-slot";
+}
+
+const {
+  title,
+  highlight,
+  display = true,
+  eyebrow,
+  prompt,
+  sub,
+  proofLine,
+  breadcrumb,
+  ctas,
+  ctaPosition = "before-slot",
+} = Astro.props;
+
+// Throws at build time when `highlight` is not one whole word of `title`.
+const parts = highlight === undefined ? null : splitHighlight(title, highlight);
+const hasSlot = Astro.slots.has("default");
+---
+<header class="page-hero bg-carbon scanlines" data-page-hero>
+  <div class="page-hero-inner">
+    {breadcrumb && breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} />}
+    {eyebrow && <p class="page-hero-eyebrow"><BracketChip label={eyebrow} /></p>}
+    {prompt && (
+      <p class="page-hero-prompt" aria-hidden="true"><span class="page-hero-caret">&gt;</span> {prompt.command}{prompt.args && <span class="page-hero-args"> {prompt.args}</span>}</p>
+    )}
+    <h1 class:list={["page-hero-title", display ? "type-display page-hero-title-display" : "page-hero-title-sentence"]}>
+      {parts ? <Fragment>{parts.before}<span class="hl">{parts.word}</span>{parts.after}</Fragment> : title}
+    </h1>
+    {proofLine && <p class="page-hero-proof">{proofLine}</p>}
+    {sub && <p class="page-hero-sub">{sub}</p>}
+    {ctaPosition === "before-slot" && <CtaLinks primary={ctas?.primary} secondary={ctas?.secondary} />}
+    {hasSlot && <div class="page-hero-slot"><slot /></div>}
+    {ctaPosition === "after-slot" && <CtaLinks primary={ctas?.primary} secondary={ctas?.secondary} />}
+  </div>
+</header>
+
+<style>
+  .page-hero {
+    width: 100%;
+    color: var(--color-bone);
+    border-bottom: 1px solid var(--color-graphite);
+    padding-block: 2.5rem 3.5rem;
+  }
+  @media (min-width: 64rem) {
+    .page-hero {
+      padding-block: 3.5rem 5.5rem;
+    }
+  }
+  .page-hero-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+    overflow-wrap: break-word;
+  }
+  @media (min-width: 40rem) {
+    .page-hero-inner {
+      padding-inline: 1.5rem;
+    }
+  }
+  .page-hero-eyebrow,
+  .page-hero-prompt {
+    margin: 0;
+  }
+  .page-hero-prompt {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-muted);
+    overflow-wrap: anywhere;
+  }
+  .page-hero-caret {
+    color: var(--color-acid);
+  }
+  .page-hero-args {
+    color: var(--color-muted);
+  }
+  .page-hero-title {
+    margin: 0;
+    text-wrap: balance;
+  }
+  /* type-display (a layered utility) sets the family, width, weight, caps, tracking and leading;
+     this rule only sizes it, so it never overrides those. Reflows at 320px (spec §6.2). */
+  .page-hero-title-display {
+    font-size: clamp(1.875rem, 0.6rem + 6.4vw, 6rem);
+  }
+  .page-hero-title-sentence {
+    max-width: 24ch;
+    font-size: clamp(1.875rem, 1.25rem + 3vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+  .page-hero-proof {
+    margin: -0.25rem 0 0;
+    font-size: clamp(1.125rem, 0.95rem + 0.9vw, 1.625rem);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .page-hero-sub {
+    margin: 0;
+    max-width: 62ch;
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+    line-height: 1.55;
+  }
+  .page-hero-slot {
+    min-width: 0;
+  }
+</style>

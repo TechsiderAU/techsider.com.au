@@ -1,0 +1,69 @@
+---
+// A labelled row of bracket chips (spec §6.3 bracket device, §8.5 "Designed around:" and
+// "Works alongside:"). A chip with an href links there; a null href (a page that isn't shown)
+// renders the chip as plain text, never a dead link. An optional note follows its chip.
+// With `id`, the label paragraph is "{id}-label" and names the list through aria-labelledby;
+// without one, the list is named by aria-label, so two unlabelled rows never share an id.
+// Long unbroken labels wrap inside the row (overflow-wrap: anywhere), so 320px never scrolls.
+import BracketChip from "../ui/BracketChip.astro";
+
+interface Props {
+  label: string;
+  chips: { label: string; href: string | null; note?: string }[];
+  id?: string;
+}
+
+const { label, chips, id } = Astro.props;
+const labelId = id === undefined ? undefined : `${id}-label`;
+---
+<div class="chip-row" id={id} data-chip-row>
+  <p class="chip-row-label" id={labelId}>{label}</p>
+  <ul class="chip-row-list" aria-labelledby={labelId} aria-label={labelId === undefined ? label : undefined}>
+    {chips.map((chip) => (
+      <li class="chip-row-item">
+        <BracketChip label={chip.label} href={chip.href ?? undefined} />
+        {chip.note && <Fragment>{" "}<span class="chip-note">{chip.note}</span></Fragment>}
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .chip-row {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .chip-row-label {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+  }
+  .chip-row-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .chip-row-item {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 0.5rem;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+  }
+  .chip-note {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+  }
+  :global(.surface-bone) .chip-note {
+    color: var(--color-muted-dark);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .chip-note {
+    color: var(--color-muted);
+  }
+</style>

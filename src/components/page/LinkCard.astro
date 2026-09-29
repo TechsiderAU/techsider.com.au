@@ -1,0 +1,155 @@
+---
+// A card that leads to one page. With an href the heading holds the link, and the link's ::after
+// stretches over the whole card, so the card is one large target with one accessible name (the
+// title). Hover or keyboard focus shows the scan line, a single sweep of a lime line (acid-deep on
+// bone) down the card (spec §6.5); under prefers-reduced-motion it doesn't run.
+// A null href (a page that isn't shown) renders the same card with no link and no hover.
+interface Props {
+  title: string;
+  href: string | null;
+  body?: string;
+  eyebrow?: string;
+  meta?: string;
+  level?: 2 | 3 | 4;
+}
+
+const { title, href, body, eyebrow, meta, level = 3 } = Astro.props;
+const Heading = `h${level}` as "h2" | "h3" | "h4";
+---
+<article class:list={["link-card", href !== null && "link-card-linked"]} data-link-card>
+  {eyebrow && <p class="link-card-eyebrow">{eyebrow}</p>}
+  <Heading class:list={["link-card-title", `link-card-title-${level}`]}>
+    {href === null ? title : <a href={href} class="link-card-link">{title}</a>}
+  </Heading>
+  {body && <p class="link-card-body">{body}</p>}
+  {meta && <p class="link-card-meta">{meta}</p>}
+</article>
+
+<style>
+  .link-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 1.25rem;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    border: 1px solid var(--color-graphite);
+    border-radius: 8px;
+  }
+  .link-card-eyebrow,
+  .link-card-meta {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+  .link-card-title {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .link-card-title-2 {
+    font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  }
+  .link-card-title-3 {
+    font-size: 1.25rem;
+  }
+  .link-card-title-4 {
+    font-size: 1.125rem;
+  }
+  .link-card-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted);
+    text-underline-offset: 4px;
+  }
+  /* The stretched link: the whole card is the target. */
+  .link-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .link-card-body {
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  /* Hover: a colour cue on every setting, plus the scan line when motion is allowed. */
+  .link-card-linked:hover,
+  .link-card-linked:focus-within {
+    border-color: var(--color-acid);
+  }
+  .link-card-linked:hover .link-card-link {
+    text-decoration-color: currentColor;
+  }
+  .link-card::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    background: var(--color-acid);
+    opacity: 0;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .link-card-linked:hover::before,
+    .link-card-linked:focus-within::before {
+      animation: link-card-scan 1.1s ease-out 1 both;
+    }
+  }
+  @keyframes link-card-scan {
+    from {
+      top: 0;
+      opacity: 1;
+    }
+    to {
+      top: 100%;
+      opacity: 0;
+    }
+  }
+
+  /* On bone: bone-line hairline, muted-dark secondary text, carbon hover cue, acid-deep scan line. */
+  :global(.surface-bone) .link-card {
+    border-color: var(--color-bone-line);
+  }
+  :global(.surface-bone) .link-card-eyebrow,
+  :global(.surface-bone) .link-card-meta {
+    color: var(--color-muted-dark);
+  }
+  :global(.surface-bone) .link-card-link {
+    text-decoration-color: var(--color-muted-dark);
+  }
+  :global(.surface-bone) .link-card-linked:hover,
+  :global(.surface-bone) .link-card-linked:focus-within {
+    border-color: var(--color-carbon);
+  }
+  :global(.surface-bone) .link-card::before {
+    background: var(--color-acid-deep);
+  }
+
+  /* A dark island (bg-carbon / bg-graphite) inside a bone section is a dark surface again. */
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .link-card {
+    border-color: var(--color-graphite);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .link-card-eyebrow,
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .link-card-meta {
+    color: var(--color-muted);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .link-card-link {
+    text-decoration-color: var(--color-muted);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .link-card-linked:hover,
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .link-card-linked:focus-within {
+    border-color: var(--color-acid);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .link-card::before {
+    background: var(--color-acid);
+  }
+</style>

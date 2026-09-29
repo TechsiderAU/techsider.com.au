@@ -1,0 +1,145 @@
+---
+// /preview/page-kit/ (group "components"): every page-kit component in src/components/page/,
+// rendered from the fixtures on carbon and on bone and composed the way the templates use them.
+// Preview only: src/preview/gallery.astro renders it after the gallery intro, and only a
+// TECHSIDER_NAV_PREVIEW=1 build injects that route. Every specimen id ends in -carbon or -bone.
+// Fixtures are imported statically from ../../fixtures/index.ts, as in every specimen (never also
+// dynamically: Vite would log INEFFECTIVE_DYNAMIC_IMPORT, which fails the build gate).
+// This page has more than one <h1>: the gallery's own and one per PageHero specimen. A template
+// page renders only its template, so there PageHero supplies the page's one <h1>.
+import PageHero from "../../components/page/PageHero.astro";
+import PageSection from "../../components/page/PageSection.astro";
+import CtaLinks from "../../components/page/CtaLinks.astro";
+import ChipRow from "../../components/page/ChipRow.astro";
+import LinkCard from "../../components/page/LinkCard.astro";
+import Notice from "../../components/page/Notice.astro";
+import InsightCard from "../../components/page/InsightCard.astro";
+import Prose from "../../components/page/Prose.astro";
+import { crumbs, industryLink, solutionLink } from "../../lib/site";
+import { insightCards } from "../../lib/views/insights";
+import { NOT_LEGAL_ADVICE, WORKS_METHOD_LABEL } from "../../lib/fixed-copy";
+import { fixtureSite as site, industryFixtures, insightFixtures } from "../../fixtures/index.ts";
+
+const SURFACES = ["carbon", "bone"] as const;
+
+const one = solutionLink(site, "fixture-solution");
+const two = solutionLink(site, "fixture-solution-2");
+const shownIndustry = industryLink(site, "fixture-industry");
+const unshownIndustry = industryLink(site, "fixture-industry-9"); // fixtureSite gives it a null href
+const privacy = site.page("privacy"); // fixtureSite gives it a null href
+const longText = industryFixtures["fixture-industry-3"]; // a chip label with a 60-character unbroken token
+
+const talk = { label: `Talk to us about ${one.shortName}`, href: site.contact({ interest: one.id }) };
+const galleryLink = { label: "Open the fixture gallery", href: "/preview/" };
+
+const industryChips = site.industries.map((i) => ({ label: i.shortName, href: i.href }));
+const designedChips = longText.obligationChips.map((c) => ({ label: c.label, href: null }));
+const worksChips = longText.worksAlongside.map((w) => ({ label: w.system, href: null, note: WORKS_METHOD_LABEL[w.method] }));
+
+const cards = [
+  { title: `${one.number} ${one.shortName}`, href: one.href, body: one.oneLiner, eyebrow: "fixture solution" },
+  { title: `${two.number} ${two.shortName}`, href: two.href, body: two.oneLiner, eyebrow: "fixture solution" },
+  { title: privacy.label, href: privacy.href, body: "Fixture card for a page that isn't shown, so it has no link.", meta: "Fixture meta: no link" },
+];
+
+// The two newest fixture insights. The second card's chips are set here, so the page always has
+// an industry chip that links and one whose page isn't shown.
+const [latest, second] = insightCards(insightFixtures, site);
+const insights = [
+  latest,
+  { ...second, industries: [shownIndustry, unshownIndustry].map((i) => ({ label: i.shortName, href: i.href })) },
+];
+
+// A stand-in for rendered markdown: every element Prose styles.
+const PROSE_HTML = [
+  "<h2>Fixture prose heading</h2>",
+  '<p>Fixture paragraph with <a href="/preview/">a fixture link</a> and <code>fixture_code()</code> inline, long enough to wrap across the reading measure on a phone.</p>',
+  "<h3>Fixture prose subheading</h3>",
+  "<ul><li>Fixture bullet one</li><li>Fixture bullet two</li></ul>",
+  "<ol><li>Fixture step one</li><li>Fixture step two</li></ol>",
+  "<blockquote><p>Fixture quotation from a fictional fixture source.</p></blockquote>",
+  "<pre><code>fixture --render prose --a-long-fixture-flag-that-wraps-at-320px=FixtureUnbrokenValueFixtureUnbrokenValue</code></pre>",
+  '<table><thead><tr><th scope="col">Fixture column</th><th scope="col">Fixture value</th></tr></thead><tbody><tr><td>Fixture row</td><td>Fixture cell</td></tr></tbody></table>',
+].join("\n");
+---
+<div class="page-kit" data-page-kit data-fixture>
+  {SURFACES.map((s) => (
+    <Fragment>
+      {s === "carbon" ? (
+        <div id="kit-hero-carbon" class="kit-hero-frame" data-kit-surface="carbon">
+          <PageHero
+            title="Fixture kit that ships."
+            highlight="ships"
+            eyebrow="fixture page kit"
+            prompt={{ command: "fixture_page", args: "--kit=hero" }}
+            proofLine="Fixture proof line: measured before it ships."
+            sub="Fixture sub-promise for the page kit, long enough to wrap onto a second line at narrow widths."
+            breadcrumb={crumbs(site, ["solutions", { label: "Fixture page kit", path: "/preview/page-kit/" }])}
+            ctas={{ primary: talk, secondary: galleryLink }}
+          >
+            <figure class="kit-slot" data-kit-slot>Fixture hero slot</figure>
+          </PageHero>
+        </div>
+      ) : (
+        <div id="kit-hero-bone" class="kit-hero-frame surface-bone" data-kit-surface="bone">
+          <PageHero
+            title={one.fullName}
+            display={false}
+            eyebrow={`fixture solution ${one.number}`}
+            sub={one.oneLiner}
+            breadcrumb={crumbs(site, ["solutions", { label: one.shortName, path: one.path }])}
+            ctas={{ primary: talk, secondary: null }}
+            ctaPosition="after-slot"
+          >
+            <figure class="kit-slot" data-kit-slot>Fixture demo slot</figure>
+          </PageHero>
+        </div>
+      )}
+      <PageSection
+        id={`kit-section-${s}`}
+        surface={s}
+        title={`Fixture page section on ${s}`}
+        prompt={`fixture --surface ${s}`}
+        lede="Fixture lede: every page-kit component, composed the way the templates use them."
+      >
+        <CtaLinks primary={talk} secondary={galleryLink} />
+        <ChipRow id={`kit-industries-${s}`} label="Fixture industries" chips={industryChips} />
+        <ChipRow id={`kit-designed-${s}`} label="Fixture designed around" chips={designedChips} />
+        <ChipRow label="Fixture works alongside" chips={worksChips} />
+        <div class="kit-grid">{cards.map((card) => <LinkCard {...card} />)}</div>
+        <Notice text={NOT_LEGAL_ADVICE} />
+        <div class="kit-grid">{insights.map((card) => <InsightCard card={card} />)}</div>
+        <Prose><Fragment set:html={PROSE_HTML} /></Prose>
+        <PageSection id={`kit-subsection-${s}`} surface={s} level={3} width="prose" title={`Fixture subsection on ${s}`}>
+          <LinkCard title="Fixture level-four card" href="/preview/" body="Fixture body in a nested section." eyebrow="fixture eyebrow" meta="Fixture meta" level={4} />
+        </PageSection>
+        <div id={`kit-cta-empty-${s}`} data-kit-empty-ctas><CtaLinks primary={null} secondary={null} /></div>
+      </PageSection>
+    </Fragment>
+  ))}
+</div>
+
+<style>
+  .kit-hero-frame.surface-bone {
+    padding-block: 2rem;
+  }
+  .kit-slot {
+    margin: 0;
+    padding: 1.5rem;
+    border: 1px dashed var(--color-graphite);
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-muted);
+  }
+  .kit-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+  @media (min-width: 48rem) {
+    .kit-grid {
+      grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    }
+  }
+</style>

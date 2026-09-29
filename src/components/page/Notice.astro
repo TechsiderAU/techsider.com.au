@@ -1,0 +1,32 @@
+---
+// A fixed-copy notice line: the packaged-offer disclaimer, "General information, not legal
+// advice.", the kit notes (src/lib/fixed-copy.ts). Mono, small, muted for its surface, with a
+// hairline rule on its left. Always visible text: never hidden, never colour alone.
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+<p class="notice" data-notice>{text}</p>
+
+<style>
+  .notice {
+    margin: 0;
+    max-width: 62ch;
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--color-graphite);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+  :global(.surface-bone) .notice {
+    border-left-color: var(--color-bone-line);
+    color: var(--color-muted-dark);
+  }
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .notice {
+    border-left-color: var(--color-graphite);
+    color: var(--color-muted);
+  }
+</style>

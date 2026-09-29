@@ -1,0 +1,134 @@
+---
+// Typography for rendered markdown (the legal documents, the evaluation method, insight posts):
+// h2, h3, p, lists, links, code, pre, blockquote and tables, in a 48rem measure. The slot holds
+// HTML this component doesn't render itself, so every rule reaches it through :global().
+// Written for bone (its home surface) and carbon, like the ui components. Nothing scrolls
+// sideways at 320px: code blocks and table cells wrap instead (a scrolling region would need
+// to be focusable, and the markdown can't carry a tabindex).
+---
+<div class="prose" data-prose><slot /></div>
+
+<style>
+  .prose {
+    max-width: 48rem;
+    min-width: 0;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    overflow-wrap: break-word;
+  }
+  .prose > :global(* + *) {
+    margin-top: 1.25em;
+  }
+  .prose :global(h2) {
+    margin-top: 2.25em;
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .prose :global(h3) {
+    margin-top: 1.75em;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .prose > :global(:first-child) {
+    margin-top: 0;
+  }
+  .prose > :global(:is(h2, h3) + *) {
+    margin-top: 0.75em;
+  }
+  .prose :global(ul) {
+    padding-left: 1.25rem;
+    list-style: square;
+  }
+  .prose :global(ol) {
+    padding-left: 1.5rem;
+    list-style: decimal;
+  }
+  .prose :global(li + li) {
+    margin-top: 0.4em;
+  }
+  .prose :global(a) {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted);
+    text-underline-offset: 3px;
+  }
+  .prose :global(a:hover) {
+    color: var(--color-acid);
+    text-decoration-color: currentColor;
+  }
+  .prose :global(code) {
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    background: var(--color-graphite);
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    overflow-wrap: anywhere;
+  }
+  .prose :global(pre) {
+    padding: 1rem;
+    border-radius: 6px;
+    background: var(--color-graphite);
+    color: var(--color-bone);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .prose :global(pre code) {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+  }
+  .prose :global(blockquote) {
+    padding-left: 1rem;
+    border-left: 2px solid var(--color-acid);
+    color: var(--color-muted);
+  }
+  .prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  .prose :global(:is(th, td)) {
+    padding: 0.625rem 0.75rem 0.625rem 0;
+    border-bottom: 1px solid var(--color-graphite);
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+  .prose :global(th) {
+    font-weight: 600;
+  }
+
+  /* On bone: carbon links on a muted-dark underline; inline code in a bone-line box with no
+     fill (bone-line is never a text surface); code blocks are carbon islands; acid-deep quote rule. */
+  :global(.surface-bone) .prose :global(a) {
+    text-decoration-color: var(--color-muted-dark);
+  }
+  :global(.surface-bone) .prose :global(a:hover) {
+    color: var(--color-carbon);
+    text-decoration-thickness: 2px;
+  }
+  :global(.surface-bone) .prose :global(code) {
+    background: none;
+    box-shadow: inset 0 0 0 1px var(--color-bone-line);
+  }
+  :global(.surface-bone) .prose :global(pre) {
+    background: var(--color-carbon);
+    color: var(--color-bone);
+  }
+  :global(.surface-bone) .prose :global(pre code) {
+    box-shadow: none;
+  }
+  :global(.surface-bone) .prose :global(blockquote) {
+    border-left-color: var(--color-acid-deep);
+    color: var(--color-muted-dark);
+  }
+  :global(.surface-bone) .prose :global(:is(th, td)) {
+    border-bottom-color: var(--color-bone-line);
+  }
+</style>

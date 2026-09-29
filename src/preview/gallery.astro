@@ -13,6 +13,7 @@ import type { AstroComponentFactory } from "astro/runtime/server/index.js";
 import PreviewLayout from "../layouts/PreviewLayout.astro";
 import ComponentsSpecimen from "./specimens/ComponentsSpecimen.astro";
 import TabsSpecimen from "./specimens/TabsSpecimen.astro";
+import PageKitSpecimen from "./specimens/PageKitSpecimen.astro";
 import { PREVIEW_PAGES, previewPath } from "../fixtures/index.ts";
 import type { PreviewGroup, PreviewKind, PreviewPage } from "../fixtures/index.ts";
 
@@ -31,6 +32,7 @@ interface Props {
 const SPECIMENS: Record<Exclude<PreviewKind, "index">, AstroComponentFactory> = {
   components: ComponentsSpecimen,
   tabs: TabsSpecimen,
+  "page-kit": PageKitSpecimen,
 };
 
 // The gallery nav lists the index first, then every other page under its group's heading.

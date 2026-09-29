@@ -10,7 +10,7 @@
 /** "gallery": the index. "components": shared-component pages. "templates": one §8 page template each. */
 export type PreviewGroup = "gallery" | "components" | "templates";
 
-export type PreviewKind = "index" | "components" | "tabs";
+export type PreviewKind = "index" | "components" | "tabs" | "page-kit";
 
 export interface PreviewPage {
   /** "" is the gallery index at /preview/. Template pages use `templates/<kind>`. */
@@ -25,6 +25,7 @@ export const PREVIEW_PAGES: PreviewPage[] = [
   { slug: "", title: "Fixture gallery", kind: "index", group: "gallery" },
   { slug: "components", title: "Fixture components", kind: "components", group: "components" },
   { slug: "tabs", title: "Fixture tabs", kind: "tabs", group: "components" },
+  { slug: "page-kit", title: "Fixture page kit", kind: "page-kit", group: "components" },
 ];
 
 export function previewPath(page: PreviewPage): string {

@@ -30,9 +30,14 @@ const NAV_GROUPS = [["components", "Components"], ["templates", "Templates"]];
 test("the preview registry lists the gallery index, components and tabs pages, each in its group", () => {
   assert.deepEqual(
     PREVIEW_PAGES.map((p) => [p.slug, p.kind, p.group]),
-    [["", "index", "gallery"], ["components", "components", "components"], ["tabs", "tabs", "components"]],
+    [
+      ["", "index", "gallery"],
+      ["components", "components", "components"],
+      ["tabs", "tabs", "components"],
+      ["page-kit", "page-kit", "components"],
+    ],
   );
-  assert.deepEqual(PREVIEW_PAGES.map(previewPath), ["/preview/", "/preview/components/", "/preview/tabs/"]);
+  assert.deepEqual(PREVIEW_PAGES.map(previewPath), ["/preview/", "/preview/components/", "/preview/tabs/", "/preview/page-kit/"]);
   assert.equal(new Set(PREVIEW_PAGES.map((p) => p.kind)).size, PREVIEW_PAGES.length, "a kind is registered twice");
   for (const p of PREVIEW_PAGES) {
     assert.match(p.title, /\bFixture\b/, `"${p.title}" is not visibly fictional`);
