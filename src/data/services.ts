@@ -216,7 +216,7 @@ export const SERVICES: ServicesData = {
     {
       id: "platform-you-license",
       title: "Inside a platform you already license",
-      body: "Runs inside software you already pay for, such as Microsoft Copilot, PropertyMe, Karbon, Xero or Dext, where the vendor sets the processing location. Anything we build for it, such as a retrieval index, runs in your own account or ours, in an Australian region.",
+      body: "Runs inside software you already pay for, such as Microsoft Copilot, PropertyMe, Karbon, Xero or Dext, where the vendor sets the processing location. Where we build part of it, such as a retrieval index, that part runs in your own account or ours, in an Australian region.",
     },
   ],
   onshoreNote: [
@@ -239,12 +239,14 @@ export const SERVICES: ServicesData = {
     { title: "Exit pack", body: "Code, data, configuration and runbook, so you can move a managed system or run it yourself." },
     { title: "You own it", body: "Your code, prompts, evaluation tests and index live in your own repository." },
   ],
+  // Printed under "Every package includes" on every launch package of all five solutions, so each line
+  // must hold for a build (① ② ③), an evaluation (④) and a switch-on (⑤) (WB-1; spec §4.5).
   standardInclusions: [
-    "An acceptance test on your own examples, with thresholds agreed before work starts and every failure shown.",
-    "A re-test when the AI model changes.",
+    "A test on your own examples, with thresholds agreed before testing and every failure shown, or, for AI Switch-On, the hours saved, measured against a baseline taken before anything changes.",
+    "Where the work has a test set, a re-run of it when the AI model changes or may have changed: by us on a system we build or run, and by your team, with the kit we hand over, after an evaluation.",
     "A one-page data note: where your data sits, where the model runs, retention and deletion.",
     "A runbook and a handover.",
-    "The delivery choice that fits the package: your own account or ours, both in an Australian region, or a platform you already license.",
+    "The delivery choice that fits the package, named in its onshore note.",
     "Your time commitment, stated in hours and weeks.",
   ],
   routes: {

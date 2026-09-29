@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { makeSolutionSchema, plainRef } from "../src/content/schemas.ts";
 import { PAGES } from "../src/data/nav.ts";
+import { SERVICES } from "../src/data/services.ts";
 
 const DIR = fileURLToPath(new URL("../src/content/solutions/", import.meta.url));
 const IDS = ["document-registers", "knowledge-assistant", "draft-for-approval", "ai-evaluation", "ai-switch-on"];
@@ -211,6 +212,35 @@ test("voice: need-profile titles are short declaratives ending in a period, and 
     }
     for (const p of DATA[id].packages.filter((x) => x.status !== "launch")) assert.ok(sentences(p.oneLiner) <= 2, `${id} ${p.id}`);
   }
+});
+
+test("the shared inclusions and delivery choice (c) hold on every solution page that repeats them (WB-1; spec §4.5, §4.6)", () => {
+  // Every launch package prints SERVICES.standardInclusions under "Every package includes", and every
+  // page offering choice (c) prints its body, so each line has to be true of all five solutions.
+  const lines = SERVICES.standardInclusions;
+  // ④ and ⑤ offer no managed choice, so no inclusion promises "your own account or ours".
+  const unmanaged = IDS.filter((id) => !DATA[id].whereItRuns.choices.includes("managed"));
+  assert.deepEqual(unmanaged, ["ai-evaluation", "ai-switch-on"]);
+  for (const id of unmanaged) for (const l of lines) assert.doesNotMatch(l, /\bor ours\b|\bmanaged\b/i, `${id} prints "${l}"`);
+  // ④'s Model-Change Regression leaves the re-runs to the client's team, and ④'s control review and ⑤
+  // have no test set, so the one re-test line applies only where there is a test set and says who runs it.
+  const regression = DATA["ai-evaluation"].packages.find((p) => p.id === "model-change-regression");
+  assert.ok(regression.outOfScope.some((o) => /your team owns and runs them/.test(o)));
+  const retest = lines.filter((l) => /\bre-(?:test|run)\b/i.test(l));
+  assert.equal(retest.length, 1, "one re-test line");
+  assert.match(retest[0], /^Where the work has a test set\b/);
+  assert.match(retest[0], /\bby us on a system we build or run\b/);
+  assert.match(retest[0], /\bby your team\b[^.]*\bafter an evaluation\b/);
+  // ⑤ is measured in hours against the Audit's baseline, not against thresholds agreed up front.
+  assert.match(DATA["ai-switch-on"].howWeTest.summary, /measured in hours/);
+  const testLine = lines.filter((l) => /\bthresholds\b/.test(l));
+  assert.equal(testLine.length, 1, "one test line");
+  assert.match(testLine[0], /\bfor AI Switch-On, the hours saved\b/);
+  assert.doesNotMatch(testLine[0], /^An acceptance test\b/, "④'s evaluations are not acceptance tests (spec §4.4)");
+  // Choice (c): only a part we build runs in our account or yours, and only where we build one.
+  const c = SERVICES.deliveryChoices.find((d) => d.id === "platform-you-license");
+  assert.doesNotMatch(c.body, /\bAnything we build\b/);
+  assert.match(c.body, /\bWhere we build part of it\b/);
 });
 
 test("language rules: nothing held, keep-off, priced or overclaimed, and no 'agents' on the mid-market solutions", () => {

@@ -129,9 +129,11 @@ test("services data: the go/no-go gate is a decision you make, and every §4.5 i
     assert.doesNotMatch(s, /\b(?:balance|release|refund|credit)\b/i, `the gate carries a consequence: "${s}"`);
   }
   assert.ok(SERVICES.deRisk.some((d) => d.title === "Go/no-go gates" && /you decide whether to continue/.test(d.body)));
+  // WB-1: each line holds for all five solutions, so the test line names ⑤'s hours measure and the
+  // re-test line applies where there is a test set (tests/solutions-content.test.mjs holds the detail).
   const INCLUSIONS = [
-    /^An acceptance test on your own examples, with thresholds agreed before work starts/,
-    /^A re-test when the AI model changes\.$/,
+    /^A test on your own examples, with thresholds agreed before testing and every failure shown, or, for AI Switch-On, the hours saved/,
+    /^Where the work has a test set, a re-run of it when the AI model changes or may have changed: /,
     /^A one-page data note/,
     /^A runbook and a handover\.$/,
     /^The delivery choice/,
