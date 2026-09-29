@@ -1,8 +1,9 @@
 ---
 // The Industries hub (spec §8.4), body only: a Phase C route loads the nine industries and five
 // solutions, calls industriesHubView() and wraps this in BaseLayout. A hero; nine deep cards
-// (constraint hook, three flagship use cases with their solution numbers, three obligation chips
-// linking to their regulatory-map rows); the solution × industry matrix; the closing prompt.
+// (constraint hook, three flagship use cases with their solution numbers, each on-request one
+// labelled "On request", three obligation chips linking to their regulatory-map rows); the
+// solution × industry matrix; the closing prompt.
 // Every link comes from the view: a null href renders as plain text, never as a dead link.
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
@@ -31,7 +32,7 @@ const { view } = Astro.props;
             <p class="industry-card-hook">{card.hook}</p>
             <ul class="industry-card-uses">
               {card.useCases.map((useCase) => (
-                <li><span class="industry-card-number">{useCase.number}</span> <span>{useCase.name}</span></li>
+                <li><span class="industry-card-number">{useCase.number}</span> <span>{useCase.name}{useCase.onRequest && " "}{useCase.onRequest && <span class="industry-card-on-request">On request</span>}</span></li>
               ))}
             </ul>
             <ChipRow id={`industry-${card.id}-chips`} label="Designed around" chips={card.chips} />
@@ -137,6 +138,18 @@ const { view } = Astro.props;
     font-family: var(--font-mono);
     font-weight: 600;
     color: var(--color-acid-deep);
+  }
+  /* "On request" is text in an outlined tag, never a colour alone (spec §5, §6.6), as on the industry page. */
+  .industry-card-on-request {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    border: 1px solid currentColor;
+    border-radius: 4px;
   }
   .template-closing {
     max-width: 80rem;

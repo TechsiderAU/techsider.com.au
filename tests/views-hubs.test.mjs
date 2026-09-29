@@ -132,11 +132,17 @@ test("industriesHubView: nine deep cards in §5 order: hook, three use cases wit
     assert.equal(card.useCases.length, 3, `${card.id}: use cases`);
     assert.deepEqual(
       card.useCases,
-      data.flagshipUseCases.slice(0, 3).map((u) => ({ name: u.name, number: site.solutions.find((s) => s.id === u.solution).number })),
+      data.flagshipUseCases.slice(0, 3).map((u) => ({
+        name: u.name,
+        number: site.solutions.find((s) => s.id === u.solution).number,
+        onRequest: u.status === "on-request",
+      })),
     );
     assert.equal(card.chips.length, 3, `${card.id}: chips`);
     assert.deepEqual(card.chips.map((c) => c.label), data.obligationChips.slice(0, 3).map((c) => c.label));
   }
+  // An on-request use case says so (spec §5): fixture-industry's third one is on request.
+  assert.deepEqual(v.cards.find((c) => c.id === "fixture-industry").useCases.map((u) => u.onRequest), [false, false, true]);
   assert.deepEqual(v.matrix, matrixView(solutions, site));
   assert.deepEqual(v.closing, { command: "talk_to_us", args: "--about=<industry>", label: "Talk to us", href: site.contact() });
 });

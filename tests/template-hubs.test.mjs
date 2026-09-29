@@ -190,7 +190,16 @@ test("industries-hub: nine deep cards: heading link, hook, three numbered use ca
     assert.deepEqual(tagged(heading[0].inner, "a").map((a) => a.attrs.href), card.href ? [card.href] : []);
     assert.ok(text(el.inner).includes(card.hook), `${card.id}: no hook`);
     const uses = elements(withClass(el.inner, "industry-card-uses")[0].inner, (t) => t.name === "li");
-    assert.deepEqual(uses.map((li) => text(li.inner)), card.useCases.map((u) => `${u.number} ${u.name}`));
+    // inlineText, not text: the number, name and label must be separated by real spaces in the markup.
+    assert.deepEqual(
+      uses.map((li) => inlineText(li.inner)),
+      card.useCases.map((u) => (u.onRequest ? `${u.number} ${u.name} On request` : `${u.number} ${u.name}`)),
+    );
+    // "On request" is a text label, never a colour alone (spec §5, §6.6).
+    uses.forEach((li, k) => {
+      const labels = withClass(li.inner, "industry-card-on-request").map((s) => text(s.inner));
+      assert.deepEqual(labels, card.useCases[k].onRequest ? ["On request"] : [], `${card.id}: use case ${k + 1}`);
+    });
     const row = one(el.inner, "id", `industry-${card.id}-chips`);
     assert.ok(text(row.inner).startsWith("Designed around"), `${card.id}: the chip row isn't labelled "Designed around"`);
     const chips = elementsWith(row.inner, "data-bracket-chip");
@@ -203,6 +212,10 @@ test("industries-hub: nine deep cards: heading link, hook, three numbered use ca
   });
   // fixture-industry-9's page isn't shown: its card has no link at all.
   assert.equal(tagged(cards[industriesView.cards.findIndex((c) => c.id === "fixture-industry-9")].inner, "a").length, 0);
+  // fixture-industry's third flagship use case is on request, and its card says so in words.
+  assert.equal(industryFixtures["fixture-industry"].flagshipUseCases[2].status, "on-request");
+  const third = elements(withClass(one(section.inner, "data-industry-card", "fixture-industry").inner, "industry-card-uses")[0].inner, (t) => t.name === "li")[2];
+  assert.deepEqual(withClass(third.inner, "industry-card-on-request").map((s) => text(s.inner)), ["On request"]);
 });
 
 test("industries-hub: the chips of the rendered industry specimens land on their regulatory rows", () => {

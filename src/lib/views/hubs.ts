@@ -44,7 +44,8 @@ export interface IndustriesHubView {
     shortName: string;
     fullName: string;
     hook: string;
-    useCases: { name: string; number: string }[];
+    /** The first three flagship use cases; an on-request one is labelled "On request" (spec §5). */
+    useCases: { name: string; number: string; onRequest: boolean }[];
     chips: { label: string; href: string | null }[];
     href: string | null;
   }[];
@@ -138,7 +139,8 @@ export function solutionsHubView(input: { solutions: Record<string, SolutionData
 /**
  * The Industries hub (spec §8.4): one deep card per industry in spec §5 order (its constraint
  * hook, its first three flagship use cases with their solution numbers, and its first three
- * obligation chips, each linking to its row on the industry page), then the matrix.
+ * obligation chips, each linking to its row on the industry page), then the matrix. An
+ * on-request use case is flagged, so its card labels it "On request" (spec §5).
  */
 export function industriesHubView(input: {
   industries: Record<string, IndustryData>;
@@ -153,7 +155,11 @@ export function industriesHubView(input: {
       shortName: industry.shortName,
       fullName: industry.fullName,
       hook: data.constraintHook,
-      useCases: data.flagshipUseCases.slice(0, CARD_ITEMS).map((u) => ({ name: u.name, number: solutionLink(site, refId(u.solution)).number })),
+      useCases: data.flagshipUseCases.slice(0, CARD_ITEMS).map((u) => ({
+        name: u.name,
+        number: solutionLink(site, refId(u.solution)).number,
+        onRequest: u.status === "on-request",
+      })),
       chips: data.obligationChips.slice(0, CARD_ITEMS).map((chip) => ({
         label: chip.label,
         href: industry.href === null ? null : `${industry.href}#${rowAnchor(data, chip)}`,
