@@ -205,9 +205,12 @@ const allInsightsHref = site.page("insights").href;
     counter-increment: about-step;
     overflow-wrap: anywhere;
   }
-  /* The step number is decorative: the <ol> already conveys the order. */
+  /* The step number is decorative: the <ol> already conveys the order. Generated content is exposed
+     to assistive technology, so the number has empty alternative text ("/ """); the first
+     declaration is the fallback for browsers without that syntax. */
   .about-step::before {
     content: counter(about-step, decimal-leading-zero);
+    content: counter(about-step, decimal-leading-zero) / "";
     font-family: var(--font-mono);
     font-size: 0.875rem;
     color: var(--color-acid-deep);

@@ -170,7 +170,9 @@ const selects = [
     resize: vertical;
   }
   /* A native select ignores height and padding in WebKit, so it drops its native look and the
-     wrapper draws the arrow (a text glyph, aria-hidden by being generated content). */
+     wrapper draws the arrow: a decorative text glyph. Generated content is exposed to assistive
+     technology, so the arrow has empty alternative text ("/ """); the first declaration is the
+     fallback for browsers without that syntax. */
   .contact-select {
     position: relative;
     display: block;
@@ -181,6 +183,7 @@ const selects = [
   }
   .contact-select::after {
     content: "▾";
+    content: "▾" / "";
     position: absolute;
     top: 50%;
     right: 0.875rem;

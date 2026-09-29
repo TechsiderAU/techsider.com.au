@@ -203,3 +203,21 @@ test("a Trust FAQ answer opens to show its Part and as-at date", async ({ page }
   await expect(item.locator(".faq-meta")).toHaveText(/^Part [AB] · as at \d{1,2} [A-Z][a-z]+ \d{4}$/);
   expect((await axe(page).analyze()).violations).toEqual([]);
 });
+
+// Review finding T12-F3: the select arrows and the About step numbers are decorative generated
+// content, but CSS content is exposed to assistive technology unless it has empty alternative text.
+test("decorative generated content has empty alternative text: the select arrows and the About step numbers", async ({ page }) => {
+  await page.goto(CONTACT);
+  const selects = page.locator(".contact-select");
+  await expect(selects).toHaveCount(3);
+  for (const select of await selects.all()) {
+    expect(await select.evaluate((el) => getComputedStyle(el, "::after").content)).toBe('"▾" / ""');
+  }
+  expect(await form(page).ariaSnapshot()).not.toContain("▾");
+  await page.goto(`${BASE}/about/`);
+  const steps = page.locator("#how-we-work li");
+  await expect(steps).not.toHaveCount(0);
+  for (const step of await steps.all()) {
+    expect(await step.evaluate((el) => getComputedStyle(el, "::before").content)).toBe('counter(about-step, decimal-leading-zero) / ""');
+  }
+});
