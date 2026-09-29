@@ -6,11 +6,11 @@
 // the held rows and keep-off facts, and the CI checks. Run `npm run build` first.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
 import { pageWords, readDist, visibleText } from "./helpers.mjs";
-import { ROOT, decodeEntities, elements, elementsWith, startTags } from "../scripts/ci/lib.mjs";
+import { ROOT, decodeEntities, elements, elementsWith, normalizeQuotes, readFrontmatter, startTags } from "../scripts/ci/lib.mjs";
 import { runAll } from "../scripts/ci/run-all.mjs";
 import {
   JURISDICTION_SECTION, SECTION_ORDER, makeIndustrySchema, makeSolutionSchema, plainRef, regulatoryFile, traceFile,
@@ -267,8 +267,18 @@ test("CI checks 01, 02, 04, 06, 08 and 11 pass on dist/, and none reports these 
   const checks = ["01-slugs", "02-links", "04-banned-phrases", "06-provenance", "08-regulatory-kits", "11-pricing"];
   const { results } = await runAll({ root: ROOT, dist: join(ROOT, "dist"), mode: "report", checks });
   const mine = new RegExp(`(industries/|regulatory/|traces/)(${IDS.join("|")})`);
+  // From Phase C Task 8 each page's Related insights cards repeat a post's title and description.
+  // Check 04 already warns on those where the post itself and /insights/ show them, so a warning
+  // that quotes a card's text isn't about this page's own copy.
+  const dir = join(ROOT, "src/content/insights");
+  const cards = readdirSync(dir).filter((f) => f.endsWith(".md")).map((f) => readFrontmatter(join(dir, f)))
+    .map(({ title, description }) => normalizeQuotes(`${title} ${description}`).replace(/\s+/g, " "));
+  const fromCard = (w) => {
+    const quoted = w.match(/ in "…?(.*?)…?"$/)?.[1];
+    return quoted !== undefined && cards.some((c) => c.includes(quoted));
+  };
   for (const { id, errors, warnings } of results) {
     assert.deepEqual(errors, [], id);
-    assert.deepEqual(warnings.filter((w) => mine.test(w)), [], id);
+    assert.deepEqual(warnings.filter((w) => mine.test(w) && !fromCard(w)), [], id);
   }
 });

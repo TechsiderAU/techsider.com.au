@@ -14,21 +14,20 @@ test("no post or post footer offers a 'paid two-week discovery'", () => {
   }
 });
 
-test("every post body ends with its own 'talk to us' CTA", () => {
-  // Look only at the markdown body (PostLayout's Prose div, up to the layout's closing prompt
-  // block), so the layout's contextual CTA can't satisfy this for a post.
+test("no post body carries a CTA of its own: PostLayout's §10.1 closing prompt is the only one", () => {
+  // Phase 0 (spec §9.4) closed each migrated post with a neutral "talk to us" mailto in place of the
+  // paid-discovery line. From Phase C (blueprint correction WB-7) that line is gone, and PostLayout's
+  // contextual prompt closes every post. Look only at the markdown body (PostLayout's Prose div, up to
+  // the layout's closing prompt block), so the layout's own CTA doesn't count.
   for (const f of insightPages) {
     const html = readDist(f);
     const start = html.indexOf("data-prose");
     assert.ok(start >= 0, `${f}: Prose body not found`);
     const end = html.indexOf("data-post-closing", start);
     assert.ok(end > start, `${f}: no closing prompt after the post body`);
-    const paras = html.slice(start, end).match(/<p\b[^>]*>[\s\S]*?<\/p>/g) ?? [];
-    assert.match(
-      paras.at(-1) ?? "",
-      /<a[^>]*href="mailto:admin@techsider\.com\.au"[^>]*>\s*talk to us\s*<\/a>/i,
-      `${f}: the post's closing paragraph has no 'talk to us' mailto link`,
-    );
+    const body = html.slice(start, end);
+    assert.doesNotMatch(body, /href="(?:mailto:|\/contact\/)/, `${f}: the post body links to contact`);
+    assert.doesNotMatch(visibleText(body), /\btalk to us\b/i, `${f}: the post body has its own "talk to us"`);
   }
 });
 

@@ -4,7 +4,7 @@ description: "How we stop 'looked good in the demo' from reaching production —
 publishDate: 2026-06-09
 type: article
 industries: []
-solutions: []
+solutions: [ai-evaluation]
 draft: false
 ---
 
@@ -48,5 +48,3 @@ Every request in production emits a trace: the retrieved context, the assembled 
 ## What "day one" actually means
 
 The eval harness, the CI gate, and tracing go in during the first week of a build — not bolted on after the first incident. It feels slower for a fortnight and then it is permanently faster, because every subsequent change is safe to make. That is the whole point: discipline up front is what lets you move quickly later without breaking the things you can't afford to break.
-
-*This is how we build. If you want it on your own workload, [talk to us](mailto:admin@techsider.com.au).*

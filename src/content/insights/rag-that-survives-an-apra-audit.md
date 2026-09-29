@@ -3,8 +3,8 @@ title: "Shipping a RAG system that stands up to APRA scrutiny"
 description: "Grounding, inline citations, retrieval evals, and a refusal path — the engineering that makes a retrieval system answer to an auditor, not just a demo."
 publishDate: 2026-06-12
 type: article
-industries: [] # Phase C: [financial-services]
-solutions: []
+industries: [financial-services]
+solutions: [knowledge-assistant, ai-evaluation]
 draft: false
 ---
 
@@ -39,5 +39,3 @@ Every query emits a trace: the question, the retrieved chunks and their scores, 
 ## Sovereignty is part of the design, not a deployment note
 
 For an APRA-regulated workload, where the data lives and who can touch it is a design input, not an afterthought. The pipeline runs inside your boundary, your documents aren't sent offshore, and they aren't used to train anyone's model. The sovereignty story and the audit story are the same story: control you can demonstrate.
-
-*This is how we approach regulated retrieval. To bring it to your corpus, [talk to us](mailto:admin@techsider.com.au).*

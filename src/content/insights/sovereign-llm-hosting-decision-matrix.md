@@ -1,9 +1,9 @@
 ---
 title: "Self-hosted vs Bedrock vs Azure OpenAI for sovereign workloads in Australia"
-description: "A practical decision framework for where your model actually runs when data residency and sovereignty are hard constraints — and how to keep the choice reversible."
+description: "A practical decision framework for where your model runs when data residency and sovereignty are hard constraints — and how to keep the choice reversible."
 publishDate: 2026-06-14
 type: article
-industries: [] # Phase C: [government, financial-services]
+industries: [government, financial-services]
 solutions: []
 draft: false
 ---
@@ -37,5 +37,3 @@ Whatever you pick first, you will eventually want to change it — a new model l
 ## How we actually choose
 
 Not by a partner badge. We run a bake-off on your real workload — capability on your tasks, latency, cost, and residency — and let the evidence decide. Being vendor-neutral isn't a slogan; it's the only honest way to recommend an option when we don't earn a referral fee on any of them.
-
-*Choosing a sovereign AI stack for your workload? [Talk to us](mailto:admin@techsider.com.au).*

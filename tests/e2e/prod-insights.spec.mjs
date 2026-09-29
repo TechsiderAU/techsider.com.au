@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-// The restyled Insights pages in the production build (dist/, prod-chromium only). /contact/ is
-// live from Phase C Task 7, so the §10.1 closing CTA leads there, and the breadcrumb runs Home ›
-// Insights › the post.
+// The restyled Insights pages in the production build (dist/, prod-chromium only). From Phase C,
+// /contact/ is live (Task 7) and every post names a solution or an industry (Task 8), so a post's
+// §10.1 closing prompt names its first solution and leads to /contact/ with that interest. The
+// breadcrumb leads back through the pages that are live: Home and Insights.
 const POST = "/insights/evals-before-vibes/";
-const TALK = "/contact/";
 const WCAG = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
 
 for (const vp of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
@@ -19,12 +19,12 @@ for (const vp of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
   });
 }
 
-test("a post's closing prompt leads to /contact/, and its breadcrumb leads back to the index", async ({ page }) => {
+test("a post's closing prompt names its first solution and leads to /contact/, and its breadcrumb leads back to the index", async ({ page }) => {
   await page.goto(POST);
   const cta = page.locator("[data-post-closing]").getByRole("link");
   await expect(cta).toHaveCount(1);
-  await expect(cta).toHaveAccessibleName("Talk to us");
-  await expect(cta).toHaveAttribute("href", TALK);
+  await expect(cta).toHaveAccessibleName("Talk to us about AI Evaluation");
+  await expect(cta).toHaveAttribute("href", "/contact/?interest=ai-evaluation");
   const crumbs = page.getByRole("navigation", { name: "Breadcrumb" });
   await expect(crumbs.getByRole("link")).toHaveText(["Home", "Insights"]);
   await expect(crumbs.locator('[aria-current="page"]')).toHaveText(await page.locator("h1").innerText());

@@ -3,7 +3,8 @@
 // <dir> is relative to the repo root (default: dist). <ids> is a comma-separated list of check
 // numbers or ids ("03,04" or "03-anchors"); the default is every check. `npm run build:preview`
 // runs the preview profile (03, 04, 05, 06, 08, 10, 11) against dist-preview/, where the
-// components and templates render (08 for its built-HTML part: the Government jurisdiction sections).
+// components and templates render (08 for its built-HTML part: the Government jurisdiction sections,
+// and every built industry page's related insights).
 // Check 9 (type-check and pristine build) is `astro check` plus scripts/ci/build.mjs,
 // and check 12 (axe smoke) is the Playwright suite, so neither runs here.
 // VERIFY_MODE=gate turns the launch gates (07, 08) from warnings into errors; any

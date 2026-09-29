@@ -1,12 +1,19 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readDist, visibleText } from "./helpers.mjs";
+import { readFrontmatter } from "../scripts/ci/lib.mjs";
+import { INSIGHT_TYPE_LABEL } from "../src/content/schemas.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
+// The three posts migrated in Phase B2. Phase C Task 8 adds nine more of all three types, so the
+// index and Home tests count every published post, and a type tag may read any type's label.
 const POSTS = ["evals-before-vibes", "rag-that-survives-an-apra-audit", "sovereign-llm-hosting-decision-matrix"];
+const INSIGHTS_DIR = join(ROOT, "src/content/insights");
+const PUBLISHED = readdirSync(INSIGHTS_DIR).filter((f) => f.endsWith(".md") && readFrontmatter(join(INSIGHTS_DIR, f)).draft !== true);
+const TYPE = Object.values(INSIGHT_TYPE_LABEL).map((label) => label.toLowerCase()).join("|");
 const PILLARS = [
   "LLMOps & reliability", "RAG & retrieval", "Agentic systems",
   "Sovereignty & compliance", "Vendor-neutral platform", "How we deliver",
@@ -20,7 +27,7 @@ function assertNoPillar(text, where) {
 // never Mistral's uppercase, letter-spaced eyebrow. The brackets are hidden from screen readers.
 // The legacy Home section (src/components/Insights.astro, retired in Phase C) writes it as a
 // mono <p> holding the bracket spans.
-const TYPE_TAG = /<p class="([^"]*)"[^>]*>\s*<span aria-hidden="true"[^>]*>\[<\/span>article<span aria-hidden="true"[^>]*>\]<\/span>/g;
+const TYPE_TAG = new RegExp(`<p class="([^"]*)"[^>]*>\\s*<span aria-hidden="true"[^>]*>\\[<\\/span>(?:${TYPE})<span aria-hidden="true"[^>]*>\\]<\\/span>`, "g");
 function typeTags(html, where) {
   const tags = [...html.matchAll(TYPE_TAG)];
   for (const [, cls] of tags) {
@@ -32,7 +39,7 @@ function typeTags(html, where) {
 
 // The restyled insights pages (Phase B2 Task 13) write it as a BracketChip, which sets the mono
 // face in its own scoped style and never takes an uppercase or tracking class.
-const CHIP_TAG = /<span class="bracket-chip"[^>]*\bdata-bracket-chip\b[^>]*><span aria-hidden="true"[^>]*>\[<\/span>article<span aria-hidden="true"[^>]*>\]<\/span><\/span>/g;
+const CHIP_TAG = new RegExp(`<span class="bracket-chip"[^>]*\\bdata-bracket-chip\\b[^>]*><span aria-hidden="true"[^>]*>\\[<\\/span>(?:${TYPE})<span aria-hidden="true"[^>]*>\\]<\\/span><\\/span>`, "g");
 const chipTags = (html) => (html.match(CHIP_TAG) ?? []).length;
 
 test("the migrated posts carry a type and no pillar or sectors", () => {
@@ -66,10 +73,10 @@ test("each post shows its type as a bracket tag above the title, not the pillar"
 test("the insights index tags every post with its type, then its date and reading time", () => {
   const html = readDist("insights/index.html");
   const cards = html.split("data-insight-card").slice(1);
-  assert.equal(cards.length, POSTS.length, "one InsightCard per post");
-  for (const card of cards) assert.equal(chipTags(card.slice(0, card.indexOf("<h3"))), 1, "a card without its [article] chip above the title");
+  assert.equal(cards.length, PUBLISHED.length, "one InsightCard per published post");
+  for (const card of cards) assert.equal(chipTags(card.slice(0, card.indexOf("<h3"))), 1, "a card without its type chip above the title");
   const text = visibleText(html);
-  assert.equal(text.match(/\[ ?article ?\] · \d{1,2} [A-Z][a-z]+ \d{4} · \d+ min read/g)?.length, POSTS.length);
+  assert.equal(text.match(new RegExp(`\\[ ?(?:${TYPE}) ?\\] · \\d{1,2} [A-Z][a-z]+ \\d{4} · \\d+ min read`, "g"))?.length, PUBLISHED.length);
   assertNoPillar(text, "insights/index.html");
 });
 
@@ -79,7 +86,7 @@ test("the home Insights section tags its cards by type", () => {
   const end = html.indexOf("</section>", start);
   assert.ok(start >= 0 && end > start, "home #insights section not found");
   const section = html.slice(start, end);
-  assert.equal(typeTags(section, "home #insights"), POSTS.length);
+  assert.equal(typeTags(section, "home #insights"), Math.min(3, PUBLISHED.length), "the legacy Home section shows the newest three posts");
   assertNoPillar(visibleText(section), "home #insights");
 });
 

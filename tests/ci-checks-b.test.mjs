@@ -222,6 +222,36 @@ test("08: a built jurisdiction section without a regulatory row is a warning in 
   assert.deepEqual(await regulatoryKits({ ...t, mode: "gate" }), { ...clean08, errors: findings });
 });
 
+// The A7 part (Phase C Task 8, spec §8.5 block 9): every built industry page renders at least one
+// related insight card. The Industries hub, the gallery's specimens and every other page need none.
+// A launch gate like the rest of 08.
+const INDUSTRY_PAGE = "dist/industries/fixture-industry/index.html";
+
+test("08: built industry pages that each render an insight card pass; the hub, the gallery and other pages need none", async () => {
+  const t = tree({
+    [INDUSTRY_PAGE]: page(`<section id="insights"><ul><li><article class="insight-card" data-insight-card><h3><a href="/insights/fixture-post/">Fixture post</a></h3></article></li></ul></section>`),
+    "dist/industries/fixture-industry-2/index.html": page("<article data-insight-card>Fixture card one</article><article data-insight-card>Fixture card two</article>"),
+    "dist/industries/index.html": page("<p>Fixture industries hub without insight cards</p>"),
+    "dist/preview/templates/industry/index.html": page("<p>Fixture industry specimen without insight cards</p>"),
+    "dist/insights/fixture-post/index.html": page("<p>Fixture post</p>"),
+  });
+  assert.deepEqual(await regulatoryKits({ ...t, mode: "gate" }), clean08);
+});
+
+test("08: a built industry page with no insight card is a warning in report mode and an error in gate mode", async () => {
+  const t = tree({
+    [INDUSTRY_PAGE]: page(`
+      <section id="faq"><h2>Fixture questions</h2></section>
+      <!-- <article data-insight-card> -->
+      <script type="application/json">{ "html": "<article data-insight-card>" }</script>
+      <p>data-insight-card is only text here</p>`),
+    "dist/industries/fixture-industry-2/index.html": page("<article data-insight-card>Fixture card</article>"),
+  });
+  const finding = `${INDUSTRY_PAGE}: industry page renders no related insight ([data-insight-card]); spec §8.5 block 9 needs at least one`;
+  assert.deepEqual(await regulatoryKits({ ...t, mode: "report" }), { ...clean08, warnings: [finding] });
+  assert.deepEqual(await regulatoryKits({ ...t, mode: "gate" }), { ...clean08, errors: [finding] });
+});
+
 // ---------- 10: package status ----------
 
 test("10: launch tabs, listed on-request packages and a flagged onshore pillar pass", async () => {
@@ -450,7 +480,8 @@ test("--checks picks checks by number or full id, in CHECKS order, and refuses a
 // built pages must run there too: on the production dist/ they pass vacuously (no SampleReport,
 // no illustrative element, no package tab, no jurisdiction section). 01, 02 and 07 read sources
 // or the production nav and stay with the production build. 08 runs with both: its source part
-// reads src/ either way, and its built-HTML part needs the Government industry specimen.
+// reads src/ either way, and its built-HTML part needs the Government industry specimen and, from
+// Phase C, the real industry pages, which the preview build shows whether or not they are live.
 const PREVIEW_PROFILE = "--dist dist-preview --checks 03,04,05,06,08,10,11";
 
 test("npm run build:preview ends with the preview profile of the checks", () => {

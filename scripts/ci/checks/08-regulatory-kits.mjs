@@ -8,9 +8,13 @@
 // - In the built pages, every [data-jurisdiction-section] (the Government industry page's
 //   Commonwealth, State and Local sections, spec §8.5) holds at least one
 //   [data-regulatory-row], so no jurisdiction renders without its regulatory map.
+// - Every built industry page (industries/<id>/index.html, not the hub and not the gallery's
+//   specimens) renders at least one related insight card ([data-insight-card]): spec §8.5
+//   block 9 needs one at launch, and IndustryTemplate leaves #insights out when there are none
+//   (Phase B2 amendment A7).
 // Findings are errors with VERIFY_MODE=gate and warnings otherwise. With no files and no
-// built jurisdiction section yet there is nothing to check; a dist folder that doesn't
-// exist has no pages to scan.
+// built jurisdiction section or industry page yet there is nothing to check; a dist folder
+// that doesn't exist has no pages to scan.
 import { join, resolve } from "node:path";
 import { makeKitSchema, plainRef, regulatoryFile } from "../../../src/content/schemas.ts";
 import { elementsWith, htmlFiles, listFiles, loadYaml, readJson, readText, relPath, result, startTags } from "../lib.mjs";
@@ -96,6 +100,27 @@ function jurisdictionFindings(dist) {
   return out;
 }
 
+/** A built industry page: industries/<id>/index.html at the build root (the hub is industries/index.html). */
+const INDUSTRY_PAGE = /^industries\/[^/]+\/index\.html$/;
+
+/**
+ * Every built industry page that renders no related insight card, one finding each (spec §8.5
+ * block 9, amendment A7). Exported so a test can hold the real builds to it outside gate mode.
+ * @param {string} dist
+ * @returns {string[]}
+ */
+export function insightFindings(dist) {
+  const out = [];
+  const root = resolve(dist);
+  for (const file of htmlFiles(root)) {
+    const rel = relPath(root, file);
+    if (!INDUSTRY_PAGE.test(rel)) continue;
+    if (startTags(readText(file)).some((t) => "data-insight-card" in t.attrs)) continue;
+    out.push(`dist/${rel}: industry page renders no related insight ([data-insight-card]); spec §8.5 block 9 needs at least one`);
+  }
+  return out;
+}
+
 export async function run({ root, dist, mode }) {
   const r = result();
   const kind = mode === "gate" ? "error" : "warning";
@@ -121,6 +146,6 @@ export async function run({ root, dist, mode }) {
     }
     for (const msg of kitFindings(rel, data)) r.add(kind, msg);
   }
-  if (dist) for (const msg of jurisdictionFindings(dist)) r.add(kind, msg);
+  if (dist) for (const msg of [...jurisdictionFindings(dist), ...insightFindings(dist)]) r.add(kind, msg);
   return { name: NAME, errors: r.errors, warnings: r.warnings };
 }
