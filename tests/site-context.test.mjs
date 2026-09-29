@@ -72,9 +72,10 @@ test("production: planned pages get a null href, and contact links fall back to 
   for (const i of site.industries) assert.equal(i.href, expected(i.path), i.id);
   for (const [key, path] of Object.entries(PAGE_PATHS)) assert.equal(site.page(key).href, expected(path), key);
   for (const id of SOLUTION_IDS) assert.equal(site.demo(id), expected(`/demos/${id}/`), id);
-  // Today only Home and Insights are live, so a live page links to them and to nothing else, and
-  // every contact link is the email address. Phase C updates these pins as it puts pages live.
-  assert.deepEqual(Object.keys(PAGE_PATHS).filter((key) => site.page(key).href !== null), ["home", "insights"]);
+  // Home, Services, Evaluation Partner and Insights are the live pages with a key, so a live page
+  // links to them and to nothing else, and every contact link is the email address. Phase C
+  // updates these pins as it puts pages live.
+  assert.deepEqual(Object.keys(PAGE_PATHS).filter((key) => site.page(key).href !== null), ["home", "services", "evaluationPartner", "insights"]);
   assert.ok(site.solutions.every((s) => s.href === null), "a solution page is shown");
   assert.ok(site.industries.every((i) => i.href === null), "an industry page is shown");
   const mailto = `mailto:${SITE.email}`;

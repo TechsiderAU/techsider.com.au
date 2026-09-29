@@ -10,5 +10,9 @@
   { "file": "dist", "phrase": "the paid two-week discovery: a fixed-price, low-commitment way", "reason": "legacy section, removed in Phase C (Faq.astro on the Home page)" },
   { "file": "dist", "phrase": "a fixed-price two-week discovery", "reason": "legacy section, removed in Phase C (Faq.astro on the Home page)" },
   { "file": "dist", "phrase": "Who we work with", "reason": "legacy section, removed in Phase C (Industries.astro on the Home page)" },
-  { "file": "dist", "phrase": "No bench, no offshore handoff", "reason": "legacy section, removed in Phase C (WhyUs.astro on the Home page)" }
+  { "file": "dist", "phrase": "No bench, no offshore handoff", "reason": "legacy section, removed in Phase C (WhyUs.astro on the Home page)" },
+  { "file": "src/data/services.ts", "phrase": "CREST-accredited tester the client engages", "reason": "spec §3.5 seeded exception: names a third-party tester's accreditation, as spec §4.1 ④ words it (the Evaluation Partner FAQ)" },
+  { "file": "dist", "phrase": "CREST-accredited tester the client engages", "reason": "spec §3.5 seeded exception: names a third-party tester's accreditation (the Evaluation Partner FAQ)" },
+  { "file": "src/data/services.ts", "phrase": "not an assurance opinion", "reason": "spec §3.5 seeded exception: the ④ disclaimer (spec §4.1)" },
+  { "file": "dist", "phrase": "not an assurance opinion", "reason": "spec §3.5 seeded exception: the ④ disclaimer (the Evaluation Partner FAQ)" }
 ]

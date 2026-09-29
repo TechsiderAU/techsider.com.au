@@ -113,16 +113,24 @@ test("industry footer labels read 'AI for {short name}'", () => {
 });
 
 // Phase C puts pages live task by task; each task that flips a status adds its paths here.
-test("the live pages: Home, the 404 and Insights", () => {
-  assert.deepEqual(PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(), ["/", "/404", "/insights/"]);
+test("the live pages: Home, the 404, Services, Evaluation Partner and Insights", () => {
+  assert.deepEqual(
+    PAGES.filter((p) => p.status === "live").map((p) => p.path).sort(),
+    ["/", "/404", "/insights/", "/services/", "/services/evaluation-partner/"],
+  );
 });
 
 test("production nav shows only live pages; preview shows every group", () => {
   const prod = visibleGroups(false);
-  assert.deepEqual(prod.map((g) => g.id), ["resources"]);
-  assert.equal(prod[0].hubHref, null);
-  assert.deepEqual(prod[0].items.map((i) => i.path), ["/insights/"]);
-  assert.deepEqual(prod[0].anchors, []);
+  assert.deepEqual(prod.map((g) => g.id), ["services", "resources"]);
+  // Services is live with its hub, so its panel carries Evaluation Partner and the phase anchors.
+  assert.equal(prod[0].hubHref, "/services/");
+  assert.deepEqual(prod[0].items.map((i) => i.path), ["/services/evaluation-partner/"]);
+  assert.deepEqual(prod[0].anchors.map((a) => a.href), ["/services/#prove", "/services/#build", "/services/#run"]);
+  // Resources has no hub page yet: a plain label whose panel lists Insights.
+  assert.equal(prod[1].hubHref, null);
+  assert.deepEqual(prod[1].items.map((i) => i.path), ["/insights/"]);
+  assert.deepEqual(prod[1].anchors, []);
   const pre = visibleGroups(true);
   assert.deepEqual(pre.map((g) => g.id), ["solutions", "industries", "services", "resources", "about"]);
   assert.equal(pre[0].hubHref, "/solutions/");
@@ -136,8 +144,11 @@ test("CTAs fall back while their target page is unbuilt", () => {
 });
 
 test("no-JS links, footer and legal row only point at shown pages", () => {
-  assert.deepEqual(noJsLinks(false), [{ label: "Insights", href: "/insights/" }]);
-  assert.deepEqual(footerColumns(false), [{ title: "Resources", links: [{ label: "Insights", href: "/insights/" }] }]);
+  assert.deepEqual(noJsLinks(false), [{ label: "Services", href: "/services/" }, { label: "Insights", href: "/insights/" }]);
+  assert.deepEqual(footerColumns(false), [
+    { title: "Services", links: [{ label: "Services", href: "/services/" }, { label: "Evaluation Partner", href: "/services/evaluation-partner/" }] },
+    { title: "Resources", links: [{ label: "Insights", href: "/insights/" }] },
+  ]);
   assert.deepEqual(legalLinks(false), []);
   assert.equal(footerColumns(true).length, 5);
 });

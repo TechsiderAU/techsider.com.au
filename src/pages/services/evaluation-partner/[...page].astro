@@ -1,0 +1,20 @@
+---
+// /services/evaluation-partner/ (spec §8.6 "Evaluation Partner"): EvaluationPartnerTemplate over
+// the Services data (its evaluationPartner block and the shared independence policy), fed exactly
+// as the gallery's EvaluationPartnerSpecimen feeds it from servicesFixture.
+import type { GetStaticPaths } from "astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import EvaluationPartnerTemplate from "../../../templates/EvaluationPartnerTemplate.astro";
+import { isPreview } from "../../../data/nav";
+import { SERVICES } from "../../../data/services";
+import { pageAt, singletonPaths } from "../../../lib/pages";
+import { pageDescription, pageTitle } from "../../../lib/meta";
+import { siteContext } from "../../../lib/site";
+
+export const getStaticPaths = (() => singletonPaths("/services/evaluation-partner/")) satisfies GetStaticPaths;
+
+const page = pageAt("/services/evaluation-partner/");
+---
+<BaseLayout title={pageTitle(page)} description={pageDescription(page)}>
+  <EvaluationPartnerTemplate services={SERVICES} site={siteContext(isPreview())} />
+</BaseLayout>

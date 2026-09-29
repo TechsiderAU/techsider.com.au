@@ -136,10 +136,12 @@ const INDUSTRIES = [
   page("industries", "Legal & professional", "/industries/", "/industries/legal-and-professional/", "planned", "Legal & professional services"),
 ];
 
-const SERVICES_HUB = page("services", "Services", "/", "/services/", "planned", "Services",
-  "From first use case to a system your team runs.");
-const EVALUATION_PARTNER = page("services", "Evaluation Partner", "/services/", "/services/evaluation-partner/", "planned", "Evaluation Partner",
-  "An independent evaluation workstream under your existing prime or adviser.");
+const SERVICES_HUB = describe(page("services", "Services", "/", "/services/", "live", "Services",
+  "From first use case to a system your team runs."),
+  "Prove it on your own files, build one package, then run it with the exit built in. Our services, where each buyer starts, where it runs, and our independence.");
+const EVALUATION_PARTNER = describe(page("services", "Evaluation Partner", "/services/", "/services/evaluation-partner/", "live", "Evaluation Partner",
+  "An independent evaluation workstream under your existing prime or adviser."),
+  "Independent AI evaluation under your contract, for primes, internal-audit co-source firms, law firms and SIs, with findings rated to your client's risk matrix.");
 
 const RESOURCES_HUB = page("resources", "Resources", "/", "/resources/", "planned");
 const INSIGHTS = describe(page("resources", "Insights", "/", "/insights/", "live", "Insights", "Field notes on shipping AI in regulated work."),

@@ -188,6 +188,17 @@ test("services: every service card shows its name, what it is, who it's for and 
   }
 });
 
+test("services: the Evaluation Partner card links to its page, and every other service card is plain", () => {
+  const list = byId(template(SERVICES, "services"), "services-list").outer;
+  const linked = elementsWith(list, "data-service").filter((c) => links(c.inner).length > 0);
+  const partner = servicesFixture.services.find((s) => s.id === "evaluation-partner");
+  assert.ok(partner, "servicesFixture has no evaluation-partner service");
+  assert.deepEqual(
+    linked.map((c) => [c.attrs["data-service"], links(c.inner)]),
+    [["evaluation-partner", [[partner.name, fixtureSite.page("evaluationPartner").href]]]],
+  );
+});
+
 test("services: #entry is a table of entry offers: Buyer, Start with, Then", () => {
   const entry = byId(template(SERVICES, "services"), "entry").outer;
   const [table] = elements(entry, (tag) => tag.name === "table");

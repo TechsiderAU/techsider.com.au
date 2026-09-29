@@ -8,6 +8,8 @@
 // - homeFixture's FAQ asks HOME_TRUST_QUESTION verbatim, as homeData requires; it is the one
 //   string here that is fixed spec copy rather than fixture text.
 // - Services team copy names functions only: no names and no numbers (spec §8.6).
+// - servicesFixture's "evaluation-partner" service carries the one id ServicesTemplate links to a
+//   page of its own, so the gallery shows a linked service card beside the plain ones.
 import type {
   AboutData, ContactData, DocumentData, HomeData, PositioningData, ServicesData, TrustData,
 } from "../content/page-schemas.ts";
@@ -55,6 +57,7 @@ export const servicesFixture: ServicesData = {
     { id: "fixture-fit-call", name: "Fixture Fit Call", what: "Fixture what: a short fixture call about one problem.", forWhom: "Fixture for: every fixture buyer", entry: "entry" },
     { id: "fixture-build", name: "Fixture Fixed-Scope Build", what: "Fixture what: one fixture package, built and handed over.", forWhom: "Fixture for: fixture mid-market teams", entry: "after-audit-or-trial" },
     { id: "fixture-program", name: "Fixture Enterprise Program", what: "Fixture what: three fixture phases, from proof to handover.", forWhom: "Fixture for: fixture agencies", entry: "secondary" },
+    { id: "evaluation-partner", name: "Fixture Evaluation Partner", what: "Fixture what: a fixture evaluation workstream under your fixture prime.", forWhom: "Fixture for: fixture primes", entry: "entry" },
     { id: "fixture-run", name: "Fixture Run", what: "Fixture what: the fixture system run and re-tested.", forWhom: "Fixture for: fixture build clients", entry: "not-entry" },
   ],
   entryOffers: [

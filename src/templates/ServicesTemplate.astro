@@ -6,7 +6,9 @@
 // - #method: ProcessSteps. Its phase sections #prove, #build and #run are the targets of the nav's
 //   /services/#prove, #build and #run anchors (src/data/nav.ts).
 // - #services-list: one card per service, with its entry label (spec §4.2 "Entry?"); a service
-//   that is not an entry point shows no label.
+//   that is not an entry point shows no label. A service with a page of its own (SERVICE_PAGE)
+//   links to it while that page is shown: the Evaluation Partner card is the /services/ hub's link
+//   to its child page, which CI check 02 requires of a built hub.
 // - #team names functions only: no names and no headcount (spec §8.6 block 5, D14/D15).
 //   servicesData.team has no field that could carry either.
 // - #where-it-runs is Home's block: the delivery choices lettered (a) (b) (c) by DELIVERY_LETTER,
@@ -22,7 +24,7 @@ import FaqList from "../components/ui/FaqList.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
 import type { ServicesData } from "../content/page-schemas";
 import { DELIVERY_LETTER, SERVICES_H1 } from "../lib/fixed-copy";
-import type { SiteContext } from "../lib/site";
+import type { PageKey, SiteContext } from "../lib/site";
 
 interface Props {
   services: ServicesData;
@@ -38,6 +40,13 @@ const ENTRY_LABEL: Record<Entry, string | null> = {
   "after-audit-or-trial": "After an Audit or Trial",
   secondary: "Secondary",
   "not-entry": null,
+};
+
+// The services that have a page of their own, by service id. Every other card is plain text.
+const SERVICE_PAGE: Partial<Record<string, PageKey>> = { "evaluation-partner": "evaluationPartner" };
+const serviceHref = (id: string): string | null => {
+  const key = SERVICE_PAGE[id];
+  return key === undefined ? null : site.page(key).href;
 };
 
 // Spec §10.1: the Fit Call CTA preselects "Not sure yet"; the method link shows only once its page does.
@@ -68,7 +77,7 @@ const choices = services.deliveryChoices
     <ul class="services-cards">
       {services.services.map((s) => (
         <li class="services-card" data-service={s.id} data-entry={s.entry}>
-          <LinkCard title={s.name} href={null} eyebrow={ENTRY_LABEL[s.entry] ?? undefined} body={s.what} meta={`For: ${s.forWhom}`} />
+          <LinkCard title={s.name} href={serviceHref(s.id)} eyebrow={ENTRY_LABEL[s.entry] ?? undefined} body={s.what} meta={`For: ${s.forWhom}`} />
         </li>
       ))}
     </ul>
