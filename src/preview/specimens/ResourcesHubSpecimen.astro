@@ -1,0 +1,8 @@
+---
+// Preview specimen for /preview/templates/resources-hub/: the Resources hub over the gallery's
+// SiteContext, so every resource card links to its gallery page (Insights to the live index).
+// Fixtures are imported statically (see src/preview/gallery.astro).
+import ResourcesHubTemplate from "../../templates/ResourcesHubTemplate.astro";
+import { fixtureSite } from "../../fixtures/index.ts";
+---
+<ResourcesHubTemplate site={fixtureSite} />

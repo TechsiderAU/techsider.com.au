@@ -1,0 +1,65 @@
+---
+// Resources hub (spec §7.1 /resources/, §8.7). Body only: a Phase C route passes
+// siteContext(isPreview()) and renders this inside BaseLayout. One LinkCard per free resource, in
+// nav order, with its nav label and one-liner; a resource whose page isn't shown yet is a card
+// with no link. The terminal prompt closes the page.
+import PageHero from "../components/page/PageHero.astro";
+import PageSection from "../components/page/PageSection.astro";
+import LinkCard from "../components/page/LinkCard.astro";
+import PromptBlock from "../components/ui/PromptBlock.astro";
+import { crumbs, type SiteContext } from "../lib/site";
+
+interface Props {
+  site: SiteContext;
+}
+
+const { site } = Astro.props;
+---
+<div class="template" data-template="resources-hub">
+  <PageHero title="Resources." highlight="Resources" breadcrumb={crumbs(site, ["resources"])} />
+
+  <PageSection id="resources" title="Free resources">
+    <ul class="resources-grid">
+      {site.resources.map((r) => (
+        <li data-resource={r.key}>
+          <LinkCard title={r.label} body={r.oneLiner} href={r.href} />
+        </li>
+      ))}
+    </ul>
+  </PageSection>
+
+  <section id="contact" class="resources-closing">
+    <PromptBlock command="talk_to_us" label="Talk to us" href={site.contact()} />
+  </section>
+</div>
+
+<style>
+  .resources-grid {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 48rem) {
+    .resources-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .resources-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .resources-grid > li {
+    display: grid;
+    min-width: 0;
+  }
+  /* The closing prompt sits inside the content width on carbon, a normal section's space above
+     the footer: never a full-width band (spec §6.4). */
+  .resources-closing {
+    padding: 4rem 1rem;
+  }
+  @media (min-width: 64rem) {
+    .resources-closing {
+      padding-block: 6rem;
+    }
+  }
+</style>

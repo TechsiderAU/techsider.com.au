@@ -1,0 +1,15 @@
+---
+// Preview specimen for /preview/templates/safe-use-kits/: both kit fixtures, one reviewed by a
+// practitioner (note and download link) and one still pending (pending note, no download).
+// Fixtures are imported statically (see src/preview/gallery.astro).
+import SafeUseKitsTemplate from "../../templates/SafeUseKitsTemplate.astro";
+import {
+  fixtureSite, kitFixture, KIT_FIXTURE_ID, pendingKitFixture, PENDING_KIT_FIXTURE_ID,
+} from "../../fixtures/index.ts";
+
+const kits = [
+  { id: KIT_FIXTURE_ID, data: kitFixture },
+  { id: PENDING_KIT_FIXTURE_ID, data: pendingKitFixture },
+];
+---
+<SafeUseKitsTemplate kits={kits} site={fixtureSite} />

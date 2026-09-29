@@ -1,0 +1,35 @@
+---
+// Preview specimen for /preview/templates/pay-for/. The checker itself is Phase D, so its slot
+// holds a placeholder; the no-JS fallback slot holds a static table of fixture vendor facts.
+// Fixtures are imported statically (see src/preview/gallery.astro).
+import PayForTemplate from "../../templates/PayForTemplate.astro";
+import DataTable from "../../components/ui/DataTable.astro";
+import { fixtureSite } from "../../fixtures/index.ts";
+
+const VENDOR_FACTS_AS_AT = new Date("2026-09-01T00:00:00Z");
+const columns = [
+  { key: "software", label: "Software" },
+  { key: "feature", label: "AI feature" },
+  { key: "processed", label: "Where it's processed" },
+];
+const rows = [
+  { software: "Fixture Suite Alpha", feature: "Fixture drafting assistant", processed: "Fixture region one" },
+  { software: "Fixture Suite Beta", feature: "Fixture meeting summaries", processed: "Fixture region two" },
+  { software: "Fixture Suite Gamma", feature: "Fixture document search", processed: "Fixture region one" },
+];
+---
+<PayForTemplate site={fixtureSite} asAt={VENDOR_FACTS_AS_AT}>
+  <p slot="checker" class="specimen-slot" data-checker-placeholder>Fixture checker slot</p>
+  <DataTable slot="fallback" caption="Fixture vendor AI features" columns={columns} rows={rows} rowHeader="software" />
+</PayForTemplate>
+
+<style>
+  .specimen-slot {
+    margin: 0;
+    padding: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    border: 1px dashed var(--color-muted-dark);
+    border-radius: 8px;
+  }
+</style>

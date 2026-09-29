@@ -1,0 +1,30 @@
+---
+// Preview specimen for /preview/templates/demo-report/: the ④-like demo, with the fixture sample
+// report in its #sample-report block. Its transcript slot holds the fixture trace (the static
+// record of a run); the engine slot (Phase D) holds a placeholder.
+// Fixtures are imported statically (see src/preview/gallery.astro).
+import DemoTemplate from "../../templates/DemoTemplate.astro";
+import TracePanel from "../../components/ui/TracePanel.astro";
+import { fixtureSite, sampleReportFixture, traceFixture } from "../../fixtures/index.ts";
+import { solutionLink } from "../../lib/site";
+---
+<DemoTemplate
+  solution={solutionLink(fixtureSite, "fixture-solution-4")}
+  demo={{ title: "Fixture evaluation report demo", kind: "report" }}
+  report={sampleReportFixture}
+  site={fixtureSite}
+>
+  <p slot="engine" class="specimen-slot" data-engine-placeholder>Fixture engine slot</p>
+  <TracePanel slot="transcript" trace={traceFixture} />
+</DemoTemplate>
+
+<style>
+  .specimen-slot {
+    margin: 0;
+    padding: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    border: 1px dashed var(--color-muted);
+    border-radius: 8px;
+  }
+</style>

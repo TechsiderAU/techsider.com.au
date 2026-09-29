@@ -1,0 +1,82 @@
+---
+// The frame every canned demo renders in (spec §8.8, §9.1). The badge sits first and stays
+// visible for as long as the demo is on screen; no prop or slot can remove it. Two named slots:
+// - `engine`: the Phase D replay engine, with its Pause/Resume and "Skip to result" controls;
+// - `transcript`: the static transcript, plain HTML that reads in full without JavaScript. Every
+//   demo has one (spec §8.8), so a frame without it fails the build.
+// `provenance` is the demo's declared provenance (spec §9.3). It sets data-provenance on the
+// figure, and an illustrative demo shows a visible "Illustrative data" label next to the badge,
+// so CI check 06(c) covers demos as it covers traces and sample reports.
+// The figcaption names the demo. The frame is a carbon island (bg-carbon): inside a bone section
+// it keeps carbon-surface colours and the lime focus ring.
+interface Props {
+  title: string;
+  badge: string;
+  provenance?: "measured" | "illustrative";
+}
+
+const { title, badge, provenance } = Astro.props;
+if (!Astro.slots.has("transcript")) {
+  throw new Error(`DemoFrame "${title}": fill the transcript slot. Every demo has a static no-JS transcript (spec §8.8).`);
+}
+const hasEngine = Astro.slots.has("engine");
+---
+<figure class="demo-frame bg-carbon" data-demo-frame data-provenance={provenance}>
+  <p class="demo-badge" data-demo-badge>{badge}</p>
+  {provenance === "illustrative" && <p class="demo-provenance" data-provenance-label>Illustrative data</p>}
+  {hasEngine && <div class="demo-engine" data-demo-engine><slot name="engine" /></div>}
+  <div class="demo-transcript" data-demo-transcript><slot name="transcript" /></div>
+  <figcaption class="demo-caption">{title}</figcaption>
+</figure>
+
+<style>
+  /* A wrapping row: the badge and the provenance label share the first line when they fit; the
+     engine, the transcript and the caption each take a full line below them. */
+  .demo-frame {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1.25rem 0.75rem;
+    min-width: 0;
+    margin: 0;
+    padding: 1.25rem 1rem;
+    color: var(--color-bone);
+    border: 1px solid var(--color-graphite);
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 40rem) {
+    .demo-frame {
+      padding: 1.5rem;
+    }
+  }
+  /* The badge and the label are text in an outlined tag, never a colour alone (spec §6.6). */
+  .demo-badge,
+  .demo-provenance {
+    max-width: 100%;
+    margin: 0;
+    padding: 0.25rem 0.625rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    border-radius: 4px;
+  }
+  .demo-badge {
+    border: 1px solid var(--color-acid);
+  }
+  .demo-provenance {
+    color: var(--color-muted);
+    border: 1px solid var(--color-graphite);
+  }
+  .demo-engine,
+  .demo-transcript,
+  .demo-caption {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .demo-caption {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+</style>

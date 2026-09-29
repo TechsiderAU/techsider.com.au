@@ -1,0 +1,18 @@
+---
+// Preview specimen for /preview/templates/demos-hub/: one fixture demo per fixture solution, one
+// of each kind, so the ⑤ checker card shows the checker badge and the others the replay badge.
+// Fixtures are imported statically (see src/preview/gallery.astro).
+import DemosHubTemplate from "../../templates/DemosHubTemplate.astro";
+import type { DemoKind } from "../../content/schemas";
+import { demoFixture, fixtureSite } from "../../fixtures/index.ts";
+import { refId } from "../../lib/site";
+
+const demos: { solutionId: string; title: string; kind: DemoKind }[] = [
+  { solutionId: refId(demoFixture.solution), title: demoFixture.title, kind: demoFixture.kind },
+  { solutionId: "fixture-solution-2", title: "Fixture assistant demo", kind: "assistant" },
+  { solutionId: "fixture-solution-3", title: "Fixture inbox demo", kind: "inbox" },
+  { solutionId: "fixture-solution-4", title: "Fixture evaluation report demo", kind: "report" },
+  { solutionId: "fixture-solution-5", title: "Fixture checker demo", kind: "checker" },
+];
+---
+<DemosHubTemplate demos={demos} site={fixtureSite} />

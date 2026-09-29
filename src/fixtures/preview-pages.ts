@@ -16,7 +16,9 @@ export type PreviewKind =
   | "industry" | "industry-government"
   | "solutions-hub" | "industries-hub"
   | "home" | "home-stale-insights"
-  | "services" | "evaluation-partner";
+  | "services" | "evaluation-partner"
+  | "resources-hub" | "safe-use-kits" | "pay-for" | "evaluation-method"
+  | "demos-hub" | "demo" | "demo-report";
 
 export interface PreviewPage {
   /** "" is the gallery index at /preview/. Template pages use `templates/<kind>`. */
@@ -43,6 +45,13 @@ export const PREVIEW_PAGES: PreviewPage[] = [
   { slug: "templates/home-stale-insights", title: "Fixture home page, stale insights", kind: "home-stale-insights", group: "templates" },
   { slug: "templates/services", title: "Fixture services page", kind: "services", group: "templates" },
   { slug: "templates/evaluation-partner", title: "Fixture Evaluation Partner page", kind: "evaluation-partner", group: "templates" },
+  { slug: "templates/resources-hub", title: "Fixture resources hub", kind: "resources-hub", group: "templates" },
+  { slug: "templates/safe-use-kits", title: "Fixture safe-use kits page", kind: "safe-use-kits", group: "templates" },
+  { slug: "templates/pay-for", title: "Fixture what-you-already-pay-for page", kind: "pay-for", group: "templates" },
+  { slug: "templates/evaluation-method", title: "Fixture evaluation method page", kind: "evaluation-method", group: "templates" },
+  { slug: "templates/demos-hub", title: "Fixture demos hub", kind: "demos-hub", group: "templates" },
+  { slug: "templates/demo", title: "Fixture demo page", kind: "demo", group: "templates" },
+  { slug: "templates/demo-report", title: "Fixture report demo page", kind: "demo-report", group: "templates" },
 ];
 
 export function previewPath(page: PreviewPage): string {

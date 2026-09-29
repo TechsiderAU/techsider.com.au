@@ -1,0 +1,190 @@
+---
+// Safe-Use Kits (spec §8.7). Body only: a Phase C route loads the kits collection, passes
+// { id, data } for each kit and siteContext(isPreview()), and renders this inside BaseLayout.
+// Every kit shows its title, industry, summary, contents and regulatory source. Then its review
+// state, which no prop can skip:
+// - reviewed (lawyerReviewedAt set): the dated review note and the download link;
+// - pending (lawyerReviewedAt null): the pending note and no download link. A pending kit's
+//   download path never reaches the page, because downloads are published only after review.
+// Industries without a kit are sent to ⑤ (site.solutions[4]).
+import PageHero from "../components/page/PageHero.astro";
+import PageSection from "../components/page/PageSection.astro";
+import LinkCard from "../components/page/LinkCard.astro";
+import Notice from "../components/page/Notice.astro";
+import BracketChip from "../components/ui/BracketChip.astro";
+import PromptBlock from "../components/ui/PromptBlock.astro";
+import type { KitData } from "../content/schemas";
+import { KIT_PENDING_NOTE, kitReviewedNote } from "../lib/fixed-copy";
+import { crumbs, industryLink, refId, type SiteContext } from "../lib/site";
+
+interface Props {
+  kits: { id: string; data: KitData }[];
+  site: SiteContext;
+}
+
+const { kits, site } = Astro.props;
+const page = site.page("safeUseKits");
+const switchOn = site.solutions[4];
+
+// Content dates are UTC midnights ("2026-09-15"), so they print in UTC: "15 September 2026".
+const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+
+// "/downloads/x.pdf" → "PDF": the schema allows only .pdf and .docx downloads.
+const fileType = (path: string) => path.slice(path.lastIndexOf(".") + 1).toUpperCase();
+
+const views = kits.map(({ id, data }) => {
+  const industry = industryLink(site, refId(data.industry));
+  const reviewedAt = data.lawyerReviewedAt;
+  return {
+    anchor: `kit-${id}`,
+    title: data.title,
+    industry: { label: industry.shortName, href: industry.href },
+    summary: data.summary,
+    contents: data.contents,
+    source: data.source,
+    review: reviewedAt === null
+      ? { status: "pending" as const, note: KIT_PENDING_NOTE, download: null }
+      : {
+          status: "reviewed" as const,
+          note: kitReviewedNote(formatDate(reviewedAt)),
+          download: { href: data.download, label: `Download ${data.title} (${fileType(data.download)})` },
+        },
+  };
+});
+---
+<div class="template" data-template="safe-use-kits">
+  <PageHero
+    title={`${page.label}.`}
+    eyebrow="resources"
+    sub={page.oneLiner}
+    breadcrumb={crumbs(site, ["resources", "safeUseKits"])}
+  />
+
+  <PageSection id="kits" title="The kits">
+    <ul class="kits-list">
+      {views.map((kit) => (
+        <li>
+          <article id={kit.anchor} class="kit" data-kit data-kit-status={kit.review.status}>
+            <h3 class="kit-title">{kit.title}</h3>
+            <p class="kit-industry"><BracketChip label={kit.industry.label} href={kit.industry.href ?? undefined} /></p>
+            <p class="kit-summary">{kit.summary}</p>
+            <ul class="kit-contents">
+              {kit.contents.map((item) => <li>{item}</li>)}
+            </ul>
+            <p class="kit-source" data-kit-source>
+              Source: <a href={kit.source.url} class="kit-link">{kit.source.label}</a>, as at <time datetime={isoDate(kit.source.asAt)}>{formatDate(kit.source.asAt)}</time>
+            </p>
+            <Notice text={kit.review.note} />
+            {kit.review.download && (
+              <p class="kit-download">
+                <a href={kit.review.download.href} class="kit-link" data-kit-download download>{kit.review.download.label}</a>
+              </p>
+            )}
+          </article>
+        </li>
+      ))}
+    </ul>
+  </PageSection>
+
+  <PageSection id="no-kit" title="No kit for your industry?">
+    <LinkCard
+      title={switchOn.fullName}
+      eyebrow={`solution ${switchOn.number}`}
+      body={switchOn.oneLiner}
+      href={switchOn.href}
+    />
+  </PageSection>
+
+  <section id="contact" class="kits-closing">
+    <PromptBlock
+      command="talk_to_us"
+      args={`--about=${switchOn.id}`}
+      label={`Talk to us about ${switchOn.shortName}`}
+      href={site.contact({ interest: switchOn.id })}
+    />
+  </section>
+</div>
+
+<style>
+  .kits-list {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 64rem) {
+    .kits-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .kits-list > li {
+    display: grid;
+    min-width: 0;
+  }
+  .kit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    min-width: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--color-bone-line);
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+  }
+  .kit-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .kit-industry,
+  .kit-summary,
+  .kit-source,
+  .kit-download {
+    margin: 0;
+  }
+  .kit-summary {
+    line-height: 1.6;
+  }
+  .kit-contents {
+    padding-left: 1.25rem;
+    list-style: square;
+    line-height: 1.6;
+  }
+  .kit-source {
+    font-size: 0.9375rem;
+    color: var(--color-muted-dark);
+  }
+  .kit-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-carbon);
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted-dark);
+    text-underline-offset: 3px;
+  }
+  .kit-link:hover {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+  .kit-download .kit-link {
+    font-weight: 600;
+  }
+  /* The closing prompt sits inside the content width on carbon, a normal section's space above
+     the footer: never a full-width band (spec §6.4). */
+  .kits-closing {
+    padding: 4rem 1rem;
+  }
+  @media (min-width: 64rem) {
+    .kits-closing {
+      padding-block: 6rem;
+    }
+  }
+  /* "Talk to us about {solution}" is longer than .btn's one line allows at 320px (global.css
+     sets white-space: nowrap): let it wrap. */
+  [data-template="safe-use-kits"] :global(.btn) {
+    padding-block: 0.5rem;
+    white-space: normal;
+    text-align: center;
+  }
+</style>

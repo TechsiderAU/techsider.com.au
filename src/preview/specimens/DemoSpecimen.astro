@@ -1,0 +1,42 @@
+---
+// Preview specimen for /preview/templates/demo/: the register demo fixture. Its transcript slot
+// holds the static register as a DataTable, which reads in full without JavaScript; the engine
+// slot (Phase D) holds a placeholder. The frame carries the fixture's declared provenance
+// ("illustrative"), so it shows the "Illustrative data" label. The demo schema types `data` as
+// unknown (each engine reads its own shape), so the register rows are cast here, in the specimen
+// only.
+// Fixtures are imported statically (see src/preview/gallery.astro).
+import DemoTemplate from "../../templates/DemoTemplate.astro";
+import DataTable from "../../components/ui/DataTable.astro";
+import { demoFixture, fixtureSite } from "../../fixtures/index.ts";
+import { refId, solutionLink } from "../../lib/site";
+
+const register = demoFixture.data as { caption: string; rows: { document: string; field: string; value: string; status: string }[] };
+const columns = [
+  { key: "document", label: "Document" },
+  { key: "field", label: "Field" },
+  { key: "value", label: "Value" },
+  { key: "status", label: "Status" },
+];
+const rows = register.rows.map((r) => ({ ...r }));
+---
+<DemoTemplate
+  solution={solutionLink(fixtureSite, refId(demoFixture.solution))}
+  demo={{ title: demoFixture.title, kind: demoFixture.kind, provenance: demoFixture.provenance }}
+  report={null}
+  site={fixtureSite}
+>
+  <p slot="engine" class="specimen-slot" data-engine-placeholder>Fixture engine slot</p>
+  <DataTable slot="transcript" caption={register.caption} columns={columns} rows={rows} rowHeader="document" />
+</DemoTemplate>
+
+<style>
+  .specimen-slot {
+    margin: 0;
+    padding: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    border: 1px dashed var(--color-muted);
+    border-radius: 8px;
+  }
+</style>

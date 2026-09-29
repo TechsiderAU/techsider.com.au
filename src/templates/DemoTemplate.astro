@@ -1,0 +1,81 @@
+---
+// One demo page (spec §8.8, §9.1). Body only: a Phase C route loads the solution's demo entry,
+// fills the slots and renders this inside BaseLayout. The ⑤ route also sets the canonical URL to
+// /resources/what-you-already-pay-for/, which owns the checker (spec §8.8).
+// - The hero holds the DemoFrame, badged by kind (checker → CHECKER_BADGE, else DEMO_BADGE) and
+//   marked with the demo's provenance when the route passes it (an illustrative demo is labelled).
+//   Its named slots pass straight through: `engine` (Phase D) and `transcript` (the no-JS static
+//   transcript, which DemoFrame requires).
+// - #sample-report: only when `report` is set (the ④ demo), with SampleReport's fixed caption.
+// - #next: the demo CTA, the contact prompt for this solution and a link to the solution page.
+import PageHero from "../components/page/PageHero.astro";
+import PageSection from "../components/page/PageSection.astro";
+import LinkCard from "../components/page/LinkCard.astro";
+import DemoFrame from "../components/page/DemoFrame.astro";
+import PromptBlock from "../components/ui/PromptBlock.astro";
+import SampleReport from "../components/ui/SampleReport.astro";
+import type { DemoData, DemoKind, SampleReportData } from "../content/schemas";
+import { CHECKER_BADGE, DEMO_BADGE, DEMO_CTA } from "../lib/fixed-copy";
+import { crumbs, type SiteContext, type SolutionLink } from "../lib/site";
+
+interface Props {
+  solution: SolutionLink;
+  demo: { title: string; kind: DemoKind; provenance?: DemoData["provenance"] };
+  report: SampleReportData | null;
+  site: SiteContext;
+}
+
+const { solution, demo, report, site } = Astro.props;
+const here = site.demo(solution.id);
+if (here === null) {
+  throw new Error(`DemoTemplate: the ${solution.id} demo page isn't shown in this build, so it has nothing to render`);
+}
+const badge = demo.kind === "checker" ? CHECKER_BADGE : DEMO_BADGE;
+const hasEngine = Astro.slots.has("engine");
+const hasTranscript = Astro.slots.has("transcript");
+---
+<div class="template" data-template="demo">
+  <PageHero
+    title={demo.title}
+    display={false}
+    eyebrow={`demo ${solution.number}`}
+    sub={solution.oneLiner}
+    breadcrumb={crumbs(site, ["demos", { label: solution.shortName, path: here }])}
+  >
+    <DemoFrame title={demo.title} badge={badge} provenance={demo.provenance}>
+      {hasEngine && <slot name="engine" slot="engine" />}
+      {hasTranscript && <slot name="transcript" slot="transcript" />}
+    </DemoFrame>
+  </PageHero>
+
+  {report && (
+    <PageSection id="sample-report" title="The sample report">
+      <SampleReport report={report} />
+    </PageSection>
+  )}
+
+  <PageSection id="next" title={DEMO_CTA} surface="carbon" width="prose">
+    <PromptBlock
+      command="talk_to_us"
+      args={`--about=${solution.id}`}
+      label={`Talk to us about ${solution.shortName}`}
+      href={site.contact({ interest: solution.id })}
+    />
+    <div class="demo-solution">
+      <LinkCard title={solution.fullName} eyebrow={`solution ${solution.number}`} href={solution.href} />
+    </div>
+  </PageSection>
+</div>
+
+<style>
+  .demo-solution {
+    display: grid;
+  }
+  /* "Talk to us about {solution}" is longer than .btn's one line allows at 320px (global.css
+     sets white-space: nowrap): let it wrap. */
+  [data-template="demo"] :global(.btn) {
+    padding-block: 0.5rem;
+    white-space: normal;
+    text-align: center;
+  }
+</style>

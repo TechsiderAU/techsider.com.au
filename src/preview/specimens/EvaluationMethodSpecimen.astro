@@ -1,0 +1,14 @@
+---
+// Preview specimen for /preview/templates/evaluation-method/: the fixture method document (its
+// body as rendered HTML in the default slot) and the fixture sample report. The harness isn't
+// published (spec §12 item 4), so harnessUrl is null and the page has no #harness block.
+// Fixtures are imported statically (see src/preview/gallery.astro).
+import EvaluationMethodTemplate from "../../templates/EvaluationMethodTemplate.astro";
+import { documentFixtures, fixtureSite, sampleReportFixture } from "../../fixtures/index.ts";
+
+const method = documentFixtures.find((d) => d.id === "fixture-evaluation-method");
+if (!method) throw new Error('documentFixtures has no "fixture-evaluation-method" entry');
+---
+<EvaluationMethodTemplate doc={method.data} report={sampleReportFixture} harnessUrl={null} site={fixtureSite}>
+  <Fragment set:html={method.bodyHtml} />
+</EvaluationMethodTemplate>

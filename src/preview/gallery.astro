@@ -25,6 +25,13 @@ import HomeSpecimen from "./specimens/HomeSpecimen.astro";
 import HomeStaleInsightsSpecimen from "./specimens/HomeStaleInsightsSpecimen.astro";
 import ServicesSpecimen from "./specimens/ServicesSpecimen.astro";
 import EvaluationPartnerSpecimen from "./specimens/EvaluationPartnerSpecimen.astro";
+import ResourcesHubSpecimen from "./specimens/ResourcesHubSpecimen.astro";
+import SafeUseKitsSpecimen from "./specimens/SafeUseKitsSpecimen.astro";
+import PayForSpecimen from "./specimens/PayForSpecimen.astro";
+import EvaluationMethodSpecimen from "./specimens/EvaluationMethodSpecimen.astro";
+import DemosHubSpecimen from "./specimens/DemosHubSpecimen.astro";
+import DemoSpecimen from "./specimens/DemoSpecimen.astro";
+import DemoReportSpecimen from "./specimens/DemoReportSpecimen.astro";
 import { PREVIEW_PAGES, previewPath } from "../fixtures/index.ts";
 import type { PreviewGroup, PreviewKind, PreviewPage } from "../fixtures/index.ts";
 
@@ -55,6 +62,13 @@ const SPECIMENS: Record<Exclude<PreviewKind, "index">, AstroComponentFactory> = 
   "home-stale-insights": HomeStaleInsightsSpecimen,
   services: ServicesSpecimen,
   "evaluation-partner": EvaluationPartnerSpecimen,
+  "resources-hub": ResourcesHubSpecimen,
+  "safe-use-kits": SafeUseKitsSpecimen,
+  "pay-for": PayForSpecimen,
+  "evaluation-method": EvaluationMethodSpecimen,
+  "demos-hub": DemosHubSpecimen,
+  demo: DemoSpecimen,
+  "demo-report": DemoReportSpecimen,
 };
 
 // The gallery nav lists the index first, then every other page under its group's heading.
