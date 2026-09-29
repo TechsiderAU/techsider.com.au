@@ -252,4 +252,10 @@ test("research holds: no platform or delivery claim the research leaves open", (
   // No kit is published until a lawyer reviews it (§12 item 6), so ⑤ never implies one exists now.
   assert.doesNotMatch(copyOf("ai-switch-on"), /where one exists|Safe-Use Kit exists/i);
   assert.ok(DATA["ai-switch-on"].faq.some((f) => f.a.includes("published only after review by an Australian legal practitioner")));
+  // Nor does ⑤ offer a kit outright (plan Global Constraints, Kits; research index A1): every
+  // sentence that names a Safe-Use Kit, other than the FAQ question, makes it conditional on the
+  // kit being published, so the page stays true while every kit waits for review.
+  const kitSentences = strings(DATA["ai-switch-on"]).flatMap((s) => s.split(/(?<=[.?!])\s+/)).filter((s) => /Safe-Use Kit/.test(s) && !s.endsWith("?"));
+  assert.ok(kitSentences.length >= 4, "⑤ names the kits in its job, need profile, scope and inclusions");
+  for (const s of kitSentences) assert.match(s, /\bwhere (one|a Safe-Use Kit\b[^.]*?) (is|has been) published\b/i, `⑤ offers a kit outright: "${s}"`);
 });

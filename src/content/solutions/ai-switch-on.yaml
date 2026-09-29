@@ -2,7 +2,8 @@
 # The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
 # fill byIndustry and matrix; Phase D adds demo (the "What you already pay for" checker). No program
 # (spec §8.3). Every package is onshore: false, because the vendor sets where processing runs.
-# Kits are named, never described as reviewed: they stay unpublished until a lawyer reviews them.
+# Kits are named, never described as reviewed, and offered only "where one is published": they stay
+# unpublished until a lawyer reviews them (plan Global Constraints, Kits; research index A1).
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 job: >-
   Gets value from the AI already inside software you pay for, such as Microsoft 365, Xero, Karbon,
@@ -37,13 +38,13 @@ genericPackage:
     set up or measured.
   scope: >-
     Week 1: an Admin Hours Audit. Weeks 2–3: configure the AI features you already own, apply the
-    published Safe-Use Kit for your industry where there is one, and train staff. Day 30: an
-    hours-saved report.
+    Safe-Use Kit for your industry where one is published, and train staff. Day 30: an hours-saved
+    report.
   inclusions:
     - An hours map of where staff time goes, and which of it the tools you own could take on
     - A build, queue or park call on everything else
     - Set-up of the AI features you already license, directly or with your IT provider
-    - The published Safe-Use Kit for accounting, legal or property applied as is, where your industry has one
+    - The Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry
     - Staff training
     - An hours-saved report at day 30, measured against the Audit baseline in your own units
   clientTime: >-
@@ -79,7 +80,7 @@ packages:
       - The Audit's hours map, with build, queue or park for each task
       - The baseline any later build is measured against
       - Set-up of the AI already in your practice, property or office software, such as Karbon AI's email summaries and suggested replies, or Reply with AiMe on PropertyMe's Advanced or Premier plan
-      - "The published Safe-Use Kit for accounting, legal or property, applied as is. Other industries work to their own AI policy."
+      - "The Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry. Otherwise, your own AI policy applies."
       - Staff training, and the day-30 hours-saved report
     clientTime: >-
       An operations lead for about 3 hours a week, admin access or your IT provider's help, and 2–3
