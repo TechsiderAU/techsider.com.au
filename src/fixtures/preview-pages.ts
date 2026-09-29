@@ -19,7 +19,7 @@ export type PreviewKind =
   | "services" | "evaluation-partner"
   | "resources-hub" | "safe-use-kits" | "pay-for" | "evaluation-method"
   | "demos-hub" | "demo" | "demo-report"
-  | "about" | "trust" | "legal-hub" | "legal-document"
+  | "about" | "trust" | "trust-no-terms" | "legal-hub" | "legal-document"
   | "contact" | "contact-no-endpoint" | "sent" | "not-found";
 
 export interface PreviewPage {
@@ -56,6 +56,7 @@ export const PREVIEW_PAGES: PreviewPage[] = [
   { slug: "templates/demo-report", title: "Fixture report demo page", kind: "demo-report", group: "templates" },
   { slug: "templates/about", title: "Fixture about page", kind: "about", group: "templates" },
   { slug: "templates/trust", title: "Fixture trust page", kind: "trust", group: "templates" },
+  { slug: "templates/trust-no-terms", title: "Fixture trust page with no confirmed terms", kind: "trust-no-terms", group: "templates" },
   { slug: "templates/legal-hub", title: "Fixture legal hub", kind: "legal-hub", group: "templates" },
   { slug: "templates/legal-document", title: "Fixture legal document", kind: "legal-document", group: "templates" },
   { slug: "templates/contact", title: "Fixture contact page", kind: "contact", group: "templates" },

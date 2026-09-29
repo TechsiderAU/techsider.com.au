@@ -9,6 +9,9 @@
 // - The independence policy (the Services data), the questionnaire FAQ (each answer dated and
 //   tagged Part A or Part B in a meta line that stays out of the FAQPage JSON-LD), the AI
 //   transparency statement with one card per system, and the dated log of changes.
+// - The questionnaire obeys the same gate as Part B: a Part B answer shows only while the term it
+//   rests on is confirmed (trustView in src/lib/views/company.ts), so no answer states a
+//   commitment the page doesn't, and a "Part B" tag always has a #part-b to point at.
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import BracketChip from "../components/ui/BracketChip.astro";
@@ -16,6 +19,7 @@ import DataTable from "../components/ui/DataTable.astro";
 import FaqList from "../components/ui/FaqList.astro";
 import type { ContactData, ServicesData, TrustData } from "../content/page-schemas";
 import type { SiteContext } from "../lib/site";
+import { trustView } from "../lib/views/company";
 
 interface Props {
   trust: TrustData;
@@ -27,8 +31,8 @@ interface Props {
 const { trust, contact, services } = Astro.props;
 const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const isoDate = (d: Date) => d.toISOString().slice(0, 10);
-const confirmed = trust.partB.filter((term) => term.confirmed);
-const faq = trust.faq.map((item) => ({ q: item.q, a: item.a, meta: `Part ${item.part} · as at ${formatDate(item.asAt)}` }));
+const { terms: confirmed, faq: answers } = trustView(trust);
+const faq = answers.map((item) => ({ q: item.q, a: item.a, meta: `Part ${item.part} · as at ${formatDate(item.asAt)}` }));
 const changes = [...trust.changes].sort((a, b) => b.date.getTime() - a.date.getTime());
 const SUB_PROCESSOR_COLUMNS = [
   { key: "entity", label: "Entity" },
@@ -86,9 +90,11 @@ const subProcessors = contact.subProcessors.map((s) => ({ entity: s.entity, purp
     </ul>
   </PageSection>
 
-  <PageSection id="questions" title="Security and data questions" width="prose">
-    <FaqList items={faq} />
-  </PageSection>
+  {faq.length > 0 && (
+    <PageSection id="questions" title="Security and data questions" width="prose">
+      <FaqList items={faq} />
+    </PageSection>
+  )}
 
   <PageSection id="ai-transparency" title="How we use AI">
     <p class="trust-statement">{trust.transparency.statement}</p>

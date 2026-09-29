@@ -24,8 +24,8 @@ const {
   governmentRegulatoryFixture, kitFixture, pendingKitFixture, traceFixture, demoFixture, sampleReportFixture, mockPanelFixture,
   heroTraceFixture, solutionFixtures, industryFixtures, regulatoryFixtures, traceFixtures, insightFixtures,
   FIXTURE_NOW, FIXTURE_STALE_NOW,
-  positioningFixture, servicesFixture, contactFixture, contactNoEndpointFixture, trustFixture, aboutFixture, homeFixture,
-  documentFixtures,
+  positioningFixture, servicesFixture, contactFixture, contactNoEndpointFixture, trustFixture, trustNoTermsFixture, aboutFixture,
+  homeFixture, documentFixtures,
 } = all;
 
 const SRC = fileURLToPath(new URL("../src/", import.meta.url));
@@ -55,6 +55,7 @@ const CASES = [
   ["contactFixture", contactData, contactFixture],
   ["contactNoEndpointFixture", contactData, contactNoEndpointFixture],
   ["trustFixture", trustData, trustFixture],
+  ["trustNoTermsFixture", trustData, trustNoTermsFixture],
   ["aboutFixture", aboutData, aboutFixture],
   ["homeFixture", homeData, homeFixture],
   ...Object.entries(solutionFixtures).map(([id, v]) => [`solutionFixtures.${id}`, solutionSchema, v]),
@@ -309,6 +310,12 @@ test("page fixtures exercise every display state", () => {
   assert.equal(contactNoEndpointFixture.formEndpoint, null);
   assert.deepEqual(trustFixture.partB.map((b) => b.confirmed), [true, true, false]);
   assert.deepEqual([...new Set(trustFixture.faq.map((f) => f.part))].sort(), ["A", "B"]);
+  // Part B answers rest on confirmed terms and on the unconfirmed one, so the page shows some and hides one.
+  const confirmedTerm = new Map(trustFixture.partB.map((b) => [b.id, b.confirmed]));
+  assert.deepEqual([...new Set(trustFixture.faq.filter((f) => f.part === "B").map((f) => confirmedTerm.get(f.term)))].sort(), [false, true]);
+  // The same page with no term confirmed: Part B and every Part B answer drop out.
+  assert.deepEqual(trustNoTermsFixture.partB.map((b) => [b.id, b.confirmed]), trustFixture.partB.map((b) => [b.id, false]));
+  assert.equal(trustNoTermsFixture.faq, trustFixture.faq);
   assert.equal(homeFixture.faq.filter((f) => f.q === HOME_TRUST_QUESTION).length, 1);
   assert.deepEqual(servicesFixture.phases.map((p) => p.id), ["prove", "build", "run"]);
   assert.deepEqual([...new Set(servicesFixture.services.map((s) => s.entry))].sort(), ["after-audit-or-trial", "entry", "not-entry", "secondary"]);

@@ -2,7 +2,9 @@
 // Page data for the singleton templates (src/content/page-schemas.ts): positioning, Services and
 // Evaluation Partner, Contact (with and without a form endpoint), Trust, About and Home, plus the
 // documents collection (a legal document and the evaluation method, bodies as rendered HTML).
-// - trustFixture has one Part B item that is not confirmed: it must never render (spec §8.11).
+// - trustFixture has one Part B item that is not confirmed: it must never render (spec §8.11), and
+//   neither must the Part B answer that rests on it. trustNoTermsFixture confirms no term at all,
+//   so the Trust page drops Part B and every Part B answer.
 // - homeFixture's FAQ asks HOME_TRUST_QUESTION verbatim, as homeData requires; it is the one
 //   string here that is fixed spec copy rather than fixture text.
 // - Services team copy names functions only: no names and no numbers (spec §8.6).
@@ -178,17 +180,17 @@ export const trustFixture: TrustData = {
     {
       q: "Fixture question: is fixture client data used to train models?",
       a: "Fixture answer: no. Fixture client data never trains a fixture model, ours or a fixture provider's. The fixture contract term says so, and the fixture provider settings are chosen to match it before any fixture work starts.",
-      part: "B", asAt,
+      part: "B", term: "fixture-no-training", asAt,
     },
     {
       q: "Fixture question: who owns what the fixture team builds?",
       a: "Fixture answer: you do. The fixture code, fixture prompts, fixture tests and the fixture index sit in your own fixture repository from the first day, so you can keep running the fixture system without us at any time.",
-      part: "B", asAt,
+      part: "B", term: "fixture-unconfirmed", asAt,
     },
     {
-      q: "Fixture question: can we trust the fixture output?",
-      a: "Fixture answer: only as far as the fixture test report shows. Every fixture system ships with a fixture acceptance test, its thresholds and its list of fixture failures, so you can see how often it is wrong before you rely on it.",
-      part: "B", asAt,
+      q: "Fixture question: where does fixture client data stay during an engagement?",
+      a: "Fixture answer: in the fixture region. The fixture systems we build or run for you process fixture client data there, and the one-page fixture data note names every fixture location before any fixture work starts.",
+      part: "B", term: "fixture-residency", asAt,
     },
   ],
   transparency: {
@@ -202,6 +204,12 @@ export const trustFixture: TrustData = {
     { date: new Date("2026-09-15"), change: "Fixture change: fixture Part A re-checked." },
     { date: new Date("2026-08-01"), change: "Fixture change: fixture page published." },
   ],
+};
+
+/** No Part B term confirmed yet: the Trust page leaves out Part B and every Part B answer. */
+export const trustNoTermsFixture: TrustData = {
+  ...trustFixture,
+  partB: trustFixture.partB.map((term) => ({ ...term, confirmed: false })),
 };
 
 export const aboutFixture: AboutData = {

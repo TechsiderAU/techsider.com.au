@@ -1,0 +1,9 @@
+---
+// /preview/templates/trust-no-terms/: the Trust page before the owner confirms any Part B term
+// (spec §8.11, §12 item 2). trustNoTermsFixture confirms none, so the page leaves out #part-b and
+// every Part B answer in the questionnaire. Fixtures are imported statically (only src/preview/ may
+// import them).
+import TrustTemplate from "../../templates/TrustTemplate.astro";
+import { contactFixture, fixtureSite, servicesFixture, trustNoTermsFixture } from "../../fixtures/index.ts";
+---
+<TrustTemplate trust={trustNoTermsFixture} contact={contactFixture} services={servicesFixture} site={fixtureSite} />

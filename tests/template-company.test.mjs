@@ -1,6 +1,7 @@
 // The company page templates (spec §8.10, §8.11, §10.2) as the preview build renders them from
-// the page-data fixtures: About, Trust, the Legal hub, a legal document, Contact (with and
-// without a form endpoint), the message-sent page and the 404 body, at /preview/templates/<kind>/.
+// the page-data fixtures: About, Trust (with and without a confirmed Part B term), the Legal hub, a
+// legal document, Contact (with and without a form endpoint), the message-sent page and the 404
+// body, at /preview/templates/<kind>/.
 // Run `npm run build:preview` first. tests/e2e/template-company.spec.mjs covers the behaviour in
 // a browser (the copy button, native validation, the POST, keyboard order, axe, 320px).
 import { test } from "node:test";
@@ -11,14 +12,16 @@ import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, idsIn, startTags } from "../scripts/ci/lib.mjs";
 import { CONTACT_H1, EXTRA_INTERESTS, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../src/lib/fixed-copy.ts";
 import { insightCards } from "../src/lib/views/insights.ts";
+import { trustView } from "../src/lib/views/company.ts";
 import {
   aboutFixture, contactFixture, contactNoEndpointFixture, documentFixtures, fixtureSite, insightFixtures,
-  positioningFixture, servicesFixture, trustFixture,
+  positioningFixture, servicesFixture, trustFixture, trustNoTermsFixture,
 } from "../src/fixtures/index.ts";
 
 const PAGES = {
   about: { template: "about", h1: "About.", highlight: "About" },
   trust: { template: "trust", h1: "Trust.", highlight: "Trust" },
+  "trust-no-terms": { template: "trust", h1: "Trust.", highlight: "Trust" },
   "legal-hub": { template: "legal-hub", h1: "Legal.", highlight: "Legal" },
   "legal-document": { template: "document", h1: documentFixtures[0].data.title, highlight: null },
   contact: { template: "contact", h1: CONTACT_H1, highlight: "fix" },
@@ -213,10 +216,11 @@ test("trust: each FAQ answer ends with its Part and date, and the FAQPage JSON-L
   const html = page("trust");
   const section = one(mainOf(html), "id", "questions");
   assert.equal(text(one(section.inner, "id", "questions-heading").inner), "Security and data questions");
+  const shown = trustView(trustFixture).faq;
   const answers = withClass(section.inner, "faq-answer");
-  assert.equal(answers.length, trustFixture.faq.length);
+  assert.equal(answers.length, shown.length);
   answers.forEach((answer, i) => {
-    const f = trustFixture.faq[i];
+    const f = shown[i];
     const meta = withClass(answer.inner, "faq-meta");
     assert.equal(meta.length, 1, `answer ${i + 1} has no meta line`);
     assert.equal(meta[0].name, "p");
@@ -224,14 +228,47 @@ test("trust: each FAQ answer ends with its Part and date, and the FAQPage JSON-L
     assert.ok(answer.inner.trimEnd().endsWith(meta[0].outer), `answer ${i + 1}: the meta line isn't last`);
     assert.equal(text(answer.inner.replace(meta[0].outer, "")), f.a);
   });
-  assert.ok(trustFixture.faq.some((f) => f.part === "A") && trustFixture.faq.some((f) => f.part === "B"));
+  assert.ok(shown.some((f) => f.part === "A") && shown.some((f) => f.part === "B"));
   const pages = jsonLd(html).filter((d) => d["@type"] === "FAQPage");
   assert.equal(pages.length, 1);
   assert.deepEqual(
     pages[0].mainEntity,
-    trustFixture.faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+    shown.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
   );
   assert.doesNotMatch(JSON.stringify(jsonLd(html)), /as at|Part [AB] ·/, "a meta line reached the JSON-LD");
+});
+
+test("trust: a Part B answer resting on an unconfirmed term never renders, on the page or in the JSON-LD (spec §8.11, §12 item 2)", () => {
+  const html = page("trust");
+  const confirmed = new Set(trustFixture.partB.filter((t) => t.confirmed).map((t) => t.id));
+  const hidden = trustFixture.faq.filter((f) => f.part === "B" && !confirmed.has(f.term));
+  assert.ok(hidden.length > 0, "no fixture answer rests on an unconfirmed term");
+  for (const f of hidden) {
+    assert.ok(!visibleText(html).includes(f.q), `"${f.q}" renders`);
+    assert.ok(!html.includes(f.a), `the answer to "${f.q}" is in the markup`);
+  }
+});
+
+test("trust-no-terms: with no confirmed term, #part-b and every Part B answer are absent; Part A stays", () => {
+  assert.ok(trustNoTermsFixture.partB.every((t) => !t.confirmed), "the fixture confirms a term");
+  const html = page("trust-no-terms");
+  const main = mainOf(html);
+  assert.deepEqual(blockIds(main), ["part-a", "independence", "questions", "ai-transparency", "changes"]);
+  assert.equal(elementsWith(main, "data-contract-term").length, 0);
+  assert.doesNotMatch(visibleText(main), /Default commitments in every engagement contract|Contract term/);
+  const partA = trustNoTermsFixture.faq.filter((f) => f.part === "A");
+  const partB = trustNoTermsFixture.faq.filter((f) => f.part === "B");
+  assert.ok(partA.length > 0 && partB.length > 0, "the fixture has answers in both parts");
+  const section = one(main, "id", "questions");
+  const metas = withClass(section.inner, "faq-meta").map((m) => text(m.inner));
+  assert.deepEqual(metas, partA.map((f) => `Part A · as at ${formatDate(f.asAt)}`));
+  for (const f of partB) {
+    assert.ok(!visibleText(html).includes(f.q), `Part B "${f.q}" renders`);
+    assert.ok(!html.includes(f.a), `the Part B answer to "${f.q}" is in the markup`);
+  }
+  for (const term of trustNoTermsFixture.partB) assert.ok(!visibleText(html).includes(term.title), `"${term.title}" renders`);
+  const [faqPage] = jsonLd(html).filter((d) => d["@type"] === "FAQPage");
+  assert.deepEqual(faqPage.mainEntity.map((q) => q.name), partA.map((f) => f.q));
 });
 
 test("trust: the AI transparency statement with one card per system, then the changes log newest first", () => {

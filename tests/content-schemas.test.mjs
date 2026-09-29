@@ -502,7 +502,10 @@ const TRUST = {
   asAt: "2026-09-15",
   partA: { cookies: "Test none", analytics: "Test none", enquiries: "Test mailbox", securityContact: "security@example.com" },
   partB: [{ id: "test-residency", title: "Test residency", body: "Test body", confirmed: false }],
-  faq: [1, 2, 3, 4, 5].map((n) => ({ q: `Test question ${n}?`, a: words(30 + n), part: n % 2 ? "A" : "B", asAt: "2026-09-15" })),
+  // A Part B answer names the contract term it rests on; a Part A answer names none.
+  faq: [1, 2, 3, 4, 5].map((n) => ({
+    q: `Test question ${n}?`, a: words(30 + n), part: n % 2 ? "A" : "B", ...(n % 2 ? {} : { term: "test-residency" }), asAt: "2026-09-15",
+  })),
   transparency: { statement: "Test statement", systems: [{ name: "Test system", purpose: "Test purpose", data: "Test data", human: "Test human", demo: "test-demo" }] },
   changes: [{ date: "2026-09-15", change: "Test change" }],
 };
@@ -558,6 +561,19 @@ test("page data: every Trust FAQ answer is 30–110 words (spec §8.11)", () => 
   bad(trustData, { ...TRUST, faq: TRUST.faq.map((f, i) => (i === 0 ? { ...f, part: "C" } : f)) }, "a FAQ in neither part");
   bad(trustData, { ...TRUST, faq: TRUST.faq.slice(0, 4) }, "four FAQs");
   bad(trustData, { ...TRUST, partA: { ...TRUST.partA, securityContact: "security" } }, "security contact that is not an address");
+});
+
+test("page data: a Part B Trust answer names the Part B term it rests on, and a Part A answer names none (spec §8.11, §12 item 2)", () => {
+  const withFaq = (i, over) => ({ ...TRUST, faq: TRUST.faq.map((f, j) => (j === i ? { ...f, ...over } : f)) });
+  assert.equal(ok(trustData, TRUST, "trust").faq[1].term, "test-residency");
+  const { term, ...untermed } = TRUST.faq[1];
+  badWith(
+    trustData, { ...TRUST, faq: TRUST.faq.map((f, j) => (j === 1 ? untermed : f)) }, "faq.1.term",
+    "faq[1] describes Part B, so it names the Part B term it rests on (spec §8.11, §12 item 2)",
+  );
+  badWith(trustData, withFaq(1, { term: "test-ownership" }), "faq.1.term", 'faq[1].term "test-ownership" names no Part B term');
+  badWith(trustData, withFaq(0, { term: "test-residency" }), "faq.0.term", "faq[0] describes Part A, so it names no Part B term");
+  bad(trustData, withFaq(1, { term: "Test residency" }), "a term that is not a slug");
 });
 
 test("page data: the Home FAQ asks the trust question exactly once (spec §8.1.10)", () => {

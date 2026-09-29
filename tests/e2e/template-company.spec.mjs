@@ -2,12 +2,12 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { focusKeys } from "../support/keys.mjs";
 
-// The company page templates (spec §8.10, §8.11, §10.2) on the preview gallery: About, Trust, the
-// Legal hub, a legal document, Contact (with and without a form endpoint), the message-sent page
-// and the 404 body. The contact form posts to an example.com endpoint; the tests intercept it, so
+// The company page templates (spec §8.10, §8.11, §10.2) on the preview gallery: About, Trust (with
+// and without a confirmed Part B term), the Legal hub, a legal document, Contact (with and without a
+// form endpoint), the message-sent page and the 404 body. The contact form posts to an example.com endpoint; the tests intercept it, so
 // nothing leaves the machine.
 const BASE = "/preview/templates";
-const KINDS = ["about", "trust", "legal-hub", "legal-document", "contact", "contact-no-endpoint", "sent", "not-found"];
+const KINDS = ["about", "trust", "trust-no-terms", "legal-hub", "legal-document", "contact", "contact-no-endpoint", "sent", "not-found"];
 const CONTACT = `${BASE}/contact/`;
 const ENDPOINT = "https://example.com/fixture/form";
 const EMAIL = "fixture@example.com";

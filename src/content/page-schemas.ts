@@ -72,7 +72,11 @@ export const trustData = z.strictObject({
   asAt: z.coerce.date(),
   partA: z.strictObject({ cookies: z.string(), analytics: z.string(), enquiries: z.string(), securityContact: z.email() }),
   partB: z.array(z.strictObject({ id: slug, title: z.string(), body: z.string(), confirmed: z.boolean() })).min(1),
-  faq: z.array(z.strictObject({ q: z.string().min(5), a: z.string(), part: z.enum(["A", "B"]), asAt: z.coerce.date() })).min(5),
+  // `term`: the partB id a Part B answer rests on. The page shows that answer only while the term
+  // is confirmed, so no answer states a commitment the owner hasn't confirmed (spec §12 item 2).
+  faq: z.array(z.strictObject({
+    q: z.string().min(5), a: z.string(), part: z.enum(["A", "B"]), term: slug.optional(), asAt: z.coerce.date(),
+  })).min(5),
   transparency: z.strictObject({
     statement: z.string(),
     systems: z.array(z.strictObject({ name: z.string(), purpose: z.string(), data: z.string(), human: z.string(), demo: slug.optional() })).min(1),
@@ -83,6 +87,15 @@ export const trustData = z.strictObject({
   t.faq.forEach((f, i) => {
     const n = words(f.a);
     if (n < 30 || n > 110) ctx.addIssue({ code: "custom", path: ["faq", i, "a"], message: `faq[${i}].a has ${n} words; the spec needs 30–110` });
+  });
+  // Spec §8.11, §12 item 2: a Part B answer describes a contract commitment, so it names the Part B
+  // term it rests on; a Part A answer describes the website and email today, and names none.
+  const terms = new Set(t.partB.map((b) => b.id));
+  t.faq.forEach((f, i) => {
+    const issue = (message: string) => ctx.addIssue({ code: "custom", path: ["faq", i, "term"], message });
+    if (f.part === "A" && f.term !== undefined) issue(`faq[${i}] describes Part A, so it names no Part B term`);
+    else if (f.part === "B" && f.term === undefined) issue(`faq[${i}] describes Part B, so it names the Part B term it rests on (spec §8.11, §12 item 2)`);
+    else if (f.part === "B" && f.term !== undefined && !terms.has(f.term)) issue(`faq[${i}].term "${f.term}" names no Part B term`);
   });
 });
 
