@@ -19,7 +19,7 @@ const view = checkerView(platformAiFile.parse(platformAi), site);
 const checker = site.page("payFor");
 ---
 <div class="checker-summary" data-checker-summary>
-  <p>Tick the software you already pay for. The checker shows the AI each product includes or sells as an add-on, where each vendor says it's processed, and what's left for a build.</p>
+  <p>Tick the software you already pay for. The checker shows the AI each product includes or sells as an add-on, whether each vendor says where it's processed, and what's left for a build.</p>
   <p>It runs in your browser, so nothing you tick is sent anywhere.</p>
   <p>Vendors covered: {view.vendors.map((group) => group.vendor).join(", ")}.</p>
   <p class="checker-summary-as-at">Vendor facts as at <time datetime={view.asAt.iso}>{view.asAt.text}</time></p>

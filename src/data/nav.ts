@@ -206,7 +206,7 @@ const DEMO_DESCRIPTIONS: Record<string, string> = {
   "knowledge-assistant": "A canned replay on public Victorian and APRA documents: each answer cites its passage, questions they don't answer are refused, and a false answer is caught.",
   "draft-for-approval": "A canned replay on a synthetic property-management inbox: eight messages sorted, work orders and updates drafted, one escalated, nothing sent until approved.",
   "ai-evaluation": "An illustrative sample evaluation report on our own demo assistant: its sample size, confidence intervals, agreed thresholds and each failure found, rated.",
-  "ai-switch-on": "Tick the software you already pay for to see the AI it includes or sells as an add-on, where the vendor says it's processed, and what's left for a build.",
+  "ai-switch-on": "Tick the software you pay for to see the AI it includes or sells as an add-on, whether the vendor says where it's processed, and what's left for a build.",
 };
 /**
  * One demo page per solution (spec §8.8), live from Phase D Task 7. The ⑤ page embeds the "What you

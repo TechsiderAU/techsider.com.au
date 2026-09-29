@@ -237,6 +237,10 @@ test("⑤: the hero's compact frame names every vendor the dated facts cover and
   for (const group of CHECKER_VIEW.vendors) assert.ok(t.includes(group.vendor), `no ${group.vendor}`);
   assert.ok(t.includes(`Vendor facts as at ${CHECKER_VIEW.asAt.text}`), "no as-at date");
   assert.ok(summary.inner.includes(`datetime="${CHECKER_VIEW.asAt.iso}"`), "the date has no datetime");
+  // Six of the eleven vendors publish no processing location, so neither the frame nor the demo
+  // page's description may read as though every vendor says where its AI is processed.
+  assert.ok(t.includes("whether each vendor says"), "the summary implies every vendor says where its AI is processed");
+  assert.ok(entryAt("/demos/ai-switch-on/").description.includes("whether the vendor says"), "the ⑤ demo page's description implies every vendor says where its AI is processed");
   assert.deepEqual(hrefsIn(summary.inner), [CHECKER_PATH]);
   // The vendors' feature texts stay off this mid-market page (spec §3.4): no checker, no vendor table.
   assert.equal(elementsWith(frame, "data-checker").length, 0, "the hero embeds the checker");
