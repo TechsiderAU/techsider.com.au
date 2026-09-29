@@ -39,7 +39,7 @@ test("every ld+json script in src/ is serialised by jsonLd()", () => {
     const rel = relative(SRC, file).split(sep).join("/");
     for (const m of readFileSync(file, "utf8").matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>/g)) scripts.push([rel, m[0]]);
   }
-  // Breadcrumb and FaqList (the B1 components), the legacy Home FAQ, BaseLayout's Organization and PostLayout's article.
+  // Breadcrumb and FaqList (the B1 components), the legacy Home FAQ, BaseLayout's Organization and PostLayout's BlogPosting.
   assert.deepEqual(scripts.map(([rel]) => rel).sort(), [
     "components/Faq.astro",
     "components/ui/Breadcrumb.astro",

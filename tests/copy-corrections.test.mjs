@@ -15,14 +15,14 @@ test("no post or post footer offers a 'paid two-week discovery'", () => {
 });
 
 test("every post body ends with its own 'talk to us' CTA", () => {
-  // Look only at the markdown body (PostLayout's post-prose div, up to the <hr> before the
-  // layout's shared footer CTA), so the layout link can't satisfy this for a post.
+  // Look only at the markdown body (PostLayout's Prose div, up to the layout's closing prompt
+  // block), so the layout's contextual CTA can't satisfy this for a post.
   for (const f of insightPages) {
     const html = readDist(f);
-    const start = html.indexOf('class="post-prose');
-    assert.ok(start >= 0, `${f}: post-prose body not found`);
-    const end = html.indexOf("<hr", start);
-    assert.ok(end > start, `${f}: no <hr> after the post body`);
+    const start = html.indexOf("data-prose");
+    assert.ok(start >= 0, `${f}: Prose body not found`);
+    const end = html.indexOf("data-post-closing", start);
+    assert.ok(end > start, `${f}: no closing prompt after the post body`);
     const paras = html.slice(start, end).match(/<p\b[^>]*>[\s\S]*?<\/p>/g) ?? [];
     assert.match(
       paras.at(-1) ?? "",

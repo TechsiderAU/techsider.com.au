@@ -1,7 +1,11 @@
 ---
+// One insight post. The route stays thin: it renders the markdown, builds the PostView from the
+// entry and this build's SiteContext (a planned page has no link), and hands both to PostLayout.
 import { getCollection, render } from "astro:content";
 import PostLayout from "../../layouts/PostLayout.astro";
-import { readingMinutes } from "../../lib/readingTime";
+import { isPreview } from "../../data/nav";
+import { siteContext } from "../../lib/site";
+import { postView } from "../../lib/views/post";
 
 export async function getStaticPaths() {
   const posts = await getCollection("insights", ({ data }) => data.draft !== true);
@@ -10,15 +14,8 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
-const minutes = readingMinutes(post.body);
+const view = postView({ post, site: siteContext(isPreview()), siteUrl: Astro.site ?? Astro.url });
 ---
-<PostLayout
-  title={post.data.title}
-  description={post.data.description}
-  publishDate={post.data.publishDate}
-  updatedDate={post.data.updatedDate}
-  type={post.data.type}
-  minutes={minutes}
->
+<PostLayout view={view}>
   <Content />
 </PostLayout>
