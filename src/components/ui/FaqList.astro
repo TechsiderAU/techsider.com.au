@@ -2,10 +2,13 @@
 // FAQ as native <details> disclosures (they work without JS) plus FAQPage JSON-LD
 // (spec §11.3). The +/− indicator is aria-hidden: <details> exposes its own expanded state.
 // Render at most once per page, so the page carries one FAQPage.
+// An item's optional `meta` line (the Trust FAQ's "Part A · as at …", spec §8.11) renders inside
+// the answer, after it, as <p class="faq-meta">. It describes the answer rather than being part of
+// it, so the FAQPage JSON-LD never carries it.
 import { jsonLd } from "../../lib/json-ld";
 
 interface Props {
-  items: { q: string; a: string }[];
+  items: { q: string; a: string; meta?: string }[];
   id?: string;
 }
 
@@ -24,7 +27,7 @@ const faqPage = {
   {items.map((item) => (
     <details class="faq-item">
       <summary class="faq-question"><span class="faq-q">{item.q}</span><span class="faq-indicator" aria-hidden="true"><span class="faq-plus">+</span><span class="faq-minus">−</span></span></summary>
-      <div class="faq-answer">{item.a}</div>
+      <div class="faq-answer">{item.a}{item.meta && <p class="faq-meta">{item.meta}</p>}</div>
     </details>
   ))}
 </div>
@@ -74,6 +77,13 @@ const faqPage = {
     padding: 0 0 1.25rem;
     line-height: 1.6;
     color: var(--color-muted);
+  }
+  /* The meta line takes the answer's muted colour on every surface. */
+  .faq-meta {
+    margin: 0.75rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.5;
   }
 
   /* On bone: bone-line hairlines, an acid-deep indicator, muted-dark answers (spec §6.1). */

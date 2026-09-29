@@ -1,0 +1,7 @@
+---
+// /preview/templates/sent/: the enquiry confirmation from the contact fixture. Fixtures are
+// imported statically (only src/preview/ may import them).
+import SentTemplate from "../../templates/SentTemplate.astro";
+import { contactFixture, fixtureSite } from "../../fixtures/index.ts";
+---
+<SentTemplate contact={contactFixture} site={fixtureSite} />

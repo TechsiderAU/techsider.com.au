@@ -1,0 +1,294 @@
+---
+// The About page (spec §8.10), body only: a Phase C route loads the about and positioning data
+// and the insight cards, and wraps this in BaseLayout. The mission (the hero sub); who we serve
+// and why control matters; the origin line in large type; the principles; how we work; a dated
+// build log of real events, newest first; up to three insight cards; the closing prompt.
+// No names and no headcount: the data carries none, and nothing here adds any.
+import PageHero from "../components/page/PageHero.astro";
+import PageSection from "../components/page/PageSection.astro";
+import InsightCard from "../components/page/InsightCard.astro";
+import PromptBlock from "../components/ui/PromptBlock.astro";
+import type { AboutData, PositioningData } from "../content/page-schemas";
+import type { SiteContext } from "../lib/site";
+import type { InsightCardView } from "../lib/views/insights";
+import { HOME_CLOSING } from "../lib/fixed-copy";
+import { CTAS } from "../data/nav";
+
+interface Props {
+  about: AboutData;
+  positioning: PositioningData;
+  insights: InsightCardView[];
+  site: SiteContext;
+}
+
+const { about, positioning, insights, site } = Astro.props;
+const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+const buildLog = [...about.buildLog].sort((a, b) => b.date.getTime() - a.date.getTime());
+const cards = insights.slice(0, 3);
+const allInsightsHref = site.page("insights").href;
+---
+<div class="template" data-template="about">
+  <PageHero title="About." highlight="About" sub={about.mission} />
+
+  <PageSection id="who" title="Who we serve" width="prose">
+    <p class="about-lead">{about.whoWeServe}</p>
+    <p class="about-text">{about.whyControl}</p>
+  </PageSection>
+
+  <div id="origin" class="about-origin bg-carbon scanlines" data-origin>
+    <div class="about-origin-inner">
+      <p class="about-origin-line"><span class="about-origin-caret" aria-hidden="true">&gt;</span> {positioning.originLine}</p>
+    </div>
+  </div>
+
+  <PageSection id="principles" title="Principles">
+    <ul class="about-principles">
+      {about.principles.map((principle) => (
+        <li class="about-principle">
+          <h3 class="about-item-title">{principle.title}</h3>
+          <p class="about-item-body">{principle.body}</p>
+        </li>
+      ))}
+    </ul>
+  </PageSection>
+
+  <PageSection id="how-we-work" title="How we work">
+    <ol class="about-steps">
+      {about.howWeWork.map((step) => (
+        <li class="about-step">
+          <h3 class="about-item-title">{step.title}</h3>
+          <p class="about-item-body">{step.body}</p>
+        </li>
+      ))}
+    </ol>
+  </PageSection>
+
+  <PageSection id="build-log" title="Build log" width="prose">
+    <ol class="about-log">
+      {buildLog.map((entry) => (
+        <li class="about-log-entry">
+          <time datetime={isoDate(entry.date)} class="about-log-date">{formatDate(entry.date)}</time>
+          <span class="about-log-event">{entry.event}</span>
+        </li>
+      ))}
+    </ol>
+  </PageSection>
+
+  {cards.length > 0 && (
+    <PageSection id="insights" title="Latest insights">
+      <ul class="about-insights">
+        {cards.map((card) => (
+          <li class="about-insight"><InsightCard card={card} /></li>
+        ))}
+      </ul>
+      {allInsightsHref && (
+        <p class="about-more"><a href={allInsightsHref} class="about-link">All insights <span aria-hidden="true">→</span></a></p>
+      )}
+    </PageSection>
+  )}
+
+  <div id="contact" class="template-closing">
+    <PromptBlock command={HOME_CLOSING.command} args={HOME_CLOSING.args} label={CTAS.talk.label} href={site.contact()} />
+  </div>
+</div>
+
+<style>
+  .about-lead,
+  .about-text,
+  .about-item-body,
+  .about-more {
+    margin: 0;
+  }
+  .about-lead {
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    font-weight: 600;
+    line-height: 1.45;
+  }
+  .about-text {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+  /* The origin line: a carbon interlude in large type, content in the 80rem container. */
+  .about-origin {
+    padding-block: 4rem;
+    color: var(--color-bone);
+  }
+  @media (min-width: 64rem) {
+    .about-origin {
+      padding-block: 6rem;
+    }
+  }
+  .about-origin-inner {
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 40rem) {
+    .about-origin-inner {
+      padding-inline: 1.5rem;
+    }
+  }
+  .about-origin-line {
+    max-width: 30ch;
+    margin: 0;
+    font-size: clamp(1.625rem, 1.1rem + 2.6vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+  }
+  .about-origin-caret {
+    font-family: var(--font-mono);
+    color: var(--color-acid);
+  }
+  /* Principles share hairlines: the page's one hairline cell grid, on bone (spec §6.4). Each cell
+     draws its own border and overlaps its neighbours by 1px, so a short last row leaves no empty
+     cell; the list's 1px end padding holds the last column's and row's overlap. */
+  .about-principles {
+    display: grid;
+    margin: 0;
+    padding: 0 1px 1px 0;
+    list-style: none;
+  }
+  @media (min-width: 40rem) {
+    .about-principles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .about-principles {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .about-principle {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0 -1px -1px 0;
+    padding: 1.5rem 1.25rem;
+    border: 1px solid var(--color-bone-line);
+    overflow-wrap: anywhere;
+  }
+  .about-item-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .about-item-body {
+    line-height: 1.55;
+    color: var(--color-muted-dark);
+  }
+  .about-steps {
+    display: grid;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: about-step;
+  }
+  @media (min-width: 48rem) {
+    .about-steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .about-step {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    min-width: 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-carbon);
+    counter-increment: about-step;
+    overflow-wrap: anywhere;
+  }
+  /* The step number is decorative: the <ol> already conveys the order. */
+  .about-step::before {
+    content: counter(about-step, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-acid-deep);
+  }
+  .about-log {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-bone-line);
+  }
+  .about-log-entry {
+    display: grid;
+    gap: 0.25rem 1.5rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--color-bone-line);
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 40rem) {
+    .about-log-entry {
+      grid-template-columns: 11rem minmax(0, 1fr);
+    }
+  }
+  .about-log-date {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-muted-dark);
+  }
+  .about-log-event {
+    line-height: 1.55;
+  }
+  .about-insights {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .about-insights {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .about-insight {
+    display: flex;
+    min-width: 0;
+  }
+  .about-insight > :global(*) {
+    flex: 1;
+  }
+  .about-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 44px;
+    font-weight: 600;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted-dark);
+    text-underline-offset: 3px;
+  }
+  .about-link:hover {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+  /* The closing prompt sits inside the content width, with normal section spacing above the
+     footer: never a full-width band (spec §6.4). */
+  .template-closing {
+    max-width: 80rem;
+    margin-inline: auto;
+    padding: 4rem 1rem;
+  }
+  @media (min-width: 40rem) {
+    .template-closing {
+      padding-inline: 1.5rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .template-closing {
+      padding-block: 6rem;
+    }
+  }
+</style>

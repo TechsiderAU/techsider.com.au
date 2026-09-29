@@ -1,0 +1,227 @@
+---
+// The contact page (spec §8.11, §10.2), body only: a Phase C route loads the contact data and
+// wraps this in BaseLayout. The H1; the enquiry form, only while a form endpoint is configured
+// (Phase E sets one; until then #form is left out and #email leads); the email address as plain
+// text with a copy button; what happens next; and the deflection column.
+// The reply-time sentence reads contact.replyTime, written once: this page and /contact/sent/
+// show it, and no other page states a reply time.
+// The copy button is the only JavaScript here: it is `hidden` in the markup, so a visitor without
+// JavaScript sees only the address, and the script shows it where the Clipboard API exists.
+import PageHero from "../components/page/PageHero.astro";
+import ContactForm from "../components/page/ContactForm.astro";
+import type { ContactData } from "../content/page-schemas";
+import type { SiteContext } from "../lib/site";
+import { CONTACT_H1 } from "../lib/fixed-copy";
+
+interface Props {
+  contact: ContactData;
+  site: SiteContext;
+}
+
+const { contact, site } = Astro.props;
+---
+<div class="template" data-template="contact">
+  <PageHero title={CONTACT_H1} highlight="fix" display={false} />
+
+  <div class="contact-body surface-bone">
+    <div class="contact-grid">
+      <div class="contact-main">
+        {contact.formEndpoint !== null && (
+          <section id="form" class="contact-block" aria-labelledby="form-heading">
+            <h2 id="form-heading" class="contact-heading">Send an enquiry</h2>
+            <ContactForm contact={contact} site={site} />
+          </section>
+        )}
+        <section id="email" class="contact-block" aria-labelledby="email-heading">
+          <h2 id="email-heading" class="contact-heading">Email us</h2>
+          <div class="contact-email" data-email-block>
+            <p class="contact-email-line">
+              <code class="contact-address" data-email>{site.email}</code>
+              <button type="button" class="btn contact-copy" data-copy-email hidden>Copy address</button>
+            </p>
+            <p class="contact-copy-status" role="status" aria-live="polite" data-copy-status></p>
+          </div>
+        </section>
+      </div>
+
+      <div class="contact-side">
+        <section id="next" class="contact-block" aria-labelledby="next-heading">
+          <h2 id="next-heading" class="contact-heading">What happens next</h2>
+          <p class="contact-reply" data-reply-time>We reply within {contact.replyTime}.</p>
+          <ol class="contact-steps">
+            {contact.whatNext.map((step) => <li>{step}</li>)}
+          </ol>
+        </section>
+        <section id="elsewhere" class="contact-block" aria-labelledby="elsewhere-heading">
+          <h2 id="elsewhere-heading" class="contact-heading">Something else?</h2>
+          <ul class="contact-deflection">
+            {contact.deflection.map((item) => (
+              <li class="contact-deflect">
+                <h3 class="contact-deflect-title">{item.title}</h3>
+                <p class="contact-deflect-body">{item.body}</p>
+                <p class="contact-deflect-email"><a href={`mailto:${item.email}`} class="contact-link">{item.email}</a></p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Copy the address (spec §8.11). The button stays hidden unless the Clipboard API exists; a
+  // click copies the address and announces the result through the polite status beside it.
+  for (const block of document.querySelectorAll<HTMLElement>("[data-email-block]")) {
+    const address = block.querySelector("[data-email]")?.textContent?.trim();
+    const button = block.querySelector<HTMLButtonElement>("[data-copy-email]");
+    const status = block.querySelector<HTMLElement>("[data-copy-status]");
+    if (!address || !button || !status || !navigator.clipboard) continue;
+    button.hidden = false;
+    button.addEventListener("click", async () => {
+      status.textContent = "";
+      try {
+        await navigator.clipboard.writeText(address);
+        status.textContent = "Copied";
+      } catch {
+        status.textContent = "Couldn't copy. Select the address instead.";
+      }
+    });
+  }
+</script>
+
+<style>
+  /* One bone band: the form and the email address on the left, what happens next and the
+     deflection column on the right from 64rem (stacked in that order below it). */
+  .contact-body {
+    padding-block: 4rem;
+  }
+  @media (min-width: 64rem) {
+    .contact-body {
+      padding-block: 6rem;
+    }
+  }
+  .contact-grid {
+    display: grid;
+    gap: 3.5rem;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 40rem) {
+    .contact-grid {
+      padding-inline: 1.5rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .contact-grid {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      gap: 4rem;
+    }
+  }
+  .contact-main,
+  .contact-side {
+    display: grid;
+    align-content: start;
+    gap: 3.5rem;
+    min-width: 0;
+  }
+  .contact-block {
+    display: grid;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+  .contact-heading {
+    margin: 0;
+    font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .contact-email,
+  .contact-email-line,
+  .contact-copy-status,
+  .contact-reply,
+  .contact-deflect-body,
+  .contact-deflect-email {
+    margin: 0;
+  }
+  .contact-email {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .contact-email-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+  }
+  .contact-address {
+    font-family: var(--font-mono);
+    font-size: 1.125rem;
+    overflow-wrap: anywhere;
+  }
+  /* A carbon outline button: .btn-secondary is bone text, invisible on bone. */
+  .contact-copy {
+    color: var(--color-carbon);
+    background: transparent;
+    border: 0;
+    box-shadow: inset 0 0 0 1px var(--color-carbon);
+    cursor: pointer;
+  }
+  .contact-copy:hover {
+    box-shadow: inset 0 0 0 2px var(--color-carbon);
+  }
+  .contact-copy-status {
+    min-height: 1.5em;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .contact-reply {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .contact-steps {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding-left: 1.5rem;
+    list-style: decimal;
+    line-height: 1.5;
+  }
+  .contact-deflection {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-bone-line);
+  }
+  .contact-deflect {
+    display: grid;
+    gap: 0.375rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--color-bone-line);
+    overflow-wrap: anywhere;
+  }
+  .contact-deflect-title {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+  .contact-deflect-body {
+    color: var(--color-muted-dark);
+    line-height: 1.5;
+  }
+  .contact-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .contact-link:hover {
+    text-decoration-thickness: 2px;
+  }
+</style>

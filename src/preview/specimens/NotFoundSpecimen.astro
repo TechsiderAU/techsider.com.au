@@ -1,0 +1,8 @@
+---
+// /preview/templates/not-found/: the 404 body with the gallery's SiteContext, whose hub links
+// all point at gallery pages (Insights at the live /insights/). Fixtures are imported statically
+// (only src/preview/ may import them).
+import NotFoundTemplate from "../../templates/NotFoundTemplate.astro";
+import { fixtureSite } from "../../fixtures/index.ts";
+---
+<NotFoundTemplate site={fixtureSite} />

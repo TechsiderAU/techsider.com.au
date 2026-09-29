@@ -1,0 +1,284 @@
+---
+// The Trust page (spec §8.11), body only: a Phase C route loads the trust, contact and services
+// data and wraps this in BaseLayout.
+// - Part A, "Our website and email today": true as at trust.asAt. The sub-processor table reads
+//   contact.subProcessors, the same data as the contact form's collection notice.
+// - Part B, "Default commitments in every engagement contract": only the items the owner has
+//   confirmed are in the standard terms (spec §12 item 2), each tagged "Contract term". An
+//   unconfirmed item never renders, and with none confirmed the section is left out.
+// - The independence policy (the Services data), the questionnaire FAQ (each answer dated and
+//   tagged Part A or Part B in a meta line that stays out of the FAQPage JSON-LD), the AI
+//   transparency statement with one card per system, and the dated log of changes.
+import PageHero from "../components/page/PageHero.astro";
+import PageSection from "../components/page/PageSection.astro";
+import BracketChip from "../components/ui/BracketChip.astro";
+import DataTable from "../components/ui/DataTable.astro";
+import FaqList from "../components/ui/FaqList.astro";
+import type { ContactData, ServicesData, TrustData } from "../content/page-schemas";
+import type { SiteContext } from "../lib/site";
+
+interface Props {
+  trust: TrustData;
+  contact: ContactData;
+  services: ServicesData;
+  site: SiteContext;
+}
+
+const { trust, contact, services } = Astro.props;
+const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+const confirmed = trust.partB.filter((term) => term.confirmed);
+const faq = trust.faq.map((item) => ({ q: item.q, a: item.a, meta: `Part ${item.part} · as at ${formatDate(item.asAt)}` }));
+const changes = [...trust.changes].sort((a, b) => b.date.getTime() - a.date.getTime());
+const SUB_PROCESSOR_COLUMNS = [
+  { key: "entity", label: "Entity" },
+  { key: "purpose", label: "Purpose" },
+  { key: "country", label: "Storage country" },
+  { key: "data", label: "Data touched" },
+];
+const subProcessors = contact.subProcessors.map((s) => ({ entity: s.entity, purpose: s.purpose, country: s.country, data: s.data }));
+---
+<div class="template" data-template="trust">
+  <PageHero title="Trust." highlight="Trust" />
+
+  <PageSection id="part-a" title="Our website and email today">
+    <p class="trust-asat" data-as-at>As at <time datetime={isoDate(trust.asAt)}>{formatDate(trust.asAt)}</time></p>
+    <DataTable caption="Sub-processors" columns={SUB_PROCESSOR_COLUMNS} rows={subProcessors} rowHeader="entity" />
+    <dl class="trust-facts">
+      <div class="trust-fact">
+        <dt>Cookies</dt>
+        <dd>{trust.partA.cookies}</dd>
+      </div>
+      <div class="trust-fact">
+        <dt>Analytics</dt>
+        <dd>{trust.partA.analytics}</dd>
+      </div>
+      <div class="trust-fact">
+        <dt>Enquiries</dt>
+        <dd>{trust.partA.enquiries}</dd>
+      </div>
+      <div class="trust-fact" data-security-contact>
+        <dt>Security contact</dt>
+        <dd>
+          <a href={`mailto:${trust.partA.securityContact}`} class="trust-link">{trust.partA.securityContact}</a> <span class="trust-securitytxt">(see <code>/.well-known/security.txt</code>)</span>
+        </dd>
+      </div>
+    </dl>
+  </PageSection>
+
+  {confirmed.length > 0 && (
+    <PageSection id="part-b" title="Default commitments in every engagement contract">
+      <ul class="trust-terms">
+        {confirmed.map((term) => (
+          <li class="trust-term" data-contract-term={term.id}>
+            <BracketChip label="Contract term" />
+            <h3 class="trust-item-title">{term.title}</h3>
+            <p class="trust-item-body">{term.body}</p>
+          </li>
+        ))}
+      </ul>
+    </PageSection>
+  )}
+
+  <PageSection id="independence" title="Independence policy" width="prose">
+    <ul class="trust-list">
+      {services.independence.map((line) => <li>{line}</li>)}
+    </ul>
+  </PageSection>
+
+  <PageSection id="questions" title="Security and data questions" width="prose">
+    <FaqList items={faq} />
+  </PageSection>
+
+  <PageSection id="ai-transparency" title="How we use AI">
+    <p class="trust-statement">{trust.transparency.statement}</p>
+    <ul class="trust-systems">
+      {trust.transparency.systems.map((system) => (
+        <li class="trust-system" data-ai-system>
+          <h3 class="trust-item-title">{system.name}</h3>
+          <dl class="trust-system-facts">
+            <div>
+              <dt>Purpose</dt>
+              <dd>{system.purpose}</dd>
+            </div>
+            <div>
+              <dt>Data</dt>
+              <dd>{system.data}</dd>
+            </div>
+            <div>
+              <dt>Human oversight</dt>
+              <dd>{system.human}</dd>
+            </div>
+          </dl>
+        </li>
+      ))}
+    </ul>
+  </PageSection>
+
+  <PageSection id="changes" title="Changes to this page" width="prose">
+    <ol class="trust-changes">
+      {changes.map((entry) => (
+        <li class="trust-change">
+          <time datetime={isoDate(entry.date)} class="trust-date">{formatDate(entry.date)}</time>
+          <span>{entry.change}</span>
+        </li>
+      ))}
+    </ol>
+  </PageSection>
+</div>
+
+<style>
+  /* Every section sits on bone: carbon text, muted-dark secondary text, bone-line hairlines. */
+  .trust-asat,
+  .trust-statement,
+  .trust-item-body {
+    margin: 0;
+  }
+  .trust-asat,
+  .trust-date {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-muted-dark);
+  }
+  .trust-facts,
+  .trust-system-facts {
+    display: grid;
+    margin: 0;
+  }
+  .trust-facts {
+    border-top: 1px solid var(--color-bone-line);
+  }
+  .trust-fact {
+    display: grid;
+    gap: 0.25rem 1.5rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--color-bone-line);
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 48rem) {
+    .trust-fact {
+      grid-template-columns: 12rem minmax(0, 1fr);
+    }
+  }
+  .trust-fact dt,
+  .trust-system-facts dt {
+    font-weight: 600;
+  }
+  .trust-fact dd,
+  .trust-system-facts dd {
+    margin: 0;
+    line-height: 1.55;
+  }
+  .trust-securitytxt {
+    color: var(--color-muted-dark);
+  }
+  .trust-securitytxt code {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-carbon);
+  }
+  .trust-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .trust-link:hover {
+    text-decoration-thickness: 2px;
+  }
+  /* The contract terms share hairlines: the page's one hairline cell grid, on bone (spec §6.4).
+     Each cell draws its own border and overlaps its neighbours by 1px, so an odd count leaves no
+     empty cell; the list's 1px end padding holds the last column's and row's overlap. */
+  .trust-terms {
+    display: grid;
+    margin: 0;
+    padding: 0 1px 1px 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .trust-terms {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .trust-term {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0 -1px -1px 0;
+    padding: 1.5rem 1.25rem;
+    border: 1px solid var(--color-bone-line);
+    overflow-wrap: anywhere;
+  }
+  .trust-item-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .trust-item-body {
+    line-height: 1.55;
+    color: var(--color-muted-dark);
+  }
+  .trust-list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style: square;
+    line-height: 1.55;
+  }
+  .trust-statement {
+    max-width: 48rem;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+  .trust-systems {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .trust-systems {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .trust-system {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    min-width: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--color-carbon);
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+  }
+  .trust-system-facts {
+    gap: 0.75rem;
+  }
+  .trust-changes {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-bone-line);
+  }
+  .trust-change {
+    display: grid;
+    gap: 0.25rem 1.5rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--color-bone-line);
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 40rem) {
+    .trust-change {
+      grid-template-columns: 11rem minmax(0, 1fr);
+    }
+  }
+</style>

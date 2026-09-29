@@ -1,0 +1,8 @@
+---
+// /preview/templates/contact-no-endpoint/: the contact page before Phase E configures a form
+// endpoint (formEndpoint: null): no form, and the email address leads. Fixtures are imported
+// statically (only src/preview/ may import them).
+import ContactTemplate from "../../templates/ContactTemplate.astro";
+import { contactNoEndpointFixture, fixtureSite } from "../../fixtures/index.ts";
+---
+<ContactTemplate contact={contactNoEndpointFixture} site={fixtureSite} />

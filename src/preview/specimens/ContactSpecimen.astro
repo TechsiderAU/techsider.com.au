@@ -1,0 +1,9 @@
+---
+// /preview/templates/contact/: the contact page with a form endpoint (an example.com URL), so
+// the form renders. fixtureSite doesn't show the privacy page, so the form's two privacy-policy
+// mentions exercise the plain-text fallback. Fixtures are imported statically (only
+// src/preview/ may import them).
+import ContactTemplate from "../../templates/ContactTemplate.astro";
+import { contactFixture, fixtureSite } from "../../fixtures/index.ts";
+---
+<ContactTemplate contact={contactFixture} site={fixtureSite} />

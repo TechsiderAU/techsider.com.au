@@ -1,0 +1,14 @@
+---
+// /preview/templates/legal-document/: the fixture legal document (the first of documentFixtures),
+// its body the fixture's rendered HTML, with the breadcrumb Home › Legal › title. Fixtures are
+// imported statically (only src/preview/ may import them).
+import DocumentTemplate from "../../templates/DocumentTemplate.astro";
+import { crumbs } from "../../lib/site";
+import { documentFixtures, fixtureSite } from "../../fixtures/index.ts";
+
+const [legal] = documentFixtures;
+const breadcrumb = crumbs(fixtureSite, ["legal", { label: legal.data.title, path: fixtureSite.page("websiteTerms").path }]);
+---
+<DocumentTemplate doc={legal.data} breadcrumb={breadcrumb}>
+  <Fragment set:html={legal.bodyHtml} />
+</DocumentTemplate>

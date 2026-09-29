@@ -32,6 +32,14 @@ import EvaluationMethodSpecimen from "./specimens/EvaluationMethodSpecimen.astro
 import DemosHubSpecimen from "./specimens/DemosHubSpecimen.astro";
 import DemoSpecimen from "./specimens/DemoSpecimen.astro";
 import DemoReportSpecimen from "./specimens/DemoReportSpecimen.astro";
+import AboutSpecimen from "./specimens/AboutSpecimen.astro";
+import TrustSpecimen from "./specimens/TrustSpecimen.astro";
+import LegalHubSpecimen from "./specimens/LegalHubSpecimen.astro";
+import LegalDocumentSpecimen from "./specimens/LegalDocumentSpecimen.astro";
+import ContactSpecimen from "./specimens/ContactSpecimen.astro";
+import ContactNoEndpointSpecimen from "./specimens/ContactNoEndpointSpecimen.astro";
+import SentSpecimen from "./specimens/SentSpecimen.astro";
+import NotFoundSpecimen from "./specimens/NotFoundSpecimen.astro";
 import { PREVIEW_PAGES, previewPath } from "../fixtures/index.ts";
 import type { PreviewGroup, PreviewKind, PreviewPage } from "../fixtures/index.ts";
 
@@ -69,6 +77,14 @@ const SPECIMENS: Record<Exclude<PreviewKind, "index">, AstroComponentFactory> = 
   "demos-hub": DemosHubSpecimen,
   demo: DemoSpecimen,
   "demo-report": DemoReportSpecimen,
+  about: AboutSpecimen,
+  trust: TrustSpecimen,
+  "legal-hub": LegalHubSpecimen,
+  "legal-document": LegalDocumentSpecimen,
+  contact: ContactSpecimen,
+  "contact-no-endpoint": ContactNoEndpointSpecimen,
+  sent: SentSpecimen,
+  "not-found": NotFoundSpecimen,
 };
 
 // The gallery nav lists the index first, then every other page under its group's heading.

@@ -1,0 +1,8 @@
+---
+// /preview/templates/trust/: the Trust page from the trust, contact and services fixtures.
+// trustFixture holds one unconfirmed Part B item, which must not render. Fixtures are imported
+// statically (only src/preview/ may import them).
+import TrustTemplate from "../../templates/TrustTemplate.astro";
+import { contactFixture, fixtureSite, servicesFixture, trustFixture } from "../../fixtures/index.ts";
+---
+<TrustTemplate trust={trustFixture} contact={contactFixture} services={servicesFixture} site={fixtureSite} />

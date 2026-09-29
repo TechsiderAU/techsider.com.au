@@ -1,0 +1,85 @@
+---
+// The 404 page (spec §8.11), body only: a Phase C route (src/pages/404.astro) wraps this in
+// BaseLayout with its own title and noindex. One H1, a card for every hub the build shows
+// (Home, the five section hubs, Insights and Demos; a hub that isn't shown is left out, never a
+// dead link), and a "Report this link" email with the address as plain text.
+import PageHero from "../components/page/PageHero.astro";
+import PageSection from "../components/page/PageSection.astro";
+import LinkCard from "../components/page/LinkCard.astro";
+import type { PageKey, SiteContext } from "../lib/site";
+
+interface Props {
+  site: SiteContext;
+}
+
+const { site } = Astro.props;
+const HUBS: PageKey[] = ["home", "solutions", "industries", "services", "resources", "insights", "demos", "about"];
+const hubs = HUBS.map((key) => site.page(key)).flatMap((p) => (p.href === null ? [] : [{ ...p, href: p.href }]));
+const reportHref = `mailto:${site.email}?subject=Broken%20link`;
+---
+<div class="template" data-template="not-found">
+  <PageHero title="Page not found." highlight="found" />
+
+  <PageSection id="hubs" title="Where to next">
+    <ul class="nf-hubs">
+      {hubs.map((hub) => (
+        <li class="nf-hub" data-hub={hub.key}>
+          <LinkCard title={hub.label} href={hub.href} body={hub.oneLiner} />
+        </li>
+      ))}
+    </ul>
+    <p class="nf-report" data-report-link>
+      <a href={reportHref} class="nf-link">Report this link</a> to <code class="nf-address" data-email>{site.email}</code>
+    </p>
+  </PageSection>
+</div>
+
+<style>
+  .nf-hubs {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 40rem) {
+    .nf-hubs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .nf-hubs {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .nf-hub {
+    display: flex;
+    min-width: 0;
+  }
+  .nf-hub > :global(*) {
+    flex: 1;
+  }
+  .nf-report {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.375rem;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .nf-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 600;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .nf-link:hover {
+    text-decoration-thickness: 2px;
+  }
+  .nf-address {
+    font-family: var(--font-mono);
+  }
+</style>

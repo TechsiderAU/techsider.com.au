@@ -1,0 +1,18 @@
+---
+// /preview/templates/legal-hub/: the Legal hub listing the fixture legal document (the first of
+// documentFixtures; the second is the evaluation method, which isn't a legal document). Its card
+// links to the gallery's legal-document page through the website-terms page link, which
+// fixtureSite shows. A second document points at the privacy page, which fixtureSite doesn't
+// show (a null href), so the hub must leave it out. Fixtures are imported statically (only
+// src/preview/ may import them).
+import LegalHubTemplate from "../../templates/LegalHubTemplate.astro";
+import { documentFixtures, fixtureSite } from "../../fixtures/index.ts";
+
+const [legal] = documentFixtures;
+const shown = { title: legal.data.title, summary: legal.data.summary, href: fixtureSite.page("websiteTerms").href, lastUpdated: legal.data.lastUpdated };
+const docs = [
+  shown,
+  { ...shown, title: "Fixture unshown legal document", href: fixtureSite.page("privacy").href },
+];
+---
+<LegalHubTemplate docs={docs} site={fixtureSite} />

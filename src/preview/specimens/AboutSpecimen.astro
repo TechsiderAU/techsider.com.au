@@ -1,0 +1,9 @@
+---
+// /preview/templates/about/: the About page from the about and positioning fixtures, with the
+// fixture insight cards (four published posts, so the template's limit of three shows) and the
+// gallery's SiteContext. Fixtures are imported statically (only src/preview/ may import them).
+import AboutTemplate from "../../templates/AboutTemplate.astro";
+import { insightCards } from "../../lib/views/insights";
+import { aboutFixture, fixtureSite, insightFixtures, positioningFixture } from "../../fixtures/index.ts";
+---
+<AboutTemplate about={aboutFixture} positioning={positioningFixture} insights={insightCards(insightFixtures, fixtureSite)} site={fixtureSite} />

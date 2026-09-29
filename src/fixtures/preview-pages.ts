@@ -18,7 +18,9 @@ export type PreviewKind =
   | "home" | "home-stale-insights"
   | "services" | "evaluation-partner"
   | "resources-hub" | "safe-use-kits" | "pay-for" | "evaluation-method"
-  | "demos-hub" | "demo" | "demo-report";
+  | "demos-hub" | "demo" | "demo-report"
+  | "about" | "trust" | "legal-hub" | "legal-document"
+  | "contact" | "contact-no-endpoint" | "sent" | "not-found";
 
 export interface PreviewPage {
   /** "" is the gallery index at /preview/. Template pages use `templates/<kind>`. */
@@ -52,6 +54,14 @@ export const PREVIEW_PAGES: PreviewPage[] = [
   { slug: "templates/demos-hub", title: "Fixture demos hub", kind: "demos-hub", group: "templates" },
   { slug: "templates/demo", title: "Fixture demo page", kind: "demo", group: "templates" },
   { slug: "templates/demo-report", title: "Fixture report demo page", kind: "demo-report", group: "templates" },
+  { slug: "templates/about", title: "Fixture about page", kind: "about", group: "templates" },
+  { slug: "templates/trust", title: "Fixture trust page", kind: "trust", group: "templates" },
+  { slug: "templates/legal-hub", title: "Fixture legal hub", kind: "legal-hub", group: "templates" },
+  { slug: "templates/legal-document", title: "Fixture legal document", kind: "legal-document", group: "templates" },
+  { slug: "templates/contact", title: "Fixture contact page", kind: "contact", group: "templates" },
+  { slug: "templates/contact-no-endpoint", title: "Fixture contact page with no form endpoint", kind: "contact-no-endpoint", group: "templates" },
+  { slug: "templates/sent", title: "Fixture message-sent page", kind: "sent", group: "templates" },
+  { slug: "templates/not-found", title: "Fixture not-found page", kind: "not-found", group: "templates" },
 ];
 
 export function previewPath(page: PreviewPage): string {
