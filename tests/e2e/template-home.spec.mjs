@@ -43,6 +43,24 @@ for (const vp of [WIDE, NARROW]) {
   });
 }
 
+// WebKit smooth-scrolled to a load-time fragment and, when that scroll was interrupted, stayed at
+// the top of the page (the anchor test above failed intermittently). global.css now turns smooth
+// scrolling on only while focus is inside the page: a fragment in the URL jumps at once, and an
+// in-page link someone activates still scrolls smoothly.
+for (const javaScriptEnabled of [false, true]) {
+  test(`smooth scrolling waits for focus in the page, so a Home fragment lands at once on load (JavaScript ${javaScriptEnabled ? "on" : "off"})`, async ({ browser }) => {
+    const ctx = await browser.newContext({ javaScriptEnabled, viewport: WIDE, reducedMotion: "no-preference" });
+    const page = await ctx.newPage();
+    await page.goto(`${HOME}#faq`);
+    const behaviour = () => page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior);
+    expect(await behaviour()).toBe("auto");
+    await expect(page.locator("#faq")).toBeInViewport();
+    await page.locator("#contact a[href]").first().focus();
+    expect(await behaviour()).toBe("smooth");
+    await ctx.close();
+  });
+}
+
 for (const path of [HOME, STALE]) {
   test(`${path} has no horizontal scroll at 320px`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 700 });

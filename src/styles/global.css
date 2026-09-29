@@ -51,8 +51,11 @@
     color-scheme: dark;
   }
 
+  /* Smooth scrolling only while focus is inside the page: an in-page link someone activates scrolls
+     smoothly, but a #fragment in the URL on load (or find-in-page) jumps at once. WebKit could stop a
+     smooth scroll to a load-time fragment part-way and leave the page at the top. */
   @media (prefers-reduced-motion: no-preference) {
-    html {
+    html:focus-within {
       scroll-behavior: smooth;
     }
   }

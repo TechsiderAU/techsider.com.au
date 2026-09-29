@@ -95,7 +95,9 @@ test("base rules sit in @layer base, so a utility can still restyle the focus ri
   // [selector, one of its declarations, enclosing @media or null]
   const base = [
     ["html", "background:var(--color-carbon)", null],
-    ["html", "scroll-behavior:smooth", "@media (prefers-reduced-motion: no-preference)"],
+    // Smooth only while focus is in the page: a load-time #fragment jumps at once (WebKit could stop
+    // a smooth scroll to it part-way and leave the page at the top).
+    ["html:focus-within", "scroll-behavior:smooth", "@media (prefers-reduced-motion: no-preference)"],
     ["body", "font-family:var(--font-sans)", null],
     ["::selection", "background:var(--color-acid)", null],
     [":focus-visible", "outline:2px solid var(--color-acid)", null],
@@ -109,6 +111,7 @@ test("base rules sit in @layer base, so a utility can still restyle the focus ri
       if (media) assert.ok(b.within.includes(media), `${sel} { ${decl} } is inside ${media}`);
     }
   }
+  assert.ok(!out.some((b) => b.prelude === "html" && b.decls.includes("scroll-behavior:smooth")), "html smooth-scrolls before focus is in the page");
   const ring = out.find((b) => b.prelude === ":focus-visible" && layerOf(b) === "@layer base");
   assert.deepEqual(ring.decls, ["outline:2px solid var(--color-acid)", "outline-offset:2px"]);
   for (const sel of [".focus-visible\\:outline-carbon:focus-visible", ".focus-visible\\:outline-offset-\\[-2px\\]:focus-visible"]) {
