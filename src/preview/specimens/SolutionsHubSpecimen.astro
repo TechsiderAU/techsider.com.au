@@ -1,0 +1,11 @@
+---
+// /preview/templates/solutions-hub/: the Solutions hub over all five fixture solution sets, with
+// the gallery's SiteContext, so every link stays inside the gallery. Fixtures are imported
+// statically (only src/preview/ may import them).
+import SolutionsHubTemplate from "../../templates/SolutionsHubTemplate.astro";
+import { solutionsHubView } from "../../lib/views/hubs";
+import { fixtureSite, solutionFixtures } from "../../fixtures/index.ts";
+
+const view = solutionsHubView({ solutions: solutionFixtures, site: fixtureSite });
+---
+<SolutionsHubTemplate view={view} />

@@ -1,0 +1,12 @@
+---
+// /preview/templates/industries-hub/: the Industries hub over all nine fixture industry sets and
+// the five fixture solution sets, with the gallery's SiteContext. fixture-industry-9 is not shown
+// (its href is null), so its card exercises the plain-text fallback; fixture-industry-3's long
+// hook exercises reflow at 320px. Fixtures are imported statically (only src/preview/ may import them).
+import IndustriesHubTemplate from "../../templates/IndustriesHubTemplate.astro";
+import { industriesHubView } from "../../lib/views/hubs";
+import { fixtureSite, industryFixtures, solutionFixtures } from "../../fixtures/index.ts";
+
+const view = industriesHubView({ industries: industryFixtures, solutions: solutionFixtures, site: fixtureSite });
+---
+<IndustriesHubTemplate view={view} />
