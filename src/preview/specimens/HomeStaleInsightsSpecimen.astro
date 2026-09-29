@@ -1,0 +1,8 @@
+---
+// /preview/templates/home-stale-insights/: the same Home page built at FIXTURE_STALE_NOW, when
+// the newest fixture insight is more than 45 days old, so the latest-insights block keeps its
+// #insights anchor and shows only the "All insights" link (spec §8.1 block 9).
+import HomeSpecimen from "./HomeSpecimen.astro";
+import { FIXTURE_STALE_NOW } from "../../fixtures/index.ts";
+---
+<HomeSpecimen now={FIXTURE_STALE_NOW} />

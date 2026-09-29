@@ -1,0 +1,481 @@
+---
+// The Home page (spec §8.1), body only: the Phase C route (src/pages/index.astro) loads the page
+// data, the solutions, industries, traces and insights, calls homeView() with the build time as
+// `now`, and wraps this in BaseLayout. Section ids keep the spec §7.1 anchors (#services #approach
+// #industries #demo #insights #faq #contact, which CI check 03 requires on the built Home page)
+// and add #switcher, #pillars and #where-it-runs.
+// - Slot `demo`: the demo band's engine (Phase D). The gallery fills it with a placeholder figure.
+// - The hero trace is decorative (spec §6.5): the TracePanel sits in an aria-hidden wrapper, and
+//   its title, provenance and lines are present once more as static text for assistive technology.
+//   B2 renders it without the type-in motion (Phase E).
+// - The four pillars carry data-pillar, never data-onshore-pillar: that attribute marks a
+//   package's onshore pillar, which CI check 10 ties to data-onshore="true".
+// Surfaces alternate from the carbon hero; the closing prompt sits on the page's carbon inside
+// the content width, so no full-width band sits directly above the footer (spec §6.4).
+import PageHero from "../components/page/PageHero.astro";
+import PageSection from "../components/page/PageSection.astro";
+import ChipRow from "../components/page/ChipRow.astro";
+import LinkCard from "../components/page/LinkCard.astro";
+import InsightCard from "../components/page/InsightCard.astro";
+import TracePanel from "../components/ui/TracePanel.astro";
+import FaqList from "../components/ui/FaqList.astro";
+import PromptBlock from "../components/ui/PromptBlock.astro";
+import type { HomeView } from "../lib/views/home";
+
+interface Props {
+  view: HomeView;
+}
+
+const { view } = Astro.props;
+const { hero, routes, whereItRuns, insights } = view;
+type TraceLine = HomeView["hero"]["trace"]["lines"][number];
+const traceLabel = hero.trace.provenance === "measured" ? `Measured run: ${hero.trace.run}` : "Illustrative trace";
+const lineText = (line: TraceLine) =>
+  [line.t, line.op, line.detail, line.metric ? `${line.metric.value}${line.metric.unit ?? ""}` : ""].filter(Boolean).join(" ");
+const routeColumns = [
+  { id: "mid-market", route: routes.midMarket, partner: null },
+  { id: "enterprise", route: routes.enterprise, partner: { text: routes.enterprise.partnerLine, href: routes.evaluationPartnerHref } },
+];
+---
+<div class="template" data-template="home">
+  <PageHero
+    title={hero.slogan}
+    highlight={hero.highlight}
+    display
+    prompt={hero.prompt}
+    proofLine={hero.proofLine}
+    sub={hero.subPromise}
+    ctas={hero.ctas}
+  >
+    <div class="home-hero-trace">
+      <div aria-hidden="true" data-hero-trace>
+        <TracePanel trace={hero.trace} />
+      </div>
+      <div class="sr-only" data-hero-trace-text>
+        <p>{hero.trace.title} ({traceLabel})</p>
+        <ol>
+          {hero.trace.lines.map((line) => <li>{lineText(line)}</li>)}
+        </ol>
+      </div>
+    </div>
+  </PageHero>
+
+  <PageSection id="switcher" title="Find your industry" surface="carbon">
+    <ChipRow id="switcher-industries" label="Industries" chips={view.industrySwitcher} />
+  </PageSection>
+
+  <PageSection id="services" title="Five solutions">
+    <ol class="home-solutions">
+      {view.solutions.map((s) => (
+        <li class="home-solution" data-solution-row>
+          <span class="home-solution-number">{s.number}</span>
+          <div class="home-solution-body">
+            <h3 class="home-solution-name">
+              {s.href === null ? s.shortName : <a href={s.href} class="home-solution-link">{s.shortName}</a>}
+            </h3>
+            <p class="home-solution-one-liner">{s.oneLiner}</p>
+            <p class="home-solution-for"><span class="home-solution-for-label">For:</span> {s.forLine}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </PageSection>
+
+  <PageSection id="demo" title="See it work" surface="carbon">
+    <div class="home-demo-slot" data-demo-slot>
+      <slot name="demo" />
+    </div>
+    {view.demo.allHref !== null && (
+      <p class="home-more"><a href={view.demo.allHref} class="home-more-link" data-all-demos>All demos <span aria-hidden="true">→</span></a></p>
+    )}
+  </PageSection>
+
+  <PageSection id="approach" title="Two ways in">
+    <div class="home-routes">
+      {routeColumns.map((column) => (
+        <div class="home-route" data-route={column.id}>
+          <h3 class="home-route-title">{column.route.title}</h3>
+          <ol class="home-route-steps">
+            {column.route.steps.map((step, i) => (
+              <li class="home-route-step">
+                <span class="home-route-step-index" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                <span class="home-route-step-text">
+                  <span class="home-route-step-name">{step.name}</span>
+                  <span class="home-route-step-body">{step.body}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          {column.partner && (
+            <p class="home-route-partner" data-partner-line>
+              {column.partner.href === null ? column.partner.text : <a href={column.partner.href} class="home-route-partner-link">{column.partner.text}</a>}
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  </PageSection>
+
+  <PageSection id="pillars" title="What you can hold us to" surface="carbon">
+    <ul class="home-pillars">
+      {view.pillars.map((pillar) => (
+        <li class="home-pillar" data-pillar={pillar.id}>
+          <h3 class="home-pillar-title">{pillar.title}</h3>
+          <p class="home-pillar-mechanism">{pillar.mechanism}</p>
+        </li>
+      ))}
+    </ul>
+  </PageSection>
+
+  <PageSection id="where-it-runs" title="Where it runs">
+    <ol class="home-choices">
+      {whereItRuns.choices.map((choice) => (
+        <li class="home-choice" data-delivery-letter={choice.letter}>
+          <h3 class="home-choice-title"><span class="home-choice-letter">({choice.letter})</span> {choice.title}</h3>
+          <p class="home-choice-body">{choice.body}</p>
+        </li>
+      ))}
+    </ol>
+    <div class="home-onshore-note" data-onshore-note>
+      <h3 class="home-onshore-note-title">The onshore note</h3>
+      <ul class="home-onshore-note-list">
+        {whereItRuns.onshoreNote.map((item) => <li>{item}</li>)}
+      </ul>
+    </div>
+  </PageSection>
+
+  <PageSection id="industries" title="Built for your industry" surface="carbon">
+    <ul class="home-industries">
+      {view.industries.map((industry) => (
+        <li class="home-industry">
+          <LinkCard title={industry.shortName} href={industry.href} body={industry.hook} level={3} />
+        </li>
+      ))}
+    </ul>
+  </PageSection>
+
+  <PageSection id="insights" title="Latest insights">
+    <div class="home-insights" data-latest-insights={insights.mode}>
+      {insights.mode === "cards" && (
+        <ul class="home-insight-cards">
+          {insights.cards.map((card) => (
+            <li class="home-insight"><InsightCard card={card} level={3} /></li>
+          ))}
+        </ul>
+      )}
+      {insights.allHref !== null && (
+        <p class="home-more"><a href={insights.allHref} class="home-more-link" data-all-insights>All insights <span aria-hidden="true">→</span></a></p>
+      )}
+    </div>
+  </PageSection>
+
+  <PageSection id="faq" title="Questions">
+    <FaqList items={view.faq} />
+  </PageSection>
+
+  <div id="contact" class="template-closing">
+    <PromptBlock command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
+  </div>
+</div>
+
+<style>
+  /* Tokens only, in the spec §6.1 text/surface pairs. Bone sections: carbon text, muted-dark
+     secondary text, acid-deep for lime-family marks, bone-line hairlines. Carbon sections: bone
+     text, muted secondary text, acid marks, graphite hairlines. Row rules only, no cell grid. */
+  .home-hero-trace {
+    margin-top: 0.5rem;
+  }
+
+  /* Five solutions: numbered rows ①–⑤ (bone). */
+  .home-solutions {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-bone-line);
+  }
+  .home-solution {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0 1rem;
+    padding-block: 1.5rem;
+    border-bottom: 1px solid var(--color-bone-line);
+  }
+  @media (min-width: 48rem) {
+    .home-solution {
+      grid-template-columns: 4rem minmax(0, 1fr);
+    }
+  }
+  .home-solution-number {
+    font-family: var(--font-mono);
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+    line-height: 1.1;
+    color: var(--color-acid-deep);
+  }
+  .home-solution-body {
+    display: grid;
+    gap: 0.375rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 64rem) {
+    .home-solution-body {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      column-gap: 2rem;
+    }
+    .home-solution-name {
+      grid-row: span 2;
+    }
+  }
+  .home-solution-name {
+    margin: 0;
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .home-solution-link,
+  .home-more-link,
+  .home-route-partner-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted-dark);
+    text-underline-offset: 4px;
+  }
+  .home-solution-link:hover,
+  .home-more-link:hover,
+  .home-route-partner-link:hover {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+  .home-solution-one-liner,
+  .home-solution-for {
+    margin: 0;
+    line-height: 1.5;
+  }
+  .home-solution-for {
+    color: var(--color-muted-dark);
+  }
+  .home-solution-for-label {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  /* See it work (carbon). */
+  .home-demo-slot {
+    min-width: 0;
+  }
+  .home-more {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+  }
+  [data-surface="carbon"] .home-more-link {
+    text-decoration-color: var(--color-muted);
+  }
+
+  /* Two ways in (bone): two columns from 48rem. */
+  .home-routes {
+    display: grid;
+    gap: 2.5rem;
+  }
+  @media (min-width: 48rem) {
+    .home-routes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 3rem;
+    }
+  }
+  .home-route {
+    display: grid;
+    align-content: start;
+    gap: 1.25rem;
+    min-width: 0;
+    padding-top: 1.25rem;
+    border-top: 2px solid var(--color-carbon);
+    overflow-wrap: anywhere;
+  }
+  .home-route-title {
+    margin: 0;
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .home-route-steps {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .home-route-step {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+  .home-route-step-index {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--color-acid-deep);
+  }
+  .home-route-step-text {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .home-route-step-name {
+    font-weight: 600;
+  }
+  .home-route-step-body {
+    line-height: 1.5;
+    color: var(--color-muted-dark);
+  }
+  .home-route-partner {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* What you can hold us to (carbon): four pillars. */
+  .home-pillars {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 40rem) {
+    .home-pillars {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .home-pillars {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .home-pillar {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 1.25rem;
+    border-top: 2px solid var(--color-acid);
+    background: var(--color-graphite);
+    overflow-wrap: anywhere;
+  }
+  .home-pillar-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .home-pillar-mechanism {
+    margin: 0;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+
+  /* Where it runs (bone): (a) (b) (c), then the onshore note. */
+  .home-choices {
+    display: grid;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 64rem) {
+    .home-choices {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 2rem;
+    }
+  }
+  .home-choice {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    min-width: 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-bone-line);
+    overflow-wrap: anywhere;
+  }
+  .home-choice-title,
+  .home-onshore-note-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .home-choice-letter {
+    font-family: var(--font-mono);
+    color: var(--color-acid-deep);
+  }
+  .home-choice-body {
+    margin: 0;
+    line-height: 1.5;
+    color: var(--color-muted-dark);
+  }
+  .home-onshore-note {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 48rem;
+    overflow-wrap: anywhere;
+  }
+  .home-onshore-note-list {
+    display: grid;
+    gap: 0.375rem;
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style: square;
+    line-height: 1.5;
+  }
+
+  /* Built for your industry (carbon): nine cards. */
+  .home-industries,
+  .home-insight-cards {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 40rem) {
+    .home-industries {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .home-industries,
+    .home-insight-cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .home-industry,
+  .home-insight {
+    display: grid;
+    min-width: 0;
+  }
+
+  /* Latest insights (bone). */
+  .home-insights {
+    display: grid;
+    gap: 2rem;
+  }
+
+  /* The closing prompt: inside the content width, on the page's carbon (spec §6.4). */
+  .template-closing {
+    max-width: 80rem;
+    margin-inline: auto;
+    padding: 4rem 1rem;
+  }
+  @media (min-width: 40rem) {
+    .template-closing {
+      padding-inline: 1.5rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .template-closing {
+      padding-block: 6rem;
+    }
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+// /preview/templates/home/: the Home template over every fixture set, with the gallery's
+// SiteContext, so every link stays inside the gallery. `now` is FIXTURE_NOW, when the newest
+// fixture insight is 9 days old, so the latest-insights block shows its cards. The demo band's
+// engine arrives in Phase D, so its slot holds a placeholder figure. Fixtures are imported
+// statically (only src/preview/ may import them).
+import HomeTemplate from "../../templates/HomeTemplate.astro";
+import { homeView } from "../../lib/views/home";
+import { insightCards } from "../../lib/views/insights";
+import {
+  FIXTURE_NOW, fixtureSite, homeFixture, industryFixtures, insightFixtures, positioningFixture, servicesFixture,
+  solutionFixtures, traceFixtures,
+} from "../../fixtures/index.ts";
+
+interface Props {
+  /** The build time the 45-day rule is decided at. HomeStaleInsightsSpecimen passes FIXTURE_STALE_NOW. */
+  now?: Date;
+}
+
+const { now = FIXTURE_NOW } = Astro.props;
+const view = homeView({
+  positioning: positioningFixture,
+  services: servicesFixture,
+  home: homeFixture,
+  solutions: solutionFixtures,
+  industries: industryFixtures,
+  traces: traceFixtures,
+  insights: insightCards(insightFixtures, fixtureSite),
+  now,
+  site: fixtureSite,
+});
+---
+<HomeTemplate view={view}>
+  <figure slot="demo" class="home-demo-placeholder" data-demo-placeholder>Fixture demo slot</figure>
+</HomeTemplate>
+
+<style>
+  .home-demo-placeholder {
+    display: grid;
+    place-items: center;
+    min-height: 12rem;
+    margin: 0;
+    padding: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-muted);
+    border: 1px dashed var(--color-graphite);
+    border-radius: 8px;
+  }
+</style>

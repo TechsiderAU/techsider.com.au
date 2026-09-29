@@ -92,6 +92,16 @@ test("the deploy build runs the CI checks in gate mode", () => {
   assert.deepEqual(build.env, { VERIFY_MODE: "gate" });
 });
 
+test("the deploy workflow also rebuilds weekly, so Home's 45-day insights rule re-evaluates without a push", () => {
+  const deploy = workflow("deploy.yml");
+  assert.deepEqual(Object.keys(deploy.on).sort(), ["push", "schedule", "workflow_dispatch"]);
+  assert.deepEqual(deploy.on.schedule, [{ cron: "0 20 * * 0" }]);
+  // A scheduled run builds the same way as a push: one build job, gated, then the deploy.
+  assert.deepEqual(Object.keys(deploy.jobs), ["build", "deploy"]);
+  assert.equal(deploy.jobs.build.if, undefined, "the build job must not skip scheduled runs");
+  assert.equal(deploy.jobs.deploy.if, undefined, "the deploy job must not skip scheduled runs");
+});
+
 test("focusKeys presses Option+Tab only in WebKit on macOS", async () => {
   const { focusKeys } = await import("./support/keys.mjs");
   assert.deepEqual(focusKeys("webkit", "darwin"), { next: "Alt+Tab", prev: "Alt+Shift+Tab" });

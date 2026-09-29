@@ -3,6 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Weekly rebuild (Sunday 20:00 UTC, Monday morning in Australia), so build-time rules such as
+  # Home's 45-day latest-insights rule (spec §8.1 block 9) re-evaluate without a push.
+  schedule:
+    - cron: "0 20 * * 0"
   workflow_dispatch:
 
 permissions:

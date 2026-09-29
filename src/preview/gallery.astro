@@ -21,6 +21,8 @@ import IndustrySpecimen from "./specimens/IndustrySpecimen.astro";
 import IndustryGovernmentSpecimen from "./specimens/IndustryGovernmentSpecimen.astro";
 import SolutionsHubSpecimen from "./specimens/SolutionsHubSpecimen.astro";
 import IndustriesHubSpecimen from "./specimens/IndustriesHubSpecimen.astro";
+import HomeSpecimen from "./specimens/HomeSpecimen.astro";
+import HomeStaleInsightsSpecimen from "./specimens/HomeStaleInsightsSpecimen.astro";
 import { PREVIEW_PAGES, previewPath } from "../fixtures/index.ts";
 import type { PreviewGroup, PreviewKind, PreviewPage } from "../fixtures/index.ts";
 
@@ -47,6 +49,8 @@ const SPECIMENS: Record<Exclude<PreviewKind, "index">, AstroComponentFactory> = 
   "industry-government": IndustryGovernmentSpecimen,
   "solutions-hub": SolutionsHubSpecimen,
   "industries-hub": IndustriesHubSpecimen,
+  home: HomeSpecimen,
+  "home-stale-insights": HomeStaleInsightsSpecimen,
 };
 
 // The gallery nav lists the index first, then every other page under its group's heading.
