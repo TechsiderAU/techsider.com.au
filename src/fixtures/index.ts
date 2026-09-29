@@ -19,6 +19,7 @@ import * as mockPanel from "./mock-panel.ts";
 import * as previewPages from "./preview-pages.ts";
 import * as sets from "./sets.ts";
 import * as pages from "./pages.ts";
+import * as site from "./site.ts";
 
 function deepFreeze(value: unknown, seen = new Set<unknown>()): void {
   if ((typeof value !== "object" && typeof value !== "function") || value === null || seen.has(value)) return;
@@ -30,7 +31,7 @@ function deepFreeze(value: unknown, seen = new Set<unknown>()): void {
   }
 }
 
-for (const mod of [solution, industry, regulatory, kit, trace, demo, report, mockPanel, previewPages, sets, pages]) {
+for (const mod of [solution, industry, regulatory, kit, trace, demo, report, mockPanel, previewPages, sets, pages, site]) {
   for (const value of Object.values(mod)) deepFreeze(value);
 }
 
@@ -45,3 +46,4 @@ export * from "./mock-panel.ts";
 export * from "./preview-pages.ts";
 export * from "./sets.ts";
 export * from "./pages.ts";
+export * from "./site.ts";
