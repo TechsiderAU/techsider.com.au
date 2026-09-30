@@ -25,7 +25,7 @@ npm run verify          # the CI checks again, against the existing dist/
 npm run preview         # serves dist/ at http://localhost:4321
 ```
 
-`npm run check` runs `astro check` on its own. `npm run brand` regenerates the logo and icon kit in `public/` from `scripts/generate_brand.py`; its header lists the Python and Node packages it needs.
+`npm run check` runs `astro check` on its own. `npm run brand` regenerates the logo and icon kit in `public/` from `scripts/generate_brand.py`; its header lists the Python and Node packages it needs. `npm run og` redraws only the social cards into `public/og/`, one per template kind in `src/lib/social-image.ts`. Run it after changing the slogan, the proof line, the Home prompt, a section tag, the generator or a font, and commit the PNGs: `tests/social-images.test.mjs` fails while any card is stale.
 
 ### `npm run build`
 

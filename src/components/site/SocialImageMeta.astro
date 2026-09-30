@@ -1,0 +1,17 @@
+---
+// The page's social card (spec §6.3, §11.3): og:image and twitter:image name the committed PNG for
+// the page's template kind, from its path (src/lib/social-image.ts), with its type, size and alt.
+// `npm run og` draws the cards into public/og/; tests/social-images.test.mjs holds every built
+// page to its card and every card to the copy it was drawn from.
+import { socialImage } from "../../lib/social-image";
+
+const image = socialImage(Astro.url.pathname);
+const url = new URL(image.path, Astro.site).toString();
+---
+<meta property="og:image" content={url} />
+<meta property="og:image:type" content={image.type} />
+<meta property="og:image:width" content={String(image.width)} />
+<meta property="og:image:height" content={String(image.height)} />
+<meta property="og:image:alt" content={image.alt} />
+<meta name="twitter:image" content={url} />
+<meta name="twitter:image:alt" content={image.alt} />

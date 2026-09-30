@@ -3,6 +3,7 @@ import "../styles/global.css";
 import archivoLatin from "@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url";
 import SiteHeader from "../components/site/SiteHeader.astro";
 import SiteFooter from "../components/site/SiteFooter.astro";
+import SocialImageMeta from "../components/site/SocialImageMeta.astro";
 import { jsonLd, pageGraph, type JsonLdNode } from "../lib/json-ld";
 
 interface Props {
@@ -64,13 +65,10 @@ const structuredData = pageGraph(site, Astro.url.pathname, graph);
     <meta property="og:description" content={description} />
     {canonical !== null && <meta property="og:url" content={canonical} />}
     <meta property="og:site_name" content="Techsider" />
-    <meta property="og:image" content="https://techsider.com.au/og.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content="https://techsider.com.au/og.png" />
+    <SocialImageMeta />
 
     <script type="application/ld+json" set:html={jsonLd(structuredData)} />
   </head>

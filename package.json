@@ -15,6 +15,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "brand": "python3 scripts/generate_brand.py",
+    "og": "python3 scripts/generate_brand.py --og",
     "test": "node --test tests/*.test.mjs",
     "build:preview": "TECHSIDER_NAV_PREVIEW=1 node scripts/ci/build.mjs --outDir dist-preview && node scripts/ci/run-all.mjs --dist dist-preview --checks 03,04,05,06,08,10,11",
     "test:e2e": "npm run build && npm run build:preview && playwright test"
