@@ -105,7 +105,9 @@ test("the Home demo band loads the ② demo lazily: its renderer and data sit be
   assert.ok(/\bdata-template="home"/.test(home), "dist/index.html is not the HomeTemplate page");
   const eager = [...scripts.eager.map(read), ...scripts.inline];
   const lazy = scripts.lazy.map(read);
-  assert.ok([...eager, ...lazy].some((code) => ENGINE.test(code)), "the Home page never loads the demo engine");
+  // The engine loads with the page and counts against the budget (see the header), so it must be in
+  // the eager JavaScript, not only in a lazy chunk (final review D8-M1).
+  assert.ok(eager.some((code) => ENGINE.test(code)), "the demo engine isn't in the Home page's eager JS, so the budget doesn't count it");
   assert.ok(DEMO_URLS.length > 0, "the ② demo has no scenario");
   for (const url of DEMO_URLS) {
     assert.ok(!eager.some((code) => code.includes(url)), `the ② demo's data (${url}) is in the Home page's eager JS`);
