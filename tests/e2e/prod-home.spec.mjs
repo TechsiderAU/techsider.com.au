@@ -120,16 +120,34 @@ test("/#approach stays in view at 390px when the ② band above it changes heigh
   // sits inside its size container, then shrink it by thousands of pixels a frame later, after the
   // browser's own scroll to /#approach. This makes the same change on purpose: the block below the
   // band must stay in view, which scroll anchoring does only while it doesn't hold on to the band.
+  // Scroll anchoring looks for its anchor below the 80px scroll-padding-top, where /#approach puts
+  // the band's bottom edge. When only the band's bottom padding shows there, as a few pixels of it
+  // did in the plan's dry run, it holds on to the band itself unless the band is excluded. So the
+  // change is made twice, after the browser's own scroll and then scrolled up by half that padding,
+  // and the exclusion itself is pinned, since a layout change can move that geometry.
   const ctx = await browser.newContext({ viewport: NARROW, reducedMotion: "reduce" });
-  const page = await ctx.newPage();
-  await openHome(page, "#approach");
-  await expect(page.locator("#approach")).toBeInViewport();
-  const shrunk = await page.locator("#demo .assist").evaluate((assist) => {
-    const before = assist.getBoundingClientRect().height;
-    for (const turns of assist.querySelectorAll(".assist-turns")) turns.hidden = true;
-    return before - assist.getBoundingClientRect().height;
-  });
-  expect(shrunk, "the band didn't change height").toBeGreaterThan(1000);
-  await expect(page.locator("#approach")).toBeInViewport();
+  let page;
+  for (const scrolledUp of [false, true]) {
+    const where = scrolledUp ? "scrolled up by half the band's bottom padding" : "after the browser's own scroll";
+    page = await ctx.newPage();
+    await openHome(page, "#approach");
+    await expect(page.locator("#approach")).toBeInViewport();
+    if (scrolledUp) {
+      const padding = await page.locator("#demo").evaluate((band) => {
+        const px = parseFloat(getComputedStyle(band).paddingBottom);
+        window.scrollBy({ top: -px / 2, behavior: "instant" });
+        return px;
+      });
+      expect(padding, "the band has no bottom padding").toBeGreaterThan(0);
+    }
+    const shrunk = await page.locator("#demo .assist").evaluate((assist) => {
+      const before = assist.getBoundingClientRect().height;
+      for (const turns of assist.querySelectorAll(".assist-turns")) turns.hidden = true;
+      return before - assist.getBoundingClientRect().height;
+    });
+    expect(shrunk, `the band didn't change height (${where})`).toBeGreaterThan(1000);
+    await expect(page.locator("#approach"), `#approach left the viewport (${where})`).toBeInViewport();
+  }
+  expect(await page.locator("#demo").evaluate((band) => getComputedStyle(band).overflowAnchor), "the ② band takes part in scroll anchoring").toBe("none");
   await ctx.close();
 });
