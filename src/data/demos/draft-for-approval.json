@@ -66,7 +66,7 @@
         "body": "We're booked to replace the rangehood light at SYN-126 on Thursday at 9am. Can we collect the keys from your office first?",
         "category": "Contractor access",
         "action": "draft-for-approval",
-        "draft": "Hi, the keys for SYN-126 will be at the front desk from 8:30am on Thursday. Please sign them out when you collect them and return them the same day.",
+        "draft": "Hi, the keys for SYN-126 can be collected from our office before the job on Thursday. Please sign them out when you collect them.",
         "to": "Synthetic Electrical",
         "reason": "A contractor asking for keys for a booked job. The draft confirms the pickup, and a property manager checks the booking before approving it."
       },
@@ -97,7 +97,7 @@
       { "label": "Read", "detail": "Read the new mail in the shared mailbox and the after-hours SMS line, read-only", "ms": { "value": 220, "unit": "ms" } },
       { "label": "Sort", "detail": "Gave each message a category, an action and the reason for both", "ms": { "value": 1340, "unit": "ms" } },
       { "label": "Check", "detail": "Found the message with no clear request and sent it to a property manager, with no draft", "ms": { "value": 280, "unit": "ms" } },
-      { "label": "Draft", "detail": "Drafted a work order, a task, two owner updates and a reply to a contractor, from the office's own templates", "ms": { "value": 2910, "unit": "ms" } },
+      { "label": "Draft", "detail": "Drafted a work order, a task, two owner updates and a reply to a contractor", "ms": { "value": 2910, "unit": "ms" } },
       { "label": "Hold", "detail": "Held every draft for a property manager's approval, so nothing was sent", "ms": { "value": 60, "unit": "ms" } },
       { "label": "Log", "detail": "Recorded each step's input, output and time in this trace", "ms": { "value": 15, "unit": "ms" } }
     ]

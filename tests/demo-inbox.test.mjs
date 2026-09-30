@@ -20,7 +20,7 @@ import { FAIL_PHRASES, WARN_PHRASES } from "../scripts/ci/checks/04-banned-phras
 import { metricTokens } from "../scripts/ci/checks/06-provenance.mjs";
 import { CURRENCY } from "../scripts/ci/checks/11-pricing.mjs";
 import { elementsWith, startTags } from "../scripts/ci/lib.mjs";
-import { ACTION_LABEL, announcements, approvalLine, formatMetric, inboxPlan, inboxSummary, introText } from "../src/lib/inbox-copy.ts";
+import { ACTION_LABEL, announcements, approvalLine, draftTo, formatMetric, inboxPlan, inboxSummary, introText } from "../src/lib/inbox-copy.ts";
 import { LOG, mountDemo } from "../src/scripts/demo-engine.ts";
 import { createPlayback } from "../src/scripts/playback.ts";
 import { buildView, inboxRenderer } from "../src/scripts/demo/inbox.ts";
@@ -108,10 +108,11 @@ test("eight messages: five drafted for approval, one escalated as ambiguous with
   for (const m of drafts) assert.doesNotMatch(m.to, /tenant/i, `${m.id}: the draft goes to a tenant`);
   for (const m of [...escalated, ...filed]) assert.equal(m.to, undefined, `${m.id} is "${m.action}" but names a recipient`);
   // The trace's Draft step names that set as it is (ledger ruling R4): one work order, one task, two
-  // owner updates and one reply to a contractor, with no plural the drafts don't bear out.
+  // owner updates and one reply to a contractor, with no plural the drafts don't bear out, and no
+  // mechanism the demo doesn't show, such as templates (final review D4-M2).
   assert.equal(
     DATA.trace.find((step) => step.label === "Draft")?.detail,
-    "Drafted a work order, a task, two owner updates and a reply to a contractor, from the office's own templates",
+    "Drafted a work order, a task, two owner updates and a reply to a contractor",
   );
   assert.match(DATA.trace[0].detail, /\bshared mailbox\b.*\bSMS line\b.*\bread-only\b/, "the trace reads only the mailbox and the SMS line");
   assert.match(escalated[0].reason, /^Ambiguous: /, "the escalation says it is ambiguous (spec §9.1)");
@@ -120,6 +121,27 @@ test("eight messages: five drafted for approval, one escalated as ambiguous with
   // An email has a subject line and an SMS doesn't; the inbox holds both (spec §9.1 "emails/SMS").
   for (const m of messages) assert.equal(m.subject !== undefined, m.channel === "email", `${m.id}: subject on ${m.channel}`);
   assert.equal(messages.filter((m) => m.channel === "sms").length, 3, "three SMS and five emails");
+});
+
+test("a draft says only what its message supports: no time, place or return rule of its own (final review D4-M1)", () => {
+  const { drafts } = inboxSummary(DATA);
+  const keys = drafts.find((m) => m.id === "keys-syn-126");
+  assert.equal(keys.draft, "Hi, the keys for SYN-126 can be collected from our office before the job on Thursday. Please sign them out when you collect them.");
+  for (const m of drafts) {
+    for (const time of m.draft.match(/\b\d{1,2}(?::\d{2})?\s?(?:am|pm)\b/gi) ?? []) assert.ok(m.body.includes(time), `${m.id}: the draft sets a time, ${time}, its message doesn't`);
+    assert.doesNotMatch(m.draft, /\bfront desk\b|\bsame day\b/i, m.id);
+  }
+});
+
+test("each approval row names who the draft goes to and what it is about in the demo's own words, never a sender's (final review D4-M3)", () => {
+  const { drafts } = inboxSummary(DATA);
+  assert.deepEqual(drafts.map(draftTo), [
+    "Draft to a contractor: Repair request",
+    "Draft to a property manager: Inspection question",
+    "Draft to the owner of SYN-120: Owner instruction",
+    "Draft to Synthetic Electrical: Contractor access",
+    "Draft to the owner of SYN-140: Lease renewal",
+  ]);
 });
 
 test("every sender, property and organisation is visibly synthetic, and nothing real-looking slips in (ruling 3)", () => {

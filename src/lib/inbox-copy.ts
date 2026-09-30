@@ -65,11 +65,13 @@ export function inboxSummary(data: InboxData): InboxSummary {
 }
 
 /**
- * One approval-queue row: who the draft goes to, and what it's about. Drafts are internal, never
- * replies to tenants (controller ruling 5), so the recipient is the message's `to`, not its sender.
+ * One approval-queue row: who the draft goes to, and what it's about. No draft goes to a tenant
+ * (controller ruling 5), so the recipient is the message's `to`, not its sender; and the row names the
+ * message's category, in the demo's own words, not the sender's subject line, whose "our" would be the
+ * sender's (final review D4-M3).
  */
 export function draftTo(m: InboxMessage): string {
-  return `Draft to ${m.to}: ${m.subject ?? `${m.category} from ${m.from}`}`;
+  return `Draft to ${m.to}: ${m.category}`;
 }
 
 export function approvalLine(s: InboxSummary): string {
