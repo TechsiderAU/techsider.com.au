@@ -3,7 +3,8 @@ import { defineConfig, devices } from "@playwright/test";
 // Every spec runs in Chromium, WebKit and Firefox against the preview build (dist-preview/:
 // every planned page in the nav, plus the /preview/ template gallery). prod-*.spec.mjs specs
 // run once, in Chromium, against the production build (dist/), where most pages are still
-// planned. `npm run test:e2e` builds both before Playwright starts.
+// planned. `npm run test:e2e` builds both before Playwright starts. A third server, the stand-in form
+// provider (tests/support/mock-form.mjs), takes the gallery contact form's enquiries.
 const PREVIEW = "http://127.0.0.1:4322";
 const PROD = "http://127.0.0.1:4323";
 const PROD_SPECS = "**/prod-*.spec.mjs";
@@ -20,6 +21,7 @@ export default defineConfig({
   webServer: [
     { command: "node tests/support/static-server.mjs dist-preview 4322", url: `${PREVIEW}/`, reuseExistingServer: false, timeout: 30_000 },
     { command: "node tests/support/static-server.mjs dist 4323", url: `${PROD}/`, reuseExistingServer: false, timeout: 30_000 },
+    { command: "node tests/support/mock-form.mjs 4324", url: "http://127.0.0.1:4324/", reuseExistingServer: false, timeout: 30_000 },
   ],
   projects: [
     { name: "chromium", testIgnore: PROD_SPECS, use: { ...devices["Desktop Chrome"], baseURL: PREVIEW } },

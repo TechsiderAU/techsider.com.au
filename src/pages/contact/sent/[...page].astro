@@ -1,0 +1,24 @@
+---
+// /contact/sent/ (spec §8.11, §10.2): SentTemplate over the contact data. The form provider
+// redirects here after a plain POST, and the form's script opens it once the provider accepts an
+// enquiry. A gated route: nav.ts keeps it planned until src/data/contact.ts has a form endpoint, and
+// gatedPaths() fails the build if it is live without one, since no form would lead to it. noindex,
+// and astro.config.mjs leaves it out of the sitemap (nav.ts noindex).
+import type { GetStaticPaths } from "astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import SentTemplate from "../../../templates/SentTemplate.astro";
+import { isPreview } from "../../../data/nav";
+import { CONTACT } from "../../../data/contact";
+import { pageDescription, pageTitle } from "../../../lib/meta";
+import { gatedPaths, pageAt } from "../../../lib/pages";
+import { siteContext } from "../../../lib/site";
+
+export const getStaticPaths = (() =>
+  gatedPaths("/contact/sent/", CONTACT.formEndpoint !== null, "src/data/contact.ts has no formEndpoint, so no form leads to it (spec §10.2)")
+) satisfies GetStaticPaths;
+
+const entry = pageAt("/contact/sent/");
+---
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)} noindex={entry.noindex}>
+  <SentTemplate contact={CONTACT} site={siteContext(isPreview())} />
+</BaseLayout>

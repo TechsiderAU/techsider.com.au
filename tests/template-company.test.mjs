@@ -17,6 +17,7 @@ import {
   aboutFixture, contactFixture, contactNoEndpointFixture, documentFixtures, fixtureSite, insightFixtures,
   positioningFixture, servicesFixture, trustFixture, trustNoTermsFixture,
 } from "../src/fixtures/index.ts";
+import { MOCK_FORM } from "../src/preview/mock-form.ts";
 
 const PAGES = {
   about: { template: "about", h1: "About.", highlight: "About" },
@@ -335,12 +336,13 @@ test("contact: a plain POST form to the endpoint, with native validation on ever
   const form = one(mainOf(page("contact")), "data-contact-form");
   assert.equal(form.name, "form");
   assert.equal(form.attrs.method, "post");
-  assert.equal(form.attrs.action, contactFixture.formEndpoint);
+  assert.equal(form.attrs.action, MOCK_FORM.formEndpoint);
   assert.ok(!("novalidate" in form.attrs), "the form turns native validation off");
   const controls = Object.fromEntries(
     elements(form.inner, (t) => ["input", "select", "textarea"].includes(t.name)).map((c) => [c.attrs.name, c]),
   );
-  assert.deepEqual(Object.keys(controls), ["name", "email", "organisation", "industry", "size", "interest", "message", "consent", "website"]);
+  // The stand-in provider's hidden fields, the enquiry fields, then the honeypot under the provider's name.
+  assert.deepEqual(Object.keys(controls), ["_redirect", "_append", "name", "email", "organisation", "industry", "size", "interest", "message", "consent", "_gotcha"]);
   const expect = {
     name: { tag: "input", type: "text", autocomplete: "name" },
     email: { tag: "input", type: "email", autocomplete: "email" },
@@ -378,7 +380,7 @@ test("contact: every visible control has a visible <label for>; the privacy poli
   const labels = new Map(tagged(form.inner, "label").map((l) => [l.attrs.for, l]));
   const honeypot = one(form.inner, "data-honeypot");
   for (const c of elements(form.inner, (t) => ["input", "select", "textarea"].includes(t.name))) {
-    if (honeypot.inner.includes(`id="${c.attrs.id}"`)) continue;
+    if (c.attrs.type === "hidden" || honeypot.inner.includes(`id="${c.attrs.id}"`)) continue;
     const label = labels.get(c.attrs.id);
     assert.ok(label, `${c.attrs.name} has no <label for="${c.attrs.id}">`);
     assert.ok(text(label.inner).length > 0, `${c.attrs.name}'s label is empty`);
@@ -398,7 +400,7 @@ test("contact: the honeypot is hidden from everyone and never required", () => {
   assert.match(honeypot.attrs.style, /^display:\s*none;?$/);
   const inputs = tagged(honeypot.inner, "input");
   assert.equal(inputs.length, 1);
-  assert.equal(inputs[0].attrs.name, "website");
+  assert.equal(inputs[0].attrs.name, MOCK_FORM.honeypotField);
   assert.equal(inputs[0].attrs.tabindex, "-1");
   assert.equal(inputs[0].attrs.autocomplete, "off");
   assert.ok(!("required" in inputs[0].attrs));

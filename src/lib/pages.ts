@@ -22,6 +22,17 @@ export function singletonPaths(path: string): { params: { page: undefined } }[] 
 }
 
 /**
+ * getStaticPaths for a gated singleton page, one that may only go live once `open` holds (spec
+ * §10.2: /contact/sent/ needs the contact form's endpoint): singletonPaths(path), except that the
+ * build fails, naming `why`, while nav.ts has the page live and `open` is false. The preview build
+ * shows planned pages, so it builds the page either way.
+ */
+export function gatedPaths(path: string, open: boolean, why: string): { params: { page: undefined } }[] {
+  if (pageAt(path).status === "live" && !open) throw new Error(`nav.ts: ${path} is live, but ${why}`);
+  return singletonPaths(path);
+}
+
+/**
  * Ids (last path segment) of the shown pages directly under `base` (e.g. "/solutions/"), in nav
  * order. Throws when no nav page sits under `base`, so a mistyped base fails the build instead of
  * building nothing.

@@ -1,17 +1,27 @@
 ---
-// The enquiry form (spec §10.2): a plain HTML POST to the form provider's endpoint, which
-// redirects to /contact/sent/. Phase E picks the provider and adds the inline JS (in-place
-// errors, ?interest= and ?industry= preselection); without JS this form already works.
+// The enquiry form (spec §10.2). Without JavaScript it is a plain HTML POST to the form provider's
+// endpoint, which redirects to /contact/sent/. With it, src/scripts/contact-form.ts preselects
+// ?industry= and ?interest=, shows each error under its field and in the summary, and sends the same
+// fields by fetch (see that file).
+// Provider-agnostic (Phase E, blueprint decision 1): the contact data names the provider's own
+// fields. The redirect field, when the provider takes one, carries /contact/sent/'s absolute URL;
+// the hidden fields go with every enquiry (Formspark's _append=false keeps the enquiry out of the
+// redirect URL); the honeypot carries the name the provider's spam filter reads. The form renders
+// only while /contact/sent/ is shown, so the provider never redirects to a missing page.
 // Native validation stops an incomplete enquiry in the browser: every field is required, the
 // email is type="email", the message has maxlength="1000", and fields carry autocomplete where
-// one applies. Spam defence needs no JavaScript: a honeypot input that its display:none wrapper
-// hides from everyone (tabindex="-1", autocomplete="off"), plus the provider's own filtering.
+// one applies. Each field has an empty, hidden error line for the script to fill, carrying its words
+// (data-missing, data-invalid), and the summary above the fields is a polite live region, empty
+// until the script reports, carrying its lines (data-say-*). Spam defence needs no
+// JavaScript: a honeypot input that its display:none wrapper hides from everyone (tabindex="-1",
+// autocomplete="off"), plus the provider's own filtering.
 // The collection notice sits directly above the submit button. It reads the same contact data as
 // the Trust page's sub-processor table, so the two can't disagree. The privacy policy is a link
 // only while its page is shown; otherwise it is plain text, never a dead link.
 import type { ContactData } from "../../content/page-schemas";
 import type { SiteContext } from "../../lib/site";
 import { EXTRA_INTERESTS, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../../lib/fixed-copy";
+import { FIELD_ERRORS, FORM_MESSAGES, MESSAGE_MAX, type EnquiryField } from "../../lib/contact-form";
 
 interface Props {
   contact: ContactData;
@@ -23,13 +33,24 @@ const endpoint = contact.formEndpoint;
 if (endpoint === null) {
   throw new Error("ContactForm: contact.formEndpoint is null; the contact page shows the email address instead");
 }
-const MESSAGE_MAX = 1000;
 const privacyHref = site.page("privacy").href;
 const { formProvider, emailProvider } = contact;
 if (formProvider === null) {
   throw new Error("ContactForm: contact.formProvider is null; the collection notice names the form provider, so the form needs one (spec §10.2)");
 }
-const selects = [
+const sent = site.page("sent").href;
+if (sent === null) {
+  throw new Error("ContactForm: /contact/sent/ isn't shown, so the form provider would redirect to a missing page. Put it live in nav.ts with the form endpoint (spec §10.2)");
+}
+// The provider's hidden fields, in order: the redirect (an absolute URL: the provider sends the
+// browser there from its own origin), then the fixed values.
+const hidden: [string, string][] = [
+  ...(contact.redirectField === null ? [] : [[contact.redirectField, new URL(sent, Astro.site).href] as [string, string]]),
+  ...Object.entries(contact.hiddenFields),
+];
+/** An error line's words, for the script to show (an attribute left undefined isn't rendered). */
+const words = (name: EnquiryField) => ({ "data-missing": FIELD_ERRORS[name].missing, "data-invalid": FIELD_ERRORS[name].invalid });
+const selects: { id: string; name: EnquiryField; label: string; options: { value: string; label: string }[] }[] = [
   {
     id: "contact-industry",
     name: "industry",
@@ -53,20 +74,35 @@ const selects = [
   },
 ];
 ---
-<form method="post" action={endpoint} class="contact-form" data-contact-form>
-  <p class="contact-form-note">All fields are required.</p>
+<form method="post" action={endpoint} class="contact-form" data-contact-form data-sent={sent}>
+  {hidden.map(([name, value]) => <input type="hidden" name={name} value={value} />)}
+  <div class="contact-intro">
+    <p class="contact-form-note">All fields are required.</p>
+    <div
+      class="contact-summary"
+      data-form-summary
+      aria-live="polite"
+      data-say-invalid={FORM_MESSAGES.invalid}
+      data-say-sending={FORM_MESSAGES.sending}
+      data-say-failed={FORM_MESSAGES.failed}
+      data-say-unconfirmed={FORM_MESSAGES.unconfirmed}
+    ></div>
+  </div>
   <div class="contact-fields">
     <div class="contact-field">
       <label for="contact-name" class="contact-label">Name</label>
       <input id="contact-name" name="name" type="text" autocomplete="name" required class="contact-control" />
+      <p id="contact-name-error" class="contact-error" data-error-for="name" {...words("name")} hidden></p>
     </div>
     <div class="contact-field">
       <label for="contact-email" class="contact-label">Work email</label>
       <input id="contact-email" name="email" type="email" autocomplete="email" required class="contact-control" />
+      <p id="contact-email-error" class="contact-error" data-error-for="email" {...words("email")} hidden></p>
     </div>
     <div class="contact-field">
       <label for="contact-organisation" class="contact-label">Organisation</label>
       <input id="contact-organisation" name="organisation" type="text" autocomplete="organization" required class="contact-control" />
+      <p id="contact-organisation-error" class="contact-error" data-error-for="organisation" {...words("organisation")} hidden></p>
     </div>
     {selects.map((select) => (
       <div class="contact-field">
@@ -77,6 +113,7 @@ const selects = [
             {select.options.map((option) => <option value={option.value}>{option.label}</option>)}
           </select>
         </span>
+        <p id={`${select.id}-error`} class="contact-error" data-error-for={select.name} {...words(select.name)} hidden></p>
       </div>
     ))}
     <div class="contact-field contact-field-wide">
@@ -92,23 +129,34 @@ const selects = [
         class="contact-control contact-textarea"
       ></textarea>
       <p id="contact-message-hint" class="contact-hint">Up to {MESSAGE_MAX.toLocaleString("en-AU")} characters.</p>
+      <p id="contact-message-error" class="contact-error" data-error-for="message" {...words("message")} hidden></p>
     </div>
   </div>
-  <label for="contact-consent" class="contact-consent">
-    <input id="contact-consent" name="consent" type="checkbox" value="yes" required class="contact-checkbox" />
-    <span>I agree to Techsider handling this enquiry as the {privacyHref ? <a href={privacyHref} class="contact-link">privacy policy</a> : "privacy policy"} describes.</span>
-  </label>
+  <div class="contact-field">
+    <label for="contact-consent" class="contact-consent">
+      <input id="contact-consent" name="consent" type="checkbox" value="yes" required class="contact-checkbox" />
+      <span>I agree to Techsider handling this enquiry as the {privacyHref ? <a href={privacyHref} class="contact-link">privacy policy</a> : "privacy policy"} describes.</span>
+    </label>
+    <p id="contact-consent-error" class="contact-error" data-error-for="consent" {...words("consent")} hidden></p>
+  </div>
   <div data-honeypot style="display:none">
     <label for="contact-website">Website</label>
-    <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    <input id="contact-website" name={contact.honeypotField} type="text" tabindex="-1" autocomplete="off" />
   </div>
   <p class="contact-notice" data-collection-notice>Your enquiry is sent via {formProvider.name} ({formProvider.country}) to our mailbox ({emailProvider.name}, {emailProvider.country}). See our {privacyHref ? <a href={privacyHref} class="contact-link">privacy policy</a> : "privacy policy"}.</p>
   <button type="submit" class="btn btn-primary contact-submit">Send enquiry</button>
 </form>
 
+<script>
+  import { initContactForm } from "../../scripts/contact-form";
+  for (const form of document.querySelectorAll<HTMLFormElement>("[data-contact-form]")) initContactForm(form);
+</script>
+
 <style>
   /* Written for bone, the contact page's reading surface (spec §6.1): carbon text, muted-dark
-     secondary text, 1px muted-dark input borders that turn carbon on focus beside the focus ring. */
+     secondary text, 1px muted-dark input borders that turn carbon on focus beside the focus ring.
+     An error is blocked-deep text on bone (a listed pair) beside its field, never colour alone:
+     the words say what is wrong, and the control carries aria-invalid. */
   .contact-form {
     display: grid;
     gap: 1.5rem;
@@ -127,6 +175,48 @@ const selects = [
   }
   .contact-hint {
     font-size: 0.8125rem;
+  }
+  .contact-error {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--color-blocked-deep);
+  }
+  /* The summary is in the page from the start, so screen readers hear what the script writes to it,
+     but it takes no room until then. */
+  .contact-summary:not(:empty) {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    color: var(--color-carbon);
+    border: 2px solid var(--color-carbon);
+    border-radius: 6px;
+  }
+  .contact-summary[data-state="invalid"],
+  .contact-summary[data-state="failed"] {
+    border-color: var(--color-blocked-deep);
+  }
+  .contact-summary :global(p) {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .contact-summary :global(ul) {
+    display: grid;
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style: disc;
+  }
+  .contact-summary :global(a) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px; /* tap target, spec §6.6 */
+    color: var(--color-blocked-deep);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
   .contact-fields {
     display: grid;
@@ -163,6 +253,10 @@ const selects = [
   }
   .contact-control:focus {
     border-color: var(--color-carbon);
+  }
+  .contact-control[aria-invalid="true"] {
+    border-color: var(--color-blocked-deep);
+    box-shadow: inset 0 0 0 1px var(--color-blocked-deep);
   }
   .contact-control::placeholder {
     color: var(--color-muted-dark);

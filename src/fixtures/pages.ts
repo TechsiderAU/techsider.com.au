@@ -133,6 +133,9 @@ export const contactFixture: ContactData = {
   replyTime: "one fixture business day",
   formEndpoint: "https://example.com/fixture/form",
   formProvider: { name: "Fixture Forms", country: "Fixture country A" },
+  redirectField: "fixture-redirect",
+  hiddenFields: { "fixture-hidden": "Fixture value" },
+  honeypotField: "fixture-honeypot",
   emailProvider: { name: "Fixture Mail", country: "Fixture country B" },
   subProcessors: [
     { entity: "Fixture Forms", purpose: "Fixture purpose: receives the fixture contact form", country: "Fixture country A", data: "Fixture data: name, email and message" },
@@ -151,7 +154,7 @@ export const contactFixture: ContactData = {
   ],
 };
 
-/** No form endpoint yet (Phase E): the contact page leads with the email address. */
+/** No form endpoint yet (the owner hasn't chosen a provider): the contact page leads with the email address. */
 export const contactNoEndpointFixture: ContactData = { ...contactFixture, formEndpoint: null };
 
 const asAt = new Date("2026-09-15");

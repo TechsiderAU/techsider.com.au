@@ -1,6 +1,7 @@
 import { z } from "astro/zod";
 import { deliveryChoice, faqItem, slug } from "./schemas.ts";
 import { HOME_TRUST_QUESTION } from "../lib/fixed-copy.ts";
+import { ENQUIRY_FIELDS } from "../lib/contact-form.ts";
 // Typed page data for the singleton pages (Services, Evaluation Partner, Contact, Trust, About,
 // Home) and the positioning copy they share. Phase C writes the data in src/data/*.ts; long
 // prose (the legal documents and the evaluation method) is the `documents` markdown collection.
@@ -58,19 +59,44 @@ export const servicesData = z.strictObject({
   }
 });
 
+/** A field name a form provider reads ("_redirect", "_append", "_gotcha"): a token, safe as a name attribute. */
+const providerField = z.string().regex(/^[A-Za-z_][A-Za-z0-9_-]*$/);
+
 export const contactData = z.strictObject({
   replyTime: z.string(), // written once: /contact/ and /contact/sent/ read it, and no other page states a reply time (spec §8.11)
-  // null until Phase E: the page then shows the email fallback only. https only: the form posts personal data.
+  // null until the owner chooses a form provider (spec §12 item 1): the page then shows the email
+  // fallback only. https only: the form posts personal data.
   formEndpoint: z.url({ protocol: /^https$/ }).nullable(),
-  // null until Phase E chooses the form provider: no placeholder names one before then (blueprint
-  // ruling 16). A form endpoint needs it, because the collection notice names it (spec §10.2).
+  // null until then too: no placeholder names a provider (blueprint ruling 16). A form endpoint
+  // needs it, because the collection notice names it (spec §10.2).
   formProvider: z.strictObject({ name: z.string(), country: z.string() }).nullable(),
+  // The provider's own field names (Phase E, blueprint decision 1), so the form posts to any
+  // provider that takes a plain POST and keeps the enquiry fields' names. redirectField: the hidden
+  // field that carries /contact/sent/'s URL (Formspark "_redirect", Formcarry "_next"), or null
+  // where the provider's dashboard sets the redirect. hiddenFields: fixed values sent with every
+  // enquiry (Formspark needs _append=false, or the enquiry lands in the redirect URL).
+  // honeypotField: the hidden input the provider's spam filter reads; a submission that fills it
+  // is treated as spam (spec §10.2).
+  redirectField: providerField.nullable(),
+  hiddenFields: z.record(providerField, z.string()),
+  honeypotField: providerField,
   emailProvider: z.strictObject({ name: z.string(), country: z.string() }),
   subProcessors: z.array(z.strictObject({ entity: z.string(), purpose: z.string(), country: z.string(), data: z.string() })).min(2),
   whatNext: z.array(z.string()).min(3),
   deflection: z.array(z.strictObject({ title: z.string(), body: z.string(), email: z.email() })).min(3),
 }).refine((c) => c.formEndpoint === null || c.formProvider !== null, {
   message: "a form endpoint needs its form provider: the collection notice names it (spec §10.2)", path: ["formProvider"],
+}).superRefine((c, ctx) => {
+  // Every name the form posts is used once: a provider field that reused an enquiry field's name, or
+  // another provider field's, would overwrite it.
+  const taken = new Set<string>(ENQUIRY_FIELDS);
+  const claim = (name: string, path: (string | number)[]) => {
+    if (taken.has(name)) ctx.addIssue({ code: "custom", path, message: `"${name}" is already a field of the enquiry form` });
+    taken.add(name);
+  };
+  claim(c.honeypotField, ["honeypotField"]);
+  if (c.redirectField !== null) claim(c.redirectField, ["redirectField"]);
+  for (const name of Object.keys(c.hiddenFields)) claim(name, ["hiddenFields", name]);
 });
 
 export const trustData = z.strictObject({

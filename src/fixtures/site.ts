@@ -60,6 +60,7 @@ const PAGE_PATH: Record<PageKey, string> = {
   privacy: `${GALLERY}/legal-document/`,
   websiteTerms: `${GALLERY}/legal-document/`,
   contact: `${GALLERY}/contact/`,
+  sent: `${GALLERY}/sent/`,
 };
 const NOT_SHOWN: PageKey[] = ["privacy"];
 const nav = siteContext(true);

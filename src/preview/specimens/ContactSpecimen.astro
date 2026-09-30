@@ -1,9 +1,12 @@
 ---
-// /preview/templates/contact/: the contact page with a form endpoint (an example.com URL), so
-// the form renders. fixtureSite doesn't show the privacy page, so the form's two privacy-policy
-// mentions exercise the plain-text fallback. Fixtures are imported statically (only
-// src/preview/ may import them).
+// /preview/templates/contact/: the contact page with a form endpoint, so the form renders. The
+// endpoint and the provider's field names are the gallery's stand-in provider's
+// (src/preview/mock-form.ts), so a browser test can follow an enquiry all the way to the gallery's
+// message-sent page. fixtureSite doesn't show the privacy page, so the form's two privacy-policy
+// mentions exercise the plain-text fallback. Fixtures are imported statically (only src/preview/
+// may import them).
 import ContactTemplate from "../../templates/ContactTemplate.astro";
 import { contactFixture, fixtureSite } from "../../fixtures/index.ts";
+import { MOCK_FORM } from "../mock-form.ts";
 ---
-<ContactTemplate contact={contactFixture} site={fixtureSite} />
+<ContactTemplate contact={{ ...contactFixture, ...MOCK_FORM }} site={fixtureSite} />

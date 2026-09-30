@@ -34,6 +34,7 @@ test("Playwright runs the preview specs in three engines and prod-* specs agains
     [
       ["node tests/support/static-server.mjs dist-preview 4322", `${PREVIEW}/`],
       ["node tests/support/static-server.mjs dist 4323", `${PROD}/`],
+      ["node tests/support/mock-form.mjs 4324", "http://127.0.0.1:4324/"],
     ],
   );
 });

@@ -36,6 +36,12 @@ export interface PageEntry {
    * leaves the page out of the sitemap.
    */
   canonicalPath?: string;
+  /**
+   * Set only on a page kept out of search: /contact/sent/, which spec §7.2 leaves out of the
+   * sitemap and the Phase E blueprint keeps noindex. Its route passes it to BaseLayout's noindex,
+   * and astro.config.mjs leaves the page out of the sitemap.
+   */
+  noindex?: true;
 }
 
 export interface Anchor {
@@ -201,7 +207,12 @@ const PRIVACY = describe(page("legal", "Privacy", "/legal/", "/legal/privacy/", 
   "How Techsider collects, uses, stores and discloses the personal information you send us, which services handle it, and how to ask about it or have it corrected.");
 const WEBSITE_TERMS = describe(page("legal", "Website terms", "/legal/", "/legal/website-terms/", "planned"),
   "The terms for using techsider.com.au: general information, not advice; what the canned demos are; who owns the content; and how links to other sites work.");
-const CONTACT_SENT = page("contact", "Sent", "/contact/", "/contact/sent/", "planned", "Message sent");
+// A gated route (spec §10.2): the form provider redirects here, so the page goes live in the same
+// change that gives src/data/contact.ts a formEndpoint. Its route fails the build if it is live with
+// no endpoint, and ContactForm fails it if the form renders while this page isn't shown.
+const CONTACT_SENT = describe(page("contact", "Sent", "/contact/", "/contact/sent/", "planned", "Message sent"),
+  "Your enquiry is on its way to Techsider. See when we reply, what happens from the Fit Call to a written proposal, and the email address to use in the meantime.");
+CONTACT_SENT.noindex = true;
 /** Each demo page's meta description (spec §11.3), by its slug, which is its solution's. */
 const DEMO_DESCRIPTIONS: Record<string, string> = {
   "document-registers": "A canned replay on synthetic management agreements and trust deeds: every register field links to its page, and unsigned or expired items are flagged.",

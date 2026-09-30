@@ -13,6 +13,7 @@ import {
   positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema,
 } from "../src/content/page-schemas.ts";
 import { HOME_TRUST_QUESTION } from "../src/lib/fixed-copy.ts";
+import { ENQUIRY_FIELDS } from "../src/lib/contact-form.ts";
 
 // Node builds every schema with plain string refs; content.config.ts passes Astro's reference() instead.
 const solutionSchema = makeSolutionSchema(plainRef);
@@ -680,6 +681,9 @@ const CONTACT = {
   replyTime: "one test business day",
   formEndpoint: "https://example.com/form",
   formProvider: { name: "Test Forms", country: "Test country" },
+  redirectField: "_redirect",
+  hiddenFields: { _append: "false" },
+  honeypotField: "_gotcha",
   emailProvider: { name: "Test Mail", country: "Test country" },
   subProcessors: texts("Test entity", 2).map((entity) => ({ entity, purpose: "Test purpose", country: "Test country", data: "Test data" })),
   whatNext: texts("Test step", 3),
@@ -748,6 +752,27 @@ test("page data: the form provider is null until a form endpoint needs one (blue
   bad(contactData, { ...CONTACT, formProvider: null }, "a form endpoint with no form provider for the collection notice");
   const { formProvider, ...unset } = CONTACT;
   bad(contactData, unset, "form provider left out rather than null");
+});
+
+test("page data: a form provider's field names are tokens, and each is a name the form doesn't already post (Phase E)", () => {
+  ok(contactData, { ...CONTACT, redirectField: null, hiddenFields: {} }, "a provider that sets its redirect in its dashboard");
+  ok(contactData, { ...CONTACT, redirectField: "_next", hiddenFields: { _subject: "Test subject", "fi-extra": "Test" } }, "other token names");
+  for (const name of ["", "1st", "two words", 'quo"te', "a=b", "é"]) {
+    bad(contactData, { ...CONTACT, honeypotField: name }, `honeypot field ${JSON.stringify(name)}`);
+    bad(contactData, { ...CONTACT, redirectField: name }, `redirect field ${JSON.stringify(name)}`);
+    bad(contactData, { ...CONTACT, hiddenFields: { [name]: "Test" } }, `hidden field ${JSON.stringify(name)}`);
+  }
+  for (const name of ENQUIRY_FIELDS) {
+    badWith(contactData, { ...CONTACT, honeypotField: name }, "honeypotField", `"${name}" is already a field of the enquiry form`);
+    badWith(contactData, { ...CONTACT, redirectField: name }, "redirectField", `"${name}" is already a field of the enquiry form`);
+    badWith(contactData, { ...CONTACT, hiddenFields: { [name]: "Test" } }, `hiddenFields.${name}`, `"${name}" is already a field of the enquiry form`);
+  }
+  badWith(contactData, { ...CONTACT, redirectField: "_gotcha" }, "redirectField", '"_gotcha" is already a field of the enquiry form');
+  badWith(contactData, { ...CONTACT, hiddenFields: { _redirect: "Test" } }, "hiddenFields._redirect", '"_redirect" is already a field of the enquiry form');
+  for (const key of ["redirectField", "hiddenFields", "honeypotField"]) {
+    const { [key]: _, ...unset } = CONTACT;
+    bad(contactData, unset, `${key} left out`);
+  }
 });
 
 test("page data: every Trust FAQ answer is 30–110 words (spec §8.11)", () => {

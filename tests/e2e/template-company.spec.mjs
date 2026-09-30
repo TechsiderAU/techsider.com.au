@@ -1,15 +1,18 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { MOCK_FORM } from "../../src/preview/mock-form.ts";
 import { focusKeys } from "../support/keys.mjs";
+import { withoutScripts } from "../support/no-scripts.mjs";
 
 // The company page templates (spec §8.10, §8.11, §10.2) on the preview gallery: About, Trust (with
 // and without a confirmed Part B term), the Legal hub, a legal document, Contact (with and without a
-// form endpoint), the message-sent page and the 404 body. The contact form posts to an example.com endpoint; the tests intercept it, so
-// nothing leaves the machine.
+// form endpoint), the message-sent page and the 404 body. The contact form posts to the local
+// stand-in provider (tests/support/mock-form.mjs); the tests here intercept its POST, and
+// tests/e2e/contact-form.spec.mjs follows an enquiry through it. Nothing leaves the machine.
 const BASE = "/preview/templates";
 const KINDS = ["about", "trust", "trust-no-terms", "legal-hub", "legal-document", "contact", "contact-no-endpoint", "sent", "not-found"];
 const CONTACT = `${BASE}/contact/`;
-const ENDPOINT = "https://example.com/fixture/form";
+const ENDPOINT = MOCK_FORM.formEndpoint;
 const EMAIL = "fixture@example.com";
 const WIDE = { width: 1280, height: 800 };
 const NARROW = { width: 390, height: 844 };
@@ -112,13 +115,18 @@ test("a refused copy is announced, and without the Clipboard API the button neve
   await ctx.close();
 });
 
-test("native validation stops an empty or malformed enquiry in the browser", async ({ page }) => {
+// With JavaScript the form checks itself (tests/e2e/contact-form.spec.mjs); these two tests serve the
+// page with its scripts stripped, so they see the browser's own validation and the plain POST.
+test("without JavaScript, native validation stops an empty or malformed enquiry in the browser", async ({ page }) => {
   const posted = [];
   await page.route(`${ENDPOINT}**`, (route) => {
     posted.push(route.request().method());
     return route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>Fixture endpoint</title>" });
   });
+  await withoutScripts(page, CONTACT);
   await page.goto(CONTACT);
+  // The form's script also focuses the first empty field and sends nothing, so prove it isn't running.
+  await expect(page.locator("html")).toHaveClass(/\bno-js\b/);
   await form(page).getByRole("button", { name: "Send enquiry" }).click();
   await expect(page).toHaveURL(new RegExp(`${CONTACT}$`));
   expect(await form(page).evaluate((f) => f.checkValidity())).toBe(false);
@@ -132,18 +140,23 @@ test("native validation stops an empty or malformed enquiry in the browser", asy
   expect(posted).toEqual([]);
 });
 
-test("a complete enquiry is a plain form POST of every field, with the honeypot empty", async ({ page }) => {
+test("without JavaScript, a complete enquiry is a plain form POST of every field, the provider's hidden fields first, with the honeypot empty", async ({ page }) => {
   let request = null;
   await page.route(`${ENDPOINT}**`, (route) => {
     request = route.request();
     return route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>Fixture endpoint</title>" });
   });
+  await withoutScripts(page, CONTACT);
   await page.goto(CONTACT);
+  await expect(page.locator("html")).toHaveClass(/\bno-js\b/);
   await fillEnquiry(page);
   await Promise.all([page.waitForURL(`${ENDPOINT}**`), form(page).getByRole("button", { name: "Send enquiry" }).click()]);
   expect(request.method()).toBe("POST");
   expect(request.headers()["content-type"]).toMatch(/^application\/x-www-form-urlencoded/);
+  expect([...new URLSearchParams(request.postData()).keys()].slice(0, 2)).toEqual(["_redirect", "_append"]);
   expect(Object.fromEntries(new URLSearchParams(request.postData()))).toEqual({
+    _redirect: "https://techsider.com.au/preview/templates/sent/",
+    _append: "false",
     name: "Fixture Person",
     email: "fixture-person@example.com",
     organisation: "Fixture Organisation",
@@ -152,7 +165,7 @@ test("a complete enquiry is a plain form POST of every field, with the honeypot 
     interest: "evaluation-partner",
     message: "Fixture message: what we are trying to fix.",
     consent: "yes",
-    website: "",
+    _gotcha: "",
   });
 });
 
@@ -165,7 +178,7 @@ test("Tab moves through the form's controls in order and never reaches the honey
     await page.keyboard.press(focusKeys(browserName).next);
   }
   expect(visited).toEqual(FORM_ORDER);
-  await expect(page.locator('[data-honeypot] input[name="website"]')).toBeHidden();
+  await expect(page.locator("[data-honeypot] input")).toBeHidden();
 });
 
 test("on bone a field has a muted-dark border that turns carbon, with the carbon focus ring", async ({ page }) => {
@@ -185,7 +198,7 @@ test("every form control is at least 44px tall at 390px; the consent row is the 
   await page.setViewportSize(NARROW);
   await page.goto(CONTACT);
   const small = await form(page).evaluate((f) =>
-    [...f.querySelectorAll('input:not([type="checkbox"]):not([tabindex="-1"]), select, textarea, button, label.contact-consent, a')]
+    [...f.querySelectorAll('input:not([type="checkbox"]):not([type="hidden"]):not([tabindex="-1"]), select, textarea, button, label.contact-consent, a')]
       .map((el) => ({ what: el.id || el.className || el.textContent.trim(), h: el.getBoundingClientRect().height, w: el.getBoundingClientRect().width }))
       .filter((t) => t.h < 44 || t.w < 44),
   );

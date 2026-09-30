@@ -219,6 +219,8 @@ npm run build && npm run build:preview && npm test
 | `chromium`, `webkit`, `firefox` | every spec in `tests/e2e/` except `prod-*.spec.mjs` | `dist-preview/`, on port 4322 |
 | `prod-chromium` | `prod-*.spec.mjs` | `dist/`, on port 4323 |
 
+A third server, `tests/support/mock-form.mjs` on port 4324, stands in for the contact form's provider. The gallery's contact page posts its enquiries there, so `tests/e2e/contact-form.spec.mjs` can follow one to the message-sent page, with and without JavaScript.
+
 Once both builds exist, run Playwright directly. Put spec paths before `--project`, which takes several values:
 
 ```bash

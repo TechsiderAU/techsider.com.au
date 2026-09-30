@@ -24,7 +24,7 @@ const PAGE_PATHS = {
   evaluationPartner: "/services/evaluation-partner/", resources: "/resources/", insights: "/insights/",
   demos: "/demos/", safeUseKits: "/resources/safe-use-kits/", payFor: "/resources/what-you-already-pay-for/",
   evaluationMethod: "/resources/evaluation-method/", about: "/about/", trust: "/trust/", legal: "/legal/",
-  privacy: "/legal/privacy/", websiteTerms: "/legal/website-terms/", contact: "/contact/",
+  privacy: "/legal/privacy/", websiteTerms: "/legal/website-terms/", contact: "/contact/", sent: "/contact/sent/",
 };
 const RESOURCE_KEYS = ["insights", "demos", "safeUseKits", "payFor", "evaluationMethod"];
 const navAt = (path) => PAGES.find((p) => p.path === path);
@@ -216,7 +216,7 @@ test("fixtureSite: pages open their template page, privacy is not shown, and con
     home: "home", solutions: "solutions-hub", industries: "industries-hub", services: "services",
     evaluationPartner: "evaluation-partner", resources: "resources-hub", demos: "demos-hub",
     safeUseKits: "safe-use-kits", payFor: "pay-for", evaluationMethod: "evaluation-method", about: "about",
-    trust: "trust", legal: "legal-hub", websiteTerms: "legal-document", contact: "contact",
+    trust: "trust", legal: "legal-hub", websiteTerms: "legal-document", contact: "contact", sent: "sent",
   };
   for (const [key, kind] of Object.entries(gallery)) {
     assert.equal(fixtureSite.page(key).href, `/preview/templates/${kind}/`, key);

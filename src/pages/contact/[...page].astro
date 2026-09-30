@@ -1,7 +1,7 @@
 ---
 // /contact/ (spec §8.11, §10.2): ContactTemplate over the contact data (src/data/contact.ts). Live
-// from Phase C with no form endpoint, so the page leads with the email address; Phase E adds the
-// form and its provider.
+// from Phase C. The form renders once src/data/contact.ts has the owner's form endpoint; until then
+// the page leads with the email address.
 import type { GetStaticPaths } from "astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ContactTemplate from "../../templates/ContactTemplate.astro";
