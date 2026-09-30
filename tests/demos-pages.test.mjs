@@ -91,6 +91,14 @@ test("production builds /demos/ and the five demo pages, each with its nav title
   }
 });
 
+test("③'s description counts what its demo drafts: one work order, so 'a work order', never 'work orders' (final review D7-F3)", () => {
+  const description = entryAt("/demos/draft-for-approval/").description;
+  const orders = DEMOS["draft-for-approval"].data.messages.filter((m) => m.draft?.startsWith("Work order")).length;
+  assert.equal(orders, 1, "the ③ demo drafts one work order");
+  assert.match(description, /\beight messages sorted, a work order and updates drafted, one escalated\b/);
+  assert.doesNotMatch(description, /\bwork orders\b/);
+});
+
 test("each solution names its own demo, and each demo file is its solution's, of the spec §9.1 kind", () => {
   for (const id of IDS) {
     assert.equal(SOLUTIONS[id].demo, id, `src/content/solutions/${id}.yaml: demo`);

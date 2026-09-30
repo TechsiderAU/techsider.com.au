@@ -3,6 +3,9 @@
 // tests/fixed-copy.test.mjs pins every value. The MockPanel and SampleReport captions stay literals
 // inside those components (B1). Plain TypeScript with no imports, so node tests and the
 // content schemas (page-schemas.ts reads HOME_TRUST_QUESTION) can import it directly.
+// One constant is ruling copy, not spec text: REPORT_BADGE, the ④ badge (Phase D ledger ruling R4
+// and final review item D7-F2), which spec §8.8 doesn't word. The owner checklist records the §8.8
+// amendment it needs.
 
 export const PACKAGED_OFFER_DISCLAIMER = "This page describes a packaged offer, not a delivered engagement."; // §4.5
 export const NOT_LEGAL_ADVICE = "General information, not legal advice."; // §8.5 block 6, §11.6
@@ -17,8 +20,10 @@ export const SCENARIO_LABEL = "Illustrative scenario: not a client engagement"; 
 export const DEMO_BADGE = "Canned replay · synthetic or public data"; // §8.8
 export const CHECKER_BADGE = "Client-side tool · dated vendor data"; // §8.8 ⑤
 // §8.8 ④ and §9.1: the ④ demo is a sample report, not a replay (Phase D ledger ruling R4), so its
-// badge names what it is in the words of SampleReport's fixed caption (§8.12), not DEMO_BADGE's.
-export const REPORT_BADGE = "Sample report · Techsider testing its own demo system";
+// badge names what it is, not DEMO_BADGE's words. It shows alone on the Demos hub's card, with no
+// "Illustrative data" label beside it, so it says it is illustrative itself (final review D7-F2). A
+// measured report (spec §9.1) changes it.
+export const REPORT_BADGE = "Illustrative sample report · our own demo system";
 export const DEMO_CTA = "Want this on your documents, in your environment?"; // §8.8
 export const ONSHORE_PILLAR = "Your data stays onshore."; // §3.2
 export const PROCESSING_NOTE = "We show you where your data is processed."; // §3.2 scope rule

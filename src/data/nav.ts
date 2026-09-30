@@ -206,7 +206,7 @@ const CONTACT_SENT = page("contact", "Sent", "/contact/", "/contact/sent/", "pla
 const DEMO_DESCRIPTIONS: Record<string, string> = {
   "document-registers": "A canned replay on synthetic management agreements and trust deeds: every register field links to its page, and unsigned or expired items are flagged.",
   "knowledge-assistant": "A canned replay on public Victorian and APRA documents: each answer cites its passage, questions they don't answer are refused, and a false answer is caught.",
-  "draft-for-approval": "A canned replay on a synthetic property-management inbox: eight messages sorted, work orders and updates drafted, one escalated, nothing sent until approved.",
+  "draft-for-approval": "A canned replay on a synthetic property-management inbox: eight messages sorted, a work order and updates drafted, one escalated, nothing sent until approved.",
   "ai-evaluation": "An illustrative sample evaluation report on our own demo assistant: its sample size, confidence intervals, agreed thresholds and each failure found, rated.",
   "ai-switch-on": "Tick the software you pay for to see the AI it includes or sells as an add-on, whether the vendor says where it's processed, and what's left for a build.",
 };

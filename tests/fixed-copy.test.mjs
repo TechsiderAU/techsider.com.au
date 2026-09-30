@@ -3,6 +3,7 @@
 // that carries it, and must be made here on purpose.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import * as copy from "../src/lib/fixed-copy.ts";
 
 test("fixed copy: every constant is the spec's text, word for word", () => {
@@ -19,8 +20,9 @@ test("fixed copy: every constant is the spec's text, word for word", () => {
   assert.equal(copy.SCENARIO_LABEL, "Illustrative scenario: not a client engagement");
   assert.equal(copy.DEMO_BADGE, "Canned replay · synthetic or public data");
   assert.equal(copy.CHECKER_BADGE, "Client-side tool · dated vendor data");
-  // Ledger ruling R4: the ④ demo is a sample report, not a replay, so it never carries DEMO_BADGE.
-  assert.equal(copy.REPORT_BADGE, "Sample report · Techsider testing its own demo system");
+  // Ledger ruling R4: the ④ demo is a sample report, not a replay, so it never carries DEMO_BADGE. The
+  // badge shows alone on the Demos hub's card, so it says it is illustrative itself (final review D7-F2).
+  assert.equal(copy.REPORT_BADGE, "Illustrative sample report · our own demo system");
   assert.equal(copy.DEMO_CTA, "Want this on your documents, in your environment?");
   assert.equal(copy.ONSHORE_PILLAR, "Your data stays onshore.");
   assert.equal(copy.PROCESSING_NOTE, "We show you where your data is processed.");
@@ -50,4 +52,10 @@ test("fixed copy: the module exports exactly the blueprint's constants", () => {
   // The pending note starts with the same disclaimer as the reviewed one; only the review state differs.
   assert.ok(copy.KIT_PENDING_NOTE.startsWith(`${copy.NOT_LEGAL_ADVICE} `));
   assert.ok(copy.kitReviewedNote("x").startsWith(`${copy.NOT_LEGAL_ADVICE} `));
+});
+
+test("fixed copy: the header names the one constant that is ruling copy, not spec text (final review D7-F4)", () => {
+  const source = readFileSync(new URL("../src/lib/fixed-copy.ts", import.meta.url), "utf8");
+  const header = source.slice(0, source.indexOf("export "));
+  assert.match(header, /\bREPORT_BADGE\b[^.]*\bruling\b/, "the header says every constant copies the spec");
 });

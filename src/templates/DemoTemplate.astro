@@ -3,7 +3,8 @@
 // fills the slots and renders this inside BaseLayout. The ⑤ route also sets the canonical URL to
 // /resources/what-you-already-pay-for/, which owns the checker (spec §8.8).
 // - The hero holds the DemoFrame, badged by kind (checker → CHECKER_BADGE, the ④ report →
-//   REPORT_BADGE, the replays → DEMO_BADGE) and marked with the demo's provenance, which every route must pass (an illustrative demo is labelled).
+//   REPORT_BADGE, the replays → DEMO_BADGE) and marked with the demo's provenance, which every
+//   route must pass (an illustrative demo is labelled).
 //   Its named slots pass straight through: `engine` (Phase D) and `transcript` (the no-JS static
 //   transcript, which DemoFrame requires). Astro counts a named slot passed inside a condition as
 //   filled even when the condition is false, so the frame renders in two branches: a route that
