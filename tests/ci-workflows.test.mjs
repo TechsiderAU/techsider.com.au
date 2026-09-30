@@ -11,6 +11,10 @@ const pkg = JSON.parse(read("package.json"));
 const PREVIEW = "http://127.0.0.1:4322";
 const PROD = "http://127.0.0.1:4323";
 const PROD_SPECS = "**/prod-*.spec.mjs";
+/** withastro/action v6.1.3, pinned by commit (https://github.com/withastro/action/releases/tag/v6.1.3). */
+const WITHASTRO_ACTION = "withastro/action@3eafd002e65cc31b4f0eae0bb05450d521562247";
+const WEEKLY_REBUILD = "0 20 * * 0";
+const DAILY_WATCH = "30 21 * * *";
 
 test("test:e2e builds production and preview before Playwright starts", () => {
   assert.equal(pkg.scripts["test:e2e"], "npm run build && npm run build:preview && playwright test");
@@ -89,18 +93,53 @@ test("the deploy build runs the CI checks in gate mode", () => {
   const deploy = workflow("deploy.yml");
   assert.deepEqual(deploy.on.push, { branches: ["main"] });
   const build = deploy.jobs.build.steps.find((s) => s.uses?.startsWith("withastro/action@"));
-  assert.equal(build.uses, "withastro/action@v6");
+  assert.equal(build.uses, WITHASTRO_ACTION);
   assert.deepEqual(build.env, { VERIFY_MODE: "gate" });
 });
 
-test("the deploy workflow also rebuilds weekly, so Home's 45-day insights rule re-evaluates without a push", () => {
+test("withastro/action is pinned by commit to v6.1.3, a release that uploads dotfiles, so /.well-known/ reaches Pages", () => {
+  // v6.1.0 put include-hidden-files: true on its upload-pages-artifact step, and v6.1.1 pinned that
+  // action by commit; upload-pages-artifact otherwise leaves every dotfile out of the artifact.
+  assert.match(WITHASTRO_ACTION, /^withastro\/action@[0-9a-f]{40}$/);
+  const line = read(".github/workflows/deploy.yml").split("\n").find((l) => l.includes(WITHASTRO_ACTION));
+  const version = line?.match(/# v(\d+)\.(\d+)\.(\d+)\s*$/)?.slice(1).map(Number);
+  assert.ok(version, "the pinned line names its release in a trailing comment, e.g. # v6.1.3");
+  const [major, minor, patch] = version;
+  assert.ok(major === 6 && (minor > 1 || (minor === 1 && patch >= 1)), `withastro/action v${version.join(".")}: v6.1.1 or a later v6.x`);
+});
+
+test("the deploy workflow rebuilds weekly, so Home's 45-day insights rule and security.txt's Expires stay fresh without a push", () => {
   const deploy = workflow("deploy.yml");
   assert.deepEqual(Object.keys(deploy.on).sort(), ["push", "schedule", "workflow_dispatch"]);
-  assert.deepEqual(deploy.on.schedule, [{ cron: "0 20 * * 0" }]);
-  // A scheduled run builds the same way as a push: one build job, gated, then the deploy.
-  assert.deepEqual(Object.keys(deploy.jobs), ["build", "deploy"]);
-  assert.equal(deploy.jobs.build.if, undefined, "the build job must not skip scheduled runs");
-  assert.equal(deploy.jobs.deploy.if, undefined, "the deploy job must not skip scheduled runs");
+  assert.deepEqual(deploy.on.schedule, [{ cron: WEEKLY_REBUILD }, { cron: DAILY_WATCH }]);
+  assert.deepEqual(Object.keys(deploy.jobs), ["build", "deploy", "live-check"]);
+  // The weekly run builds the same way as a push: one build job, gated, then the deploy. Only the
+  // daily live watch skips them, and the deploy follows the build.
+  assert.equal(deploy.jobs.build.if, `github.event.schedule != '${DAILY_WATCH}'`, "the build job must skip only the daily live watch");
+  assert.equal(deploy.jobs.deploy.needs, "build");
+  assert.equal(deploy.jobs.deploy.if, undefined, "the deploy job must follow the build job");
+  // A run queued in a group cancels the one pending there, so the watch, which deploys nothing,
+  // stays out of `pages`, where it could cancel a push waiting to deploy.
+  assert.deepEqual(deploy.concurrency, { group: `\${{ github.event.schedule == '${DAILY_WATCH}' && 'live-watch' || 'pages' }}`, "cancel-in-progress": false });
+});
+
+test("live-check checks the live domain after every deploy and daily, on main only, with read access only", () => {
+  const job = workflow("deploy.yml").jobs["live-check"];
+  assert.equal(job.needs, "deploy");
+  // !cancelled() lets the daily watch run with the build and deploy skipped; the rest keeps it to
+  // main and to a deploy that succeeded.
+  assert.equal(
+    job.if,
+    `\${{ !cancelled() && github.ref == 'refs/heads/main' && (needs.deploy.result == 'success' || github.event.schedule == '${DAILY_WATCH}') }}`,
+  );
+  assert.deepEqual(job.permissions, { contents: "read" });
+  assert.equal(job["timeout-minutes"], 25, "15 minutes of freshness polling, then the checks");
+  // Exit 3 is warnings alone (security.txt's Content-Type, while STRICT_TXT_TYPE is false): the step
+  // passes, and the script's ::warning:: line annotates the run (controller ruling 4).
+  assert.deepEqual(job.steps.map((s) => s.uses ?? s.run), ["actions/checkout@v5", "actions/setup-node@v5", "node scripts/ci/live-check.mjs || test $? -eq 3"]);
+  assert.equal(job.steps[1].with["node-version"], "22.18", "the engines floor, as in ci.yml");
+  assert.equal(job.steps.some((s) => /npm (ci|install)/.test(s.run ?? "")), false, "the check has no dependencies to install");
+  assert.deepEqual(job.steps[2].env, { EXPECT_SHA: "${{ needs.deploy.result == 'success' && github.sha || '' }}" });
 });
 
 test("focusKeys presses Option+Tab only in WebKit on macOS", async () => {

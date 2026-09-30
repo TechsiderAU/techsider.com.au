@@ -3,10 +3,14 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # Weekly rebuild (Sunday 20:00 UTC, Monday morning in Australia), so build-time rules such as
-  # Home's 45-day latest-insights rule (spec §8.1 block 9) re-evaluate without a push.
   schedule:
+    # Weekly rebuild (Sunday 20:00 UTC, Monday morning in Australia), so build-time rules such as
+    # Home's 45-day latest-insights rule (spec §8.1 block 9) re-evaluate without a push, and
+    # security.txt's Expires (180 days after the build day) never runs short.
     - cron: "0 20 * * 0"
+    # Daily live watch (21:30 UTC): the live-check job alone, so a Cloudflare setting switched back
+    # on (spec §12 item 1) is caught without waiting for a deploy. Nothing is built or deployed.
+    - cron: "30 21 * * *"
   workflow_dispatch:
 
 permissions:
@@ -15,18 +19,25 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  # One deploy at a time. The daily live watch deploys nothing, so it takes its own group: queued
+  # in `pages`, it would cancel a pending deploy and take its place.
+  group: ${{ github.event.schedule == '30 21 * * *' && 'live-watch' || 'pages' }}
   cancel-in-progress: false
 
 jobs:
   build:
+    # Every run builds except the daily live watch.
+    if: github.event.schedule != '30 21 * * *'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
       - name: Build with Astro
-        uses: withastro/action@v6
+        # Pinned by commit. From v6.1.0 the action uploads with include-hidden-files: true (v6.1.1
+        # pinned that upload by commit too), so /.well-known/security.txt reaches Pages; the
+        # live-check job fails if it ever doesn't.
+        uses: withastro/action@3eafd002e65cc31b4f0eae0bb05450d521562247 # v6.1.3
         with:
           node-version: 22
         env:
@@ -43,3 +54,32 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  live-check:
+    # Spec §11.3: the live domain after each deploy, and daily, because Cloudflare rewrites HTML at
+    # the edge after every build-time check. main only: the branch never deploys (spec §13).
+    needs: deploy
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && (needs.deploy.result == 'success' || github.event.schedule == '30 21 * * *') }}
+    runs-on: ubuntu-latest
+    # Up to 15 minutes waiting for this commit to go live, then about a minute of requests.
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          # The engines floor, as in ci.yml. The script needs no npm install: it imports only nav.ts
+          # and src/lib/security-txt.ts, which Node 22.18 loads by stripping their types.
+          node-version: "22.18"
+
+      - name: Check the live site (security.txt, the plain-text email, no Cloudflare rewrites)
+        # Exit 3 is warnings alone (security.txt's Content-Type, until STRICT_TXT_TYPE is set in the
+        # script): the step passes, and the script's ::warning:: line annotates the run.
+        run: node scripts/ci/live-check.mjs || test $? -eq 3
+        env:
+          # A deploy run first waits until the live site serves this commit; the daily watch checks what is live.
+          EXPECT_SHA: ${{ needs.deploy.result == 'success' && github.sha || '' }}

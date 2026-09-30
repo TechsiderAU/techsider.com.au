@@ -3,6 +3,7 @@ import "../styles/global.css";
 import archivoLatin from "@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url";
 import SiteHeader from "../components/site/SiteHeader.astro";
 import SiteFooter from "../components/site/SiteFooter.astro";
+import { buildStamp } from "../lib/build-stamp";
 import SocialImageMeta from "../components/site/SocialImageMeta.astro";
 import { jsonLd, pageGraph, type JsonLdNode } from "../lib/json-ld";
 
@@ -48,6 +49,7 @@ const structuredData = pageGraph(site, Astro.url.pathname, graph);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script is:inline>document.documentElement.classList.replace("no-js", "js");</script>
     <meta name="generator" content={Astro.generator} />
+    <meta name="build" content={buildStamp()} />
     <meta name="theme-color" content="#0B0B0C" />
     <link rel="preload" as="font" type="font/woff2" href={archivoLatin} crossorigin />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
