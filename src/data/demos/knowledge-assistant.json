@@ -245,7 +245,7 @@
         "title": "A risk analyst asks about APRA CPS 230 notification timeframes.",
         "corpus": {
           "title": "Prudential Standard CPS 230 Operational Risk Management",
-          "version": "The version commencing 1 July 2026",
+          "version": "the version commencing 1 July 2026",
           "url": "https://www.apra.gov.au/standards/cps-230",
           "licence": "CC BY 4.0",
           "attribution": "Excerpts from *Prudential Standard CPS 230 Operational Risk Management* (the version commencing 1 July 2026, made by Banking, Insurance, Life Insurance, Health Insurance and Superannuation (prudential standard) determination No. 1 of 2026). © Australian Prudential Regulation Authority 2024. Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source: [apra.gov.au/standards/cps-230](https://www.apra.gov.au/standards/cps-230). Answers paraphrase the cited paragraphs, which the source panel quotes verbatim; headings added for retrieval. No endorsement by APRA is implied."
@@ -343,7 +343,7 @@
             ]
           },
           {
-            "question": "And what's the financial penalty if we miss the 72-hour deadline?",
+            "question": "And what’s the financial penalty if we miss the 72-hour deadline?",
             "retrieved": [
               {
                 "cite": 1,
@@ -353,7 +353,7 @@
             ],
             "answer": [
               {
-                "text": "That isn't stated in the provided documents. CPS 230 sets the 72-hour notification obligation, but the excerpts here don't specify any financial penalty for late notification — so I won't guess. Escalating to a human, with the relevant clause attached."
+                "text": "That isn’t stated in the provided documents. CPS 230 sets the 72-hour notification obligation, but the excerpts here don’t specify any financial penalty for late notification, so I won’t guess. Escalating to a person, with the relevant clause attached."
               }
             ],
             "outcome": "refused",

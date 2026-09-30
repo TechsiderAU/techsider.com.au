@@ -62,10 +62,27 @@ test("each announcement names its question and its outcome, and leaves the intro
   });
   let n = 0;
   DATA.scenarios.forEach((scenario, si) => {
-    const named = `Scenario ${si + 1} of ${DATA.scenarios.length}, ${scenario.title.replace(/\.$/, "")}. `;
+    // "Scenario n of m: ", so the title's capital opens a new clause (final review WB-D4).
+    const named = `Scenario ${si + 1} of ${DATA.scenarios.length}: ${scenario.title.replace(/\.$/, "")}. `;
     assert.equal(lines[n].startsWith(named), DATA.scenarios.length > 1, lines[n]);
     n += scenario.turns.length;
   });
+});
+
+test("the ② copy keeps one voice: curly quotes, no dash, a person, and no capital after a comma in the corpus line or the log (final review WB-D4)", () => {
+  // What the demo shows as its own; the sources, snippets and attributions keep their publishers' wording.
+  const own = DATA.scenarios.flatMap((s) => [
+    s.title, s.corpus.version,
+    ...s.turns.flatMap((t) => [t.question, ...t.answer.map((a) => a.text), t.caught ?? "", ...t.trace.map((x) => x.detail)]),
+  ]);
+  for (const text of own) {
+    assert.doesNotMatch(text, /['"]/, `a straight quote: ${text}`);
+    assert.doesNotMatch(text, /—/, `a dash: ${text}`);
+    assert.doesNotMatch(text, /\bto a human\b/, `the Victorian refusal escalates to a person: ${text}`);
+  }
+  // The transcript's corpus line reads "Corpus: <title>, <version>".
+  for (const s of DATA.scenarios) assert.doesNotMatch(`${s.corpus.title}, ${s.corpus.version}`, /, The\b/, s.id);
+  for (const line of announcements(DATA)) assert.doesNotMatch(line, /^Scenario \d+ of \d+, /, line);
 });
 
 test("the intro counts the questions and names Pause and Skip to result", () => {

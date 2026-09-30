@@ -83,8 +83,9 @@ export function announcements(data: AssistantData): string[] {
     scenario.turns.forEach((turn, ti) => {
       const n = lines.length + 1;
       const label = ti === 0 ? scenarioLabel(si, data.scenarios.length) : null;
-      // A scenario title is a sentence with its own full stop (spec §3.3), so it isn't given another.
-      const head = label === null ? "" : `${label}, ${scenario.title.replace(/\.$/, "")}. `;
+      // A scenario title is a sentence with its own full stop (spec §3.3), so it isn't given another,
+      // and a colon before it, so its capital opens a new clause: "Scenario 1 of 2: A state agency …".
+      const head = label === null ? "" : `${label}: ${scenario.title.replace(/\.$/, "")}. `;
       const cites = citesIn(turn);
       const outcome =
         turn.outcome === "answered"
