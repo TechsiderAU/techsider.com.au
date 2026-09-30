@@ -10,9 +10,11 @@ import { internalLinks, linkProblems } from "../support/gallery-links.mjs";
 // a visitor reaches with JavaScript to the same rules, on every page that has them. The page list and
 // each page's demos and checkboxes are read from dist/ when the spec loads, so a page Phase E puts
 // live is swept with no edit here:
-// - every page loads nothing from another origin, every request it makes succeeds, and no script
-//   errs, through each demo's lazily loaded chunk and every checkbox ticked. The demos and the
-//   checker make no network call (scope ruling 5, spec §8.7), and the site has no analytics (§14);
+// - every page loads nothing from another origin, makes no network call of its own (no fetch, XHR,
+//   WebSocket, EventSource or beacon, even to its own origin), every request it makes succeeds, and
+//   no script errs, through each demo's lazily loaded chunk and every checkbox ticked. The demos and
+//   the checker make no network call (scope ruling 5, spec §8.7), and the site has no analytics (§14):
+//   a page loads documents, styles, scripts, fonts and images, and nothing else;
 // - each engine-backed demo ([data-demo-root]) keeps the replay contract (spec §6.5, §8.8): in the
 //   built page its controls come before its stage and the stage before the polite log, and the stage
 //   is never a live region; paused mid-run, the stage still shows aria-hidden while "Skip to result"
@@ -55,6 +57,12 @@ const BOX_BUILT = BUILT.filter((p) => p.boxes > 0);
 const WCAG = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
 const NARROWEST = { width: 320, height: 700 };
 const NOTHING_ALLOWED = { paths: new Set(), fragments: new Map() };
+/**
+ * The request types a script makes when it calls the network itself (Playwright's resourceType();
+ * "ping" is a beacon). The lazily loaded demo chunks are "script" requests, so they pass (final
+ * review WB-D3: a same-origin fetch() in a replay passed the other-origin check).
+ */
+const NETWORK_CALLS = new Set(["fetch", "xhr", "websocket", "eventsource", "ping"]);
 
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 const repeatedIds = (page) =>
@@ -201,15 +209,18 @@ test("the sweep finds the demos and the checker in the production build, and eve
 });
 
 for (const { path, demos, boxes } of BUILT) {
-  test(`${path} loads nothing from another origin, every request succeeds and no script errs, through its demos and ticked checkboxes`, async ({ page, baseURL }) => {
+  test(`${path} loads nothing from another origin, makes no network call, every request succeeds and no script errs, through its demos and ticked checkboxes`, async ({ page, baseURL }) => {
     const origin = new URL(baseURL).origin;
     const offsite = [];
+    const calls = [];
     const failed = [];
     const errors = [];
     page.on("request", (r) => {
       const url = r.url();
       if (/^https?:/.test(url) && new URL(url).origin !== origin) offsite.push(url);
+      if (NETWORK_CALLS.has(r.resourceType())) calls.push(`${r.resourceType()} ${url}`);
     });
+    page.on("websocket", (ws) => calls.push(`websocket ${ws.url()}`));
     page.on("requestfailed", (r) => failed.push(`${r.url()} (${r.failure()?.errorText})`));
     page.on("response", (r) => {
       if (r.status() >= 400) failed.push(`${r.url()} (${r.status()})`);
@@ -226,6 +237,7 @@ for (const { path, demos, boxes } of BUILT) {
     if (boxes > 0) await tickAll(page);
     await page.waitForLoadState("networkidle");
     expect(offsite, "requests to another origin").toEqual([]);
+    expect(calls, "network calls a script made (fetch, XHR, WebSocket, EventSource, beacon)").toEqual([]);
     expect(failed, "requests that failed").toEqual([]);
     expect(errors, "script and console errors").toEqual([]);
   });
