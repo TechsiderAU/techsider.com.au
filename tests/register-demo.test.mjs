@@ -234,7 +234,9 @@ test("the downloads are the register as CSV and the documents as text, exactly a
   const lines = csv.trimEnd().split("\n");
   assert.equal(lines[0], "register,document_id,document,template,field,value,page,status,note");
   assert.equal(lines.length - 1, 12 * 4 + 6 * 5);
-  assert.ok(lines.includes('Management agreement register as at 1 September 2026,ma-04,Synthetic management agreement MA-04,"Form A (Synthetic Agency One, 2024 edition)",Owner\'s signed authority,Not signed,3,blocked,"The Owner\'s signature and date on page 3 are blank, so there is no signed authority to act on."'));
+  assert.ok(lines.includes('Management agreement register as at 1 September 2026,ma-04,Synthetic management agreement MA-04,"Form A (Synthetic Agency One, 2024 edition)",Owner\'s signed authority,Not signed,3,blocked,"The Owner\'s signature and date on page 3 are blank, so the file holds no signed authority."'));
+  // The note records what the page shows, not a call on the agreement's validity (final review D3-T3-R-3).
+  assert.doesNotMatch(csv, /\bto act on\b/);
   for (const doc of DATA.documents) for (const page of doc.pages) assert.ok(txt.includes(`--- Page ${page.n} ---\n${page.text}`), `${doc.id} p${page.n}`);
   assert.match(txt, /^Synthetic documents from the Techsider Document Registers demo\.\nEvery party, premises, policy, date and amount in this file is invented\./);
   // Plain ASCII, so a spreadsheet opens the CSV without an encoding prompt.

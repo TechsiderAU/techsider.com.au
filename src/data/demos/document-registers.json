@@ -464,7 +464,7 @@
                 "value": "Not signed",
                 "page": 3,
                 "status": "blocked",
-                "note": "The Owner's signature and date on page 3 are blank, so there is no signed authority to act on."
+                "note": "The Owner's signature and date on page 3 are blank, so the file holds no signed authority."
               }
             }
           },

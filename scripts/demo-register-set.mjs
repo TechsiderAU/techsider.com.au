@@ -159,7 +159,7 @@ function agreement(a) {
       : ok(a.expiry, form.at.insurance),
     "owner-authority": a.owner
       ? ok(`Signed ${a.owner}`, form.at.authority)
-      : { value: "Not signed", page: form.at.authority, status: "blocked", note: `The Owner's signature and date on page ${form.at.authority} are blank, so there is no signed authority to act on.` },
+      : { value: "Not signed", page: form.at.authority, status: "blocked", note: `The Owner's signature and date on page ${form.at.authority} are blank, so the file holds no signed authority.` },
   };
   return { doc, row: { doc: doc.id, cells } };
 }
