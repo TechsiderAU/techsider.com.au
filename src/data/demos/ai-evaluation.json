@@ -4,12 +4,12 @@
   "kind": "report",
   "provenance": "illustrative",
   "data": {
-    "system": "Techsider's Knowledge Assistant demo: cited answers from Victoria's public-sector generative AI Guideline and Guidance, and from APRA's CPS 230",
+    "system": "Techsider’s Knowledge Assistant demo: cited answers from Victoria’s public-sector generative AI Guideline and Guidance, and from APRA’s CPS 230",
     "n": 120,
-    "method": "Each question asked once, in a fresh session, and its answer graded against the ground truth. A right answer that cites a passage that doesn't hold it counts as a wrong citation, not a false answer. Each threshold is the highest rate accepted, agreed before testing, and it is met only when the whole Wilson score interval sits below it. The failures listed are model version A's.",
+    "method": "Each question asked once, in a fresh session, and its answer graded against the ground truth. A right answer that cites a passage that doesn’t hold it counts as a wrong citation, not a false answer. Each threshold is the highest rate accepted, agreed before testing, and it is met only when the whole Wilson score interval sits below it. The failures listed are model version A’s. Model version B’s rates are shown for comparison, without intervals, and under the same rule it meets only the wrong-citation threshold.",
     "groundTruth": "An expected answer, or an expected refusal, for each question, with the passage that supports it, from the Victorian Guideline and Guidance and from CPS 230",
-    "interRater": { "statistic": "Cohen's kappa, on the double-labelled questions", "value": { "value": 0.81 } },
-    "framework": "NSW AI Assessment Framework risk bands, as the NSW AI Operational Policy (Final version 1.1) defines them: each failure takes the band its impact matches",
+    "interRater": { "statistic": "Cohen’s kappa, on the double-labelled questions", "value": { "value": 0.81 } },
+    "framework": "NSW AI Assessment Framework risk bands, as the NSW AI Operational Policy, Final version 1.1 (approved 31 August 2026), defines them: each failure takes the band its impact matches",
     "provenance": "illustrative",
     "thresholds": [
       {
@@ -44,13 +44,13 @@
       {
         "id": "false-answer-2",
         "rating": "high",
-        "description": "Asked “How quickly must we tell APRA when an incident disrupts a critical operation?”, it gave only the 72-hour clock for an operational risk incident (¶32). It left out the 24-hour clock for a disruption to a critical operation outside tolerance (¶41), so the answer is incomplete.",
+        "description": "Asked “How quickly must we tell APRA when an incident disrupts a critical operation?”, it gave only the 72-hour clock for an operational risk incident likely to have a material impact (¶32). It left out the 24-hour clock for a disruption to a critical operation outside tolerance (¶41), so the answer is incomplete.",
         "frameworkLevel": "High-Risk"
       },
       {
         "id": "false-refusal-1",
         "rating": "low",
-        "description": "Asked “What if our agency wants to work differently from the guideline?”, it said the documents don't cover it. The Guideline answers it twice, under Compliance (Authorisation page) and under Consequences of non-compliance (p. 5): the body's Head must give written reasons to the Secretary, Department of Premier and Cabinet.",
+        "description": "Asked “What if our agency wants to work differently from the guideline?”, it said the documents don’t cover it. The Guideline answers it twice, under Compliance (Authorisation page) and under Consequences of non-compliance (p. 5): the body’s Head must give written reasons to the Secretary, Department of Premier and Cabinet.",
         "frameworkLevel": "Low-risk"
       },
       {

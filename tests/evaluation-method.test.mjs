@@ -96,7 +96,7 @@ test("it carries every spec §9.1 field: n, intervals, ground truth, inter-rater
     assert.equal(t.result.unit, "%", t.metric);
   }
   assert.match(report.groundTruth, /\bexpected refusal\b/, "the ground truth has no expected refusals, so a false refusal can't be scored");
-  assert.match(report.interRater.statistic, /^Cohen's kappa\b/);
+  assert.match(report.interRater.statistic, /^Cohen’s kappa\b/);
   assert.ok(report.interRater.value.value > 0 && report.interRater.value.value <= 1 && report.interRater.value.unit === undefined);
   assert.match(report.framework, /\bNSW AI Assessment Framework\b/, "spec §9.1: failures map to NSW AIAF levels");
   assert.ok(report.failures.length >= 3, `${report.failures.length} failures; spec §9.1 needs at least three`);
@@ -142,13 +142,28 @@ test("its interval is the published method's: the method's worked example comes 
 test("the regression runs the same set on two model versions: A is the reported run, and B's rates are whole failures over n", () => {
   const { rows } = report.regression;
   assert.deepEqual(rows.map((r) => r.metric), report.thresholds.map((t) => t.metric));
-  assert.match(report.method, new RegExp(`\\bThe failures listed are ${report.regression.baseline.toLowerCase()}'s\\.`, "i"));
+  assert.match(report.method, new RegExp(`\\bThe failures listed are ${report.regression.baseline.toLowerCase()}’s\\.`, "i"));
   rows.forEach((row, i) => {
     assert.deepEqual(row.baseline, report.thresholds[i].result, `${row.metric}: the baseline isn't the reported result`);
     assert.equal(row.candidate.unit, "%");
     const k = Math.round((row.candidate.value * report.n) / 100);
     assert.equal(row.candidate.value, round1((100 * k) / report.n), `${row.metric}: ${row.candidate.value}% isn't a whole count of ${report.n}`);
   });
+});
+
+test("the method says how to read version B's bare rates: shown without intervals, and under the report's own rule it meets only the thresholds its intervals allow (final review D5-T5-M1)", () => {
+  const { rows, candidate } = report.regression;
+  const met = rows.filter((row, i) => wilson(Math.round((row.candidate.value * report.n) / 100), report.n).high < report.thresholds[i].target.value);
+  assert.deepEqual(met.map((row) => row.metric), ["Wrong-citation rate"], "the sentence below names the thresholds B meets");
+  assert.match(report.method, new RegExp(`\\b${candidate}’s rates are shown for comparison, without intervals, and under the same rule it meets only the wrong-citation threshold\\.`));
+});
+
+test("the report's words: curly apostrophes, the ¶32 materiality test kept, and the NSW Policy cited with its date (final review D5-T5-M3, M4, M6)", () => {
+  for (const [path, s] of strings(demo)) assert.doesNotMatch(s, /'/, `${path}: a straight apostrophe`);
+  const [clock] = report.failures.filter((f) => f.id === "false-answer-2");
+  assert.ok(clock.description.includes("it gave only the 72-hour clock for an operational risk incident likely to have a material impact (¶32)."), clock.description);
+  // demo-corpora.md §2.2: "Cite it as 'Final version 1.1 (approved 31 Aug 2026)'".
+  assert.ok(report.framework.includes("the NSW AI Operational Policy, Final version 1.1 (approved 31 August 2026),"), report.framework);
 });
 
 test("its failures are the ② demo's own: the false answer the demo shows caught, and questions the demo never shows answered or refused", () => {
