@@ -181,7 +181,7 @@ Every demo is a canned replay or a client-side tool: no demo, and not the checke
 |---|---|---|
 | `register` | ① Document Registers | A management agreement register over synthetic agreements, and a trust deed register over synthetic deeds. Each value opens the page it came from, and the synthetic set downloads from `public/downloads/`. |
 | `assistant` | ② Knowledge Assistant | Cited answers over public CC BY 4.0 text: the Victorian public sector's generative AI guideline and its guidance first, then APRA's CPS 230. It shows refusals, and a false answer the acceptance test caught. |
-| `inbox` | ③ Draft-for-Approval | Eight synthetic property-management emails and texts. Each is sorted, then drafted for approval, filed or, for the one ambiguous message, escalated. The drafts are internal (work orders, owner updates, a task), never a reply to a tenant. The run ends on the approval queue and the trace. |
+| `inbox` | ③ Draft-for-Approval | Eight synthetic property-management emails and texts. Each is sorted, then drafted for approval, filed or, for the one ambiguous message, escalated. The drafts are internal (a work order, a task, two owner updates and a reply to a contractor), never a reply to a tenant. The run ends on the approval queue and the trace. |
 | `report` | ④ AI Evaluation | The sample evaluation report on the ② demo, with the fixed sample-report caption. |
 | `checker` | ⑤ AI Switch-On | The "What you already pay for" checker. |
 
