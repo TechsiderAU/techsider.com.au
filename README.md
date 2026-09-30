@@ -167,11 +167,42 @@ const view = solutionView({ id: entry.id, data: entry.data, shared: SERVICES, si
 `src/data/nav.ts` decides what production builds. Every page there is `planned` or `live`:
 
 - **Planned:** the preview build renders it, so its route, template and content are built and tested, but production builds no file for it. The nav and footer leave it out, and every link to it renders as plain text (while `/contact/` is planned, contact links fall back to email).
-- **Live:** production builds it, and it is held to every rule the production build is: the CI checks, including check `02-links` (every link and fragment lands, so a live page can't link to a planned one), and the two site-wide sweeps of `dist/`. `tests/site-sweep.test.mjs` checks one `h1`, heading order, unique ids, and a title and description no other page shares. `tests/e2e/prod-site-sweep.spec.mjs` runs axe at 390px and 1280px, checks for horizontal scroll at 320px with and without JavaScript, and follows every link in `<main>`. Both read the page list from `dist/`, so a page is swept from the build in which it goes live.
+- **Live:** production builds it, and it is held to every rule the production build is: the CI checks, including check `02-links` (every link and fragment lands, so a live page can't link to a planned one), and the three site-wide sweeps of `dist/`. `tests/site-sweep.test.mjs` checks one `h1`, heading order, unique ids, a title and description no other page shares, and one canonical URL. `tests/e2e/prod-site-sweep.spec.mjs` runs axe at 390px and 1280px, checks for horizontal scroll at 320px with and without JavaScript, and follows every link in `<main>`. `tests/e2e/prod-interactive-sweep.spec.mjs` holds what a visitor reaches with JavaScript to the same rules: each demo paused mid-run and at its result, and every checkbox ticked. It also checks that no page requests anything from another origin, that every request succeeds, and that no script errs. All three read the page list from `dist/`, so a page is swept from the build in which it goes live.
 
 A page goes live in one commit. It writes the page's content, its route and its meta description (`describe()` in `src/data/nav.ts`), flips its `status`, and updates the tests that pin the live set, such as `tests/nav-data.test.mjs` and the production shell specs. A page written before it goes live, such as Trust, already has its route under `src/pages/`: its `getStaticPaths` returns `singletonPaths()` from `src/lib/pages.ts`, which builds the page only while `nav.ts` shows it, so flipping its `status` publishes it and no route file moves.
 
 Content can be written and still wait: for a fact to be re-checked, a review, or a business confirmation. Until then the statement stays out of the copy, or its page stays `planned`, and the open item is a `⚑` comment beside the data it concerns. Check `07-verify-markers`, a launch gate, lists every open `⚑` and fails the launch build while any is left. `tests/content-language.test.mjs` keeps held and unverified statements out of the built pages, keeps enterprise vocabulary off the mid-market pages, and checks the proper names the banned-phrase exceptions let through.
+
+### Demos and the checker
+
+Every demo is a canned replay or a client-side tool: no demo, and not the checker, calls a model or any other network endpoint (spec §8.7, §9.1). Each solution has one demo file, `src/data/demos/<solution id>.json`, which `makeDemoSchema()` in `src/content/schemas.ts` validates by its `kind`:
+
+| Kind | Solution | What the demo shows |
+|---|---|---|
+| `register` | ① Document Registers | A management agreement register over synthetic agreements, and a trust deed register over synthetic deeds. Each value opens the page it came from, and the synthetic set downloads from `public/downloads/`. |
+| `assistant` | ② Knowledge Assistant | Cited answers over public CC BY 4.0 text: the Victorian public sector's generative AI guideline and its guidance first, then APRA's CPS 230. It shows refusals, and a false answer the acceptance test caught. |
+| `inbox` | ③ Draft-for-Approval | Eight synthetic property-management emails and texts. Each is sorted, then drafted for approval, filed or, for the one ambiguous message, escalated. The drafts are internal (work orders, owner updates, a task), never a reply to a tenant. The run ends on the approval queue and the trace. |
+| `report` | ④ AI Evaluation | The sample evaluation report on the ② demo, with the fixed sample-report caption. |
+| `checker` | ⑤ AI Switch-On | The "What you already pay for" checker. |
+
+Every demo file keeps three rules:
+
+- **Provenance.** Every replay and the sample report are `provenance: "illustrative"`, and every page that renders one shows the label. The checker's file is `"sourced"`: its data is real, dated vendor facts, so its frame carries no illustrative label, and check `06-provenance` accepts `"sourced"` from a checker file only. A `measured` file needs `run`, a committed harness run under `src/data/runs/`, which check `06-provenance` verifies. Scores, latencies and counts are typed `{ value, unit? }` metrics, never numbers in free text.
+- **Synthetic data looks synthetic.** Organisation and person names are invented, every document title says "Synthetic", and nothing is a real address, ABN or phone number. The only email domain is `example.com`.
+- **Public text keeps its licence terms.** Each ② corpus carries its publisher's attribution, with the licence and source links, and its source panel quotes the passages as published. Where the answers paraphrase (CPS 230), the attribution's changes clause says so (CC BY 4.0 §3(a)(1)(B)); where they quote word for word (the Victorian guideline), it says "wording unchanged".
+
+The replay engine is `src/scripts/demo-engine.ts`, over `src/scripts/playback.ts`, with one renderer for each replayed kind (`register`, `assistant` and `inbox`) in `src/scripts/demo/`. Each replay sits in a `DemoFrame` (`src/components/page/DemoFrame.astro`) and keeps the same contract (spec §6.5, §8.8):
+
+- the controls, `src/components/demo/DemoControls.astro` (Pause/Resume, "Skip to result" and Replay), come before the animation in DOM order, and stay hidden without JavaScript;
+- Pause/Resume and "Skip to result" work for the whole run, and Replay is never the only control and is never disabled. When a run ends and disables a control that has keyboard focus, focus moves to Replay first, never to `<body>`;
+- the animation plays in an `aria-hidden` stage that is never a live region, and each finished step is announced once through a visually hidden `aria-live="polite"` log. The engine then holds the run for `STEP_GAP` (2.5 s), so a screen reader can finish one line before the next lands;
+- "Skip to result" shows the static transcript's content, and with `prefers-reduced-motion` nothing animates: the final state shows at once;
+- without JavaScript, the static transcript (the frame's `transcript` slot) reads in full;
+- each demo's script is its own chunk, loaded only on a page that shows that demo (spec §11.4).
+
+The checker, `src/components/demo/PlatformChecker.astro` with `src/scripts/checker.ts`, renders on `/resources/what-you-already-pay-for/`, its canonical page, and on the ⑤ demo page. It reads the dated vendor facts in `src/data/platform-ai.json`, bundled at build time, and shows their "as at" date. Re-check every entry against its `source` every quarter (spec §11.6): update the entry and its `asAt`, then the file's `asAt`. A fact the research couldn't verify stays out of the file until someone does. A processing location the vendor doesn't publish starts with "Not published", and the checker shows exactly that.
+
+The ④ sample report stays illustrative until the evaluation harness produces a measured run. `SampleReport` labels it "Illustrative sample: not a real test run", and the `⚑` in `src/data/runs/README.md` keeps check `07-verify-markers` failing the launch build until the report comes from a committed run.
 
 ### Tests
 
@@ -212,14 +243,14 @@ Then enable "Enforce HTTPS" once the cert provisions.
 
 - `src/data/nav.ts`: every page's names, path, group, status (`live` or `planned`) and meta description.
 - `src/content/`: the content collections (insights, solutions, industries, kits, documents) and their schemas.
-- `src/data/`: typed data (regulatory rows, demos, traces, harness runs) and the CI exception lists.
+- `src/data/`: typed data (regulatory rows, demos, traces, harness runs, the checker's vendor facts) and the CI exception lists.
 - `src/layouts/`: `BaseLayout.astro` (the shell), `PostLayout.astro` (one insight) and `PreviewLayout.astro` (the gallery only).
-- `src/components/site/`: the header and the footer. `src/components/ui/`: the shared components. `src/components/page/`: the page kit that templates are built from.
+- `src/components/site/`: the header and the footer. `src/components/ui/`: the shared components. `src/components/page/`: the page kit that templates are built from. `src/components/demo/`: the demo controls, engines and static transcripts, and the checker.
 - `src/templates/`: the page templates.
 - `src/lib/`: the site context, the route helpers (`src/lib/pages.ts`), page titles and descriptions, fixed copy, JSON-LD and smaller helpers, with the view builders in `src/lib/views/`.
 - `src/pages/`: the routes.
 - `src/preview/`: the `/preview/` gallery, in preview builds only. `src/fixtures/`: its data.
-- `src/scripts/`: the client scripts (nav, mobile menu, tabs, demo playback).
+- `src/scripts/`: the client scripts (nav, mobile menu, tabs, the demo engine with its renderers in `src/scripts/demo/`, and the checker).
 - `scripts/ci/`: the build gate and the CI checks.
 - `tests/`: the `node:test` suites, with Playwright specs in `tests/e2e/` and shared helpers in `tests/support/`.
 - `public/`: files copied into the build as they are.

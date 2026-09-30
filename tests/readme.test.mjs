@@ -12,6 +12,7 @@ import { parse } from "yaml";
 import { result } from "../scripts/ci/lib.mjs";
 import { FAIL_PHRASES, WARN_PHRASES, scan } from "../scripts/ci/checks/04-banned-phrases.mjs";
 import { CHECKS, LAUNCH_GATES } from "../scripts/ci/run-all.mjs";
+import { makeDemoSchema, plainRef } from "../src/content/schemas.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const README = readFileSync(join(ROOT, "README.md"), "utf8");
@@ -95,5 +96,24 @@ test("the README explains how a page goes live, and names the site-wide sweeps t
     "tests/site-sweep.test.mjs", "tests/e2e/prod-site-sweep.spec.mjs", "tests/content-language.test.mjs",
   ]) {
     assert.ok(README.includes(s), `the README never mentions ${s}`);
+  }
+});
+
+test("the README explains the demos and the checker: each demo kind, the engine's contract, the vendor facts' re-check and the sample report's launch gate", () => {
+  const kinds = makeDemoSchema(plainRef).options.map((option) => option.shape.kind.value);
+  assert.equal(kinds.length, 5, "one demo kind per solution");
+  for (const kind of kinds) assert.ok(README.includes(`| \`${kind}\` |`), `the README's demo table has no row for the ${kind} kind`);
+  for (const s of [
+    "### Demos and the checker", "src/data/demos/", "src/scripts/demo-engine.ts", "src/components/demo/DemoControls.astro",
+    "Replay is never the only control", "never to `<body>`",
+    "aria-hidden", 'aria-live="polite"', "prefers-reduced-motion", "src/components/demo/PlatformChecker.astro",
+    "src/data/platform-ai.json", "every quarter", "Not published", "Illustrative sample: not a real test run",
+    "src/data/runs/README.md", "tests/e2e/prod-interactive-sweep.spec.mjs",
+  ]) {
+    assert.ok(README.includes(s), `the README never mentions ${s}`);
+  }
+  // Phase D Task 2 deleted the Phase 0 engine: not even a code block names it.
+  for (const gone of ["src/lib/demoScript.ts", "src/scripts/demo.ts"]) {
+    assert.ok(!README.includes(gone), `the README names ${gone}, which no longer exists`);
   }
 });

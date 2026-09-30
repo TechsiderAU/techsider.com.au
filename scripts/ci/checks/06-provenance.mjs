@@ -1,7 +1,7 @@
 // Spec §11.5 check 6 (metric provenance, §9.3):
 //  (a) every demo and trace file declares provenance; anything `measured` cites a committed run
 //      directory that exists and is non-empty (checking that the run holds the cited metric key
-//      waits for the harness's run format in Phase D);
+//      waits for the harness's run format, which arrives with its first committed run: spec §9.2);
 //  (b) metric-shaped numbers never sit in free text (they belong in typed { value, unit } metrics);
 //  (c) every built element marked data-provenance="illustrative" shows its label.
 // The ⑤ checker is the one exception to (a) and (c) (controller ruling 6): a demo file of kind
