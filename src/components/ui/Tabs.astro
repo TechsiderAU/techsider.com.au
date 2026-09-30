@@ -2,15 +2,37 @@
 // A group of <TabPanel>s (spec §8.12). Without JavaScript the panels are stacked sections.
 // src/scripts/tabs.ts enhances the group: WAI-ARIA tabs from 768px, an accordion below.
 // The tablist and accordion buttons are built by the script, so their styles are :global().
+//
+// First paint (BR-4; spec §11.4, CLS under 0.05). BaseLayout's inline head script swaps html.no-js
+// for html.js before anything paints, but tabs.ts is a module script: it runs once the parser has
+// finished, often after the first paint. Until it sets data-tabs-mode, the .js rules below lay the
+// server-rendered group out the way tabs.ts will, so nothing moves when it runs. From 768px, the
+// first-paint tablist (.tab-list-skeleton: the real tablist's classes, and so its metrics and its
+// wrapping) stands above the first panel, whose heading is visually hidden. Below 768px, every
+// heading is an accordion row, and only the first item's content shows. tabs.ts inserts the real
+// tablist after the skeleton and sets data-tabs-mode in the same task, and the skeleton then stays
+// display: none. Without JavaScript (html.no-js) none of this applies. If tabs.ts never runs (its
+// chunk fails to load, or it throws), BaseLayout's inline fallback marks the group data-tabs-static
+// at the load event, or 3 s in, and these rules stand down: the group reads as stacked sections, as
+// it does without JavaScript (controller ruling 2). The accordion's "+" and "−" have empty
+// alternative text, so no heading is read with them.
 interface Props {
   id: string;
   label: string;
 }
 
 const { id, label } = Astro.props;
+// The panels, rendered here so the first-paint tablist can name them: each TabPanel's
+// data-tab-label, in order, escaped as Astro wrote it, so set:html writes it back unchanged.
+// Tabs don't nest, so every label in the slot belongs to this group.
+const panels = await Astro.slots.render("default");
+const labels = [...panels.matchAll(/\sdata-tab-label="([^"]*)"/g)].map((m) => m[1]);
 ---
 <div class="tabs" id={id} data-tabs data-tabs-label={label}>
-  <slot />
+  <div class="tab-list tab-list-skeleton" data-tab-skeleton aria-hidden="true">
+    {labels.map((text) => <span class="tab" set:html={text} />)}
+  </div>
+  <Fragment set:html={panels} />
 </div>
 
 <style>
@@ -106,6 +128,88 @@ const { id, label } = Astro.props;
   }
   :global(.surface-bone) .tabs :global(.tab[aria-selected="true"]) {
     border-bottom-color: var(--color-acid-deep);
+  }
+
+  /* First paint, before tabs.ts runs (BR-4; see the header comment). The skeleton shows only then,
+     and only from 768px; its first tab looks selected, as tabs.ts selects the first panel. */
+  .tabs > .tab-list-skeleton {
+    display: none;
+  }
+  .tab-list-skeleton > .tab {
+    display: inline-flex;
+    align-items: center;
+    cursor: default;
+  }
+  .tab-list-skeleton > .tab:first-child {
+    color: var(--color-bone);
+    font-weight: 700;
+    border-bottom-color: var(--color-acid);
+  }
+  :global(.surface-bone) .tab-list-skeleton > .tab:first-child {
+    color: var(--color-carbon);
+    border-bottom-color: var(--color-acid-deep);
+  }
+  :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) {
+    gap: 0;
+  }
+  @media (min-width: 48rem) {
+    :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > .tab-list-skeleton {
+      display: flex;
+    }
+    :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > :global([data-tab-panel] ~ [data-tab-panel]) {
+      display: none;
+    }
+    /* Tailwind's sr-only, which tabs.ts adds to each heading in tab mode. */
+    :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > :global([data-tab-panel]) > :global(.tab-panel-heading) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  }
+  @media (width < 48rem) {
+    :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > :global([data-tab-panel]) {
+      border-top: 1px solid var(--color-graphite);
+    }
+    :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > :global([data-tab-panel]:last-child) {
+      border-bottom: 1px solid var(--color-graphite);
+    }
+    :global(.js) :global(.surface-bone) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > :global([data-tab-panel]) {
+      border-color: var(--color-bone-line);
+    }
+    /* Each heading takes the accordion button's box: .tab-toggle's row, with its icon. */
+    :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > :global([data-tab-panel]) > :global(.tab-panel-heading) {
+      display: flex;
+      min-height: 3rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 0;
+      padding: 0.625rem 0;
+    }
+    :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > :global([data-tab-panel]) > :global(.tab-panel-heading)::after {
+      content: "+";
+      content: "+" / "";
+      flex: none;
+      font-family: var(--font-mono);
+      font-weight: 400;
+    }
+    /* The first item starts open, as tabs.ts opens it: its content shows, with the body's padding. */
+    :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > :global([data-tab-panel]:first-of-type) {
+      padding-bottom: 1.25rem;
+    }
+    :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > :global([data-tab-panel]:first-of-type) > :global(.tab-panel-heading)::after {
+      content: "−";
+      content: "−" / "";
+    }
+    :global(.js) .tabs:not([data-tabs-mode]):not([data-tabs-static]) > :global([data-tab-panel] ~ [data-tab-panel]) > :global(:not(.tab-panel-heading)) {
+      display: none;
+    }
   }
 </style>
 

@@ -48,6 +48,10 @@ const structuredData = pageGraph(site, Astro.url.pathname, graph);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script is:inline>document.documentElement.classList.replace("no-js", "js");</script>
+    {/* BR-4's way out (Tabs.astro): a tab group src/scripts/tabs.ts hasn't set up by the load event,
+        or 3 s in, is marked data-tabs-static, and its first-paint layout stands down, so it reads as
+        stacked sections (controller ruling 2). */}
+    <script is:inline>(function(){function f(){document.querySelectorAll("[data-tabs]:not([data-tabs-mode])").forEach(function(g){g.setAttribute("data-tabs-static","")})}addEventListener("load",f);setTimeout(f,3e3)})();</script>
     <meta name="generator" content={Astro.generator} />
     <meta name="build" content={buildStamp()} />
     <meta name="theme-color" content="#0B0B0C" />

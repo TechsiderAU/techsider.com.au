@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { focusKeys } from "../support/keys.mjs";
+import { TABS_CHUNK, moved, tabsBeforeAndAfter } from "../support/first-paint.mjs";
 
 // Tabs (spec §8.12) on /preview/tabs/: two independent groups built from the fixtures.
 // "fixture-workflow" (on carbon) has the industry fixture's four workflow stages;
@@ -74,6 +75,41 @@ test("the no-JavaScript rendering has no axe violations", async ({ page }) => {
     expect((await axe(page).analyze()).violations).toEqual([]);
   }
 });
+
+// BR-4 (spec §11.4, CLS under 0.05): with JavaScript on, the page can paint before tabs.ts runs.
+// The first paint already has the enhanced layout (from 768px the tablist over the first panel,
+// below it the accordion with its first item open), so nothing moves when the script runs. 768px
+// is tab mode at its narrowest.
+for (const vp of [WIDE, { width: 768, height: 800 }, NARROW]) {
+  test(`the first paint already has the enhanced layout, so nothing moves when tabs.ts runs, at ${vp.width}px (BR-4)`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    const { before, after } = await tabsBeforeAndAfter(page, PAGE);
+    expect(before.map((g) => [g.id, g.enhanced])).toEqual([["fixture-workflow", false], ["fixture-packages", false]]);
+    expect(after.map((g) => g.enhanced)).toEqual([true, true]);
+    expect(moved(before, after)).toEqual([]);
+  });
+}
+
+// BR-4's way out (controller ruling 2): if the tabs chunk never loads, BaseLayout's inline fallback
+// marks each group data-tabs-static at the load event, the first-paint rules stand down, and every
+// panel reads in full as a stacked section, as it does without JavaScript.
+for (const vp of [WIDE, { width: 768, height: 800 }, NARROW]) {
+  test(`if the tabs chunk never loads, every panel and its content still show, at ${vp.width}px (BR-4 fallback)`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    await page.route(TABS_CHUNK, (route) => route.abort());
+    await page.goto(PAGE);
+    await expect(page.locator("html")).toHaveClass(/\bjs\b/);
+    await expect(page.locator("[data-tabs][data-tabs-static]")).toHaveCount(2);
+    await expect(page.locator("[data-tabs][data-tabs-mode]")).toHaveCount(0);
+    for (const skeleton of await page.locator("[data-tab-skeleton]").all()) await expect(skeleton).toBeHidden();
+    const panels = page.locator("[data-tabs] > [data-tab-panel]");
+    expect(await panels.count()).toBeGreaterThan(2);
+    for (const panel of await panels.all()) {
+      await expect(panel.locator(":scope > .tab-panel-heading")).toBeVisible();
+      await expect(panel.locator(":scope > :not(.tab-panel-heading)").first()).toBeVisible();
+    }
+  });
+}
 
 // Spec §8.3 block 4, in the server-rendered markup that CI check 10 reads: the generic package
 // first as a full block, then only the launch packages as tabs, then the on-request packages as
