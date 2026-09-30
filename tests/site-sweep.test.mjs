@@ -92,3 +92,23 @@ test("no page links to a planned page, or to a path inside one, anywhere on the 
   }
   assert.deepEqual(offenders, []);
 });
+
+test("the sweep reads Phase D's pages: the Demos hub, the five demo pages, the checker and the evaluation method", () => {
+  const urls = new Set(BUILT.map((p) => p.url));
+  const phaseD = [
+    "/demos/", "/demos/document-registers/", "/demos/knowledge-assistant/", "/demos/draft-for-approval/",
+    "/demos/ai-evaluation/", "/demos/ai-switch-on/", "/resources/what-you-already-pay-for/", "/resources/evaluation-method/",
+  ];
+  assert.deepEqual(phaseD.filter((url) => !urls.has(url)), [], "production doesn't build these Phase D pages");
+});
+
+test("every page names one canonical URL: its own, except the ⑤ demo page, whose canonical is the checker's page (spec §8.8)", () => {
+  const CANONICAL = { "/demos/ai-switch-on/": "/resources/what-you-already-pay-for/" };
+  for (const { url, html } of BUILT) {
+    const hrefs = startTags(headOf(html)).filter((t) => t.name === "link" && t.attrs.rel === "canonical").map((t) => t.attrs.href);
+    assert.equal(hrefs.length, 1, `${url} has ${hrefs.length} canonical links`);
+    // The 404 is noindex, and Astro names /404/ as its canonical: it has no URL of its own to claim.
+    if (url === "/404.html") continue;
+    assert.equal(hrefs[0], `https://techsider.com.au${CANONICAL[url] ?? url}`, `${url}: its canonical URL`);
+  }
+});

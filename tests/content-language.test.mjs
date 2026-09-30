@@ -184,10 +184,13 @@ const UNVERIFIED_SYSTEMS = {
 };
 
 // Spec §3.4. The mid-market pages: the accounting, education, manufacturing and real-estate
-// industry pages, and the solutions whose every package is for mid-market buyers (①, ③ and ⑤).
+// industry pages, the solutions whose every package is for mid-market buyers (①, ③ and ⑤), and
+// the ① and ③ demo pages. ⑤'s demo page is the checker, which quotes vendors' own feature names,
+// such as "Agents in Copilot Chat": spec §3.4 lets a page name the systems a client runs.
 const MID_MARKET = [
   "/industries/accounting/", "/industries/education/", "/industries/manufacturing/", "/industries/real-estate/",
   "/solutions/document-registers/", "/solutions/draft-for-approval/", "/solutions/ai-switch-on/",
+  "/demos/document-registers/", "/demos/draft-for-approval/",
 ];
 // No vendor "agent" product is allowed on these pages. None needs one: Tasks 3 and 5 write
 // "SharePoint's built-in AI", ruling 8 allows no "agent" naming on Manufacturing, and agents in
@@ -378,7 +381,7 @@ test("banned-phrase-exceptions.json lets each proper name through with one src/*
   const accredited = list.filter((e) => /accredited/i.test(e.phrase) && !PROPER_NAMES.some((n) => n.toLowerCase() === e.phrase.toLowerCase()));
   assert.deepEqual(accredited.map((e) => `${e.file}: ${e.phrase}`), [], "an exception lets 'accredited' through outside the tester wording");
   const reasons = list.filter((e) => /\bremoved in Phase C\b/.test(e.reason)).map((e) => `${e.file}: ${e.phrase}`);
-  assert.deepEqual(reasons, [], "the legacy Home sections stay until Phase D replaces the Home page");
+  assert.deepEqual(reasons, [], "an exception's reason still says Phase C removes its section");
 });
 
 test("every occurrence of a proper name, in src/ and in both builds, is excepted", () => {
