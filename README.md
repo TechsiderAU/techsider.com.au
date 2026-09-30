@@ -232,7 +232,7 @@ npx playwright test tests/e2e/prod-vitals.spec.mjs --project prod-vitals --no-de
 
 The specs move focus with `focusKeys()` from `tests/support/keys.mjs`, because WebKit on macOS skips links on a plain Tab. They run axe against the WCAG 2.2 A and AA rules. CI (`.github/workflows/ci.yml`) runs every project on Ubuntu, Firefox included.
 
-`tests/e2e/prod-vitals.spec.mjs` is the lab vitals gate (spec §11.4): LCP under 2.0 s and CLS under 0.05 on the pages in `tests/support/vitals.mjs` (Home, one solution page and one industry page). Each page loads five times on Lighthouse's mobile screen, with the CPU slowed 4× and every response held back 150 ms, and the median of each metric must be under budget. It runs in the real Chrome build, after every other project and one load at a time, so nothing else competes for the CPU. `--no-deps` runs it without the rest.
+`tests/e2e/prod-vitals.spec.mjs` is the lab vitals gate (spec §11.4): LCP under 2.0 s and CLS under 0.05 on the pages in `tests/support/vitals.mjs` (Home, one solution page and one industry page). Each page loads five times on Lighthouse's mobile screen, with the CPU slowed 4× and every response held back 150 ms, and the median of each metric must be under budget. It runs in the real Chrome build, after every other project and one load at a time, so nothing else competes for the CPU. `--no-deps` runs it without the rest. The same workflow runs Lighthouse on those pages weekly, on demand, and on a pull request into `main`, through `scripts/ci/lighthouse-report.mjs`. That job only reports, in its summary: the vitals spec is the gate.
 
 ## Deploy
 

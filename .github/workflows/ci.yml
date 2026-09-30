@@ -1,22 +1,31 @@
 name: CI
 
 # Every branch push and every pull request: type-check, pristine build, CI content checks,
-# unit tests, then the e2e suite in Chromium, WebKit and Firefox plus the production shell.
+# unit tests, then the e2e suite in Chromium, WebKit and Firefox plus the production shell, and
+# last the lab vitals gate. Weekly, on demand, and on a pull request into main: the report-only
+# Lighthouse job.
 on:
   push:
     branches: ["**"]
   pull_request:
+  # Sunday 21:00 UTC, an hour after deploy.yml's weekly rebuild. GitHub runs a schedule, and
+  # offers workflow_dispatch, only for a workflow file on the default branch: from the launch on.
+  schedule:
+    - cron: "0 21 * * 0"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # By event as well as ref, so a scheduled run and a push to main never cancel each other.
+  group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test:
     name: Build, check and test
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -66,3 +75,43 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  # Spec §1 criteria 4 and 5 by Lighthouse's own measure. Report only: the scores go to the job
+  # summary, and a score below target fails nothing (tests/e2e/prod-vitals.spec.mjs is the gate).
+  # A pull request into main (the launch PR) gets a report before the merge.
+  lighthouse:
+    name: Lighthouse report (report only)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.base_ref == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          # Lighthouse 13.5.0 needs Node 22.19 or later; the test job stays on the engines floor.
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production
+        run: npm run build
+
+      - name: Install Playwright's Chromium, which Lighthouse drives through CHROME_PATH
+        run: npx playwright install --with-deps chromium
+
+      - name: Lighthouse (mobile) on Home, one solution page and one industry page
+        run: node scripts/ci/lighthouse-report.mjs
+
+      - name: Upload the Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lighthouse
+          path: test-results/lighthouse/
+          if-no-files-found: ignore
+          retention-days: 30

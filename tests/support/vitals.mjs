@@ -1,5 +1,6 @@
 // The lab vitals gate (spec §1 criterion 4, §11.4): the pages it measures, its budgets and its
-// arithmetic. tests/e2e/prod-vitals.spec.mjs is the gate.
+// arithmetic. tests/e2e/prod-vitals.spec.mjs is the gate; scripts/ci/lighthouse-report.mjs
+// reports on the same pages without gating.
 
 /**
  * Home, one solution page and one industry page (spec §1 criterion 4). The solution is ④ AI

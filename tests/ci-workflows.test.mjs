@@ -104,6 +104,36 @@ test("CI gates only pull requests into main; every other run reports", () => {
   assert.equal(build.env.VERIFY_MODE, "${{ github.event_name == 'pull_request' && github.base_ref == 'main' && 'gate' || 'report' }}");
 });
 
+test("a report-only Lighthouse job runs weekly, on demand and on a pull request into main, never on a push", async () => {
+  const ci = workflow("ci.yml");
+  assert.deepEqual(ci.on.schedule, [{ cron: "0 21 * * 0" }]);
+  assert.ok("workflow_dispatch" in ci.on, "no workflow_dispatch trigger");
+  assert.equal(ci.concurrency.group, "ci-${{ github.event_name }}-${{ github.ref }}", "a scheduled run must not cancel a push to main");
+  assert.equal(ci.jobs.test.if, "github.event_name == 'push' || github.event_name == 'pull_request'");
+  const job = ci.jobs.lighthouse;
+  // The launch pull request gets a report before the merge; no other pull request does.
+  assert.equal(job.if, "github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.base_ref == 'main')");
+  assert.deepEqual(
+    job.steps.map((s) => s.uses ?? s.run),
+    [
+      "actions/checkout@v5",
+      "actions/setup-node@v5",
+      "npm ci",
+      "npm run build",
+      "npx playwright install --with-deps chromium",
+      "node scripts/ci/lighthouse-report.mjs",
+      "actions/upload-artifact@v7",
+    ],
+  );
+  // Lighthouse 13.5.0 needs Node 22.19 or later: the latest 22, not the test job's floor.
+  assert.equal(job.steps.find((s) => s.uses === "actions/setup-node@v5").with["node-version"], "22");
+  const upload = job.steps.at(-1);
+  assert.equal(upload.if, "always()");
+  assert.equal(upload.with.path, "test-results/lighthouse/");
+  const { LIGHTHOUSE } = await import("../scripts/ci/lighthouse-report.mjs");
+  assert.equal(LIGHTHOUSE, "lighthouse@13.5.0", "one exact version: npx fetches it on every run");
+});
+
 test("the deploy build runs the CI checks in gate mode", () => {
   const deploy = workflow("deploy.yml");
   assert.deepEqual(deploy.on.push, { branches: ["main"] });
