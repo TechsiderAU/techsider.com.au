@@ -242,16 +242,34 @@ test("platform-ai.json: the six silent vendors read 'Not published', and nothing
   for (const e of PLATFORM.entries) {
     assert.equal(e.processingLocation.startsWith("Not published"), NOT_PUBLISHED.includes(e.vendor), `${e.vendor}: ${e.processingLocation}`);
   }
-  // Microsoft says only that in-country inferencing for Australia is "expected" by the end of 2026.
-  for (const e of PLATFORM.entries.filter((x) => x.vendor === "Microsoft")) {
-    assert.match(e.processingLocation, /'expected' by the end of 2026/);
-    assert.doesNotMatch(e.processingLocation, /(processed|processing|runs|inference) in Australia/i);
-  }
+  const microsoft = PLATFORM.entries.filter((x) => x.vendor === "Microsoft");
+  for (const e of microsoft) assert.doesNotMatch(e.processingLocation, /(processed|processing|runs|inference) in Australia/i, e.feature);
+  // Microsoft's blog (4 Nov 2025, updated 3 Apr 2026) says only that in-country inferencing is
+  // "expected" in Australia by the end of 2026, and says it of Microsoft 365 Copilot, now Copilot
+  // Business, whose interactions its footnote 1 defines. It doesn't say it of Copilot Chat, so no Copilot
+  // Chat entry mentions it (final review WB-D1).
+  const [business] = microsoft.filter((e) => e.product.includes("Copilot Business"));
+  assert.match(business.processingLocation, /\bMicrosoft says in-country inferencing for Microsoft 365 Copilot is 'expected' in Australia by the end of 2026\./);
+  const chat = microsoft.filter((e) => e.product.includes("Copilot Chat"));
+  assert.equal(chat.length, 3, "Copilot Chat, Copilot Chat in Outlook and Agents in Copilot Chat");
+  for (const e of chat) assert.doesNotMatch(e.processingLocation, /\bin[\s-]country\b|\bexpected\b/i, `${e.product}: ${e.feature}`);
+});
+
+test("platform-ai.json: Rex's inference line keeps the scope its sub-processor register gives it (final review WB-D5)", () => {
+  const [rex] = PLATFORM.entries.filter((e) => e.vendor === "Rex");
+  // The register lists the inference "for AI Admin operations" (platform-ai.md's Rex note): whether that
+  // covers the plan's Rex AI isn't stated, so the line quotes the scope rather than extend it.
+  assert.match(rex.processingLocation, /\bAI inference for 'AI Admin operations' by Anthropic, OpenAI and Google Vertex AI\b/);
+  // The register states zero retention for Vertex only, so the line claims no zero retention.
+  assert.doesNotMatch(rex.processingLocation, /\bzero[\s-]retention\b/i);
 });
 
 test("platform-ai.json: current product names, no prices, and nothing from the keep-off list", () => {
   // Renames (platform-ai.md): Microsoft 365 Copilot is now Microsoft Copilot; Zoom AI Companion is ZoomMate.
-  assert.doesNotMatch(RAW_PLATFORM.replaceAll("formerly Microsoft 365 Copilot", ""), /Microsoft 365 Copilot/);
+  // The old name stays only after "formerly", and where Copilot Business's processing note names the
+  // product as Microsoft's in-country inferencing statement does.
+  const renamed = RAW_PLATFORM.replaceAll("formerly Microsoft 365 Copilot", "").replaceAll("in-country inferencing for Microsoft 365 Copilot", "");
+  assert.doesNotMatch(renamed, /Microsoft 365 Copilot/);
   assert.doesNotMatch(RAW_PLATFORM, /AI Companion|Console Cloud/);
   // No pricing (D4): no currency figure, and no "free" or "no additional cost".
   assert.doesNotMatch(RAW_PLATFORM, /\$\s?\d|\bfree\b|no additional cost|\bdiscount/i);

@@ -138,7 +138,7 @@ const KEEP_OFF = [
     "LEAP says some AI features may send limited client data to the US (platform-ai)"),
   rule("Copilot processing in Australia",
     /(?<!\bassume (?:that )?(?:Microsoft )?)\bCopilot\b[^.]{0,80}?(?<!\bnot |n't |\bnever )\b(?:processe[sd]|runs|hosted|inferenc\w*)\b[^.]{0,40}?\bin (?:Australia|an Australian region)\b/gi,
-    "Microsoft says only that in-country inferencing for Australia is expected by the end of 2026 (platform-ai)"),
+    "Microsoft says only that in-country inferencing for Microsoft 365 Copilot is expected in Australia by the end of 2026 (platform-ai)"),
   rule("the removed Smokeball quote", /\bdirect access to (?:the )?production\b/gi, "not on Smokeball's pages (legal dossier)"),
   rule("Gemini Gems", /\bGemini Gems?\b/g, "grounding in school documents is unverified (education dossier)"),
   rule("agents in SharePoint on school licences", /\bagents in SharePoint\b[^.]{0,80}?\b(?:A1|A3|A5|A-licen[cs]es?|education licen[cs]es?)\b/gi,
@@ -184,14 +184,19 @@ const UNVERIFIED_SYSTEMS = {
 };
 
 // Spec §3.4. The mid-market pages: the accounting, education, manufacturing and real-estate
-// industry pages, the solutions whose every package is for mid-market buyers (①, ③ and ⑤), and
-// the ① and ③ demo pages. ⑤'s demo page is the checker, which quotes vendors' own feature names,
-// such as "Agents in Copilot Chat": spec §3.4 lets a page name the systems a client runs.
+// industry pages, the solutions whose every package is for mid-market buyers (①, ③ and ⑤), the
+// ① and ③ demo pages, and the checker's own page (final review D6-M5). The checker quotes vendors'
+// own feature names, such as "Agents in Copilot Chat", which spec §3.4 lets a page name as systems a
+// client runs: CHECKER_FEATURES allows those four phrases there, and nowhere else, so the checker's
+// own copy still can't say "agent".
+const CHECKER = "/resources/what-you-already-pay-for/";
 const MID_MARKET = [
   "/industries/accounting/", "/industries/education/", "/industries/manufacturing/", "/industries/real-estate/",
   "/solutions/document-registers/", "/solutions/draft-for-approval/", "/solutions/ai-switch-on/",
-  "/demos/document-registers/", "/demos/draft-for-approval/",
+  "/demos/document-registers/", "/demos/draft-for-approval/", CHECKER,
 ];
+/** The vendors' own feature wording the checker quotes from src/data/platform-ai.json (Microsoft, MYOB, Zoom). */
+const CHECKER_FEATURES = ["Agents in Copilot Chat", "advanced agent experiences", "AI agents and features", "custom agent builder"];
 // No vendor "agent" product is allowed on these pages. None needs one: Tasks 3 and 5 write
 // "SharePoint's built-in AI", ruling 8 allows no "agent" naming on Manufacturing, and agents in
 // SharePoint on school licences are unverified (research index, education). A page that later names
@@ -200,6 +205,8 @@ const MANUFACTURING = "/industries/manufacturing/";
 const AGENT = rule("agent", /\bagent(?:s|ic)?\b/gi, "name the job, not an agent, on a mid-market page (spec §3.4; ruling 8)", [
   // ④'s package name (spec §4.1 import rule 4), wherever ④ is offered, except Manufacturing (ruling 8).
   ...MID_MARKET.filter((url) => url !== MANUFACTURING).map((url) => ({ phrase: "Agentic AI Control Evaluation", url })),
+  // The vendor feature names the checker quotes, on the checker's page only.
+  ...CHECKER_FEATURES.map((phrase) => ({ phrase, url: CHECKER })),
   // Professions, and the statutes named after them.
   ...[
     "tax agent", "tax agents", "Tax Agent Services", "BAS agent", "BAS agents", "estate agent", "estate agents", "real estate agent",
@@ -303,6 +310,11 @@ test("the matchers catch what they're for, and pass the wording the research all
   assert.equal(sample([AGENT], "Our AI agents draft your replies. Agentic automation.", "/industries/accounting/").length, 2);
   assert.equal(sample([AGENT], "Try agents in SharePoint first.", "/industries/education/").length, 1, "a vendor agent product is allowed on a mid-market page");
   assert.deepEqual(sample([AGENT], "Agentic AI Control Evaluation", "/industries/education/"), []);
+  // The checker's page quotes four vendor feature names (D6-M5); its own copy still can't say "agent".
+  const quoted = "Agents in Copilot Chat that answer; advanced agent experiences; the 'AI agents and features' heading; a custom agent builder.";
+  assert.deepEqual(sample([AGENT], quoted, CHECKER), []);
+  assert.equal(sample([AGENT], quoted, "/industries/accounting/").length, 4, "a vendor feature name is allowed off the checker's page");
+  assert.equal(sample([AGENT], "If a job is still left over, our AI agents may cover it.", CHECKER).length, 1);
   assert.equal(sample([AGENT], "Agentic AI Control Evaluation", MANUFACTURING).length, 1, "ruling 8: no agent naming on Manufacturing");
   assert.deepEqual(sample([SPRINT], "Start with a Feasibility Sprint on public or synthetic data."), []);
   assert.equal(sample([SPRINT], "A two-week sprint on your files.").length, 1);

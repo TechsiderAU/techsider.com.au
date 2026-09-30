@@ -7,7 +7,7 @@
       "feature": "Web-grounded AI chat for work accounts: drafting and rewriting, analysis of uploaded files, image generation. Organisational content is used only when the user pastes or uploads it. Standard access, subject to service capacity.",
       "plans": ["Microsoft 365 Business Basic", "Microsoft 365 Business Standard", "Microsoft 365 Business Premium"],
       "included": "included",
-      "processingLocation": "Microsoft says Copilot Chat calls to the model go to the closest datacentres in the region but can go to other regions when demand is high, and customers outside the EU 'may have their queries processed in the US, EU, or other regions'. Web search queries go to Bing, outside the Microsoft 365 service boundary. Microsoft says in-country inferencing for Australia is 'expected' by the end of 2026. Prompts and responses are stored in Exchange in the tenant, for audit and eDiscovery.",
+      "processingLocation": "Microsoft says Copilot Chat calls to the model go to the closest datacentres in the region but can go to other regions when demand is high, and customers outside the EU 'may have their queries processed in the US, EU, or other regions'. Web search queries go to Bing, outside the Microsoft 365 service boundary. Prompts and responses are stored in Exchange in the tenant, for audit and eDiscovery.",
       "source": "https://learn.microsoft.com/en-us/copilot/manage",
       "asAt": "2026-09-29",
       "category": "general"
@@ -18,7 +18,7 @@
       "feature": "Chat in Outlook that answers from the user's own emails, calendar, meetings, chats and a bounded set of OneDrive and SharePoint files, without a Copilot add-on licence. Client, mailbox and configuration requirements apply.",
       "plans": ["Microsoft 365 Business Basic", "Microsoft 365 Business Standard", "Microsoft 365 Business Premium"],
       "included": "included",
-      "processingLocation": "Microsoft says model calls go to the closest datacentres in the region but can go to other regions when demand is high, and customers outside the EU 'may have their queries processed in the US, EU, or other regions'. In-country inferencing for Australia is 'expected' by the end of 2026.",
+      "processingLocation": "Microsoft says model calls go to the closest datacentres in the region but can go to other regions when demand is high, and customers outside the EU 'may have their queries processed in the US, EU, or other regions'.",
       "source": "https://learn.microsoft.com/en-us/copilot/overview",
       "asAt": "2026-09-29",
       "category": "general"
@@ -29,7 +29,7 @@
       "feature": "Agents in Copilot Chat that answer from shared organisational content (SharePoint or Copilot connector content).",
       "plans": ["Microsoft 365 Business Basic", "Microsoft 365 Business Standard", "Microsoft 365 Business Premium"],
       "included": "add-on",
-      "processingLocation": "Microsoft says model calls go to the closest datacentres in the region but can go to other regions when demand is high, and customers outside the EU 'may have their queries processed in the US, EU, or other regions'. In-country inferencing for Australia is 'expected' by the end of 2026.",
+      "processingLocation": "Microsoft says model calls go to the closest datacentres in the region but can go to other regions when demand is high, and customers outside the EU 'may have their queries processed in the US, EU, or other regions'.",
       "source": "https://learn.microsoft.com/en-us/copilot/privacy-and-protections",
       "asAt": "2026-09-29",
       "category": "general"
@@ -40,7 +40,7 @@
       "feature": "Copilot in Word, Excel, PowerPoint, Outlook and Teams that reasons across the user's emails, meetings, chats, documents and sites (Graph, Work IQ and semantic indexing), with priority access and advanced agent experiences.",
       "plans": ["Microsoft 365 Business Basic", "Microsoft 365 Business Standard", "Microsoft 365 Business Premium", "Microsoft 365 Apps for business", "Microsoft Teams Essentials"],
       "included": "add-on",
-      "processingLocation": "Microsoft says model calls go to the closest datacentres in the region but can go to other regions when demand is high, and customers outside the EU 'may have their queries processed in the US, EU, or other regions'. In-country inferencing for Australia is 'expected' by the end of 2026. Prompts, responses and citations are stored under the tenant's Microsoft 365 data residency commitments; Anthropic and OpenAI models are offered as subprocessors that an admin can choose to enable.",
+      "processingLocation": "Microsoft says model calls go to the closest datacentres in the region but can go to other regions when demand is high, and customers outside the EU 'may have their queries processed in the US, EU, or other regions'. Microsoft says in-country inferencing for Microsoft 365 Copilot is 'expected' in Australia by the end of 2026. Prompts, responses and citations are stored under the tenant's Microsoft 365 data residency commitments; Anthropic and OpenAI models are offered as subprocessors that an admin can choose to enable.",
       "source": "https://learn.microsoft.com/en-us/microsoft-365/copilot/microsoft-365-copilot-licensing",
       "asAt": "2026-09-29",
       "category": "general"
@@ -249,7 +249,7 @@
       "feature": "Rex AI, as listed in the plan: email and SMS drafting, plain-English search filters over CRM data, and listing ad copy.",
       "plans": ["Professional"],
       "included": "included",
-      "processingLocation": "Rex says the CRM is hosted on Google Cloud with Australian customer data in Australian data centres. Its sub-processor register lists AI inference by Anthropic, OpenAI and Google Vertex AI with processing location 'United States / Global', under zero-retention and no-training terms. AI interaction logs are kept in Australia for 12 months.",
+      "processingLocation": "Rex says the CRM is hosted on Google Cloud with Australian customer data in Australian data centres. Its sub-processor register lists AI inference for 'AI Admin operations' by Anthropic, OpenAI and Google Vertex AI, with processing location 'United States / Global', under no-training terms. AI interaction logs are kept in Australia for 12 months.",
       "source": "https://www.rexsoftware.com/plans",
       "asAt": "2026-09-29",
       "category": "property"

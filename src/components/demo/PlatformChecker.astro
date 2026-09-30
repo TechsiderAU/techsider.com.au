@@ -3,7 +3,7 @@
 // in src/data/platform-ai.json, then the results for the ticked vendors, each listing every product
 // name and feature the file has under the vendor (a product name is the research's name for a feature
 // family, not something a visitor knows they pay for, so it is never a checkbox; see checkerView):
-// - "AI you already pay for": each feature by product, included or add-on, its plans and its vendor page;
+// - "AI in the software you ticked": each feature by product, included or add-on, its plans and its vendor page;
 // - "Where it's processed": each product's statement word for word, or "Not published" where
 //   the vendor pages checked don't say (checkerView's processing(), Phase D Review Focus 4);
 // - "What's left for a build": ①, ② and ③, linked through the site context;
@@ -54,7 +54,7 @@ const Block = `h${headingLevel + 1}` as "h3" | "h4";
     <p class="checker-status" data-checker-status role="status" aria-live="polite">{EMPTY_STATUS}</p>
 
     <div class="checker-block" data-checker-section="features" hidden>
-      <Block class="checker-block-heading">AI you already pay for</Block>
+      <Block class="checker-block-heading">AI in the software you ticked</Block>
       <p class="checker-note">Every AI feature listed for the vendors you ticked, by product. Check each feature's plans against your own.</p>
       <ul class="checker-list">
         {view.vendors.map((g) => (

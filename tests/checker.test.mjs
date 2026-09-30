@@ -162,6 +162,9 @@ test("nav: the checker's page is live, with its own title, its description and i
   assert.ok(html.includes(`<title>${pageTitle(entry)}</title>`), "the page's <title>");
   assert.ok(html.includes(`<meta name="description" content="${pageDescription(entry)}">`));
   assert.ok(html.includes(`<link rel="canonical" href="https://techsider.com.au${PATH}">`));
+  // The checker lists add-ons as well as what a plan includes (final review D6-M1).
+  assert.match(entry.description, /\bthe AI features it includes or sells as add-ons\b/);
+  assert.doesNotMatch(entry.description, /\balready includes\b/);
 });
 
 test("the page: the checker badge and the facts' date lead; one checkbox per vendor, whose results hold every feature listed under it; the form and the results wait for JavaScript", () => {
@@ -199,7 +202,7 @@ test("the page: the checker badge and the facts' date lead; one checkbox per ven
     const sections = elementsWith(results.inner, "data-checker-section");
     assert.deepEqual(sections.map((s) => s.attrs["data-checker-section"]), view.kits.length ? ["features", "processing", "build", "kits"] : ["features", "processing", "build"], build);
     assert.ok(sections.every((s) => "hidden" in s.attrs), `${build}: a results block shows before anything is ticked`);
-    assert.deepEqual(sections.map((s) => text(tagged(s.inner, "h4")[0].inner)), ["AI you already pay for", "Where it's processed", "What's left for a build", "Safe-Use Kits"].slice(0, sections.length));
+    assert.deepEqual(sections.map((s) => text(tagged(s.inner, "h4")[0].inner)), ["AI in the software you ticked", "Where it's processed", "What's left for a build", "Safe-Use Kits"].slice(0, sections.length));
     const items = elementsWith(results.inner, "data-vendor");
     assert.equal(items.length, 2 * view.vendors.length, `${build}: every vendor has its features and its locations`);
     assert.ok(items.every((item) => "hidden" in item.attrs), `${build}: a vendor's results show before it is ticked`);
