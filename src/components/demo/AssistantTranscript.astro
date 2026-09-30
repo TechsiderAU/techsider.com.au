@@ -114,6 +114,15 @@ const sourceId = (scenario: string, cite: number) => `${idPrefix}-${scenario}-sr
     min-width: 0;
     overflow-wrap: anywhere;
   }
+  /* Chromium styles what sits inside a size container during layout. A layout forced at the load
+     event, such as the browser's scroll to a /#anchor below the transcript, can find its contents
+     not yet styled, thousands of pixels too tall at 390px, and they settle a frame later. Scroll
+     anchoring would then hold on to the section around the transcript, whose top doesn't move, and
+     leave the anchor off screen. With that section excluded, it holds on to the block below, which
+     moves with the change (the Home page's /#approach, spec §7.1). */
+  :global(section:has(.assist)) {
+    overflow-anchor: none;
+  }
   :global(.assist-note),
   :global(.assist-kicker),
   :global(.assist-role),

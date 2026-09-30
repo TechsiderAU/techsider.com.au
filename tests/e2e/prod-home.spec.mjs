@@ -114,3 +114,22 @@ test("without JavaScript the demo band shows its static transcript, every questi
   for (const question of QUESTIONS) await expect(transcript).toContainText(question);
   await ctx.close();
 });
+
+test("/#approach stays in view at 390px when the ② band above it changes height after the load event (Review Focus 5)", async ({ browser }) => {
+  // Under load, Chromium can lay the ② transcript out at the load event before it has styled what
+  // sits inside its size container, then shrink it by thousands of pixels a frame later, after the
+  // browser's own scroll to /#approach. This makes the same change on purpose: the block below the
+  // band must stay in view, which scroll anchoring does only while it doesn't hold on to the band.
+  const ctx = await browser.newContext({ viewport: NARROW, reducedMotion: "reduce" });
+  const page = await ctx.newPage();
+  await openHome(page, "#approach");
+  await expect(page.locator("#approach")).toBeInViewport();
+  const shrunk = await page.locator("#demo .assist").evaluate((assist) => {
+    const before = assist.getBoundingClientRect().height;
+    for (const turns of assist.querySelectorAll(".assist-turns")) turns.hidden = true;
+    return before - assist.getBoundingClientRect().height;
+  });
+  expect(shrunk, "the band didn't change height").toBeGreaterThan(1000);
+  await expect(page.locator("#approach")).toBeInViewport();
+  await ctx.close();
+});
