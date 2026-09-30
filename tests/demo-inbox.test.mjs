@@ -102,8 +102,8 @@ test("eight messages: five drafted for approval, one escalated as ambiguous with
   // The automation reads only the shared mailbox and the SMS line (Phase C ruling 9), so each
   // draft's reason names the person who checks, acts or decides before anything is sent.
   for (const m of drafts) assert.match(m.reason, /\bproperty manager\b|\bthe owner decides\b/, `${m.id}: the reason says who checks or decides`);
-  // Drafts are internal (controller ruling 5): a work order, owner updates, a contractor's key
-  // pickup and a task, never a reply to a tenant, which spec §4.1 leaves to the property system.
+  // No draft goes to a tenant (controller ruling 5): a work order, a task, two owner updates and a
+  // contractor's key pickup, never a reply to a tenant, which spec §4.1 leaves to the property system.
   assert.deepEqual(drafts.map((m) => m.to), ["a contractor", "a property manager", "the owner of SYN-120", "Synthetic Electrical", "the owner of SYN-140"]);
   for (const m of drafts) assert.doesNotMatch(m.to, /tenant/i, `${m.id}: the draft goes to a tenant`);
   for (const m of [...escalated, ...filed]) assert.equal(m.to, undefined, `${m.id} is "${m.action}" but names a recipient`);

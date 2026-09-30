@@ -240,9 +240,9 @@ export const registerData = z.strictObject({
 }).superRefine(registerRules);
 
 // ③ Draft-for-Approval: a synthetic shared inbox of eight messages, exactly one escalated. A drafted
-// message carries its draft and `to`, who the draft goes to: drafts are internal (contractor work
-// orders, owner updates, file notes and task assignments), never replies to tenants, which spec
-// §4.1 leaves to the property system (controller ruling 5). No other message has a draft.
+// message carries its draft and `to`, who the draft goes to: a contractor, a property manager or an
+// owner (work orders, tasks, owner updates and replies to contractors), never a tenant, whose replies
+// spec §4.1 leaves to the property system (controller ruling 5). No other message has a draft.
 export const inboxMessage = z.strictObject({
   id: slug, channel: z.enum(["email", "sms"]), from: z.string(), subject: z.string().optional(), body: z.string(),
   category: z.string(), action: z.enum(["draft-for-approval", "escalate", "file"]), draft: z.string().optional(), to: z.string().optional(),
