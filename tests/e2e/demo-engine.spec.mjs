@@ -162,7 +162,7 @@ test("under prefers-reduced-motion the band keeps its final state: the transcrip
   await expect(d.lines).toHaveCount(0);
 });
 
-test("a keyboard user already reading the transcript keeps it: the controls appear with Replay ready, and nothing runs", async ({ page }) => {
+test("a keyboard user already reading the transcript keeps it: the controls appear with Replay ready, and nothing runs", async ({ page, context }) => {
   const d = await openHome(page);
   const cite = d.transcript.locator("a.assist-cite").first();
   await cite.focus(); // focusing scrolls the band into view, which would start the replay
@@ -174,6 +174,22 @@ test("a keyboard user already reading the transcript keeps it: the controls appe
   await expect(d.skip).toBeDisabled();
   await expect(d.replay).toBeEnabled();
   await expect(d.lines).toHaveCount(0);
+
+  // A screen reader activates a citation from its browse mode before the band counts as in view: a
+  // click, with focus left on <body>. Only bootDemos' watch on the frame, set from the page's start,
+  // sees it: the engine that mounts later finds no focus in the transcript (final review D2-T2-F1).
+  const other = await context.newPage();
+  const e = await openHome(other);
+  await expect(e.frame).not.toBeInViewport();
+  expect(await other.evaluate(() => document.activeElement === document.body), "focus starts on <body>").toBe(true);
+  await e.transcript.locator("a.assist-cite").first().dispatchEvent("click");
+  expect(await other.evaluate(() => document.activeElement === document.body), "the click left focus on <body>").toBe(true);
+  await e.frame.scrollIntoViewIfNeeded();
+  await expect(e.controls).toBeVisible();
+  await expect(e.transcript).toBeVisible();
+  await expect(e.stage).toBeHidden();
+  await expect(e.replay).toBeEnabled();
+  await expect(e.lines).toHaveCount(0);
 });
 
 test("at 320px the band doesn't scroll sideways, before or during a run", async ({ page }) => {
