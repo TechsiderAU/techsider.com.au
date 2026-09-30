@@ -278,3 +278,15 @@ test("Legal & professional: the problem's source names the Victorian Lawyer Cens
   assert.match(source.url, /2025-victorian$/);
   assert.equal(source.label, "VLSB+C, Generative AI Use in the Legal Profession (2025 Victorian Lawyer Census)");
 });
+
+test("Resources & energy: the problem's From line says only what DCCEEW's Compliance outcomes page records (WB-4, the Resources problem line; Phase C ledger, ruling R5)", () => {
+  const { from, source } = industryData("resources-and-energy").problem;
+  assert.equal(source.url, "https://www.dcceew.gov.au/environment/epbc/compliance/audit-outcomes");
+  assert.equal(
+    from,
+    "The regulator records approval holders who failed to publish annual compliance reports, implement approved management plans or report non-compliance.",
+  );
+  // The page lists enforcement outcomes: it says nothing of spreadsheets or how conditions are tracked.
+  assert.doesNotMatch(from, /spreadsheet|by hand/i);
+  assert.ok(inlineText(mainOf(built("/industries/resources-and-energy/"))).includes(from), "the built page doesn't show the From line");
+});

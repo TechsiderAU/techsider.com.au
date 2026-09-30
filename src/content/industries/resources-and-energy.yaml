@@ -61,7 +61,7 @@ dontDo:
   - Predictive maintenance, vision QA, orebody modelling or digital twins. Specialist products do those.
   - AI policy paperwork. Your CIRMP and policy owners write policy.
 problem:
-  from: Approval conditions sit across approvals and management plans, in a spreadsheet rebuilt by hand whenever a plan changes.
+  from: The regulator records approval holders who failed to publish annual compliance reports, implement approved management plans or report non-compliance.
   to: One register where every condition links to its page, with the error rate measured before anyone relies on it.
   source:
     label: DCCEEW, Compliance outcomes (EPBC Act)
