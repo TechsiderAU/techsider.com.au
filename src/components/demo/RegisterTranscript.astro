@@ -224,11 +224,12 @@ const valuesIn = (view: (typeof views)[number]) => view.rows.reduce((n, row) => 
     text-align: left;
     color: var(--color-muted);
   }
+  /* break-word, as DataTable's cells: "anywhere" lets a column shrink below its longest word. */
   .rg-table th,
   .rg-table td {
     text-align: left;
     vertical-align: top;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .rg-table thead th {
     font-family: var(--font-mono);

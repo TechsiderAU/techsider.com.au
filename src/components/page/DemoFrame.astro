@@ -50,6 +50,11 @@ const hasEngine = Astro.slots.has("engine");
     border-radius: 8px;
     overflow-wrap: anywhere;
   }
+  /* A table in the frame doesn't inherit "anywhere": it would let a column shrink below its longest
+     word, so words break mid-letter at any width (final review WB-D2). */
+  .demo-frame :global(table) {
+    overflow-wrap: break-word;
+  }
   @media (min-width: 40rem) {
     .demo-frame {
       padding: 1.5rem;

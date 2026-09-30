@@ -79,11 +79,14 @@ const markerOf = () => (rowMarker ? { [rowMarker]: "" } : {});
     text-align: left;
     color: var(--dt-muted);
   }
+  /* break-word, not anywhere: a word breaks only when it can't fit its column. "anywhere" also lowers
+     a cell's min-content width, so an auto-layout table shrinks a short column below its longest word
+     and breaks it mid-letter even at 1280px (final review WB-D2). */
   .dt-table th,
   .dt-table td {
     text-align: left;
     vertical-align: top;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .dt-table thead th {
     font-family: var(--font-mono);
