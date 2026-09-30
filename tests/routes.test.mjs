@@ -29,6 +29,8 @@ const fileOf = (path) => (path === "/404" ? "404.html" : `${path.slice(1)}index.
 function expectNotFoundPage(html, site, build) {
   const head = html.slice(0, html.indexOf("</head>"));
   assert.match(head, /<meta name="robots" content="noindex">/, `${build}: the 404 is indexable`);
+  // GitHub Pages serves 404.html at every address it has no file for, so it claims no URL (T1-F1).
+  assert.doesNotMatch(head, /<link rel="canonical"|<meta property="og:url"/, `${build}: the 404 names a URL of its own`);
   assert.equal(head.match(/<title>([^<]*)<\/title>/)?.[1], pageTitle(pageAt("/404")), `${build}: title`);
   assert.equal(pageTitle(pageAt("/404")), "Not found | Techsider");
   const description = head.match(/<meta name="description" content="([^"]*)">/)?.[1];

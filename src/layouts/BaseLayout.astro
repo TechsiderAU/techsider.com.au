@@ -3,7 +3,7 @@ import "../styles/global.css";
 import archivoLatin from "@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url";
 import SiteHeader from "../components/site/SiteHeader.astro";
 import SiteFooter from "../components/site/SiteFooter.astro";
-import { jsonLd } from "../lib/json-ld";
+import { jsonLd, pageGraph, type JsonLdNode } from "../lib/json-ld";
 
 interface Props {
   /** The page's own <title> (spec §11.3): a route passes pageTitle(entry) from src/lib/meta.ts, a post its own. */
@@ -19,25 +19,25 @@ interface Props {
   /**
    * The canonical URL's path when another page owns this page's content: a route passes its nav
    * entry's canonicalPath (the ⑤ demo page's is /resources/what-you-already-pay-for/, spec §8.8).
-   * <link rel="canonical"> and og:url use it; without it, both are the page's own URL.
+   * <link rel="canonical"> and og:url use it; without it, both are the page's own URL. null: the
+   * page has no URL of its own, so neither renders. The 404 passes null: GitHub Pages serves it at
+   * every address it has no file for (the Phase C review's T1-F1).
    */
-  canonicalPath?: string;
+  canonicalPath?: string | null;
+  /**
+   * The page's own JSON-LD nodes (spec §11.3), which follow the Organization in the page's @graph:
+   * a Service on a solution or service page, a BlogPosting on a post. src/lib/json-ld.ts builds them.
+   */
+  graph?: JsonLdNode[];
 }
 
-const { title, description, noindex = false, canonicalPath } = Astro.props;
+const { title, description, noindex = false, canonicalPath, graph = [] } = Astro.props;
 
-const canonical = new URL(canonicalPath ?? Astro.url.pathname, Astro.site).toString();
-// The Organization carries no description: the page's meta description describes the page, and
-// would give the one organisation a different description on every page.
-const organization = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Techsider",
-  url: "https://techsider.com.au",
-  email: "admin@techsider.com.au",
-  areaServed: "AU",
-  knowsAbout: ["LLM Ops", "Retrieval-Augmented Generation", "AI Agents"],
-};
+const site = Astro.site ?? Astro.url;
+const canonical = canonicalPath === null ? null : new URL(canonicalPath ?? Astro.url.pathname, site).toString();
+// One @graph per page: the Organization (in full, with the WebSite, on Home), then the route's nodes.
+// src/lib/json-ld.ts says what each node carries, and why the Organization has no description.
+const structuredData = pageGraph(site, Astro.url.pathname, graph);
 ---
 
 <!doctype html>
@@ -53,7 +53,7 @@ const organization = {
     <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="canonical" href={canonical} />
+    {canonical !== null && <link rel="canonical" href={canonical} />}
 
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -62,7 +62,7 @@ const organization = {
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {canonical !== null && <meta property="og:url" content={canonical} />}
     <meta property="og:site_name" content="Techsider" />
     <meta property="og:image" content="https://techsider.com.au/og.png" />
     <meta property="og:image:width" content="1200" />
@@ -72,7 +72,7 @@ const organization = {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="https://techsider.com.au/og.png" />
 
-    <script type="application/ld+json" set:html={jsonLd(organization)} />
+    <script type="application/ld+json" set:html={jsonLd(structuredData)} />
   </head>
   <body class="bg-carbon text-bone font-sans antialiased">
     <a href="#main" class="skip-link">Skip to content</a>

@@ -79,12 +79,12 @@ test("postView: drafts and unknown references throw", () => {
   assert.throws(() => view({ industries: ["mining"] }), /Unknown industry id "mining"/);
 });
 
-test("postView: BlogPosting JSON-LD, authored and published by the Organization, never a person", () => {
+test("postView: the BlogPosting node, authored and published by the Organization it points to, never a person", () => {
   const updated = new Date("2026-07-01T00:00:00Z");
-  const organization = { "@type": "Organization", name: "Techsider", url: "https://techsider.com.au" };
+  const organization = { "@id": "https://techsider.com.au/#organization" };
   assert.deepEqual(view({ updatedDate: updated }).jsonLd, {
-    "@context": "https://schema.org",
     "@type": "BlogPosting",
+    "@id": "https://techsider.com.au/insights/test-post/#article",
     headline: "Test post title",
     description: "Test post description.",
     datePublished: "2026-06-09T00:00:00.000Z",

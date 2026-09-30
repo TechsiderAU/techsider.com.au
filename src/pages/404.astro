@@ -1,8 +1,9 @@
 ---
 // The 404 page (spec §8.11). Always built, as dist/404.html, which GitHub Pages serves for any
 // path it has no file for, so its links are root-relative. Its own title and description, noindex,
-// and NotFoundTemplate's one H1, a card for each hub this build shows and the "Report this link"
-// email address.
+// no canonical URL or og:url (it has no address of its own: the Phase C review's T1-F1), and
+// NotFoundTemplate's one H1, a card for each hub this build shows and the "Report this link" email
+// address.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import NotFoundTemplate from "../templates/NotFoundTemplate.astro";
 import { isPreview } from "../data/nav";
@@ -12,6 +13,6 @@ import { siteContext } from "../lib/site";
 
 const page = pageAt("/404");
 ---
-<BaseLayout title={pageTitle(page)} description={pageDescription(page)} noindex>
+<BaseLayout title={pageTitle(page)} description={pageDescription(page)} noindex canonicalPath={null}>
   <NotFoundTemplate site={siteContext(isPreview())} />
 </BaseLayout>

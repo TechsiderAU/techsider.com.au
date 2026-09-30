@@ -12,6 +12,7 @@ import SolutionTemplate from "../../templates/SolutionTemplate.astro";
 import DemoEmbed from "../../components/demo/DemoEmbed.astro";
 import { isPreview } from "../../data/nav";
 import { SERVICES } from "../../data/services";
+import { service } from "../../lib/json-ld";
 import { pageDescription, pageTitle } from "../../lib/meta";
 import { pageAt, shownIds } from "../../lib/pages";
 import { siteContext } from "../../lib/site";
@@ -41,8 +42,10 @@ const { data, demo }: Props = Astro.props;
 const entry = pageAt(`/solutions/${id}/`);
 const site = siteContext(isPreview());
 const view = solutionView({ id, data, shared: SERVICES, site });
+// Spec §11.3: the solution as a Service, in the hero's words: its full name (the h1) and its one-liner.
+const graph = [service(Astro.site ?? Astro.url, { path: entry.path, key: "service", name: view.fullName, description: view.oneLiner })];
 ---
-<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)} graph={graph}>
   <SolutionTemplate view={view}>
     <DemoEmbed slot="demo" demo={demo} site={site} />
   </SolutionTemplate>

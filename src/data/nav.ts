@@ -88,7 +88,11 @@ export interface Cta {
 
 export const SITE = {
   name: "Techsider",
-  /** Legal entity for the footer ©. Owner to confirm the registered entity (spec §12 item 5). */
+  /**
+   * The registered legal entity, for the footer © and the Organization JSON-LD's legalName (spec
+   * §11.3), which src/lib/json-ld.ts emits only once it differs from the name, as Google asks.
+   */
+  // ⚑ owner: confirm the registered entity (ABN Lookup shows TECHSIDER PTY LTD) and its ABN, then set legalName to it (spec §12 item 5)
   legalName: "Techsider",
   email: "admin@techsider.com.au",
   slogan: "AI that ships.",

@@ -5,6 +5,7 @@
 // links to a page that isn't shown: while /contact/ is planned, the closing CTA is a mailto.
 import { SITE } from "../../data/nav.ts";
 import { SCENARIO_LABEL } from "../fixed-copy.ts";
+import { blogPosting, type JsonLdNode } from "../json-ld.ts";
 import { crumbs, industryLink, refId, solutionLink, type Link, type SiteContext } from "../site.ts";
 import { insightCards, type InsightCardView } from "./insights.ts";
 
@@ -17,26 +18,6 @@ export interface PostClosing {
   args?: string;
   label: string;
   href: string;
-}
-
-export interface OrganizationRef {
-  "@type": "Organization";
-  name: string;
-  url: string;
-}
-
-export interface BlogPostingJsonLd {
-  "@context": "https://schema.org";
-  "@type": "BlogPosting";
-  headline: string;
-  description: string;
-  datePublished: string;
-  dateModified?: string;
-  inLanguage: "en-AU";
-  url: string;
-  mainEntityOfPage: string;
-  author: OrganizationRef;
-  publisher: OrganizationRef;
 }
 
 export interface PostView {
@@ -52,8 +33,11 @@ export interface PostView {
   illustrativeLabel: string | null;
   /** Spec §10.1: the first solution ref, else the first industry ref, else plain "Talk to us". */
   closing: PostClosing;
-  /** Spec §11.3: BlogPosting, authored and published by the Organization, never a person. */
-  jsonLd: BlogPostingJsonLd;
+  /**
+   * Spec §11.3: the BlogPosting node (src/lib/json-ld.ts blogPosting()), authored and published by
+   * the Organization, never a person. PostLayout puts it in BaseLayout's @graph.
+   */
+  jsonLd: JsonLdNode;
 }
 
 function closingFor(site: SiteContext, solutions: string[], industries: string[]): PostClosing {
@@ -89,8 +73,6 @@ export function postView(input: { post: InsightPost; site: SiteContext; siteUrl:
   const [card] = insightCards([post], site);
   if (card === undefined) throw new Error(`postView(): "${post.id}" is a draft, and a draft has no page`);
   const { data } = post;
-  const url = new URL(card.href, siteUrl).href;
-  const organization: OrganizationRef = { "@type": "Organization", name: SITE.name, url: new URL(siteUrl).origin };
   return {
     card,
     metaTitle: `${card.title} | ${SITE.name}`,
@@ -98,18 +80,12 @@ export function postView(input: { post: InsightPost; site: SiteContext; siteUrl:
     breadcrumb: crumbs(site, ["insights", { label: card.title, path: card.href }]),
     illustrativeLabel: data.illustrative ? SCENARIO_LABEL : null,
     closing: closingFor(site, data.solutions.map(refId), data.industries.map(refId)),
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
+    jsonLd: blogPosting(siteUrl, {
+      path: card.href,
       headline: card.title,
       description: card.description,
-      datePublished: card.date.toISOString(),
-      ...(data.updatedDate ? { dateModified: data.updatedDate.toISOString() } : {}),
-      inLanguage: "en-AU",
-      url,
-      mainEntityOfPage: url,
-      author: organization,
-      publisher: organization,
-    },
+      published: card.date,
+      modified: data.updatedDate ?? null,
+    }),
   };
 }

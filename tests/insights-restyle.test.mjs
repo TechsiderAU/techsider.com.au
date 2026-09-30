@@ -150,14 +150,20 @@ test("posts: the body is Prose on bone, then the contextual closing prompt, link
   }
 });
 
-test("posts: BlogPosting JSON-LD, authored and published by the Organization", () => {
+test("posts: BlogPosting JSON-LD in the page's @graph, authored and published by the Organization, dated as the page shows", () => {
   for (const { id, fm } of POSTS) {
     const html = readDist(`insights/${id}/index.html`);
     const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
-    assert.deepEqual(blocks.map((b) => b["@type"]).sort(), ["BlogPosting", "BreadcrumbList", "Organization"], id);
-    const post = blocks.find((b) => b["@type"] === "BlogPosting");
+    const nodes = blocks.flatMap((b) => b["@graph"] ?? [b]);
+    assert.deepEqual(nodes.map((b) => b["@type"]).sort(), ["BlogPosting", "BreadcrumbList", "Organization"], id);
+    const post = nodes.find((b) => b["@type"] === "BlogPosting");
     const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)[1];
-    const organization = { "@type": "Organization", name: "Techsider", url: "https://techsider.com.au" };
+    const organization = { "@id": "https://techsider.com.au/#organization" };
+    assert.deepEqual(nodes.find((b) => b["@type"] === "Organization"), { "@type": "Organization", ...organization, name: "Techsider", url: "https://techsider.com.au/" });
+    // The page shows the dates the JSON-LD gives: the published date, and the updated one when there is one.
+    for (const date of [post.datePublished, post.dateModified].filter(Boolean)) {
+      assert.ok(html.includes(`<time datetime="${date.slice(0, 10)}"`), `${id}: the page doesn't show ${date}`);
+    }
     assert.equal(post.headline, fm.title);
     assert.equal(post.description, fm.description);
     assert.equal(post.datePublished, new Date(fm.publishDate).toISOString());

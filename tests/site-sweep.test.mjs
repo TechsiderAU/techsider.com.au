@@ -102,13 +102,15 @@ test("the sweep reads Phase D's pages: the Demos hub, the five demo pages, the c
   assert.deepEqual(phaseD.filter((url) => !urls.has(url)), [], "production doesn't build these Phase D pages");
 });
 
-test("every page names one canonical URL: its own, except the ⑤ demo page, whose canonical is the checker's page (spec §8.8)", () => {
+test("every page names one canonical URL and the same og:url: its own, except the ⑤ demo page, whose canonical is the checker's page (spec §8.8); the 404 names neither (T1-F1)", () => {
   const CANONICAL = { "/demos/ai-switch-on/": "/resources/what-you-already-pay-for/" };
   for (const { url, html } of BUILT) {
-    const hrefs = startTags(headOf(html)).filter((t) => t.name === "link" && t.attrs.rel === "canonical").map((t) => t.attrs.href);
-    assert.equal(hrefs.length, 1, `${url} has ${hrefs.length} canonical links`);
-    // The 404 is noindex, and Astro names /404/ as its canonical: it has no URL of its own to claim.
-    if (url === "/404.html") continue;
-    assert.equal(hrefs[0], `https://techsider.com.au${CANONICAL[url] ?? url}`, `${url}: its canonical URL`);
+    const head = startTags(headOf(html));
+    const canonicals = head.filter((t) => t.name === "link" && t.attrs.rel === "canonical").map((t) => t.attrs.href);
+    const ogUrls = head.filter((t) => t.name === "meta" && t.attrs.property === "og:url").map((t) => t.attrs.content);
+    // GitHub Pages serves the 404 at every address it has no file for, so it has no URL of its own to claim.
+    const want = url === "/404.html" ? [] : [`https://techsider.com.au${CANONICAL[url] ?? url}`];
+    assert.deepEqual(canonicals, want, `${url}: canonical`);
+    assert.deepEqual(ogUrls, want, `${url}: og:url`);
   }
 });

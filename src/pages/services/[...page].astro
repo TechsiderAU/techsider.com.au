@@ -1,12 +1,14 @@
 ---
 // /services/ (spec §8.6): ServicesTemplate over the Services data, fed exactly as the gallery's
 // ServicesSpecimen feeds it from servicesFixture. A rest-param route, so a production build leaves
-// the page out while nav.ts has it planned (singletonPaths in src/lib/pages.ts).
+// the page out while nav.ts has it planned (singletonPaths in src/lib/pages.ts). Each service the
+// page lists is a Service in its JSON-LD (spec §11.3), in its card's words.
 import type { GetStaticPaths } from "astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ServicesTemplate from "../../templates/ServicesTemplate.astro";
 import { isPreview } from "../../data/nav";
 import { SERVICES } from "../../data/services";
+import { service } from "../../lib/json-ld";
 import { pageAt, singletonPaths } from "../../lib/pages";
 import { pageDescription, pageTitle } from "../../lib/meta";
 import { siteContext } from "../../lib/site";
@@ -14,7 +16,8 @@ import { siteContext } from "../../lib/site";
 export const getStaticPaths = (() => singletonPaths("/services/")) satisfies GetStaticPaths;
 
 const page = pageAt("/services/");
+const graph = SERVICES.services.map((s) => service(Astro.site ?? Astro.url, { path: page.path, key: s.id, name: s.name, description: s.what }));
 ---
-<BaseLayout title={pageTitle(page)} description={pageDescription(page)}>
+<BaseLayout title={pageTitle(page)} description={pageDescription(page)} graph={graph}>
   <ServicesTemplate services={SERVICES} site={siteContext(isPreview())} />
 </BaseLayout>
