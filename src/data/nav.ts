@@ -97,6 +97,12 @@ export const SITE = {
   email: "admin@techsider.com.au",
   slogan: "AI that ships.",
   proofLine: "Measured before it ships.",
+  /**
+   * The address /.well-known/security.txt names in its Contact field (RFC 9116; spec §11.3), bare,
+   * without "mailto:". While it is null the file isn't built (src/pages/.well-known/[name].txt.ts).
+   */
+  // ⚑ owner: a security contact address for security.txt (spec §12 item 7)
+  securityContact: null as string | null,
 };
 
 export function slugify(name: string): string {

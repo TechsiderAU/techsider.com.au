@@ -10,6 +10,8 @@ const types = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css",
   ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon", ".woff2": "font/woff2",
   ".json": "application/json", ".webmanifest": "application/manifest+json", ".xml": "application/xml",
+  // RFC 9116 §3: security.txt is text/plain with charset=utf-8 (the live check holds GitHub Pages to it).
+  ".txt": "text/plain; charset=utf-8",
 };
 
 createServer(async (req, res) => {
