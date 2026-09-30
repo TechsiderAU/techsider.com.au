@@ -93,10 +93,12 @@ test("the import readers tell a static import from a dynamic one, in the forms V
   assert.deepEqual(importsOf('import("./x.Mn34.js")', "index.html").lazy, ["x.Mn34.js"]);
 });
 
-test("home page JS stays under 40 KB gzipped, excluding the lazily loaded demo chunk (spec §11.4)", () => {
+test("home page JS stays under 40 KB gzipped, excluding the lazily loaded demo chunk (spec §11.4)", (t) => {
   const bytes =
     scripts.eager.reduce((n, rel) => n + gzipSync(read(rel)).length, 0) +
     scripts.inline.reduce((n, code) => n + gzipSync(code).length, 0);
+  // The figure the launch report quotes (spec §11.4), printed on every run.
+  t.diagnostic(`home JS: ${bytes} bytes gzipped of ${BUDGET}, from ${scripts.eager.length} module file(s) and ${scripts.inline.length} inline script(s)`);
   assert.ok(scripts.eager.length + scripts.inline.length > 0, "the Home page loads no JavaScript at all");
   assert.ok(bytes < BUDGET, `home JS is ${bytes} bytes gzipped (budget ${BUDGET})`);
 });

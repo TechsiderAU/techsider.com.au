@@ -1,10 +1,22 @@
 // Minimal static file server for e2e tests: serves a build directory with
 // directory → index.html resolution, like GitHub Pages. No dependencies.
+//   node tests/support/static-server.mjs [dir] [port] [--latency <ms>]
+// Port 0 takes any free port; the "serving … on <origin>" line names the one it got, which
+// tests/support/serve.mjs reads. --latency holds every response back that long before it starts,
+// like a round trip on a slow mobile link: tests/e2e/prod-vitals.spec.mjs serves dist/ with
+// Lighthouse's 150 ms (spec §11.4).
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize, resolve } from "node:path";
 
-const [dir = "dist", port = "4322"] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const flag = args.indexOf("--latency");
+const latency = flag === -1 ? 0 : Number(args.splice(flag, 2)[1]);
+if (!Number.isInteger(latency) || latency < 0) {
+  console.error("static-server: --latency needs a whole number of milliseconds");
+  process.exit(2);
+}
+const [dir = "dist", port = "4322"] = args;
 const root = resolve(dir);
 const types = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css",
@@ -14,7 +26,8 @@ const types = {
   ".txt": "text/plain; charset=utf-8",
 };
 
-createServer(async (req, res) => {
+const server = createServer(async (req, res) => {
+  if (latency > 0) await new Promise((done) => setTimeout(done, latency));
   try {
     const url = new URL(req.url ?? "/", "http://localhost");
     let path = normalize(join(root, decodeURIComponent(url.pathname)));
@@ -35,4 +48,5 @@ createServer(async (req, res) => {
   } catch {
     res.writeHead(500).end();
   }
-}).listen(Number(port), "127.0.0.1", () => console.log(`serving ${root} on http://127.0.0.1:${port}`));
+});
+server.listen(Number(port), "127.0.0.1", () => console.log(`serving ${root} on http://127.0.0.1:${server.address().port}`));

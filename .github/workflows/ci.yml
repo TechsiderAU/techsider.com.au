@@ -53,8 +53,9 @@ jobs:
         run: npx playwright install --with-deps chromium webkit firefox
 
       # Both builds above already exist, so run Playwright directly: `npm run test:e2e`
-      # (the local one-shot command) would build both again.
-      - name: End-to-end tests (Chromium, WebKit, Firefox and the production shell)
+      # (the local one-shot command) would build both again. The prod-vitals project, the lab
+      # vitals gate, waits for every other project to finish, so it runs last and alone.
+      - name: End-to-end tests (Chromium, WebKit, Firefox, the production shell, then the vitals gate)
         run: npx playwright test
 
       - name: Upload Playwright results

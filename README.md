@@ -212,12 +212,13 @@ The ④ sample report stays illustrative until the evaluation harness produces a
 npm run build && npm run build:preview && npm test
 ```
 
-`npm run test:e2e` builds both, then runs Playwright. `playwright.config.mjs` has four projects, and `tests/support/static-server.mjs` serves each build:
+`npm run test:e2e` builds both, then runs Playwright. `playwright.config.mjs` has five projects, and `tests/support/static-server.mjs` serves each build:
 
 | Project | Specs | Build |
 |---|---|---|
 | `chromium`, `webkit`, `firefox` | every spec in `tests/e2e/` except `prod-*.spec.mjs` | `dist-preview/`, on port 4322 |
-| `prod-chromium` | `prod-*.spec.mjs` | `dist/`, on port 4323 |
+| `prod-chromium` | `prod-*.spec.mjs`, except the vitals gate | `dist/`, on port 4323 |
+| `prod-vitals` | `prod-vitals.spec.mjs`, once every other project has finished | `dist/`, on a free port, each response held back 150 ms |
 
 A third server, `tests/support/mock-form.mjs` on port 4324, stands in for the contact form's provider. The gallery's contact page posts its enquiries there, so `tests/e2e/contact-form.spec.mjs` can follow one to the message-sent page, with and without JavaScript.
 
@@ -226,9 +227,12 @@ Once both builds exist, run Playwright directly. Put spec paths before `--projec
 ```bash
 npx playwright install chromium webkit firefox   # once
 npx playwright test tests/e2e/template-gallery.spec.mjs --project chromium --project webkit
+npx playwright test tests/e2e/prod-vitals.spec.mjs --project prod-vitals --no-deps   # the vitals gate alone
 ```
 
 The specs move focus with `focusKeys()` from `tests/support/keys.mjs`, because WebKit on macOS skips links on a plain Tab. They run axe against the WCAG 2.2 A and AA rules. CI (`.github/workflows/ci.yml`) runs every project on Ubuntu, Firefox included.
+
+`tests/e2e/prod-vitals.spec.mjs` is the lab vitals gate (spec §11.4): LCP under 2.0 s and CLS under 0.05 on the pages in `tests/support/vitals.mjs` (Home, one solution page and one industry page). Each page loads five times on Lighthouse's mobile screen, with the CPU slowed 4× and every response held back 150 ms, and the median of each metric must be under budget. It runs in the real Chrome build, after every other project and one load at a time, so nothing else competes for the CPU. `--no-deps` runs it without the rest.
 
 ## Deploy
 

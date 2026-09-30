@@ -11,6 +11,7 @@ const pkg = JSON.parse(read("package.json"));
 const PREVIEW = "http://127.0.0.1:4322";
 const PROD = "http://127.0.0.1:4323";
 const PROD_SPECS = "**/prod-*.spec.mjs";
+const VITALS_SPECS = "**/prod-vitals.spec.mjs";
 /** withastro/action v6.1.3, pinned by commit (https://github.com/withastro/action/releases/tag/v6.1.3). */
 const WITHASTRO_ACTION = "withastro/action@3eafd002e65cc31b4f0eae0bb05450d521562247";
 const WEEKLY_REBUILD = "0 20 * * 0";
@@ -23,7 +24,7 @@ test("test:e2e builds production and preview before Playwright starts", () => {
 test("Playwright runs the preview specs in three engines and prod-* specs against dist/", async () => {
   const { default: config } = await import("../playwright.config.mjs");
   const projects = Object.fromEntries(config.projects.map((p) => [p.name, p]));
-  assert.deepEqual(Object.keys(projects), ["chromium", "webkit", "firefox", "prod-chromium"]);
+  assert.deepEqual(Object.keys(projects), ["chromium", "webkit", "firefox", "prod-chromium", "prod-vitals"]);
   for (const name of ["chromium", "webkit", "firefox"]) {
     assert.equal(projects[name].use.defaultBrowserType, name, name);
     assert.equal(projects[name].use.baseURL, PREVIEW, name);
@@ -32,6 +33,7 @@ test("Playwright runs the preview specs in three engines and prod-* specs agains
   assert.equal(projects["prod-chromium"].use.defaultBrowserType, "chromium");
   assert.equal(projects["prod-chromium"].use.baseURL, PROD);
   assert.equal(projects["prod-chromium"].testMatch, PROD_SPECS);
+  assert.equal(projects["prod-chromium"].testIgnore, VITALS_SPECS, "the vitals gate runs in prod-vitals only");
   assert.equal(projects.firefox.use.launchOptions?.firefoxUserPrefs?.["accessibility.tabfocus"], 7);
   assert.deepEqual(
     config.webServer.map((s) => [s.command, s.url]),
@@ -41,6 +43,19 @@ test("Playwright runs the preview specs in three engines and prod-* specs agains
       ["node tests/support/mock-form.mjs 4324", "http://127.0.0.1:4324/"],
     ],
   );
+});
+
+test("prod-vitals runs the vitals gate alone: after every other project, one load at a time, in the real Chrome build", async () => {
+  const { default: config } = await import("../playwright.config.mjs");
+  const vitals = config.projects.find((p) => p.name === "prod-vitals");
+  assert.equal(vitals.testMatch, VITALS_SPECS);
+  assert.deepEqual(vitals.dependencies, ["chromium", "webkit", "firefox", "prod-chromium"]);
+  assert.equal(vitals.workers, 1);
+  assert.equal(vitals.fullyParallel, false);
+  assert.equal(vitals.use.defaultBrowserType, "chromium");
+  assert.equal(vitals.use.channel, "chromium", "new headless: the real Chrome build, not the headless shell");
+  assert.equal(vitals.use.trace, "off", "a trace records DOM snapshots and a screencast during the load it measures");
+  assert.equal(vitals.use.baseURL, undefined, "the spec serves dist/ itself, with latency");
 });
 
 test("a failed e2e test keeps its trace for the CI artifact, and retries stay off", async () => {

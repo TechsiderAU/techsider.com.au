@@ -8,6 +8,10 @@ import { defineConfig, devices } from "@playwright/test";
 const PREVIEW = "http://127.0.0.1:4322";
 const PROD = "http://127.0.0.1:4323";
 const PROD_SPECS = "**/prod-*.spec.mjs";
+// The lab vitals gate, prod-vitals.spec.mjs, has a project of its own, prod-vitals: the spec
+// serves dist/ itself, with latency, and the project runs once every other project has finished,
+// one page load at a time (`--no-deps` runs it alone).
+const VITALS_SPECS = "**/prod-vitals.spec.mjs";
 
 export default defineConfig({
   testDir: "tests/e2e",
@@ -37,6 +41,19 @@ export default defineConfig({
         launchOptions: { firefoxUserPrefs: { "accessibility.tabfocus": 7 } },
       },
     },
-    { name: "prod-chromium", testMatch: PROD_SPECS, use: { ...devices["Desktop Chrome"], baseURL: PROD } },
+    { name: "prod-chromium", testMatch: PROD_SPECS, testIgnore: VITALS_SPECS, use: { ...devices["Desktop Chrome"], baseURL: PROD } },
+    {
+      name: "prod-vitals",
+      testMatch: VITALS_SPECS,
+      // After the rest of the suite, so no other browser competes for the CPU it slows 4×.
+      dependencies: ["chromium", "webkit", "firefox", "prod-chromium"],
+      workers: 1,
+      fullyParallel: false,
+      // "New headless", the real Chrome build, rather than the default headless shell. The spec
+      // sets Lighthouse's mobile screen on each context it opens. No trace: recording one takes
+      // DOM snapshots in the page, on the CPU the spec slows 4×, and a screencast, during the very
+      // load it measures.
+      use: { ...devices["Desktop Chrome"], channel: "chromium", trace: "off" },
+    },
   ],
 });
