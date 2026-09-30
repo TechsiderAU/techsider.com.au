@@ -175,13 +175,13 @@ Content can be written and still wait: for a fact to be re-checked, a review, or
 
 ### Demos and the checker
 
-Every demo is a canned replay or a client-side tool: no demo, and not the checker, calls a model or any other network endpoint (spec §8.7, §9.1). Each solution has one demo file, `src/data/demos/<solution id>.json`, which `makeDemoSchema()` in `src/content/schemas.ts` validates by its `kind`:
+Every demo is a canned replay, the sample report or a client-side tool: no demo, and not the checker, calls a model or any other network endpoint (spec §8.7, §9.1). Each solution has one demo file, `src/data/demos/<solution id>.json`, which `makeDemoSchema()` in `src/content/schemas.ts` validates by its `kind`:
 
 | Kind | Solution | What the demo shows |
 |---|---|---|
 | `register` | ① Document Registers | A management agreement register over synthetic agreements, and a trust deed register over synthetic deeds. Each value opens the page it came from, and the synthetic set downloads from `public/downloads/`. |
 | `assistant` | ② Knowledge Assistant | Cited answers over public CC BY 4.0 text: the Victorian public sector's generative AI guideline and its guidance first, then APRA's CPS 230. It shows refusals, and a false answer the acceptance test caught. |
-| `inbox` | ③ Draft-for-Approval | Eight synthetic property-management emails and texts. Each is sorted, then drafted for approval, filed or, for the one ambiguous message, escalated. The drafts are internal (a work order, a task, two owner updates and a reply to a contractor), never a reply to a tenant. The run ends on the approval queue and the trace. |
+| `inbox` | ③ Draft-for-Approval | Eight synthetic property-management emails and texts. Each is sorted, then drafted for approval, filed or, for the one ambiguous message, escalated. The drafts go to a contractor, a property manager or an owner (a work order, a task, two owner updates and a reply to a contractor), never to a tenant. The run ends on the approval queue and the trace. |
 | `report` | ④ AI Evaluation | The sample evaluation report on the ② demo, with the fixed sample-report caption. |
 | `checker` | ⑤ AI Switch-On | The "What you already pay for" checker. |
 

@@ -112,6 +112,11 @@ test("the README explains the demos and the checker: each demo kind, the engine'
   ]) {
     assert.ok(README.includes(s), `the README never mentions ${s}`);
   }
+  // Final review D9-F3 and D9-F4: ④ is neither a replay nor a tool, and the ③ drafts go out to a
+  // contractor, a property manager or an owner, so none is called internal.
+  assert.ok(README.includes("Every demo is a canned replay, the sample report or a client-side tool:"), "the README's demo kinds leave out ④");
+  assert.ok(README.includes("The drafts go to a contractor, a property manager or an owner"), "the README doesn't say who the ③ drafts go to");
+  assert.doesNotMatch(README, /\bdrafts are internal\b/i);
   // Phase D Task 2 deleted the Phase 0 engine: not even a code block names it.
   for (const gone of ["src/lib/demoScript.ts", "src/scripts/demo.ts"]) {
     assert.ok(!README.includes(gone), `the README names ${gone}, which no longer exists`);
