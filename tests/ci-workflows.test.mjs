@@ -134,12 +134,15 @@ test("a report-only Lighthouse job runs weekly, on demand and on a pull request 
   assert.equal(LIGHTHOUSE, "lighthouse@13.5.0", "one exact version: npx fetches it on every run");
 });
 
-test("the deploy build runs the CI checks in gate mode", () => {
+// Interim, by the owner's decision of 2026-09-30: the site deploys before its launch items are
+// cleared, so the deploy build reports the launch gates' open items instead of failing on them.
+// At launch this goes back to { VERIFY_MODE: "gate" } (an item on the owner checklist).
+test("the deploy build runs the CI checks in report mode during the owner's interim deploy", () => {
   const deploy = workflow("deploy.yml");
   assert.deepEqual(deploy.on.push, { branches: ["main"] });
   const build = deploy.jobs.build.steps.find((s) => s.uses?.startsWith("withastro/action@"));
   assert.equal(build.uses, WITHASTRO_ACTION);
-  assert.deepEqual(build.env, { VERIFY_MODE: "gate" });
+  assert.deepEqual(build.env, { VERIFY_MODE: "report" });
 });
 
 test("withastro/action is pinned by commit to v6.1.3, a release that uploads dotfiles, so /.well-known/ reaches Pages", () => {

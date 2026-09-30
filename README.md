@@ -50,7 +50,7 @@ The production build has three stages, and any one of them fails it:
 
 Check 09 is stages 1 and 2. Check 12, the accessibility smoke test, is the Playwright suite.
 
-`VERIFY_MODE` decides what the launch gates do. With `report` (the default) they print their open items as warnings, and with `gate` those items fail the build. CI gates pull requests into `main`, and the deploy build always gates. To re-run the checks without building again, use `npm run verify` or `VERIFY_MODE=gate npm run verify`, or pick checks and a build with `node scripts/ci/run-all.mjs --dist dist-preview --checks 04,11`.
+`VERIFY_MODE` decides what the launch gates do. With `report` (the default) they print their open items as warnings, and with `gate` those items fail the build. CI gates pull requests into `main`. The deploy build gates at launch; until then, by the owner's interim-deploy decision of 2026-09-30, it runs with `report`, so the open launch items print without stopping the deploy. To re-run the checks without building again, use `npm run verify` or `VERIFY_MODE=gate npm run verify`, or pick checks and a build with `node scripts/ci/run-all.mjs --dist dist-preview --checks 04,11`.
 
 ### Exceptions
 
@@ -236,7 +236,7 @@ The specs move focus with `focusKeys()` from `tests/support/keys.mjs`, because W
 
 ## Deploy
 
-Push to `main`. `.github/workflows/deploy.yml` runs `npm run build` with `VERIFY_MODE=gate` and publishes `dist/` to GitHub Pages. It also rebuilds `main` on a weekly schedule, so date-based content, such as the Home page's latest insights, moves on without a push. No other branch deploys: a push to any branch, and every pull request, runs `.github/workflows/ci.yml` instead.
+Push to `main`. `.github/workflows/deploy.yml` runs `npm run build` and publishes `dist/` to GitHub Pages. At launch the build runs with `VERIFY_MODE=gate`; during the owner's interim deploy (from 2026-09-30) it runs with `VERIFY_MODE=report`. It also rebuilds `main` on a weekly schedule, so date-based content, such as the Home page's latest insights, moves on without a push. No other branch deploys: a push to any branch, and every pull request, runs `.github/workflows/ci.yml` instead.
 
 The custom domain is configured via `public/CNAME`. After enabling GitHub Pages (Settings → Pages → Source: GitHub Actions), point DNS at your registrar:
 

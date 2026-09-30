@@ -41,8 +41,11 @@ jobs:
         with:
           node-version: 22
         env:
-          # The action runs `npm run build`, CI checks included; launch-gate checks fail the deploy.
-          VERIFY_MODE: gate
+          # The action runs `npm run build`, CI checks included. Interim, by the owner's decision of
+          # 2026-09-30: the rebuilt site deploys before its launch items are cleared, so the launch
+          # gates (checks 07 and 08) report their open items instead of failing the deploy. Set this
+          # back to `gate` for launch; the owner checklist carries that item.
+          VERIFY_MODE: report
 
   deploy:
     needs: build
