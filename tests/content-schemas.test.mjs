@@ -744,6 +744,8 @@ test("page data: contact takes a form endpoint URL or null, and real email addre
   const { formEndpoint, ...unset } = CONTACT;
   bad(contactData, unset, "form endpoint left out rather than null");
   bad(contactData, { ...CONTACT, deflection: CONTACT.deflection.map((d, i) => (i === 0 ? { ...d, email: "security" } : d)) }, "deflection email that is not an address");
+  ok(contactData, { ...CONTACT, deflection: CONTACT.deflection.slice(0, 1) }, "one shared contact mailbox");
+  bad(contactData, { ...CONTACT, deflection: [] }, "no contact mailbox");
   bad(contactData, { ...CONTACT, subProcessors: CONTACT.subProcessors.slice(0, 1) }, "one sub-processor");
 });
 

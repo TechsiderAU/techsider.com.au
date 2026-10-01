@@ -85,7 +85,7 @@ export const contactData = z.strictObject({
   emailProvider: z.strictObject({ name: z.string(), country: z.string() }),
   subProcessors: z.array(z.strictObject({ entity: z.string(), purpose: z.string(), country: z.string(), data: z.string() })).min(2),
   whatNext: z.array(z.string()).min(3),
-  deflection: z.array(z.strictObject({ title: z.string(), body: z.string(), email: z.email() })).min(3),
+  deflection: z.array(z.strictObject({ title: z.string(), body: z.string(), email: z.email() })).min(1),
 }).refine((c) => c.formEndpoint === null || c.formProvider !== null, {
   message: "a form endpoint needs its form provider: the collection notice names it (spec §10.2)", path: ["formProvider"],
 }).superRefine((c, ctx) => {

@@ -167,6 +167,7 @@ test("Contact: the configured form provider is included in the services handling
   assert.equal(CONTACT.formProvider.name, "FormSubmit");
   assert.equal(CONTACT.emailProvider.name, "Lark Suite");
   assert.deepEqual(CONTACT.subProcessors.map((s) => s.entity), ["GitHub Pages", "Cloudflare", "Lark Suite", "FormSubmit"]);
+  assert.equal(CONTACT.deflection.length, 1, "other enquiries share one contact block");
   assert.ok(CONTACT.deflection.every((d) => d.email === SITE.email), "a deflection address isn't the site's mailbox");
 });
 
