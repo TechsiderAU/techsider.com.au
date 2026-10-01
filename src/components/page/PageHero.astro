@@ -7,6 +7,7 @@ import Breadcrumb from "../ui/Breadcrumb.astro";
 import BracketChip from "../ui/BracketChip.astro";
 import CtaLinks from "./CtaLinks.astro";
 import BusinessArtwork, { type ArtworkKind } from "./BusinessArtwork.astro";
+import SignalField from "../ui/SignalField.astro";
 
 interface Props {
   title: string;
@@ -59,6 +60,7 @@ const hasSlot = Astro.slots.has("default");
     {hasSlot && <div class="page-hero-slot"><slot /></div>}
     {ctaPosition === "after-slot" && <CtaLinks primary={ctas?.primary} secondary={ctas?.secondary} />}
   </div>
+  {art && <SignalField />}
 </header>
 
 <style>
@@ -83,14 +85,14 @@ const hasSlot = Astro.slots.has("default");
     overflow-wrap: break-word;
   }
   .page-hero-copy { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
-  .page-hero-editorial { color: var(--color-carbon); border-color: var(--color-bone-line); padding-block: 3rem 4rem; }
+  .page-hero-editorial { color: var(--color-carbon); border-color: var(--color-bone-line); padding-block: 3rem 0; }
   .page-hero-editorial .page-hero-title-sentence { max-width: 16ch; font-size: clamp(2.2rem, 1rem + 3.5vw, 4.25rem); letter-spacing: -.045em; line-height: 1.05; }
   .page-hero-editorial .page-hero-eyebrow { font-size: .8125rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-muted-dark); }
   .page-hero-editorial .page-hero-sub { max-width: 42ch; color: var(--color-muted-dark); }
   .page-hero-editorial .page-hero-art { min-width: 0; }
   .page-hero-editorial .page-hero-slot { grid-column: 1 / -1; }
   @media (min-width: 48rem) {
-    .page-hero-editorial { padding-block: 4.5rem 5.5rem; }
+    .page-hero-editorial { padding-block: 4.5rem 0; }
     .page-hero-editorial .page-hero-inner { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); align-items: center; gap: 3rem; }
   }
   @media (min-width: 40rem) {

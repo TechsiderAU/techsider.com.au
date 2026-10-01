@@ -8,6 +8,8 @@ The homepage introduces Techsider as an AI automation solution provider, with th
 
 The responsive enterprise application concepts in `public/images/automation/` are generated examples, not screenshots of a proprietary platform or customer implementations. Their provenance and prompts are recorded in [the asset README](public/images/automation/README.md). `BusinessArtwork.astro` provides descriptions, visible captions, reserved dimensions and responsive loading; only hero images load eagerly.
 
+`SignalField.astro` adds a decorative lime pixel ribbon to illustrated heroes. `site-motion.ts` gives headlines and sections a single entrance, while linked cards have gentle hover/focus feedback. The ribbon pauses offscreen and in background tabs; its keyboard-accessible control pauses site motion. Reduced-motion preferences disable animations. Without JavaScript, all content and artwork remain visible with a static ribbon.
+
 ## Stack
 
 - [Astro 7](https://astro.build/): static output, no UI framework. `astro check` type-checks every build.
