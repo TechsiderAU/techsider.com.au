@@ -169,6 +169,13 @@ test("plainText keeps a page's own text, and drops comments, attributes and what
   assert.equal(plainText(quoted), "Write to us", "a > inside a quoted attribute value doesn't end the tag, so the address in it stays out");
 });
 
+test("an apostrophe in an unquoted attribute cannot expose a later quoted address as page text", () => {
+  const malformed = `<p><a data-x=it's title='a > ${EMAIL}'>Write</a></p>`;
+  assert.equal(plainText(malformed), "Write");
+  assert.equal(emailProblems({ path: "/x/", body: malformed }, EMAIL).length, 1);
+  assert.deepEqual(emailProblems({ path: "/x/", body: malformed.replace("Write", EMAIL) }, EMAIL), []);
+});
+
 test("the built pages pass: the address is plain text on each page spec §11.3 names, and no page carries a Cloudflare signature", () => {
   for (const rel of EMAIL_FILES) assert.deepEqual(emailProblems({ path: rel, body: read(rel) }, EMAIL), [], rel);
   const clean = htmlFiles(DIST).flatMap((file) => edgeRewrites(readFileSync(file, "utf8")).map((found) => `${relPath(DIST, file)}: ${found}`));

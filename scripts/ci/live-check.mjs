@@ -59,12 +59,35 @@ export const EDGE_SIGNATURES = [
 export const ROCKET_TYPE = /<script\b[^>]*\btype=["'][0-9a-f]{8,}-(?:text\/javascript|module)["']/i;
 /** Elements whose content Email Address Obfuscation leaves alone, so an address inside them proves nothing. */
 const UNREWRITTEN = ["head", "script", "style", "noscript", "textarea", "xmp"];
-/**
- * One tag, from "<" to the ">" that ends it. A quoted attribute value may hold a ">"
- * (aria-label="a > b"), so a quote runs to its closing quote before the tag can end; otherwise the
- * rest of the value, an address included, would read as page text.
- */
-const TAG = /<(?:[^>"']|"[^"]*"|'[^']*')*>/g;
+/** Strip tags with quote handling only at attribute-value boundaries. An apostrophe inside an
+ * unquoted value (data-x=it's) does not open a quote. An unfinished quoted tag consumes the rest
+ * conservatively, so an attribute cannot become evidence of a visible email address. */
+function stripTags(html) {
+  let out = "", start = 0;
+  for (let i = 0; i < html.length; i++) {
+    if (html[i] !== "<") continue;
+    out += html.slice(start, i) + " ";
+    let quote = null, beforeValue = false, unquoted = false;
+    for (i++; i < html.length; i++) {
+      const ch = html[i];
+      if (quote !== null) {
+        if (ch === quote) quote = null;
+        continue;
+      }
+      if (beforeValue) {
+        if (/\s/.test(ch)) continue;
+        beforeValue = false;
+        if (ch === '"' || ch === "'") { quote = ch; continue; }
+        unquoted = true;
+      }
+      if (ch === ">") break;
+      if (/\s/.test(ch)) unquoted = false;
+      else if (!unquoted && ch === "=") beforeValue = true;
+    }
+    start = i + 1;
+  }
+  return out + html.slice(start);
+}
 const NAMED_ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: "\u00a0" };
 const DAY_MS = 86_400_000;
 
@@ -87,7 +110,7 @@ function decodeEntities(text) {
 export function plainText(html) {
   let out = html.replace(/<!--[\s\S]*?-->/g, " ");
   for (const tag of UNREWRITTEN) out = out.replace(new RegExp(`<${tag}\\b[^>]*>[\\s\\S]*?</${tag}\\s*>`, "gi"), " ");
-  return decodeEntities(out.replace(TAG, " ")).replace(/\s+/g, " ").trim();
+  return decodeEntities(stripTags(out)).replace(/\s+/g, " ").trim();
 }
 
 /** The Cloudflare rewrites a response body carries, each as "<token>: <what it means>". */

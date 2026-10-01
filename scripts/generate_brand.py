@@ -201,6 +201,9 @@ def text_run(font: TTFont, text: str, size: float, x: float, baseline: float, tr
     cmap = font.getBestCmap()
     glyphs, prev = [], None
     for ch in text:
+        if ord(ch) not in cmap:
+            family = font["name"].getDebugName(1) or "unnamed font"
+            raise ValueError(f"social-card text: missing glyph {ch!r} (U+{ord(ch):04X}) in font {family}; text {text!r}")
         name = cmap[ord(ch)]
         if prev is not None:
             x += pair_kern(font, prev, name) * scale

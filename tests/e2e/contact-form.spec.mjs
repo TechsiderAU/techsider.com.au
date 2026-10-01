@@ -169,36 +169,126 @@ test("with JavaScript, the provider's 422 shows the error of each field it names
   expect((await logged(request, org)).delivered).toHaveLength(1);
 });
 
-// A refusal is an answer: the provider didn't take the enquiry. With no answer to read (fetch
-// rejects, as it does for a provider answer blocked for CORS or a connection dropped after the
-// enquiry went) the provider may have it, so the page says only that it may not have been sent
-// (ledger ruling R4).
-test("with JavaScript, a refused enquiry says it wasn't sent, an unanswered one that it may not have been, and either keeps every answer and can be sent again", async ({ page, request }) => {
-  const org = organisation();
-  let calls = 0;
-  await page.route(MOCK_FORM.formEndpoint, (route) => {
-    calls++;
-    return calls === 1
-      ? route.fulfill({ status: 500, contentType: "text/html", body: "<!doctype html><title>Fixture failure</title>" })
-      : route.abort("failed");
+// HTTP server/gateway errors do not establish whether delivery happened, even with field names.
+for (const [status, body] of [[500, { errors: [{ field: "email" }] }], [502, {}], [504, {}], [422, { errors: [{ field: "unknown" }] }]]) {
+  test(`with JavaScript, HTTP ${status} without supported validation leaves delivery unconfirmed`, async ({ page }) => {
+    let calls = 0;
+    await page.route(MOCK_FORM.formEndpoint, (route) => {
+      calls++;
+      return route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
+    });
+    await page.goto(CONTACT);
+    const org = organisation();
+    await fillEnquiry(page, org);
+    await send(page).click();
+    await expect(summary(page)).toHaveText(FORM_MESSAGES.unconfirmed);
+    await expect(summary(page)).toHaveAttribute("data-state", "unconfirmed");
+    await expect(summary(page)).not.toContainText("wasn't sent");
+    await expect(summary(page)).not.toContainText("Try again");
+    await expect(summary(page).getByRole("link")).toHaveCount(0);
+    await expect(page.getByLabel("Work email")).not.toHaveAttribute("aria-invalid");
+    await expect(page.getByLabel("Organisation", { exact: true })).toHaveValue(org);
+    await expect(page.getByLabel("Message")).toHaveValue(POSTED.message);
+    await expect(page.getByLabel(/I agree/)).toBeChecked();
+    await expect(page).toHaveURL(new RegExp(`${CONTACT}$`));
+    expect(calls).toBe(1);
   });
+}
+
+test("a connection failure keeps the answers and advises email with neutral uncertainty", async ({ page }) => {
+  await page.route(MOCK_FORM.formEndpoint, (route) => route.abort("failed"));
   await page.goto(CONTACT);
-  await fillEnquiry(page, org);
+  await fillEnquiry(page, organisation());
   await send(page).click();
-  await expect(summary(page)).toHaveText(FORM_MESSAGES.failed);
-  await send(page).click();
-  await expect.poll(() => calls).toBe(2);
   await expect(summary(page)).toHaveText(FORM_MESSAGES.unconfirmed);
-  await expect(summary(page)).not.toContainText("wasn't sent");
-  await expect(summary(page)).toHaveAttribute("data-state", "failed");
-  await expect(page).toHaveURL(new RegExp(`${CONTACT}$`));
-  await expect(page.getByLabel("Organisation", { exact: true })).toHaveValue(org);
+  await expect(summary(page)).toHaveAttribute("data-state", "unconfirmed");
+  expect(await summary(page).evaluate((el) => getComputedStyle(el).borderTopColor === getComputedStyle(el).color)).toBe(true);
   await expect(page.getByLabel("Message")).toHaveValue(POSTED.message);
-  await expect(page.getByLabel(/I agree/)).toBeChecked();
-  await page.unroute(MOCK_FORM.formEndpoint);
-  await Promise.all([sentUrl(page), send(page).click()]);
-  expect((await logged(request, org)).delivered).toHaveLength(1);
 });
+
+// A deliberately non-cooperative transport lets old continuations finish after cancellation.
+// This models held headers/body and proves visible state/redirect ownership, rather than relying
+// on fetch obeying abort. The browser clock bounds the attempt without a 30-second real wait.
+async function holdTransport(page, phase) {
+  await page.addInitScript(({ endpoint, phase }) => {
+    window.heldEnquiries = [];
+    const realFetch = window.fetch;
+    window.fetch = (url, options) => {
+      if (url !== endpoint) return realFetch(url, options);
+      const attempt = { signal: options.signal };
+      window.heldEnquiries.push(attempt);
+      return new Promise((resolve, reject) => {
+        attempt.reject = reject;
+        if (phase === "headers") attempt.resolve = resolve;
+        else resolve({ ok: false, status: 422, json: () => new Promise((resolveBody, rejectBody) => {
+          attempt.resolve = resolveBody;
+          attempt.reject = rejectBody;
+        }) });
+      });
+    };
+  }, { endpoint: MOCK_FORM.formEndpoint, phase });
+  await page.clock.install();
+  await page.goto(CONTACT);
+  await fillEnquiry(page, organisation());
+}
+
+for (const phase of ["headers", "body"]) {
+  for (const completion of ["success", "error"]) {
+    test(`held ${phase} reaches its deadline; late ${completion} cannot affect a newer enquiry`, async ({ page }) => {
+      await holdTransport(page, phase);
+      await send(page).click();
+      await expect(summary(page)).toHaveText(FORM_MESSAGES.sending);
+      await send(page).click();
+      expect(await page.evaluate(() => window.heldEnquiries.length)).toBe(1);
+      await page.clock.runFor(30_001);
+      await expect(summary(page)).toHaveText(FORM_MESSAGES.unconfirmed);
+      await expect(summary(page)).toHaveAttribute("data-state", "unconfirmed");
+      await expect(page.getByLabel("Message")).toHaveValue(POSTED.message);
+      await expect(page.getByLabel(/I agree/)).toBeChecked();
+      expect(await page.evaluate(() => window.heldEnquiries.length)).toBe(1); // No automatic retry.
+      expect(await page.evaluate(() => window.heldEnquiries[0].signal.aborted)).toBe(true);
+      await send(page).click();
+      await expect(summary(page)).toHaveText(FORM_MESSAGES.sending);
+      await page.evaluate(({ phase, completion }) => {
+        const old = window.heldEnquiries[0];
+        if (completion === "error") old.reject(new Error("late transport failure"));
+        else old.resolve(phase === "headers" ? { ok: true, status: 200 } : { errors: [{ field: "email" }] });
+      }, { phase, completion });
+      await expect(summary(page)).toHaveText(FORM_MESSAGES.sending);
+      await expect(page.getByLabel("Work email")).not.toHaveAttribute("aria-invalid");
+      await expect(page).toHaveURL(new RegExp(`${CONTACT}$`));
+      await send(page).click();
+      expect(await page.evaluate(() => window.heldEnquiries.length)).toBe(2); // Still only one active.
+      await page.clock.runFor(30_001);
+      await expect(summary(page)).toHaveText(FORM_MESSAGES.unconfirmed);
+    });
+  }
+  for (const completion of ["success", "error"]) {
+  test(`persisted restore invalidates held ${phase}; late ${completion} cannot affect a new enquiry`, async ({ page }) => {
+    await holdTransport(page, phase);
+    await send(page).click();
+    await expect(summary(page)).toHaveText(FORM_MESSAGES.sending);
+    await page.clock.runFor(10_000);
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
+    await expect(summary(page)).toBeEmpty();
+    expect(await page.evaluate(() => window.heldEnquiries[0].signal.aborted)).toBe(true);
+    await send(page).click();
+    await page.evaluate(({ phase, completion }) => {
+      const old = window.heldEnquiries[0];
+      if (completion === "error") old.reject(new Error("late restored-page failure"));
+      else old.resolve(phase === "headers" ? { ok: true, status: 200 } : { errors: [{ field: "email" }] });
+    }, { phase, completion });
+    await page.clock.runFor(20_001); // Old deadline must not expire the new request.
+    await expect(summary(page)).toHaveText(FORM_MESSAGES.sending);
+    await expect(page.getByLabel("Work email")).not.toHaveAttribute("aria-invalid");
+    await expect(page).toHaveURL(new RegExp(`${CONTACT}$`));
+    await send(page).click();
+    expect(await page.evaluate(() => window.heldEnquiries.length)).toBe(2);
+    await page.clock.runFor(10_000);
+    await expect(summary(page)).toHaveText(FORM_MESSAGES.unconfirmed);
+  });
+  }
+}
 
 test("with JavaScript, a second click while the enquiry is on its way sends nothing more, and the button stays enabled", async ({ page }) => {
   const org = organisation();

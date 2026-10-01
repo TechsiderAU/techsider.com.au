@@ -6,7 +6,7 @@
 // a browser (the copy button, native validation, the POST, keyboard order, axe, 320px).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, idsIn, startTags } from "../scripts/ci/lib.mjs";
@@ -17,6 +17,7 @@ import {
   aboutFixture, contactFixture, contactNoEndpointFixture, documentFixtures, fixtureSite, insightFixtures,
   positioningFixture, servicesFixture, trustFixture, trustNoTermsFixture,
 } from "../src/fixtures/index.ts";
+import { renderAstro } from "./support/render-astro.mjs";
 import { MOCK_FORM } from "../src/preview/mock-form.ts";
 
 const PAGES = {
@@ -395,11 +396,16 @@ test("contact: every visible control has a visible <label for>; the consent and 
   assert.deepEqual(links(one(form.inner, "data-collection-notice").inner), [[privacy, "privacy policy"]]);
 });
 
-test("contact: the form refuses to render while the privacy page isn't shown, as it does without an endpoint (WB-12)", () => {
-  const form = readFileSync(new URL("../src/components/page/ContactForm.astro", import.meta.url), "utf8");
-  assert.match(form, /if \(privacyHref === null\) \{\s*throw new Error\("ContactForm: the privacy page isn't shown; /);
-  assert.doesNotMatch(form, /privacyHref \?/, "the form still has a plain-text fallback for the privacy policy");
-  assert.equal(fixtureSite.page("privacy").href, null, "the gallery's shared SiteContext still leaves the privacy page unshown");
+test("contact: executing a form with an endpoint and an unavailable privacy page rejects the render (WB-12)", async () => {
+  assert.notEqual(contactFixture.formEndpoint, null, "the fixture must reach the privacy guard");
+  assert.equal(fixtureSite.page("privacy").href, null, "the fixture's privacy page is unavailable");
+  const component = new URL("../src/components/page/ContactForm.astro", import.meta.url);
+  const unavailable = { ...fixtureSite, page: (id) => ({ ...fixtureSite.page(id), href: id === "sent" ? "/contact/sent/" : fixtureSite.page(id).href }) };
+  await assert.rejects(renderAstro(component, { contact: contactFixture, site: unavailable }), /ContactForm: the privacy page isn't shown/);
+  const shown = { ...unavailable, page: (id) => ({ ...unavailable.page(id), href: id === "privacy" ? "/privacy/" : unavailable.page(id).href }) };
+  const html = await renderAstro(component, { contact: contactFixture, site: shown });
+  assert.match(html, /data-contact-form/);
+  assert.match(html, /href="\/privacy\/"/);
 });
 
 test("contact: the honeypot is hidden from everyone and never required", () => {

@@ -29,6 +29,7 @@ for (const width of [390, 1280]) {
       expect(pairs.length, `${path}: no bone sections in a row`).toBeGreaterThan(0);
       for (const { ids, padTop, gap } of pairs) {
         expect(padTop, `${path} ${ids}: top padding`).toBe(0);
+        expect(gap, `${path} ${ids}: space between the sections' content`).toBeGreaterThanOrEqual(STEP[width] - 1);
         expect(gap, `${path} ${ids}: space between the sections' content`).toBeLessThanOrEqual(STEP[width] + 1);
       }
       const first = page.locator("[data-template] > .surface-bone").first();
@@ -41,6 +42,7 @@ for (const width of [390, 1280]) {
     await page.goto("/industries/government/");
     const jumps = await page.locator("#designed-around .ind-jumps").boundingBox();
     const heading = await page.locator("#commonwealth-heading").boundingBox();
+    expect(heading.y - (jumps.y + jumps.height)).toBeGreaterThanOrEqual(STEP[width] - 1);
     expect(heading.y - (jumps.y + jumps.height)).toBeLessThanOrEqual(STEP[width] + 1);
   });
 }

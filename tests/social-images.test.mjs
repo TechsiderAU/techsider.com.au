@@ -7,11 +7,12 @@
 // The build tests read dist/ and dist-preview/: run `npm run build && npm run build:preview` first.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { decodeEntities, htmlFiles, readText, relPath } from "../scripts/ci/lib.mjs";
+import { htmlFiles, readText, relPath, startTags } from "../scripts/ci/lib.mjs";
 import { PAGES, SITE } from "../src/data/nav.ts";
 import { HOME_PROMPT } from "../src/lib/fixed-copy.ts";
 import { SLOGAN_HIGHLIGHT, SOCIAL_IMAGE, SOCIAL_KINDS, socialImage, socialImageSpec, socialKind } from "../src/lib/social-image.ts";
@@ -59,8 +60,9 @@ function pathOf(rel) {
 
 /** The content of `<meta {attr}="{value}" content="…">`, decoded; undefined when the page has none. */
 function metaContent(html, attr, value) {
-  const m = html.match(new RegExp(`<meta ${attr}="${value}" content="([^"]*)"`));
-  return m ? decodeEntities(m[1]) : undefined;
+  const matches = startTags(html).filter((tag) => tag.name === "meta" && tag.attrs[attr] === value);
+  assert.equal(matches.length, 1, `exactly one ${value}, found ${matches.length}`);
+  return matches[0].attrs.content;
 }
 
 test("socialKind(): Home has its own card, each section's hub and pages share theirs, and every other page the default", () => {
@@ -147,6 +149,36 @@ test("no card is stale: each records the hash of every input it was drawn from, 
   }
 });
 
+for (const [attr, tag] of [["property", "og:image"], ["property", "og:image:type"], ["property", "og:image:width"], ["property", "og:image:height"], ["property", "og:image:alt"], ["name", "twitter:card"], ["name", "twitter:image"], ["name", "twitter:image:alt"]]) {
+  test(`required social tag ${tag} rejects a second conflicting value, regardless of attribute order`, () => {
+    const first = `<meta ${attr}="${tag}" content="expected">`;
+    assert.equal(metaContent(first, attr, tag), "expected");
+    assert.throws(() => metaContent(`${first}<meta ${attr}="${tag}" content="conflicting">`, attr, tag), /exactly one/, tag);
+    assert.throws(() => metaContent(`${first}<meta content="conflicting" ${attr}="${tag}">`, attr, tag), /exactly one/, tag);
+  });
+}
+
+test("an unsupported social-card glyph names the character and font instead of a bare KeyError", () => {
+  const result = spawnSync("python3", ["-c", `
+# Compile the real generator function using only stdlib, so CI needs no glyph dependencies.
+# The unsupported character exits before outlining; the fake supplies only font tables/naming.
+import ast
+from pathlib import Path
+module = ast.parse(Path("scripts/generate_brand.py").read_text())
+function = next(node for node in module.body if isinstance(node, ast.FunctionDef) and node.name == "text_run")
+class Names:
+    def getDebugName(self, index): return "Fixture Archivo"
+class Font(dict):
+    def getBestCmap(self): return {}
+namespace = {"TTFont": Font}
+exec(compile(ast.Module(body=[function], type_ignores=[]), "scripts/generate_brand.py", "exec"), namespace)
+namespace["text_run"](Font(head=type("Head", (), {"unitsPerEm": 1000})(), name=Names()), "🧪", 24, 0, 30)
+`], { cwd: ROOT, encoding: "utf8" });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /missing glyph.*🧪.*U\+1F9EA.*Archivo/i);
+  assert.doesNotMatch(result.stderr, /KeyError/);
+});
+
 test("the retired cloud-wordmark card, public/og.png, is gone (spec §6.3)", () => {
   assert.equal(existsSync(join(ROOT, "public/og.png")), false);
 });
@@ -161,7 +193,6 @@ for (const [build, dir] of Object.entries(BUILDS)) {
       const image = socialImage(pathOf(rel));
       const url = `https://techsider.com.au${image.path}`;
       const at = `${build}/${rel}`;
-      assert.equal(html.match(/<meta property="og:image"/g)?.length, 1, `${at}: one og:image`);
       assert.equal(metaContent(html, "property", "og:image"), url, `${at}: og:image`);
       assert.equal(metaContent(html, "property", "og:image:type"), "image/png", `${at}: og:image:type`);
       assert.equal(metaContent(html, "property", "og:image:width"), "1200", `${at}: og:image:width`);

@@ -24,8 +24,8 @@ export const CONTACT: ContactData = {
   // The provider's own field names. Formspark: redirectField "_redirect", hiddenFields
   // { _append: "false" }. Formcarry: redirectField "_next", no hidden fields. Forminit sets its
   // redirect in its dashboard (redirectField null), but stores only inputs named fi-…, so choosing
-  // it also means renaming the enquiry fields. All three treat a submission whose "_gotcha" is
-  // filled as spam.
+  // it also means renaming the enquiry fields. "_gotcha" is the historical shortlist
+  // placeholder; verify spam handling for the selected provider and tier before connecting it.
   redirectField: null,
   hiddenFields: {},
   honeypotField: "_gotcha",

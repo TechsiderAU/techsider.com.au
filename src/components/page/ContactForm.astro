@@ -88,7 +88,6 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
       aria-live="polite"
       data-say-invalid={FORM_MESSAGES.invalid}
       data-say-sending={FORM_MESSAGES.sending}
-      data-say-failed={FORM_MESSAGES.failed}
       data-say-unconfirmed={FORM_MESSAGES.unconfirmed}
     ></div>
   </div>
@@ -198,8 +197,7 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
     border: 2px solid var(--color-carbon);
     border-radius: 6px;
   }
-  .contact-summary[data-state="invalid"],
-  .contact-summary[data-state="failed"] {
+  .contact-summary[data-state="invalid"] {
     border-color: var(--color-blocked-deep);
   }
   .contact-summary :global(p) {

@@ -8,16 +8,18 @@
 //   once it is answered;
 // - a complete enquiry goes by fetch: the same urlencoded fields a plain POST sends, with
 //   Accept: application/json, so the provider answers in JSON instead of redirecting. A 2xx opens
-//   /contact/sent/ (the form's data-sent). A rejection that names fields shows their errors; any
-//   other answer says the enquiry wasn't sent. No answer (fetch rejects: an answer blocked for CORS,
-//   or a dropped connection) says only that it may not have been sent, and points to the email
-//   address, since the provider may have it. The form keeps every answer either way;
+//   /contact/sent/ (the form's data-sent). A supported 422 validation rejection names field errors; all
+//   other outcomes, including server errors, CORS, connection loss and the 30-second deadline,
+//   leave delivery unconfirmed and advise email instead of resubmitting. Answers stay in place;
 // - one enquiry at a time: a submit while one is on its way does nothing. The button is never
 //   disabled, so focus never drops to <body>. A page restored from the back-forward cache after
 //   the message-sent page opened starts afresh.
 // The words come from the markup: each error line's data-missing and data-invalid, and the
 // summary's data-say-* lines, which ContactForm.astro writes from src/lib/contact-form.ts.
 import { ENQUIRY_FIELDS, errorLine, preselection, problemOf, rejectedFields, type EnquiryField, type Problem } from "../lib/contact-form";
+
+/** Deadline for the whole attempt, including response-body parsing. No automatic retry. */
+export const SUBMISSION_DEADLINE_MS = 30_000;
 
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
@@ -57,11 +59,18 @@ export function initContactForm(form: HTMLFormElement): void {
   }
 
   form.noValidate = true;
-  let sending = false;
-  // Back from /contact/sent/ can restore this page as it was left, mid-send: start it afresh.
+  let active: { controller: AbortController; timer: number } | null = null;
+  const cancel = () => {
+    if (!active) return;
+    const previous = active;
+    active = null; // Invalidate before abort can reject an old continuation.
+    window.clearTimeout(previous.timer);
+    previous.controller.abort();
+  };
+  // A persisted restore invalidates all continuations and resources of the previous attempt.
   window.addEventListener("pageshow", (event) => {
     if (!event.persisted) return;
-    sending = false;
+    cancel();
     summary.replaceChildren();
     delete summary.dataset.state;
   });
@@ -78,7 +87,7 @@ export function initContactForm(form: HTMLFormElement): void {
     else control.setAttribute("aria-invalid", "true");
   };
 
-  const tell = (state: "sending" | "failed", line = "") => {
+  const tell = (state: "sending" | "unconfirmed", line = "") => {
     const p = document.createElement("p");
     p.textContent = line;
     summary.replaceChildren(p);
@@ -122,7 +131,7 @@ export function initContactForm(form: HTMLFormElement): void {
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (sending) return;
+    if (active) return;
     const invalid: EnquiryField[] = [];
     for (const name of ENQUIRY_FIELDS) {
       const problem = problemOf(field(name).control.validity);
@@ -133,29 +142,43 @@ export function initContactForm(form: HTMLFormElement): void {
       report(invalid);
       return;
     }
-    sending = true;
+    const attempt = { controller: new AbortController(), timer: 0 };
+    active = attempt;
+    attempt.timer = window.setTimeout(() => {
+      if (active !== attempt) return;
+      cancel();
+      tell("unconfirmed", say.sayUnconfirmed);
+    }, SUBMISSION_DEADLINE_MS);
     tell("sending", say.saySending);
     const body = new URLSearchParams();
     for (const [key, value] of new FormData(form)) body.append(key, typeof value === "string" ? value : value.name);
     try {
-      const response = await fetch(action, { method: "POST", body, headers: { Accept: "application/json" } });
+      const response = await fetch(action, { method: "POST", body, headers: { Accept: "application/json" }, signal: attempt.controller.signal });
+      if (active !== attempt) return;
       if (response.ok) {
+        // Keep submit suppression during navigation; pageshow invalidates it on a restore.
+        window.clearTimeout(attempt.timer);
+        attempt.controller.abort(); // The success body is not used; release its transport.
         location.assign(sent);
         return;
       }
-      const rejected = rejectedFields(await response.json().catch(() => null));
-      sending = false;
+      // Only the local supported 422 validation contract proves a field rejection. A 5xx with
+      // an errors-shaped body still cannot establish whether the provider delivered the enquiry.
+      const rejected = response.status === 422 ? rejectedFields(await response.json().catch(() => null)) : [];
+      if (active !== attempt) return;
+      cancel();
       if (rejected.length === 0) {
-        tell("failed", say.sayFailed);
+        tell("unconfirmed", say.sayUnconfirmed);
         return;
       }
-      // The browser found nothing wrong with these answers, so the provider's rule is the stricter one.
       for (const name of rejected) show(name, "invalid");
       report(rejected);
     } catch {
-      // No answer to read: the provider may still have the enquiry (ledger ruling R4).
-      sending = false;
-      tell("failed", say.sayUnconfirmed);
+      if (active !== attempt) return;
+      cancel();
+      tell("unconfirmed", say.sayUnconfirmed);
+    } finally {
+      window.clearTimeout(attempt.timer);
     }
   });
 }

@@ -12,8 +12,8 @@
 // - The same POST with `Accept: application/json`, as the form's script sends it: 200 `{ ok: true }`,
 //   or 422 `{ ok: false, errors: [{ field, message }] }`, with CORS headers for the page's origin.
 //   Formspark documents only that a JSON request is answered in JSON and that `response.ok` tells
-//   success; the 422 body is Formspree's shape, one of the two rejectedFields() reads, so the tests
-//   can show errors placed by a provider's rule.
+//   success; the 422 body is this local mock's supported validation shape, not verified vendor
+//   behaviour. It lets tests exercise field errors; the chosen provider needs its own check.
 // - A filled `_gotcha` honeypot is answered as a success and never delivered.
 // - GET /__log?organisation=<name> lists what was delivered and what was dropped as spam for that
 //   organisation, so tests running in parallel each read their own enquiries. GET / answers
