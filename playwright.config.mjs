@@ -17,6 +17,9 @@ export default defineConfig({
   testDir: "tests/e2e",
   testMatch: "**/*.spec.mjs",
   fullyParallel: true,
+  // Use both hosted-runner CPUs; one worker left the full suite close to the 30-minute job limit.
+  // The vitals project below still runs alone, with its own single-worker limit.
+  workers: process.env.CI ? 2 : undefined,
   forbidOnly: !!process.env.CI,
   reporter: [["list"]],
   // Keep a trace of every failed test: Firefox and Linux WebKit first run in CI, which uploads
