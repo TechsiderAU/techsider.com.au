@@ -145,7 +145,8 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
     <input id="contact-website" name={contact.honeypotField} type="text" tabindex="-1" autocomplete="off" />
   </div>
   <p class="contact-notice" data-collection-notice>Your enquiry is sent via {formProvider.name} to our {emailProvider.name} mailbox. See our <a href={privacyHref} class="contact-link">{privacyLabel}</a>.</p>
-  <button type="submit" class="btn btn-primary contact-submit">Send enquiry</button>
+  {contact.submitMode === "native" && <p id="contact-submit-hint" class="contact-form-note">After sending, complete {formProvider.name}'s spam check to finish your enquiry.</p>}
+  <button type="submit" class="btn btn-primary contact-submit" aria-describedby={contact.submitMode === "native" ? "contact-submit-hint" : undefined}>Send enquiry</button>
 </form>
 {privacyHref === "#enquiry-privacy" && (
   <section id="enquiry-privacy" class="contact-privacy" aria-labelledby="enquiry-privacy-heading">
