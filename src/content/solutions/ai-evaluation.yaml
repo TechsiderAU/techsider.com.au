@@ -239,6 +239,8 @@ packages:
     name: Agentic AI Control Evaluation
     status: launch
     onshore: false
+    # A configuration review, not a test on your own examples: its block leaves out that standard line.
+    testInclusion: false
     buyers: [enterprise-government]
     forWhom: >-
       Agencies and financial-services entities with Copilot Studio or other agents leaving pilot.
@@ -336,9 +338,10 @@ faq:
       official decides whether to deploy, on measured evidence rather than a demo.
   - q: Do you evaluate systems you built, or take fees from vendors you evaluate?
     a: >-
-      No. We never issue an independent evaluation of a system we built, configured or advised on for
-      the same client. We take no resale margin or referral fees from vendors we evaluate, and we
-      disclose any vendor relationship.
+      Not independently, and no. We never issue an independent evaluation of a system we built,
+      configured or advised on for the same client: our tests of our own builds are labelled
+      "acceptance test (not independent)". We take no resale margin or referral fees from vendors we
+      evaluate, and we disclose any vendor relationship.
   - q: Can we engage you through a firm we already use?
     a: >-
       Yes. The Evaluation Partner route delivers the same evaluation as a subcontract workstream

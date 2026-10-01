@@ -153,7 +153,7 @@ faq:
   - q: Will your report tell us the system is safe to deploy?
     a: No. You get findings, not an assurance opinion, and it isn't an ASAE 3000 engagement. Each finding is rated to your risk matrix, and your accountable official decides whether to deploy.
   - q: Do you evaluate systems you built, or take money from vendors?
-    a: No. We never independently evaluate a system we built, configured or advised on for the same client, and we take no resale margin or referral fees from vendors we evaluate.
+    a: "Not independently, and no. We never independently evaluate a system we built, configured or advised on for the same client: our tests of our own builds are labelled \"acceptance test (not independent)\". We take no resale margin or referral fees from vendors we evaluate."
   - q: Will you red-team or penetration-test our AI agents?
     a: No. The Agentic AI Control Evaluation is a configuration review. Where prompt-injection or tool-misuse testing is needed, a CREST-accredited tester you engage does it, under written rules of engagement.
   - q: Does our test data leave our environment?

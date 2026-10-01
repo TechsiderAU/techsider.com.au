@@ -9,9 +9,11 @@
 // id, pass idSuffix "-block" so the ids stay unique.
 // Onshore scope rule (spec §3.2): ONSHORE_PILLAR only when pkg.onshore; otherwise PROCESSING_NOTE,
 // linking to this block's onshore note.
+// "Every package includes" lists the standard inclusions, less the test line for a package that
+// holds no test on your own examples (pkg.testInclusion false: ④'s configuration review).
 import Notice from "./Notice.astro";
 import { ONSHORE_PILLAR, PACKAGED_OFFER_DISCLAIMER, PROCESSING_NOTE } from "../../lib/fixed-copy.ts";
-import type { PackageView } from "../../lib/views/offer.ts";
+import { isTestInclusion, type PackageView } from "../../lib/views/offer.ts";
 
 interface Props {
   pkg: PackageView;
@@ -23,6 +25,7 @@ interface Props {
 const { pkg, standardInclusions, headingLevel = 3, idSuffix = "" } = Astro.props;
 const blockId = `${pkg.id}${idSuffix}`;
 const headingId = `${blockId}-heading`;
+const shared = pkg.testInclusion ? standardInclusions : standardInclusions.filter((line) => !isTestInclusion(line));
 ---
 <section id={blockId} class="package-block" aria-labelledby={headingId} data-package-tab data-package-status="launch" data-package-id={pkg.id}>
   {headingLevel === 4 ? (
@@ -45,7 +48,7 @@ const headingId = `${blockId}-heading`;
     </div>
     <div class="package-fact">
       <dt>Every package includes</dt>
-      <dd><ul>{standardInclusions.map((item) => <li>{item}</li>)}</ul></dd>
+      <dd><ul>{shared.map((item) => <li>{item}</li>)}</ul></dd>
     </div>
     <div class="package-fact">
       <dt>Your time</dt>

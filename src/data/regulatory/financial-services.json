@@ -24,7 +24,7 @@
       "id": "cps230-service-providers",
       "obligation": "CPS 230 ¶52, ¶59–60: due diligence, monitoring and APRA notice for material providers",
       "meaning": "If an AI vendor supports a critical operation or exposes you to material operational risk, you must do due diligence before signing or materially changing the arrangement, regularly assess how well your controls manage the risks of using it, and notify APRA of critical-operation arrangements and before any material offshoring, which can include inference run overseas.",
-      "design": "Vendor AI is tested on your cases before you sign, and the data note records where inference runs.",
+      "design": "Vendor AI is tested on your cases before you sign, and the data note records the vendor's published processing location, with its date.",
       "evidence": "A side-by-side vendor test report before contract",
       "source": "https://www.apra.gov.au/standards/cps-230",
       "asAt": "2026-07-01",

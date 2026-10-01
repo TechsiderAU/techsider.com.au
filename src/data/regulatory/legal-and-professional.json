@@ -4,7 +4,7 @@
       "id": "joint-statement-confidentiality",
       "obligation": "Joint AI statement (6 Dec 2024), ASCR r 9.1: keep client confidences out of public AI",
       "meaning": "The NSW, Victorian and WA regulators say confidential, sensitive or privileged client information can't safely go into public chatbots or copilots. If a commercial AI tool is used with any client information, the firm needs to review its contract terms to check that information is kept secure.",
-      "design": "Before any matter material is used, we record where each tool stores and processes inputs, and whether it keeps or trains on them.",
+      "design": "Before any matter material is used, we record each vendor's published storage and processing locations, with their dates, and whether the tool keeps or trains on inputs.",
       "evidence": "A data note per tool on storage, processing, retention and training",
       "source": "https://lsbc.vic.gov.au/news-updates/news/statement-use-artificial-intelligence-australian-legal-practice",
       "asAt": "2024-12-06",
