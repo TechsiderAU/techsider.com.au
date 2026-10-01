@@ -123,7 +123,7 @@ test("assertFictional rejects real-looking copy, real hosts and prose in token f
   assert.throws(() => assertFictional({ lines: [{ t: "9am", op: "fixture.load" }] }), /not visibly fictional/);
   assert.throws(() => assertFictional({ target: { value: 90, unit: "per cent of answers" } }), /not visibly fictional/);
   assert.throws(() => assertFictional({ packagesHeading: "Programs" }), /not visibly fictional/);
-  assert.throws(() => assertFictional({ faq: [{ q: "Why should we trust you?" }] }), /not visibly fictional/);
+  assert.throws(() => assertFictional({ faq: [{ q: "Why choose our company?" }] }), /not visibly fictional/);
   assertFictional({ packagesHeading: "Engagements", part: "B", buyers: ["mid-market"], faq: [{ q: HOME_TRUST_QUESTION }] });
   assertFictional({
     status: "on-request", name: "Northwind Fixture Pty Ltd", href: "https://example.com/fixture",

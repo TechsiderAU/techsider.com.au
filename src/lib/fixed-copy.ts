@@ -30,7 +30,7 @@ export const PROCESSING_NOTE = "We show you where your data is processed."; // �
 export const ACCEPTANCE_TEST_LABEL = "Acceptance test (not independent)"; // §4.4
 export const HOME_PROMPT = { command: "applied_ai", args: "--region=au" } as const; // §8.1.1
 export const HOME_CLOSING = { command: "talk_to_us", args: "--about=<industry>" } as const; // §8.1.11
-export const HOME_TRUST_QUESTION = "You're new. Why should we trust you?"; // §8.1.10
+export const HOME_TRUST_QUESTION = "Why should we trust you?"; // §8.1.10; wording updated by owner
 export const CONTACT_H1 = "Tell us what you're trying to fix."; // §8.11
 export const SERVICES_H1 = "From first use case to a system your team runs."; // §8.6.1
 export const MESSAGE_PLACEHOLDER = "What are you trying to fix? Any deployment or data constraints? Please don't include sensitive personal information."; // §10.2
