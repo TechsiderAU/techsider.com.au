@@ -47,6 +47,6 @@ const graph = [service(Astro.site ?? Astro.url, { path: entry.path, key: "servic
 ---
 <BaseLayout title={pageTitle(entry)} description={pageDescription(entry)} graph={graph}>
   <SolutionTemplate view={view}>
-    <DemoEmbed slot="demo" demo={demo} site={site} />
+    <DemoEmbed slot="demo" demo={demo} site={site} level={3} />
   </SolutionTemplate>
 </BaseLayout>

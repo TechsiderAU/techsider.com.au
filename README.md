@@ -2,6 +2,12 @@
 
 The Techsider website, published at https://techsider.com.au. It is a static Astro site: production deploys from `main` only, and every push is built, checked and tested in CI.
 
+## Business presentation
+
+The homepage introduces Techsider as an AI automation solution provider, with three capability areas: workflow automation, document intelligence and knowledge assistants. Detailed evaluation, deployment and regulatory evidence remains on the solution and industry pages. Interactive examples live on the Demos pages; solution pages expose their examples through native disclosures that work without JavaScript.
+
+The responsive enterprise application concepts in `public/images/automation/` are generated examples, not screenshots of a proprietary platform or customer implementations. Their provenance and prompts are recorded in [the asset README](public/images/automation/README.md). `BusinessArtwork.astro` provides descriptions, visible captions, reserved dimensions and responsive loading; only hero images load eagerly.
+
 ## Stack
 
 - [Astro 7](https://astro.build/): static output, no UI framework. `astro check` type-checks every build.
@@ -258,7 +264,7 @@ The specs move focus with `focusKeys()` from `tests/support/keys.mjs`, because W
 
 `tests/e2e/prod-vitals.spec.mjs` is the lab vitals gate (spec §11.4): LCP under 2.0 s and CLS under 0.05 on the pages in `tests/support/vitals.mjs` (Home, one solution page and one industry page). Each page loads five times on Lighthouse's mobile screen, with the CPU slowed 4× and every response held back 150 ms, and the median of each metric must be under budget. It runs in the real Chrome build, after every other project and one load at a time, so nothing else competes for the CPU. `--no-deps` runs it without the rest. The same workflow runs Lighthouse on those pages weekly, on demand, and on a pull request into `main`, through `scripts/ci/lighthouse-report.mjs`. That job only reports, in its summary: the vitals spec is the gate.
 
-`tests/perf-budget.test.mjs` holds Home's JavaScript under 40 KB gzipped, not counting the demo chunk it loads lazily (spec §11.4).
+`tests/perf-budget.test.mjs` holds the homepage's JavaScript under 40 KB gzipped and verifies that replay engines and scenario data are absent from its scripts. Detailed demos load their own renderer and data when needed.
 
 ## Deploy
 

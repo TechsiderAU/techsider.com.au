@@ -12,7 +12,7 @@ const BONE_RUNS = ["/solutions/knowledge-assistant/", "/industries/government/",
 /** Each pair of sibling bone bands directly in the template: the second's top padding, and the space between their contents. */
 const bonePairs = (page) =>
   page.evaluate(() =>
-    [...document.querySelectorAll("[data-template] > .surface-bone + .surface-bone")].map((next) => {
+    [...document.querySelectorAll("[data-template] > :is(.page-section, .ind-band).surface-bone + :is(.page-section, .ind-band).surface-bone")].map((next) => {
       const prev = next.previousElementSibling;
       const padTop = parseFloat(getComputedStyle(next).paddingTop);
       const contentBottom = prev.getBoundingClientRect().bottom - parseFloat(getComputedStyle(prev).paddingBottom);
@@ -32,7 +32,7 @@ for (const width of [390, 1280]) {
         expect(gap, `${path} ${ids}: space between the sections' content`).toBeGreaterThanOrEqual(STEP[width] - 1);
         expect(gap, `${path} ${ids}: space between the sections' content`).toBeLessThanOrEqual(STEP[width] + 1);
       }
-      const first = page.locator("[data-template] > .surface-bone").first();
+      const first = page.locator("[data-template] > .page-section.surface-bone").first();
       expect(await first.evaluate((el) => parseFloat(getComputedStyle(el).paddingTop)), `${path}: the first bone section`).toBe(STEP[width]);
     }
   });

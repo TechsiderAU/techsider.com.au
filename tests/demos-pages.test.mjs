@@ -157,7 +157,7 @@ test("each demo page: its title as the one h1, its frame badged by kind and labe
 test("①–③: each replay keeps spec §8.8's order and roles on the demo page and in the solution hero: hidden controls, an aria-hidden stage, one polite log", () => {
   for (const id of REPLAYS) {
     for (const file of [`demos/${id}/index.html`, `solutions/${id}/index.html`]) {
-      const frame = one(heroOf(file), "data-demo-frame").outer;
+      const frame = one(mainOf(readDist(file)), "data-demo-frame").outer;
       const root = one(frame, "data-demo-root").outer;
       // Pause/Resume, "Skip to result" and Replay, hidden until a run starts (no dead buttons without JavaScript).
       const controls = one(root, "data-demo-controls");
@@ -211,9 +211,9 @@ test("the sitemap lists the Demos hub and every demo page but ⑤'s, whose canon
   assert.ok(locs.includes(`${ORIGIN}${CHECKER_PATH}`), "the sitemap has no checker page");
 });
 
-test("each solution hero holds its demo above the CTAs: a replay frame on ①–③, the sample report on ④, the compact checker frame on ⑤", () => {
+test("each solution keeps its demo below the concise hero: a replay frame on ①–③, the sample report on ④, the compact checker frame on ⑤", () => {
   for (const id of IDS) {
-    const hero = heroOf(`solutions/${id}/index.html`);
+    const hero = mainOf(readDist(`solutions/${id}/index.html`));
     const slot = one(hero, "data-solution-demo");
     const frames = elementsWith(slot.outer, "data-demo-frame");
     if (KIND[id] === "report") {
@@ -236,12 +236,12 @@ test("each solution hero holds its demo above the CTAs: a replay frame on ①–
     const tryIt = elements(hero, (t) => t.name === "a" && t.attrs.href === `/demos/${id}/`);
     assert.equal(tryIt.length, 1, `${id}: expected one link to its demo page`);
     assert.equal(text(tryIt[0].inner), "Try the demo");
-    assert.ok(hero.indexOf(tryIt[0].outer) >= hero.indexOf(slot.outer) + slot.outer.length, `${id}: "Try the demo" comes before the demo`);
+    assert.ok(hero.indexOf(tryIt[0].outer) < hero.indexOf(slot.outer), `${id}: "Try the demo" comes before the demo`);
   }
 });
 
 test("⑤: the hero's compact frame names every vendor the dated facts cover and their date, links to the full checker, and embeds no checker", () => {
-  const frame = one(heroOf("solutions/ai-switch-on/index.html"), "data-demo-frame").outer;
+  const frame = one(mainOf(readDist("solutions/ai-switch-on/index.html")), "data-demo-frame").outer;
   const summary = one(frame, "data-checker-summary");
   const t = text(summary.inner);
   for (const group of CHECKER_VIEW.vendors) assert.ok(t.includes(group.vendor), `no ${group.vendor}`);

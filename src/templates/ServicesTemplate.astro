@@ -67,7 +67,7 @@ const choices = services.deliveryChoices
   .sort((x, y) => x.letter.localeCompare(y.letter));
 ---
 <div class="template" data-template="services">
-  <PageHero title={SERVICES_H1} display={false} ctas={ctas} />
+  <PageHero title={SERVICES_H1} display={false} art="workflow" eyebrow="Design · Build · Support" sub="We turn manual processes into AI workflows, connect your systems and support your team from the first test to everyday use." ctas={ctas} />
 
   <PageSection id="method" title="Prove → Build → Run">
     <ProcessSteps phases={services.phases} />
@@ -84,10 +84,16 @@ const choices = services.deliveryChoices
   </PageSection>
 
   <PageSection id="entry" title="Where to start">
+    <details class="services-details"><summary>View starting options</summary>
+    <div class="services-detail-body">
     <DataTable caption="Entry offer by buyer" columns={entryColumns} rows={entryRows} rowHeader="buyer" />
+  </div>
+    </details>
   </PageSection>
 
   <PageSection id="team" title="Who you work with" width="prose">
+    <details class="services-details"><summary>View team roles</summary>
+    <div class="services-detail-body">
     <p class="services-lead" data-team-summary>{services.team.summary}</p>
     <ul class="services-functions" data-team-functions>
       {services.team.functions.map((f) => (
@@ -97,9 +103,13 @@ const choices = services.deliveryChoices
         </li>
       ))}
     </ul>
+  </div>
+    </details>
   </PageSection>
 
   <PageSection id="where-it-runs" title="Where it runs">
+    <details class="services-details"><summary>View deployment and data locations</summary>
+    <div class="services-detail-body">
     <ol class="delivery-choices">
       {choices.map((c) => (
         <li class="delivery-choice" data-delivery-choice={c.id}>
@@ -114,15 +124,23 @@ const choices = services.deliveryChoices
         {services.onshoreNote.map((item) => <li>{item}</li>)}
       </ul>
     </div>
+  </div>
+    </details>
   </PageSection>
 
   <PageSection id="independence" title="Independence policy" width="prose">
+    <details class="services-details"><summary>View our independence policy</summary>
+    <div class="services-detail-body">
     <ul class="services-list">
       {services.independence.map((item) => <li>{item}</li>)}
     </ul>
+  </div>
+    </details>
   </PageSection>
 
   <PageSection id="de-risk" title="How we de-risk">
+    <details class="services-details"><summary>View delivery safeguards</summary>
+    <div class="services-detail-body">
     <ul class="services-cards">
       {services.deRisk.map((d) => (
         <li class="services-card">
@@ -130,6 +148,8 @@ const choices = services.deliveryChoices
         </li>
       ))}
     </ul>
+  </div>
+    </details>
   </PageSection>
 
   <PageSection id="faq" title="Questions" width="prose">
@@ -137,11 +157,13 @@ const choices = services.deliveryChoices
   </PageSection>
 
   <div id="contact" class="services-closing">
-    <PromptBlock command="talk_to_us" args="--about=fit-call" label={fitCall.label} href={fitCall.href} />
+    <PromptBlock title="Bring us one manual process." command="talk_to_us" args="--about=fit-call" label={fitCall.label} href={fitCall.href} />
   </div>
 </div>
 
 <style>
+  .services-details summary { cursor: pointer; min-height: 44px; font-size: 1rem; font-weight: 500; }
+  .services-detail-body { display: grid; gap: 2rem; margin-top: 1rem; }
   .services-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));

@@ -1,0 +1,25 @@
+---
+// Generated application concepts, never presented as a deployed product or client system.
+export type ArtworkKind = "hero" | "workflow" | "documents" | "knowledge";
+interface Props {
+  kind: ArtworkKind;
+  priority?: boolean;
+  caption?: boolean;
+}
+const { kind, priority = false, caption = true } = Astro.props;
+const descriptions = {
+  hero: "Example operations workspace connecting request intake, extraction, business rules and human approval.",
+  workflow: "Example workflow editor connecting an inbox, request classification, human approval and a CRM update.",
+  documents: "Example document review workspace showing a sample invoice beside extracted fields for approval.",
+  knowledge: "Example knowledge assistant answering a purchasing question with citations to internal policies.",
+};
+---
+<figure class="business-artwork" data-business-artwork={kind}>
+  <img src={`/images/automation/${kind}-1280.webp`} srcset={`/images/automation/${kind}-640.webp 640w, /images/automation/${kind}-1280.webp 1280w`} sizes="(min-width: 1280px) 680px, (min-width: 768px) 52vw, 100vw" width="1536" height="1024" alt={descriptions[kind]} loading={priority ? "eager" : "lazy"} fetchpriority={priority ? "high" : "auto"} decoding="async" />
+  {caption && <figcaption>Illustrative application concept</figcaption>}
+</figure>
+<style>
+  .business-artwork { margin: 0; min-width: 0; }
+  img { display: block; width: 100%; height: auto; border: 1px solid var(--color-bone-line); border-radius: 10px; background: white; }
+  figcaption { margin-top: .65rem; font-size: .75rem; line-height: 1.4; color: var(--color-muted-dark); }
+</style>

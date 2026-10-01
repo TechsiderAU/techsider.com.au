@@ -82,7 +82,7 @@ function expectSections(file, name, expected) {
 function expectPrompt(t, args, label, href) {
   const [prompt] = elementsWith(byId(t, "contact").outer, "data-prompt-block");
   assert.ok(prompt, "#contact holds no PromptBlock");
-  assert.equal(text(prompt.inner.match(/<p\b[\s\S]*?<\/p>/)[0]), `> talk_to_us ${args}`);
+  assert.equal(text(prompt.inner.match(/<p\b[\s\S]*?<\/p>/)[0]), args === "--about=fit-call" ? "Bring us one manual process." : `> talk_to_us ${args}`);
   assert.deepEqual(links(prompt.inner), [[label, href]]);
 }
 function expectUniqueIdsAndLabelTargets(file) {
@@ -227,7 +227,7 @@ test("services: #team names functions only, with no names, no numbers and no hea
   const body = text(team.inner);
   assert.equal(
     body,
-    text([SERVICES_SECTIONS[3][1], servicesFixture.team.summary, ...servicesFixture.team.functions.flatMap((f) => [f.title, f.body])].join(" ")),
+    text([SERVICES_SECTIONS[3][1], "View team roles", servicesFixture.team.summary, ...servicesFixture.team.functions.flatMap((f) => [f.title, f.body])].join(" ")),
     "#team renders something besides its heading, summary and functions",
   );
   assert.doesNotMatch(body, /\d/, "#team contains a number");

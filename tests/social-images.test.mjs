@@ -115,10 +115,10 @@ test("socialImageSpec(): every card carries the §6.3 lock-up from SITE, section
   });
 });
 
-test("dist: the Home H1 highlights the word the cards highlight", () => {
-  const html = readText(join(BUILDS.dist, "index.html"));
-  const h1 = html.match(/<h1\b[\s\S]*?<\/h1>/)?.[0] ?? "";
-  assert.match(h1, new RegExp(`<span class="hl"[^>]*>${SLOGAN_HIGHLIGHT}</span>`), "the Home H1's highlighted word isn't SLOGAN_HIGHLIGHT");
+test("dist: the homepage leads with automation while social cards retain the brand slogan", () => {
+  const html=readText(join(BUILDS.dist,"index.html"));
+  assert.match(html, /<h1[^>]*>AI automation\. Built for your business\.<\/h1>/);
+  assert.equal(SLOGAN_HIGHLIGHT,"ships");
 });
 
 test("public/og/ holds one 1200×630 PNG per kind and nothing else, each under LinkedIn's 5 MB limit", () => {

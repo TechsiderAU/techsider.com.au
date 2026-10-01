@@ -103,18 +103,12 @@ test("home page JS stays under 40 KB gzipped, excluding the lazily loaded demo c
   assert.ok(bytes < BUDGET, `home JS is ${bytes} bytes gzipped (budget ${BUDGET})`);
 });
 
-test("the Home demo band loads the ② demo lazily: its renderer and data sit behind a dynamic import(), never in the page's eager JS (spec §11.4)", () => {
-  assert.ok(/\bdata-template="home"/.test(home), "dist/index.html is not the HomeTemplate page");
-  const eager = [...scripts.eager.map(read), ...scripts.inline];
-  const lazy = scripts.lazy.map(read);
-  // The engine loads with the page and counts against the budget (see the header), so it must be in
-  // the eager JavaScript, not only in a lazy chunk (final review D8-M1).
-  assert.ok(eager.some((code) => ENGINE.test(code)), "the demo engine isn't in the Home page's eager JS, so the budget doesn't count it");
-  assert.ok(DEMO_URLS.length > 0, "the ② demo has no scenario");
-  for (const url of DEMO_URLS) {
-    assert.ok(!eager.some((code) => code.includes(url)), `the ② demo's data (${url}) is in the Home page's eager JS`);
-    assert.ok(lazy.some((code) => code.includes(url)), `no lazily loaded chunk holds the ② demo's data (${url}); lazy: ${scripts.lazy.join(", ")}`);
-  }
+test("the marketing homepage does not load demo engines or scenario data", () => {
+  assert.match(home,/data-template="home"/);
+  const code=[...scripts.eager.map(read),...scripts.lazy.map(read),...scripts.inline];
+  assert.ok(!code.some(text=>ENGINE.test(text)),"demo engine should load on demo pages");
+  for(const url of DEMO_URLS) assert.ok(!code.some(text=>text.includes(url)),url);
+  assert.doesNotMatch(home,/data-demo-root|data-demo-frame/);
 });
 
 test("no Three.js or WebGL hero ships", () => {

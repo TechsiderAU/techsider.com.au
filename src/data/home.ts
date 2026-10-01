@@ -21,7 +21,7 @@ export const HOME: HomeData = {
     // ⚑ owner: "our evaluation method is published" holds only while /resources/evaluation-method/ is live at launch (research index B10)
     {
       q: HOME_TRUST_QUESTION,
-      a: `Don't take it on trust: check the method and the demos. Our evaluation method is published, so you can see how we test before you talk to us. ${SERVICES.independence[0]} If we run a system for you, the exit pack of code, data, configuration and runbook lets you move it or run it yourself.`,
+      a: `Check our published evaluation method and illustrative demos. ${SERVICES.independence[0]} Managed systems include an exit pack: code, data, configuration and runbook.`,
     },
     {
       q: "Where does our data go?",
@@ -29,7 +29,7 @@ export const HOME: HomeData = {
     },
     {
       q: "How do we start?",
-      a: "With a 30-minute Fit Call on one problem you want to fix. Mid-market teams then start with an Admin Hours Audit or a Two-Week Trial on Your Own Files; government and enterprise teams with an Independent Evaluation or a Feasibility Sprint on public or synthetic data.",
+      a: "Start with a 30-minute Fit Call on one manual process. We identify a suitable audit, trial or evaluation before a build.",
     },
     {
       q: "What if our software's AI already does the job?",
@@ -40,8 +40,8 @@ export const HOME: HomeData = {
       a: "You do. Your code, prompts, evaluation tests and index live in your own repository, whether your team runs the system or we do.",
     },
     {
-      q: "Is the demo on this page a live AI model?",
-      a: "No. It's a canned replay over public documents: it runs in your browser and never calls a model. Its scores and timings are illustrative, not a measured run, and each document is named with its licence.",
+      q: "Are your demos live AI models?",
+      a: "The replays run in your browser using public or synthetic documents. They do not call a model. Scores and timings are illustrative; document sources and licences are listed with each example.",
     },
   ],
   trustPageLine: "Our Trust page sets out how we handle your data, with plain answers to common security questions.",

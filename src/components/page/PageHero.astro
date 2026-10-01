@@ -1,15 +1,12 @@
 ---
-// The page hero (spec §6.4, §8): full-bleed carbon with the scan-line texture, content in the
-// 80rem container. It renders the page's one <h1>, so a template renders exactly one PageHero.
-// In order: breadcrumb, bracket eyebrow, decorative prompt line, H1 (with at most one highlighted
-// word), proof line, sub, then the CTAs and the default slot in `ctaPosition` order.
-// The header also carries bg-carbon, so it stays a dark island if it ever sits inside
-// .surface-bone (the gallery shows it there): lime focus rings and carbon-surface colours.
+// Shared hero: technical pages keep the dark treatment; business pages pass `art` for a
+// light, responsive introduction beside a labelled application concept. Each page has one H1.
 import type { Link } from "../../lib/site";
 import { splitHighlight } from "../../lib/highlight";
 import Breadcrumb from "../ui/Breadcrumb.astro";
 import BracketChip from "../ui/BracketChip.astro";
 import CtaLinks from "./CtaLinks.astro";
+import BusinessArtwork, { type ArtworkKind } from "./BusinessArtwork.astro";
 
 interface Props {
   title: string;
@@ -22,6 +19,7 @@ interface Props {
   breadcrumb?: Link[];
   ctas?: { primary?: Link | null; secondary?: Link | null };
   ctaPosition?: "before-slot" | "after-slot";
+  art?: ArtworkKind;
 }
 
 const {
@@ -35,25 +33,29 @@ const {
   breadcrumb,
   ctas,
   ctaPosition = "before-slot",
+  art,
 } = Astro.props;
 
 // Throws at build time when `highlight` is not one whole word of `title`.
 const parts = highlight === undefined ? null : splitHighlight(title, highlight);
 const hasSlot = Astro.slots.has("default");
 ---
-<header class="page-hero bg-carbon scanlines" data-page-hero>
+<header class:list={["page-hero", art ? "page-hero-editorial surface-bone" : "bg-carbon scanlines"]} data-page-hero>
   <div class="page-hero-inner">
+    <div class="page-hero-copy">
     {breadcrumb && breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} />}
-    {eyebrow && <p class="page-hero-eyebrow"><BracketChip label={eyebrow} /></p>}
-    {prompt && (
+    {eyebrow && <p class="page-hero-eyebrow">{art ? eyebrow : <BracketChip label={eyebrow} />}</p>}
+    {prompt && !art && (
       <p class="page-hero-prompt" aria-hidden="true"><span class="page-hero-caret">&gt;</span> {prompt.command}{prompt.args && <span class="page-hero-args"> {prompt.args}</span>}</p>
     )}
-    <h1 class:list={["page-hero-title", display ? "type-display page-hero-title-display" : "page-hero-title-sentence"]}>
+    <h1 class:list={["page-hero-title", display && !art ? "type-display page-hero-title-display" : "page-hero-title-sentence"]}>
       {parts ? <Fragment>{parts.before}<span class="hl">{parts.word}</span>{parts.after}</Fragment> : title}
     </h1>
     {proofLine && <p class="page-hero-proof">{proofLine}</p>}
     {sub && <p class="page-hero-sub">{sub}</p>}
     {ctaPosition === "before-slot" && <CtaLinks primary={ctas?.primary} secondary={ctas?.secondary} />}
+    </div>
+    {art && <div class="page-hero-art"><BusinessArtwork kind={art} priority /></div>}
     {hasSlot && <div class="page-hero-slot"><slot /></div>}
     {ctaPosition === "after-slot" && <CtaLinks primary={ctas?.primary} secondary={ctas?.secondary} />}
   </div>
@@ -79,6 +81,17 @@ const hasSlot = Astro.slots.has("default");
     margin-inline: auto;
     padding-inline: 1rem;
     overflow-wrap: break-word;
+  }
+  .page-hero-copy { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+  .page-hero-editorial { color: var(--color-carbon); border-color: var(--color-bone-line); padding-block: 3rem 4rem; }
+  .page-hero-editorial .page-hero-title-sentence { max-width: 16ch; font-size: clamp(2.2rem, 1rem + 3.5vw, 4.25rem); letter-spacing: -.045em; line-height: 1.05; }
+  .page-hero-editorial .page-hero-eyebrow { font-size: .8125rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-muted-dark); }
+  .page-hero-editorial .page-hero-sub { max-width: 42ch; color: var(--color-muted-dark); }
+  .page-hero-editorial .page-hero-art { min-width: 0; }
+  .page-hero-editorial .page-hero-slot { grid-column: 1 / -1; }
+  @media (min-width: 48rem) {
+    .page-hero-editorial { padding-block: 4.5rem 5.5rem; }
+    .page-hero-editorial .page-hero-inner { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); align-items: center; gap: 3rem; }
   }
   @media (min-width: 40rem) {
     .page-hero-inner {

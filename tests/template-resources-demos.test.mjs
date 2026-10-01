@@ -377,7 +377,7 @@ test("production: resources and demos template markup appears only on the pages 
     "data-sample-report": [METHOD, "demos/ai-evaluation/index.html", "solutions/ai-evaluation/index.html"],
     "data-platform-facts": [CHECKER, "demos/ai-switch-on/index.html"],
     'data-template="demo"': demoPages,
-    "data-demo-frame": [...demoPages, ...framedHeroes, "index.html"],
+    "data-demo-frame": [...demoPages, ...framedHeroes],
     "data-kit": [],
     'data-template="safe-use-kits"': [],
   };

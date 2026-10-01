@@ -1,5 +1,5 @@
 // The demo engine's accessibility contract (spec §6.5, §8.8; Phase D Review Focus 1 and 2), in two
-// halves. The markup half reads the built Home's demo band (dist/index.html, `npm run build`
+// halves. The markup half reads the dedicated demo page's demo band (dist/index.html, `npm run build`
 // first). The behaviour half drives src/scripts/demo-engine.ts with the real ② renderer over the
 // real data file, on the fake DOM in tests/support/fake-dom.mjs with mocked timers. Every
 // guarantee the Phase 0 tests pinned on the old src/scripts/demo.ts carries over: the stage is
@@ -22,11 +22,11 @@ const LINES = announcements(DATA);
 const QUESTIONS = DATA.scenarios.flatMap((s) => s.turns.map((t) => t.question));
 
 // ---------------------------------------------------------------------------
-// Markup: the Home's demo band, without its inline <style>/<script> bodies (the transcript's
+// Markup: the dedicated demo page, without its inline <style>/<script> bodies (the transcript's
 // global styles name the hooks too, and DOM-order checks must only see real elements).
 // ---------------------------------------------------------------------------
-const home = readDist("index.html").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<style[\s\S]*?<\/style>/g, "");
-const band = home.slice(home.indexOf('id="demo"'));
+const home = readDist("demos/knowledge-assistant/index.html").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<style[\s\S]*?<\/style>/g, "");
+const band = home;
 const tagOf = (attr) => {
   const m = band.match(new RegExp(`<[a-z]+[^>]*\\b${attr}\\b[^>]*>`));
   assert.ok(m, `element with ${attr} not found in the #demo band`);
@@ -67,7 +67,7 @@ test("one polite log announces progress: visually hidden, empty, and the band's 
   assert.match(log, /aria-live="polite"/);
   assert.match(log, /class="sr-only"/);
   assert.match(band, /data-demo-log[^>]*><\/div>/, "the log ships empty");
-  const section = band.slice(0, band.indexOf("</section>"));
+  const section = band;
   assert.equal(section.match(/aria-live=/g).length, 1);
   assert.doesNotMatch(section, /role="(status|alert|log)"/);
 });

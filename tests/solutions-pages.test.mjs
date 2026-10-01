@@ -67,7 +67,7 @@ test("each solution page: one h1 (the full name), the one-liner, and a primary C
     // Phase D Task 7: the demo sits in the hero, with "Try the demo" below it
     // (tests/demos-pages.test.mjs pins what the slot holds).
     assert.deepEqual(VIEWS[id].ctas.secondary, { label: "Try the demo", href: `/demos/${id}/` }, `${id}: the demo link`);
-    assert.equal(elementsWith(hero.outer, "data-solution-demo").length, 1, `${id}: no demo slot`);
+    assert.equal(elementsWith(main, "data-solution-demo").length, 1, `${id}: no demo slot`);
   }
 });
 
@@ -157,7 +157,7 @@ test("the hub: five job cards linking to the live pages, a matrix row per indust
   const main = mainOf(readDist("solutions/index.html"));
   const h1 = elements(main, (t) => t.name === "h1");
   assert.equal(h1.length, 1);
-  assert.equal(text(h1[0].inner), "Solutions.");
+  assert.equal(text(h1[0].inner), "AI solutions for the work that matters.");
   const byJob = elements(main, (t) => t.attrs.id === "by-job")[0].outer;
   assert.deepEqual(hrefsIn(byJob), IDS.map((id) => `/solutions/${id}/`));
   assert.equal(elementsWith(main, "data-matrix-row").length, SITE.industries.length);

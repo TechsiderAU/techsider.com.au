@@ -7,16 +7,18 @@ interface Props {
   args?: string;
   label: string;
   href: string;
+  title?: string;
 }
 
-const { command, args, label, href } = Astro.props;
+const { command, args, label, href, title } = Astro.props;
 ---
 <div class="prompt-block bg-carbon scanlines" data-prompt-block>
-  <p class="prompt-line" aria-hidden="true"><span class="prompt-caret">&gt;</span> {command}{args && <span class="prompt-args"> {args}</span>}</p>
+  {title ? <p class="closing-title">{title}</p> : <p class="prompt-line" aria-hidden="true"><span class="prompt-caret">&gt;</span> {command}{args && <span class="prompt-args"> {args}</span>}</p>}
   <a href={href} class="btn btn-primary">{label}</a>
 </div>
 
 <style>
+  .closing-title { margin: 0; max-width: 24ch; font-size: clamp(1.5rem, 1rem + 1vw, 2rem); font-weight: 600; line-height: 1.15; letter-spacing: -.025em; }
   .prompt-block {
     display: flex;
     flex-wrap: wrap;

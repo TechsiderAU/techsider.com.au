@@ -4,8 +4,10 @@
 // title). Hover or keyboard focus shows the scan line, a single sweep of a lime line (acid-deep on
 // bone) down the card (spec §6.5); under prefers-reduced-motion it doesn't run.
 // A null href (a page that isn't shown) renders the same card with no link and no hover.
+import BusinessArtwork, { type ArtworkKind } from "./BusinessArtwork.astro";
 interface Props {
   title: string;
+  art?: ArtworkKind;
   href: string | null;
   body?: string;
   eyebrow?: string;
@@ -13,10 +15,11 @@ interface Props {
   level?: 2 | 3 | 4;
 }
 
-const { title, href, body, eyebrow, meta, level = 3 } = Astro.props;
+const { title, href, body, eyebrow, meta, art, level = 3 } = Astro.props;
 const Heading = `h${level}` as "h2" | "h3" | "h4";
 ---
 <article class:list={["link-card", href !== null && "link-card-linked"]} data-link-card>
+  {art && <BusinessArtwork kind={art} />}
   {eyebrow && <p class="link-card-eyebrow">{eyebrow}</p>}
   <Heading class:list={["link-card-title", `link-card-title-${level}`]}>
     {href === null ? title : <a href={href} class="link-card-link">{title}</a>}

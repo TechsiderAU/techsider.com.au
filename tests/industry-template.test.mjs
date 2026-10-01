@@ -63,7 +63,7 @@ test("hero: the breadcrumb, the industry eyebrow, the constraint set and both CT
     const hero = elementsWith(read(kind), "data-page-hero")[0];
     assert.ok(hero, `${kind}: no [data-page-hero]`);
     const t = text(hero.inner);
-    assert.match(t, /\[\s*industry\s*\]/, `${kind}: no [industry] eyebrow`);
+    assert.match(t, /\bindustry\b/, `${kind}: no [industry] eyebrow`);
     assert.ok(t.includes(view.constraintSet), `${kind}: no constraint set`);
     assert.match(hero.inner, /aria-label="Breadcrumb"/);
     const links = elements(hero.inner, (tag) => tag.name === "a").map((a) => [text(a.inner), a.attrs.href]);
@@ -257,7 +257,7 @@ test("a first engagement, related insights, one FAQ and the closing prompt", () 
     const contact = byId(html, "contact");
     const prompt = elementsWith(contact.inner, "data-prompt-block");
     assert.equal(prompt.length, 1);
-    assert.ok(text(prompt[0].inner).includes(`${view.closing.command} ${view.closing.args}`));
+    assert.ok(text(prompt[0].inner).includes("Let’s discuss your workflow."));
     assert.deepEqual(elements(prompt[0].inner, (t) => t.name === "a").map((a) => [text(a.inner), a.attrs.href]), [[view.closing.label, view.closing.href]]);
   }
 });

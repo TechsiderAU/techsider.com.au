@@ -80,6 +80,8 @@ function scriptErrors(page) {
 
 /** The frames that hold an engine-backed demo, in page order: exactly as many as the build put on the page. */
 async function demoFrames(page, count) {
+  const disclosure = page.locator(".solution-example:not([open]) > summary");
+  if (await disclosure.count()) await disclosure.click();
   const frames = page.locator("[data-demo-frame]:has([data-demo-root])");
   await expect(frames, "engine-backed demo frames on the page").toHaveCount(count);
   return frames.all();
@@ -197,7 +199,6 @@ test("the sweep finds the demos and the checker in the production build, and eve
   // Phase D Tasks 7 and 8: the ① ② ③ replays on their demo pages and solution heroes, and ② on Home.
   expect(DEMO_BUILT.map((p) => p.path)).toEqual(
     expect.arrayContaining([
-      "/",
       "/demos/document-registers/", "/demos/knowledge-assistant/", "/demos/draft-for-approval/",
       "/solutions/document-registers/", "/solutions/knowledge-assistant/", "/solutions/draft-for-approval/",
     ]),

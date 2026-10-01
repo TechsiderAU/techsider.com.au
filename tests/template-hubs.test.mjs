@@ -1,6 +1,7 @@
 // The Solutions and Industries hub templates (spec §8.2, §8.4) as the preview build renders them
 // from every fixture set: /preview/templates/solutions-hub/ and /preview/templates/industries-hub/.
 // Run `npm run build:preview` first. The builders are covered by tests/views-hubs.test.mjs.
+import { AUTOMATION } from "../src/lib/marketing.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
@@ -26,9 +27,9 @@ function one(html, attr, value) {
 }
 const launchIds = (id) => [solutionFixtures[id].genericPackage, ...solutionFixtures[id].packages.filter((p) => p.status === "launch")].map((p) => p.id);
 
-for (const [file, name, h1, word] of [
-  [SOLUTIONS_HUB, "solutions-hub", "Solutions.", "Solutions"],
-  [INDUSTRIES_HUB, "industries-hub", "Industries.", "Industries"],
+for (const [file, name, h1] of [
+  [SOLUTIONS_HUB, "solutions-hub", "AI solutions for the work that matters."],
+  [INDUSTRIES_HUB, "industries-hub", "Your industry. Your workflows."],
 ]) {
   test(`${name}: one h1 with its highlight, a data-template root, headings in order, unique ids`, () => {
     const html = readPreviewDist(file);
@@ -36,7 +37,7 @@ for (const [file, name, h1, word] of [
     const h1s = tagged(main, "h1");
     assert.equal(h1s.length, 1, "exactly one <h1>");
     assert.equal(inlineText(h1s[0].inner), h1);
-    assert.deepEqual(withClass(h1s[0].inner, "hl").map((s) => text(s.inner)), [word]);
+    assert.deepEqual(withClass(h1s[0].inner, "hl").map((s) => text(s.inner)), []);
     one(main, "data-template", name);
     // Headings never skip a level on the way down.
     const levels = startTags(main).filter((t) => /^h[1-6]$/.test(t.name)).map((t) => Number(t.name[1]));
@@ -58,8 +59,7 @@ for (const [file, name, h1, word] of [
     const contact = one(template.inner, "id", "contact");
     assert.ok(template.inner.trimEnd().endsWith(contact.outer), "#contact is not the last block");
     const prompt = one(contact.inner, "data-prompt-block");
-    const closing = name === "solutions-hub" ? solutionsView.closing : industriesView.closing;
-    assert.match(text(prompt.inner), new RegExp(`talk_to_us ${closing.args}`));
+    assert.ok(text(prompt.inner).includes(name === "solutions-hub" ? "Start with one workflow." : "Find a useful first step."));
     const link = tagged(prompt.inner, "a");
     assert.equal(link.length, 1);
     assert.equal(link[0].attrs.href, "/preview/templates/contact/");
@@ -90,7 +90,7 @@ test("solutions-hub: By job is one card per solution, headed by its number and s
     const heading = tagged(cards[i].inner, "h4");
     assert.equal(heading.length, 1, `${job.shortName}: the card heading is not an h4`);
     assert.equal(text(heading[0].inner), `${job.number} ${job.shortName}`);
-    assert.ok(text(cards[i].inner).includes(job.job), `${job.shortName}: no job line`);
+    assert.ok(text(cards[i].inner).includes(job.oneLiner), `${job.shortName}: no job line`);
     assert.deepEqual(tagged(cards[i].inner, "a").map((a) => a.attrs.href), [job.href]);
   });
 });
@@ -179,7 +179,7 @@ test("solutions-hub: By buyer links into the solution specimens land on the pack
 
 test("industries-hub: nine deep cards: heading link, hook, three numbered use cases and a three-chip row", () => {
   const section = one(mainOf(readPreviewDist(INDUSTRIES_HUB)), "id", "industries");
-  assert.equal(text(one(section.inner, "id", "industries-heading").inner), "Nine industries");
+  assert.equal(text(one(section.inner, "id", "industries-heading").inner), "Find your industry");
   const cards = elementsWith(section.inner, "data-industry-card");
   assert.deepEqual(cards.map((c) => c.attrs["data-industry-card"]), industriesView.cards.map((c) => c.id));
   industriesView.cards.forEach((card, i) => {
@@ -188,7 +188,7 @@ test("industries-hub: nine deep cards: heading link, hook, three numbered use ca
     assert.equal(heading.length, 1);
     assert.equal(text(heading[0].inner), card.shortName);
     assert.deepEqual(tagged(heading[0].inner, "a").map((a) => a.attrs.href), card.href ? [card.href] : []);
-    assert.ok(text(el.inner).includes(card.hook), `${card.id}: no hook`);
+    assert.ok(text(el.inner).includes(AUTOMATION.industries[card.shortName] ?? card.hook), `${card.id}: no hook`);
     const uses = elements(withClass(el.inner, "industry-card-uses")[0].inner, (t) => t.name === "li");
     // inlineText, not text: the number, name and label must be separated by real spaces in the markup.
     assert.deepEqual(
