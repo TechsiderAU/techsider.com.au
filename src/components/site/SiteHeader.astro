@@ -154,6 +154,7 @@ const isCurrent = (href: string) => (href === current ? "page" : undefined);
   .nav-toggle[aria-expanded="true"] svg {
     transform: rotate(180deg);
   }
+  .nav-toggle svg { transition: transform 180ms ease; }
   .nav-panel {
     position: absolute;
     left: 0;
@@ -164,6 +165,27 @@ const isCurrent = (href: string) => (href === current ? "page" : undefined);
     background: var(--color-graphite);
     border-radius: 8px;
     box-shadow: 0 16px 40px rgb(0 0 0 / 0.5);
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms cubic-bezier(.2, .7, .3, 1);
+  }
+  .nav-panel[data-nav-open] {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  /* Bridge the visual gap so travelling from the label into its panel keeps hover active. */
+  .nav-panel::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -.5rem;
+    height: .5rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nav-panel, .nav-toggle svg { transition: none; }
   }
   .nav-panel-wide {
     width: 38rem;
