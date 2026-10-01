@@ -17,7 +17,12 @@ export const CONTACT: ContactData = {
   // ⚑ owner: confirm FormSubmit's storage/access countries with the provider (spec §12 item 1)
   formProvider: { name: "FormSubmit", country: "Storage countries not yet confirmed" },
   redirectField: "_next",
-  hiddenFields: { _subject: "New Techsider website enquiry", _template: "table" },
+  hiddenFields: {
+    _subject: "New Techsider website enquiry",
+    _template: "table",
+    // Preserve the exact page: cross-origin referrer policies otherwise report only the homepage.
+    _url: "https://techsider.com.au/contact/",
+  },
   honeypotField: "_honey",
   // ⚑ owner: confirm the email provider and its storage country with the provider, not from DNS (spec §12 item 1)
   emailProvider: { name: "Lark Suite", country: "Not yet confirmed with Lark Suite" },

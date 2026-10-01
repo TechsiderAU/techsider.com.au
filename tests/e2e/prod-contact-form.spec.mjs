@@ -22,6 +22,8 @@ for (const javaScriptEnabled of [true, false]) {
       await expect(form).toHaveAttribute("action", CONTACT.formEndpoint);
       await expect(form).toHaveAttribute("data-submit-mode", "native");
       await expect(form.locator('[name="_next"]')).toHaveValue("https://techsider.com.au/contact/sent/");
+      await expect(form.locator('[name="_url"]')).toHaveValue("https://techsider.com.au/contact/");
+      await expect(form.getByRole("button", { name: "Send enquiry" })).toHaveAccessibleDescription(/complete FormSubmit's spam check/);
       await expect(page.locator("#enquiry-privacy")).toContainText("FormSubmit");
       if (javaScriptEnabled) {
         await form.getByRole("button", { name: "Send enquiry" }).click();
