@@ -12,6 +12,8 @@ The responsive enterprise application concepts in `public/images/automation/` ar
 
 The hero application concept animates a fictional invoice run through intake, extraction, checks, human approval and an ERP update. Its SVG overlay keeps the run panel and activity statuses in sync. The caption includes a keyboard-accessible pause/resume control; the run pauses offscreen and in background tabs. Reduced motion and browsers without JavaScript show the static approval state. The image keeps its reserved dimensions and responsive loading.
 
+Desktop header dropdowns open on mouse hover with a short fade and slide. A pointer bridge and brief close delay avoid flicker while entering a panel; clicking the arrow pins it open. Keyboard disclosure controls, Escape and outside-click dismissal remain available. Closing links become inert immediately, and reduced motion disables the transitions. Touch devices use the existing click and mobile navigation.
+
 ## Stack
 
 - [Astro 7](https://astro.build/): static output, no UI framework. `astro check` type-checks every build.

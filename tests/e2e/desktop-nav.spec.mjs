@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { focusKeys } from "../support/keys.mjs";
+import AxeBuilder from "@axe-core/playwright";
 
 test.use({ viewport: { width: 1280, height: 800 } });
 
@@ -111,6 +112,75 @@ test("at 1024px every panel stays inside the viewport, with room for a classic s
 test("top-level labels are real links to their hubs", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("[data-site-nav]").getByRole("link", { name: "Solutions", exact: true })).toHaveAttribute("href", "/solutions/");
+});
+
+test("mouse hover opens with a transition and the pointer crosses into the panel without flicker", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const label = page.locator("[data-site-nav]").getByRole("link", { name: "Solutions", exact: true });
+  const toggle = page.getByRole("button", { name: "Solutions menu" });
+  const panel = page.locator("#nav-panel-solutions");
+  await label.hover();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await expect(panel).toHaveCSS("opacity", "1");
+  expect(await panel.evaluate(el => getComputedStyle(el).transitionDuration)).toContain("0.18s");
+  const box = await panel.boundingBox();
+  await page.mouse.move(box.x + 30, box.y - 4);
+  await page.waitForTimeout(250);
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await panel.getByRole("link").first().hover();
+  await expect(panel).toBeVisible();
+  const results = await new AxeBuilder({ page }).include("[data-site-nav]").withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+  expect(results.violations).toEqual([]);
+  await page.mouse.move(20, 500);
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(panel).toHaveAttribute("inert", "");
+  await expect(panel).toBeHidden();
+});
+
+test("reentering during dismissal cancels the pending hide and switching groups closes the old panel", async ({ page }) => {
+  await page.goto("/");
+  const nav = page.locator("[data-site-nav]");
+  const solutions = nav.getByRole("link", { name: "Solutions", exact: true });
+  const panel = page.locator("#nav-panel-solutions");
+  await solutions.hover();
+  await expect(panel).toHaveCSS("opacity", "1");
+  await page.mouse.move(20, 500);
+  await expect(page.getByRole("button", { name: "Solutions menu" })).toHaveAttribute("aria-expanded", "false");
+  await solutions.hover();
+  await page.waitForTimeout(350);
+  await expect(panel).toBeVisible();
+  await expect(panel).not.toHaveAttribute("inert", "");
+  await nav.getByRole("link", { name: "Industries", exact: true }).hover();
+  await expect(page.locator("#nav-panel-industries")).toHaveCSS("opacity", "1");
+  await expect(panel).toBeHidden();
+});
+
+test("a hovered panel stays open while its links have keyboard focus, and Escape dismisses it", async ({ page, browserName }) => {
+  await page.goto("/");
+  const toggle = page.getByRole("button", { name: "Solutions menu" });
+  const panel = page.locator("#nav-panel-solutions");
+  await toggle.hover();
+  await toggle.focus();
+  await page.keyboard.press(focusKeys(browserName).next);
+  await expect(panel.getByRole("link").first()).toBeFocused();
+  await page.mouse.move(20, 500);
+  await page.waitForTimeout(350);
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await page.keyboard.press("Escape");
+  await expect(panel).toBeHidden();
+  await expect(toggle).toBeFocused();
+});
+
+test("reduced motion opens and closes hover dropdowns without animation", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const panel = page.locator("#nav-panel-solutions");
+  await page.locator("[data-site-nav]").getByRole("link", { name: "Solutions", exact: true }).hover();
+  await expect(panel).toHaveCSS("opacity", "1");
+  expect(await panel.evaluate(el => el.getAnimations().length)).toBe(0);
+  await page.mouse.move(20, 500);
+  await expect(panel).toBeHidden();
 });
 
 test("without JavaScript the toggles stay hidden and the basic link row shows", async ({ browser }) => {

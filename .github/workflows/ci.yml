@@ -53,8 +53,8 @@ jobs:
         run: npx playwright install --with-deps chromium firefox
       - name: Firefox contact regression
         run: npx playwright test tests/e2e/contact-form.spec.mjs --project=firefox
-      - name: Site motion and reduced-motion accessibility
-        run: npx playwright test tests/e2e/site-motion.spec.mjs --project=chromium --project=firefox
+      - name: Site motion, navigation and reduced-motion accessibility
+        run: npx playwright test tests/e2e/site-motion.spec.mjs tests/e2e/desktop-nav.spec.mjs tests/e2e/mobile-menu.spec.mjs --project=chromium --project=firefox
       - name: Production contact form and accessibility
         run: npx playwright test tests/e2e/prod-contact-form.spec.mjs tests/e2e/prod-company.spec.mjs --project=prod-chromium
       - name: Isolated mobile vitals
