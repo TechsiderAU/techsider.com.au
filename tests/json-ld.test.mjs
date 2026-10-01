@@ -76,6 +76,7 @@ test("organization(): minimal off Home; in full on Home, with the logo, the slog
     "@id": ORG_ID,
     name: "Techsider",
     url: `${ORIGIN}/`,
+    legalName: "Techsider Pty Ltd",
     email: SITE.email,
     logo: `${ORIGIN}/icon-512.png`,
     slogan: "AI that ships. Measured before it ships.",
@@ -87,21 +88,21 @@ test("organization(): minimal off Home; in full on Home, with the logo, the slog
   for (const topic of KNOWS_ABOUT) assert.doesNotMatch(topic, /\bagent/i, `knowsAbout names agents: "${topic}"`);
 });
 
-test("legalName: left out while nav.ts holds the name, carried once the owner sets the registered entity, and held open by a ⚑ (spec §12 item 5)", () => {
-  assert.equal(SITE.legalName, SITE.name, "the owner has set the entity: drop this line and the legalName ⚑ in nav.ts");
-  assert.equal("legalName" in organization(ORIGIN, true), false, "legalName repeats the name");
+test("legalName: carries the owner-supplied company name; the ABN remains held open by a ⚑ (spec §12 item 5)", () => {
+  assert.equal(SITE.legalName, "Techsider Pty Ltd");
+  assert.equal(organization(ORIGIN, true).legalName, SITE.legalName);
   const saved = SITE.legalName;
   try {
-    SITE.legalName = "Test Entity Pty Ltd";
-    assert.equal(organization(ORIGIN, true).legalName, "Test Entity Pty Ltd");
+    SITE.legalName = SITE.name;
+    assert.equal("legalName" in organization(ORIGIN, true), false, "legalName repeats the brand name");
     assert.equal("legalName" in organization(ORIGIN, false), false, "the minimal node grew a legalName");
   } finally {
     SITE.legalName = saved;
   }
   const nav = readFileSync(join(SRC, "data/nav.ts"), "utf8");
   assert.ok(
-    nav.includes("  // ⚑ owner: confirm the registered entity (ABN Lookup shows TECHSIDER PTY LTD) and its ABN, then set legalName to it (spec §12 item 5)\n  legalName: "),
-    "nav.ts has no ⚑ above SITE.legalName",
+    nav.includes("  // ⚑ owner: confirm the ABN for Techsider Pty Ltd (spec §12 item 5)"),
+    "nav.ts has no ABN verification marker",
   );
 });
 

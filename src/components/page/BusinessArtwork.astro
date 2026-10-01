@@ -1,4 +1,5 @@
 ---
+import WorkflowArtwork from "./WorkflowArtwork.astro";
 // Generated application concepts, never presented as a deployed product or client system.
 export type ArtworkKind = "hero" | "workflow" | "documents" | "knowledge";
 interface Props {
@@ -15,11 +16,25 @@ const descriptions = {
 };
 ---
 <figure class="business-artwork" data-business-artwork={kind}>
+  <div class="artwork-media" data-workflow-artwork={kind === "hero" ? "" : undefined} data-workflow-phase={kind === "hero" ? "review" : undefined}>
   <img src={`/images/automation/${kind}-1280.webp`} srcset={`/images/automation/${kind}-640.webp 640w, /images/automation/${kind}-1280.webp 1280w`} sizes="(min-width: 1280px) 680px, (min-width: 768px) 52vw, 100vw" width="1536" height="1024" alt={descriptions[kind]} loading={priority ? "eager" : "lazy"} fetchpriority={priority ? "high" : "auto"} decoding="async" />
-  {caption && <figcaption>Illustrative application concept</figcaption>}
+  {kind === "hero" && <WorkflowArtwork />}
+  </div>
+  {kind === "hero" ? <div class="artwork-footer">
+    {caption && <figcaption>Illustrative application concept</figcaption>}
+    <button class="artwork-toggle" type="button" data-workflow-toggle hidden aria-pressed="false">Pause animation</button>
+  </div> : caption && <figcaption>Illustrative application concept</figcaption>}
 </figure>
+<script>
+  import { initWorkflowArtwork } from "../../scripts/workflow-artwork";
+  document.querySelectorAll<HTMLElement>("[data-business-artwork='hero']").forEach(initWorkflowArtwork);
+</script>
 <style>
   .business-artwork { margin: 0; min-width: 0; }
+  .artwork-media { position: relative; }
   img { display: block; width: 100%; height: auto; border: 1px solid var(--color-bone-line); border-radius: 10px; background: white; }
   figcaption { margin-top: .65rem; font-size: .75rem; line-height: 1.4; color: var(--color-muted-dark); }
+  .artwork-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 44px; margin-top: .3rem; }
+  .artwork-footer figcaption { margin: 0; }
+  .artwork-toggle { min-height: 44px; padding: .5rem; border: 0; background: transparent; color: var(--color-carbon); font: inherit; font-size: .75rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 </style>
