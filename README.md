@@ -10,6 +10,8 @@ The responsive enterprise application concepts in `public/images/automation/` ar
 
 `site-motion.ts` gives headlines and sections a single entrance, while linked cards have gentle hover/focus feedback. Reduced-motion preferences disable animations. Without JavaScript, all content and artwork remain visible. There are no continuously animated decorative sections.
 
+The hero application concept animates a fictional invoice run through intake, extraction, checks, human approval and an ERP update. Its SVG overlay keeps the run panel and activity statuses in sync. The caption includes a keyboard-accessible pause/resume control; the run pauses offscreen and in background tabs. Reduced motion and browsers without JavaScript show the static approval state. The image keeps its reserved dimensions and responsive loading.
+
 ## Stack
 
 - [Astro 7](https://astro.build/): static output, no UI framework. `astro check` type-checks every build.

@@ -92,8 +92,8 @@ export const SITE = {
    * The registered legal entity, for the footer © and the Organization JSON-LD's legalName (spec
    * §11.3), which src/lib/json-ld.ts emits only once it differs from the name, as Google asks.
    */
-  // ⚑ owner: confirm the registered entity (ABN Lookup shows TECHSIDER PTY LTD) and its ABN, then set legalName to it (spec §12 item 5)
-  legalName: "Techsider",
+  // ⚑ owner: confirm the ABN for Techsider Pty Ltd (spec §12 item 5); company name supplied by the owner on 2026-10-01
+  legalName: "Techsider Pty Ltd",
   email: "admin@techsider.com.au",
   slogan: "AI that ships.",
   proofLine: "Measured before it ships.",

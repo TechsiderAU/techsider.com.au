@@ -1,0 +1,96 @@
+---
+// Motion is layered inside the existing application concept, with a readable static baseline.
+const nodes = [
+  { x: 205, width: 140, title: "Receive request", sub: "Shared inbox", icon: "M0 0h12l5 5v19H0z M12 0v6h5" },
+  { x: 366, width: 141, title: "Extract details", sub: "AI document processing", icon: "M0 2h2m4 0h14M0 10h2m4 0h14M0 18h2m4 0h14" },
+  { x: 527, width: 151, title: "Check business rules", sub: "Validation and matching", icon: "M10 0l3 4 5-1 1 5 4 3-3 4 1 5-5 1-3 4-4-3-5 1-1-5-4-3 3-4-1-5 5-1z M14 7a4 4 0 1 0 0 8a4 4 0 0 0 0-8" },
+  { x: 697, width: 146, title: "Human approval", sub: "Awaiting review", icon: "M7 6a5 5 0 1 0 10 0a5 5 0 1 0-10 0 M2 25v-4a10 7 0 0 1 20 0v4z" },
+  { x: 864, width: 145, title: "Update systems", sub: "ERP and record keeping", icon: "M1 5a10 4 0 1 0 20 0a10 4 0 1 0-20 0 M1 5v15a10 4 0 0 0 20 0V5 M1 12a10 4 0 0 0 20 0" },
+];
+---
+<svg class="workflow-overlay" viewBox="0 0 1280 853" aria-hidden="true" focusable="false" data-workflow-overlay>
+  <rect x="201" y="289" width="812" height="73" fill="#fff" />
+  {nodes.slice(0, -1).map((node, i) => (
+    <g data-workflow-connector={i}>
+      <path class="connector-track" d={`M${node.x + node.width} 325H${nodes[i + 1].x}`} />
+      <path class="connector-flow" d={`M${node.x + node.width} 325H${nodes[i + 1].x}`} />
+      <path class="connector-arrow" d={`M${nodes[i + 1].x - 5} 321l5 4-5 4`} />
+    </g>
+  ))}
+  {nodes.map((node, i) => (
+    <g data-workflow-node={i} data-state={i < 3 ? "complete" : i === 3 ? "waiting" : "pending"}>
+      <rect class="node-card" x={node.x} y="296" width={node.width} height="58" rx="4" />
+      <path class="node-icon" d={node.icon} transform={`translate(${node.x + 10} 313)`} />
+      <text class="node-title" x={node.x + 37} y="319">{node.title}</text>
+      <text class="node-sub" x={node.x + 37} y="335" data-node-sub>{node.sub}</text>
+      <circle class="node-status" cx={node.x + node.width - 14} cy="310" r="5" />
+      <path class="node-check" d={`M${node.x + node.width - 17} 310l2 2 4-4`} />
+      <rect class="node-progress" x={node.x + 1} y="351" width={node.width - 2} height="2" rx="1" />
+    </g>
+  ))}
+  {/* The dynamic panel covers the original run status and shows only fictional sample events. */}
+  <rect x="1049" y="198" width="205" height="261" fill="#fff" />
+  <text class="panel-label" x="1055" y="216">Source</text>
+  <text class="panel-value" x="1127" y="216">Shared inbox</text>
+  <text class="panel-label" x="1055" y="244">Status</text>
+  <circle class="run-indicator" cx="1130" cy="240" r="4" />
+  <text class="panel-value run-status" x="1140" y="244" data-run-status>Awaiting review</text>
+  <text class="panel-label" x="1055" y="272">Run ID</text>
+  <text class="panel-value" x="1127" y="272">Example-0042</text>
+  <text class="panel-label" x="1055" y="300">Workflow</text>
+  <text class="panel-value" x="1127" y="300">Invoice processing</text>
+  <path d="M1054 348H1250" stroke="#edf0ed" />
+  <text class="panel-heading" x="1055" y="377">Current step</text>
+  <text class="panel-step" x="1055" y="407" data-run-step>Human approval</text>
+  <text class="panel-label" x="1055" y="431" data-run-description>Operations reviews the details.</text>
+  <text class="panel-label" x="1055" y="449" data-run-description-last>Updates wait for approval.</text>
+  {/* Keep the activity table in sync with the illustrated run. */}
+  <rect x="534" y="679" width="555" height="108" fill="#fff" />
+  {["Received", "Processed", "Awaiting review"].map((status, i) => (
+    <g data-workflow-activity={i} data-state={i < 2 ? "complete" : "waiting"}>
+      <circle class="activity-indicator" cx="544" cy={693 + i * 36} r="4" />
+      <text class="activity-status" x="557" y={697 + i * 36} data-activity-status>{status}</text>
+      <text class="activity-status" x="700" y={697 + i * 36} data-activity-description>{["Request received from shared inbox", "Document analysed, key details extracted", "Pending review by operations team"][i]}</text>
+    </g>
+  ))}
+  <path d="M534 715H1089 M534 750H1089" stroke="#edf0ed" />
+</svg>
+
+<style>
+  .workflow-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; font-family: var(--font-sans); }
+  .connector-track, .connector-arrow { fill: none; stroke: #68736a; stroke-width: 1.2; }
+  .connector-flow { fill: none; stroke: #548852; stroke-width: 3; stroke-dasharray: 5 15; opacity: 0; }
+  .node-card { fill: #fff; stroke: #d4d9d5; stroke-width: 1; }
+  .node-icon { fill: none; stroke: #737b78; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .node-title { fill: #25312b; font-size: 9px; font-weight: 600; }
+  .node-sub { fill: #6a756e; font-size: 8px; }
+  .node-status { fill: white; stroke: #bec7c0; stroke-width: 1; }
+  .node-check { fill: none; stroke: white; stroke-width: 1.2; opacity: 0; }
+  .node-progress { fill: #5b9658; opacity: 0; transform-box: fill-box; transform-origin: left; }
+  [data-state="complete"] .node-card, [data-state="active"] .node-card { fill: #f5faf5; stroke: #a3c49f; }
+  [data-state="complete"] .node-icon, [data-state="active"] .node-icon { stroke: #4b7c49; }
+  [data-state="complete"] .node-status { fill: #5b9658; stroke: #5b9658; }
+  [data-state="complete"] .node-check { opacity: 1; }
+  [data-state="active"] .node-status { fill: #79a873; stroke: #79a873; }
+  [data-state="waiting"] .node-card { fill: #fffbeb; stroke: #dcbd62; }
+  [data-state="waiting"] .node-icon { stroke: #bd8d19; }
+  [data-state="waiting"] .node-status { fill: #d5ac36; stroke: #d5ac36; }
+  [data-state="waiting"] .node-sub { fill: #a27613; }
+  .panel-label { fill: #758078; font-size: 10px; }
+  .panel-value { fill: #47524b; font-size: 10px; }
+  .panel-heading, .panel-step { fill: #25312b; font-size: 12px; font-weight: 600; }
+  .run-indicator { fill: #d5ac36; }
+  .run-status { fill: #a27613; font-size: 9px; }
+  .activity-indicator { fill: #5b9658; }
+  [data-workflow-activity][data-state="waiting"] .activity-indicator { fill: #d5ac36; }
+  [data-workflow-activity][data-state="pending"] .activity-indicator { fill: #a2aaa4; }
+  .activity-status { fill: #626e65; font-size: 10px; }
+  :global([data-workflow-phase]:not([data-workflow-phase="review"])) .run-indicator { fill: #5b9658; }
+  :global([data-workflow-phase]:not([data-workflow-phase="review"])) .run-status { fill: #467543; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global([data-workflow-motion="running"]) [data-connector-active] .connector-flow { opacity: 1; animation: move-request 1s linear infinite; }
+    :global([data-workflow-motion="running"]) [data-state="active"] .node-progress { opacity: 1; animation: process-request 1.4s ease-in-out infinite; }
+  }
+  @keyframes move-request { to { stroke-dashoffset: -20; } }
+  @keyframes process-request { from { transform: scaleX(.05); } to { transform: scaleX(1); } }
+</style>
