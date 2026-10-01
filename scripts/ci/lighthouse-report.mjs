@@ -34,8 +34,9 @@ export function summarise(path, lhr) {
   };
   const performance = score("performance");
   const accessibility = score("accessibility");
-  const lcpMs = Math.round(lhr.audits["largest-contentful-paint"]?.numericValue ?? NaN);
-  const cls = Number((lhr.audits["cumulative-layout-shift"]?.numericValue ?? NaN).toFixed(3));
+  // Strict budgets use the measured values; rounding can turn a passing value into a miss.
+  const lcpMs = lhr.audits["largest-contentful-paint"]?.numericValue ?? NaN;
+  const cls = lhr.audits["cumulative-layout-shift"]?.numericValue ?? NaN;
   const misses = [
     performance < TARGETS.performance && `performance ${performance} < ${TARGETS.performance}`,
     accessibility < TARGETS.accessibility && `accessibility ${accessibility} < ${TARGETS.accessibility}`,

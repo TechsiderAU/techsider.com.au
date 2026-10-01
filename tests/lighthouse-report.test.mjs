@@ -12,8 +12,12 @@ const lhr = ({ performance = 0.97, accessibility = 1, lcp = 1480.4, cls = 0.0123
 });
 
 test("a page that meets spec §1 and §11.4 has its scores, LCP and CLS, and nothing below target", () => {
-  assert.deepEqual(summarise("/", lhr()), { path: "/", performance: 97, accessibility: 100, lcpMs: 1480, cls: 0.012, misses: [] });
+  assert.deepEqual(summarise("/", lhr()), { path: "/", performance: 97, accessibility: 100, lcpMs: 1480.4, cls: 0.0123, misses: [] });
   assert.deepEqual(TARGETS, { performance: 90, accessibility: 100, lcpMs: 2000, cls: 0.05 });
+  const nearBudget = summarise("/", lhr({ lcp: 1999.6, cls: 0.0499 }));
+  assert.deepEqual(nearBudget.misses, [], "raw metrics below strict targets pass even when display rounding reaches the target");
+  assert.match(table([nearBudget]), /1999\.6 ms \| 0\.0499 \| none/);
+  assert.deepEqual(summarise("/", lhr({ lcp: 2000, cls: 0.05 })).misses, ["LCP 2000 ms ≥ 2000 ms", "CLS 0.05 ≥ 0.05"]);
 });
 
 test("each target a page misses is named, and a missing score means Lighthouse couldn't measure the page", () => {
@@ -26,6 +30,6 @@ test("the table has one row per page and the pinned version, and reports rather 
   const md = table([summarise("/", lhr()), summarise("/solutions/ai-evaluation/", lhr({ performance: 0.88 }))]);
   assert.equal(LIGHTHOUSE, "lighthouse@13.5.0");
   assert.match(md, /Lighthouse \(mobile\), lighthouse@13\.5\.0: report only/);
-  assert.match(md, /^\| `\/` \| 97 \| 100 \| 1480 ms \| 0\.012 \| none \|$/m);
-  assert.match(md, /^\| `\/solutions\/ai-evaluation\/` \| 88 \| 100 \| 1480 ms \| 0\.012 \| performance 88 < 90 \|$/m);
+  assert.match(md, /^\| `\/` \| 97 \| 100 \| 1480\.4 ms \| 0\.0123 \| none \|$/m);
+  assert.match(md, /^\| `\/solutions\/ai-evaluation\/` \| 88 \| 100 \| 1480\.4 ms \| 0\.0123 \| performance 88 < 90 \|$/m);
 });
