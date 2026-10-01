@@ -4,7 +4,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readDist, visibleText } from "./helpers.mjs";
-import { readFrontmatter } from "../scripts/ci/lib.mjs";
+import { elementsWith, readFrontmatter } from "../scripts/ci/lib.mjs";
 import { INSIGHT_TYPE_LABEL } from "../src/content/schemas.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -61,7 +61,7 @@ test("each post shows its type as a bracket tag above the title, not the pillar"
 
 test("the insights index tags every post with its type, then its date and reading time", () => {
   const html = readDist("insights/index.html");
-  const cards = html.split("data-insight-card").slice(1);
+  const cards = elementsWith(html, "data-insight-card").map(card => card.inner);
   assert.equal(cards.length, PUBLISHED.length, "one InsightCard per published post");
   for (const card of cards) assert.equal(chipTags(card.slice(0, card.indexOf("<h3"))), 1, "a card without its type chip above the title");
   const text = visibleText(html);
@@ -77,7 +77,7 @@ test("the Home page's latest insights tag each card by type, as the index does",
   const section = html.slice(start, end);
   const mode = section.match(/\bdata-latest-insights="(cards|link)"/)?.[1];
   assert.ok(mode, "home #insights has no latest-insights block");
-  const cards = section.split("data-insight-card").slice(1);
+  const cards = elementsWith(section, "data-insight-card").map(card => card.inner);
   assert.equal(cards.length, mode === "cards" ? Math.min(3, PUBLISHED.length) : 0, `home #insights shows ${cards.length} cards in "${mode}" mode`);
   for (const card of cards) assert.equal(chipTags(card.slice(0, card.indexOf("<h3"))), 1, "a Home card without its type chip above the title");
   assertNoPillar(visibleText(section), "home #insights");

@@ -177,6 +177,7 @@ html.menu-open {
     font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
+    transition: background-color 180ms ease, box-shadow 180ms ease;
   }
   .btn-primary {
     background: var(--color-acid);
@@ -191,5 +192,16 @@ html.menu-open {
   }
   .btn-secondary:hover {
     color: var(--color-acid);
+  }
+}
+
+/* Marketing motion: readable first paint, compositor-only entrances and restrained feedback. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-site-motion="paused"]) :is(.link-card-linked, .insight-card) {
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  }
+  html:not([data-site-motion="paused"]) :is(.link-card-linked, .insight-card):is(:hover, :focus-within) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgb(11 11 12 / .07);
   }
 }

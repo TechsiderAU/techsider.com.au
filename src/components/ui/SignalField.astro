@@ -1,0 +1,61 @@
+---
+// Original geometric accent inspired by the rhythm of Mistral's shifting blocks.
+// Decorative only: it does not represent a real workflow, customer or performance result.
+const columns = 24;
+const rows = 3;
+const tiles = Array.from({ length: columns * rows }, (_, i) => ({
+  x: (i % columns) * 60,
+  y: Math.floor(i / columns) * 30,
+  dense: (i * 7 + Math.floor(i / columns)) % 5 === 0,
+  phase: -((i % columns) * 0.3 + Math.floor(i / columns) * 1.2),
+}));
+---
+<div class="signal-field" data-signal-field>
+  <svg class="signal-grid" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    {tiles.map(tile => <rect x={tile.x} y={tile.y} width="60" height="30" class:list={["signal-tile", tile.dense && "signal-tile-dense"]} style={`--signal-phase:${tile.phase}s`} />)}
+  </svg>
+  <button type="button" class="signal-toggle" data-motion-toggle aria-pressed="false" hidden>Pause motion</button>
+</div>
+<style>
+  .signal-field {
+    position: relative;
+    margin-top: 2.5rem;
+    background: var(--color-bone);
+    border-top: 1px solid var(--color-bone-line);
+    border-bottom: 1px solid var(--color-bone-line);
+  }
+  .signal-grid { display: block; width: 100%; height: clamp(3.5rem, 6vw, 5.625rem); }
+  .signal-tile { fill: var(--color-acid); opacity: .3; }
+  .signal-tile-dense { fill: var(--color-acid-deep); opacity: .15; }
+  .signal-toggle {
+    position: absolute;
+    inset-inline-end: max(1rem, calc((100vw - 77rem) / 2));
+    top: 50%;
+    transform: translateY(-50%);
+    min-height: 45px;
+    padding-inline: .875rem;
+    border: 1px solid var(--color-carbon);
+    border-radius: 6px;
+    background: var(--color-bone);
+    color: var(--color-carbon);
+    font: inherit;
+    font-size: .75rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .signal-toggle:hover { background: white; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .signal-tile {
+      animation: signal-flow 8s ease-in-out var(--signal-phase) infinite;
+      animation-play-state: paused;
+    }
+    :global(html[data-site-motion="running"]) .signal-field[data-signal-visible="true"] .signal-tile {
+      animation-play-state: running;
+    }
+  }
+  @keyframes signal-flow {
+    0%, 100% { opacity: .18; }
+    40% { opacity: .65; }
+    70% { opacity: .3; }
+  }
+</style>
