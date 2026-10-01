@@ -29,12 +29,13 @@ for (const path of PAGES) {
 test.describe("/contact/ without JavaScript", () => {
   test.use({ javaScriptEnabled: false });
 
-  test("the address is visible plain text, the copy button stays hidden, and there is no form", async ({ page }) => {
+  test("the address and native form are visible, while the copy button stays hidden", async ({ page }) => {
     await page.goto("/contact/");
     await expect(page.locator("[data-email]")).toHaveText(EMAIL);
     await expect(page.locator("[data-email]")).toBeVisible();
     await expect(page.locator("[data-copy-email]")).toBeHidden();
-    await expect(page.locator("form")).toHaveCount(0);
+    await expect(page.locator("form")).toHaveCount(1);
+    await expect(page.getByRole("button", { name: "Send enquiry" })).toBeVisible();
   });
 });
 

@@ -396,16 +396,21 @@ test("contact: every visible control has a visible <label for>; the consent and 
   assert.deepEqual(links(one(form.inner, "data-collection-notice").inner), [[privacy, "privacy policy"]]);
 });
 
-test("contact: executing a form with an endpoint and an unavailable privacy page rejects the render (WB-12)", async () => {
+test("contact: an unavailable privacy policy uses a visible enquiry notice without publishing the legal draft", async () => {
   assert.notEqual(contactFixture.formEndpoint, null, "the fixture must reach the privacy guard");
   assert.equal(fixtureSite.page("privacy").href, null, "the fixture's privacy page is unavailable");
   const component = new URL("../src/components/page/ContactForm.astro", import.meta.url);
   const unavailable = { ...fixtureSite, page: (id) => ({ ...fixtureSite.page(id), href: id === "sent" ? "/contact/sent/" : fixtureSite.page(id).href }) };
-  await assert.rejects(renderAstro(component, { contact: contactFixture, site: unavailable }), /ContactForm: the privacy page isn't shown/);
+  const inline = await renderAstro(component, { contact: contactFixture, site: unavailable });
+  assert.equal(tagged(inline, "a").filter((a) => a.attrs.href === "#enquiry-privacy").length, 2);
+  const notice = one(inline, "id", "enquiry-privacy");
+  assert.ok(text(notice.inner).includes(contactFixture.formProvider.name));
+  assert.ok(text(notice.inner).includes(contactFixture.emailProvider.name));
   const shown = { ...unavailable, page: (id) => ({ ...unavailable.page(id), href: id === "privacy" ? "/privacy/" : unavailable.page(id).href }) };
   const html = await renderAstro(component, { contact: contactFixture, site: shown });
   assert.match(html, /data-contact-form/);
   assert.match(html, /href="\/privacy\/"/);
+  assert.equal(elementsWith(html, "id", "enquiry-privacy").length, 0);
 });
 
 test("contact: the honeypot is hidden from everyone and never required", () => {
@@ -427,7 +432,7 @@ test("contact: the collection notice names both providers, directly above the Se
   const { formProvider: f, emailProvider: e } = contactFixture;
   assert.equal(
     inlineText(notice.inner),
-    `Your enquiry is sent via ${f.name} (${f.country}) to our mailbox (${e.name}, ${e.country}). See our privacy policy.`,
+    `Your enquiry is sent via ${f.name} to our ${e.name} mailbox. See our privacy policy.`,
   );
   const button = tagged(form.inner, "button");
   assert.equal(button.length, 1);

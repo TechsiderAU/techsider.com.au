@@ -163,11 +163,10 @@ test("About: the build log holds real, dated events from this repository's histo
   }
 });
 
-test("Contact: no form endpoint and no form provider until Phase E; the three services that touch data today", () => {
-  assert.equal(CONTACT.formEndpoint, null);
-  assert.equal(CONTACT.formProvider, null);
+test("Contact: the configured form provider is included in the services handling enquiries", () => {
+  assert.equal(CONTACT.formProvider.name, "FormSubmit");
   assert.equal(CONTACT.emailProvider.name, "Lark Suite");
-  assert.deepEqual(CONTACT.subProcessors.map((s) => s.entity), ["GitHub Pages", "Cloudflare", "Lark Suite"]);
+  assert.deepEqual(CONTACT.subProcessors.map((s) => s.entity), ["GitHub Pages", "Cloudflare", "Lark Suite", "FormSubmit"]);
   assert.ok(CONTACT.deflection.every((d) => d.email === SITE.email), "a deflection address isn't the site's mailbox");
 });
 
@@ -261,9 +260,10 @@ test("check 04: the new sources carry no banned phrase and no warning, beyond th
   assert.deepEqual([...r.errors, ...r.warnings], []);
 });
 
-test("nav: About, Contact and Resources are live; Trust, Legal, the legal documents, the kits page and Sent stay planned", () => {
+test("nav: the company pages and contact confirmation are live; legal drafts and kits stay planned", () => {
   for (const path of LIVE) assert.equal(entryAt(path).status, "live", path);
-  for (const path of [...PLANNED, "/contact/sent/"]) assert.equal(entryAt(path).status, "planned", path);
+  assert.equal(entryAt("/contact/sent/").status, "live");
+  for (const path of PLANNED) assert.equal(entryAt(path).status, "planned", path);
 });
 
 test("each planned company page has its own [...page].astro route in src/pages/, built only while nav.ts shows it", () => {
@@ -293,27 +293,28 @@ test("every company page takes its title and meta description from nav.ts", () =
   }
 });
 
-test("/contact/: the H1, the address as plain text, no form, the reply time, what happens next and where else to write", () => {
+test("/contact/: the enquiry form, email fallback, reply time and next steps are available", () => {
   const main = mainOf(readDist("contact/index.html"));
   one(main, "data-template", "contact");
   const h1s = tagged(main, "h1");
   assert.equal(h1s.length, 1);
   assert.equal(inlineText(h1s[0].inner), CONTACT_H1);
-  assert.equal(tagged(main, "form").length, 0, "a form renders with no endpoint");
+  assert.equal(tagged(main, "form").length, 1);
+  assert.equal(one(main, "data-contact-form").attrs.action, CONTACT.formEndpoint);
   assert.equal(text(one(main, "data-email").inner), SITE.email);
   assert.equal(text(one(main, "data-reply-time").inner), `We reply within ${CONTACT.replyTime}.`);
   assert.deepEqual(tagged(tagged(one(main, "id", "next").inner, "ol")[0].inner, "li").map((li) => text(li.inner)), CONTACT.whatNext);
   assert.deepEqual(tagged(one(main, "id", "elsewhere").inner, "a").map((a) => a.attrs.href), CONTACT.deflection.map((d) => `mailto:${d.email}`));
 });
 
-test("the reply time is written once, in the contact data, and only /contact/ states it", () => {
+test("the reply time is written once and shared by the contact and confirmation pages", () => {
   const files = listFiles(join(ROOT, "src"), (rel) => SOURCE_FILE.test(rel) && !rel.startsWith("fixtures/"));
   const writing = files.filter((f) => readFileSync(f, "utf8").includes(CONTACT.replyTime)).map((f) => relPath(ROOT, f)).sort();
   // The legacy Home's contact section said it too, until Phase D Task 8 deleted it with the legacy
   // Home. No other page states a reply time (spec §8.11).
   assert.deepEqual(writing, ["src/data/contact.ts"]);
   const stating = allHtmlFiles().filter((f) => /\bwe reply within\b/i.test(visibleText(readDist(f)))).sort();
-  assert.deepEqual(stating, ["contact/index.html"]);
+  assert.deepEqual(stating, ["contact/index.html", "contact/sent/index.html"]);
   for (const f of stating) assert.ok(visibleText(readDist(f)).includes(`We reply within ${CONTACT.replyTime}.`), f);
 });
 

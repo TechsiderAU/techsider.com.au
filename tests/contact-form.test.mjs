@@ -222,12 +222,18 @@ test("mock provider: it reads the gallery form's field names, runs on the galler
   assert.equal(SITE_ORIGIN, astro.site);
 });
 
-test("data: the form, /contact/sent/ and the privacy policy go live together (spec §8.11, §10.2)", () => {
+test("data: an enabled form has a confirmation route, disclosure and registered provider", () => {
   const status = (path) => PAGES.find((p) => p.path === path).status;
   const formLive = CONTACT.formEndpoint !== null;
   assert.equal(status("/contact/sent/") === "live", formLive, "/contact/sent/ goes live with the form endpoint, and only with it");
   if (formLive) {
-    assert.equal(status("/legal/privacy/"), "live", "the privacy policy is required before the form goes live (spec §8.11)");
+    const html = readDist("contact/index.html");
+    if (status("/legal/privacy/") !== "live") {
+      const notice = one(html, "id", "enquiry-privacy");
+      assert.ok(text(notice.inner).includes(CONTACT.formProvider.name));
+      assert.ok(text(notice.inner).includes(CONTACT.emailProvider.name));
+      assert.equal(tagged(html, "a").filter((a) => a.attrs.href === "#enquiry-privacy").length, 2);
+    }
     assert.ok(CONTACT.subProcessors.some((s) => s.entity === CONTACT.formProvider?.name), "the Trust page's Part A table names the form provider (spec §8.11)");
   }
   const sent = PAGES.find((p) => p.path === "/contact/sent/");
@@ -236,16 +242,18 @@ test("data: the form, /contact/sent/ and the privacy policy go live together (sp
   assert.match(source("src/pages/contact/sent/[...page].astro"), /gatedPaths\("\/contact\/sent\/", CONTACT\.formEndpoint !== null, /);
 });
 
-test("data: until the owner chooses a provider, no form, no provider, and the historical honeypot placeholder awaits selected-provider verification (spec §12 item 1)", () => {
-  assert.equal(CONTACT.formEndpoint, null);
-  assert.equal(CONTACT.formProvider, null);
-  assert.equal(CONTACT.redirectField, null);
-  assert.deepEqual(CONTACT.hiddenFields, {});
-  assert.equal(CONTACT.honeypotField, "_gotcha");
-  assert.ok(
-    source("src/data/contact.ts").includes("  // ⚑ owner: choose the form provider and create its form (spec §10.2, §12 item 1), then set its endpoint here\n  formEndpoint: null,\n"),
-    "formEndpoint lost its owner marker",
-  );
+test("data: FormSubmit uses its native POST, redirect and honeypot contract with CAPTCHA retained", () => {
+  assert.equal(CONTACT.formEndpoint, `https://formsubmit.co/${SITE.email}`);
+  assert.equal(CONTACT.formProvider.name, "FormSubmit");
+  assert.equal(CONTACT.submitMode, "native");
+  assert.equal(CONTACT.redirectField, "_next");
+  assert.equal(CONTACT.honeypotField, "_honey");
+  assert.equal(CONTACT.hiddenFields._subject, "New Techsider website enquiry");
+  assert.equal(CONTACT.hiddenFields._template, "table");
+  assert.ok(!("_captcha" in CONTACT.hiddenFields), "provider spam protection must remain enabled");
+  const form = one(readDist("contact/index.html"), "data-contact-form");
+  assert.equal(form.attrs["data-submit-mode"], "native");
+  assert.equal(controlNamed(form.inner, "_next").attrs.value, `${SITE_ORIGIN}/contact/sent/`);
 });
 
 test("gatedPaths: a gated page builds like any singleton page, but a live one whose gate is shut fails the build", () => {

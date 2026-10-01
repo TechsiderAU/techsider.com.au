@@ -9,26 +9,16 @@ import { SITE } from "./nav.ts";
 export const CONTACT: ContactData = {
   // ⚑ owner: confirm the reply-time promise (spec §12 item 9)
   replyTime: "two business days",
-  // The form posts to any provider that takes a plain POST and keeps the enquiry fields' names
-  // (spec §10.2). Until the owner chooses one, /contact/ has no form and leads with the email
-  // address, and /contact/sent/ stays planned.
-  // Going live is one change, made once the privacy policy is live (spec §8.11): set the endpoint,
-  // the provider and its three field settings below, add the provider to subProcessors, and put
-  // /contact/sent/ live in nav.ts. The build fails while the endpoint and /contact/sent/ disagree,
-  // and tests/contact-form.test.mjs while the privacy policy or the sub-processor row is missing.
-  // The tests that pin today's state (no endpoint, /contact/sent/ planned) move in the same change.
-  // ⚑ owner: choose the form provider and create its form (spec §10.2, §12 item 1), then set its endpoint here
-  formEndpoint: null,
-  // ⚑ owner: name the chosen form provider and its storage country (spec §12 item 1); no row names one until then
-  formProvider: null,
-  // The provider's own field names. Formspark: redirectField "_redirect", hiddenFields
-  // { _append: "false" }. Formcarry: redirectField "_next", no hidden fields. Forminit sets its
-  // redirect in its dashboard (redirectField null), but stores only inputs named fi-…, so choosing
-  // it also means renaming the enquiry fields. "_gotcha" is the historical shortlist
-  // placeholder; verify spam handling for the selected provider and tier before connecting it.
-  redirectField: null,
-  hiddenFields: {},
-  honeypotField: "_gotcha",
+  // FormSubmit requires one-time inbox activation after the first submission. Native POST keeps
+  // its reCAPTCHA enabled and returns to /contact/sent/ after acceptance; no AJAX success guess.
+  // https://formsubmit.co/documentation
+  formEndpoint: `https://formsubmit.co/${SITE.email}`,
+  submitMode: "native",
+  // ⚑ owner: confirm FormSubmit's storage/access countries with the provider (spec §12 item 1)
+  formProvider: { name: "FormSubmit", country: "Storage countries not yet confirmed" },
+  redirectField: "_next",
+  hiddenFields: { _subject: "New Techsider website enquiry", _template: "table" },
+  honeypotField: "_honey",
   // ⚑ owner: confirm the email provider and its storage country with the provider, not from DNS (spec §12 item 1)
   emailProvider: { name: "Lark Suite", country: "Not yet confirmed with Lark Suite" },
   // The services that touch website and email data today, as the Trust page's Part A table lists them.
@@ -51,6 +41,12 @@ export const CONTACT: ContactData = {
       purpose: "Hosts our email, including the enquiries you send us",
       country: "Not yet confirmed with Lark Suite",
       data: "Emails you send us: your name, your email address and your message",
+    },
+    {
+      entity: "FormSubmit",
+      purpose: "Receives website enquiries and emails them to our mailbox",
+      country: "Storage countries not yet confirmed",
+      data: "The enquiry fields you submit and requests used for spam protection",
     },
   ],
   whatNext: [

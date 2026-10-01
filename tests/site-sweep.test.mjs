@@ -72,14 +72,14 @@ test("every page has its own title and its own meta description of 150–160 cha
   assert.deepEqual(repeated(BUILT.map(({ url, html }) => [descriptionOf(html), url])), [], "descriptions shared between pages");
 });
 
-test("only the 404 is noindex: every other page production builds is meant to be found", () => {
+test("the 404 and contact confirmation are noindex", () => {
   const noindex = BUILT.filter(({ html }) => /<meta name="robots" content="noindex"/.test(headOf(html))).map((p) => p.url);
-  assert.deepEqual(noindex, ["/404.html"]);
+  assert.deepEqual(noindex, ["/404.html", "/contact/sent/"]);
 });
 
 test("no page links to a planned page, or to a path inside one, anywhere on the page (Review Focus 2)", () => {
   // Phase D Task 7 put /demos/ and its pages live; these wait for owner or lawyer review.
-  for (const path of ["/trust/", "/resources/safe-use-kits/", "/legal/", "/legal/privacy/", "/contact/sent/"]) {
+  for (const path of ["/trust/", "/resources/safe-use-kits/", "/legal/", "/legal/privacy/"]) {
     assert.ok(inPlanned(path), `${path} is no longer planned: update this self-check`);
   }
   const offenders = [];

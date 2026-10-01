@@ -1,7 +1,7 @@
 ---
 title: Privacy policy
 summary: How Techsider collects, uses, stores and discloses the personal information you send us, and how to ask about it or have it corrected.
-lastUpdated: 2026-09-29
+lastUpdated: 2026-10-01
 draft: true
 ---
 
@@ -12,14 +12,14 @@ This policy explains how Techsider handles personal information. It covers this 
 
 ## What we collect
 
-- **When you email us:** your name, your email address, your organisation if you mention it, and whatever you write.
+- **When you email us or submit an enquiry:** your name, your email address, your organisation, and whatever you write. The enquiry form also asks for your industry, organisation size, interest and agreement to handling the enquiry.
 - **When you visit this website:** nothing, from the site itself. It sets no cookies and loads no analytics or tracking scripts. The services that host it, listed below, handle each request under their own terms.
 
 We don't ask for sensitive information, and we'd ask you not to send it.
 
 ## How we collect it
 
-Only from you, when you email us. This website has no form and no accounts, and it stores nothing you send.
+From you, when you email us or submit the contact form. The form sends your details to FormSubmit, which emails them to our mailbox. This website has no accounts and its static pages do not store your enquiry.
 
 ## Why we use it
 
@@ -28,6 +28,7 @@ To reply to you, to discuss the work you ask about, and to keep a record of that
 ## Who else handles it
 
 - **Lark Suite** hosts our email, so it stores the messages you send us.
+- **FormSubmit** processes contact-form submissions, runs spam protection and sends the enquiry to our mailbox. Its documentation states that it retains submissions for 30 days. See [FormSubmit's documentation](https://formsubmit.co/documentation) and [privacy terms](https://formsubmit.co/privacy.pdf).
 - **GitHub Pages** hosts this website's files.
 - **Cloudflare** runs the domain's DNS and passes requests to the website.
 

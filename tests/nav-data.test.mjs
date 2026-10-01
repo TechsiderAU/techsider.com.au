@@ -128,7 +128,7 @@ test("the live pages after Phase D Task 7", () => {
       "/services/", "/services/evaluation-partner/",
       "/resources/", "/insights/", "/resources/what-you-already-pay-for/", "/resources/evaluation-method/",
       "/demos/", ...demos,
-      "/about/", "/contact/",
+      "/about/", "/contact/", "/contact/sent/",
     ].sort(),
   );
 });

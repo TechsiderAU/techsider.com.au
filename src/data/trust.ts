@@ -9,7 +9,7 @@
 import type { TrustData } from "../content/page-schemas.ts";
 import { SITE } from "./nav.ts";
 
-const asAt = new Date("2026-09-29");
+const asAt = new Date("2026-10-01");
 
 export const TRUST: TrustData = {
   asAt,
@@ -18,7 +18,7 @@ export const TRUST: TrustData = {
     cookies: "None. The site's code sets no cookies.",
     analytics: "None. The site's code loads no analytics or tracking scripts.",
     // ⚑ owner: state how long enquiries are kept (spec §8.11, §12 item 1)
-    enquiries: "Enquiries arrive by email and are kept in our mailbox, which Lark Suite hosts. This website stores nothing you send.",
+    enquiries: "Enquiries arrive by email or through FormSubmit and are kept in our Lark Suite mailbox. FormSubmit's documentation states that submissions are retained for 30 days. The website's static pages do not store your enquiry.",
     // ⚑ owner: a security contact address for security.txt (spec §12 item 7)
     securityContact: SITE.email,
   },
@@ -71,7 +71,7 @@ export const TRUST: TrustData = {
       // The mailbox's storage country joins this answer once the owner confirms it with the
       // provider (the owner marker on emailProvider in src/data/contact.ts).
       q: "Where is the information I send you stored?",
-      a: "In our email mailbox, which Lark Suite hosts. You reach us by email, so your message, your name and your address stay in that mailbox. This website stores nothing you send: it is a set of static files with no database and no form, served by GitHub Pages through Cloudflare.",
+      a: "In our email mailbox, which Lark Suite hosts. Contact-form enquiries also pass through FormSubmit, whose documentation states that submissions are retained for 30 days. The storage countries for these providers are not yet confirmed. The website itself is a set of static files with no database, served by GitHub Pages through Cloudflare.",
       part: "A", asAt,
     },
     {
@@ -81,7 +81,7 @@ export const TRUST: TrustData = {
     },
     {
       q: "Which services handle my data?",
-      a: "Three, today. Lark Suite hosts our email, so it holds any message you send us. GitHub Pages hosts the website's files, and Cloudflare runs the domain's DNS and passes requests to the site. Neither of those two stores anything you type. The table above lists each service, its purpose and the data it touches.",
+      a: "Four, today. FormSubmit processes contact-form enquiries and emails them to our mailbox. Lark Suite hosts that mailbox, including messages you send directly. GitHub Pages hosts the website's public files, and Cloudflare runs the domain's DNS and passes requests to the site. The table above lists each service, its purpose and the data it touches.",
       part: "A", asAt,
     },
     {

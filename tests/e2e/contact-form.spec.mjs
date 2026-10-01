@@ -100,6 +100,23 @@ test("with JavaScript, a complete enquiry goes by fetch, urlencoded with Accept:
   expect(await logged(request, org)).toEqual({ delivered: [{ ...POSTED, organisation: org }], spam: [] });
 });
 
+test("native submission mode retains accessible validation and posts through the browser instead of fetch", async ({ page, request }) => {
+  const org = organisation();
+  await page.goto(CONTACT);
+  await form(page).evaluate((el) => { el.dataset.submitMode = "native"; });
+  await send(page).click();
+  await expect(page.getByLabel("Name")).toBeFocused();
+  await expect(summary(page)).toHaveAttribute("data-state", "invalid");
+  expect(await logged(request, org)).toEqual({ delivered: [], spam: [] });
+  await fillEnquiry(page, org);
+  const posted = page.waitForRequest((r) => r.url() === MOCK_FORM.formEndpoint && r.method() === "POST");
+  await Promise.all([sentUrl(page), send(page).click()]);
+  expect((await posted).isNavigationRequest()).toBe(true);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Message sent.");
+  expect(new URL(page.url()).search).toBe("");
+  expect(await logged(request, org)).toEqual({ delivered: [{ ...POSTED, organisation: org }], spam: [] });
+});
+
 test("with JavaScript, an empty enquiry sends nothing: each field shows its error, tied to it, the summary lists them in order, and focus moves to the first", async ({ page }) => {
   const requests = [];
   page.on("request", (r) => {
