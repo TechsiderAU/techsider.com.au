@@ -6,7 +6,7 @@
 // a browser (the copy button, native validation, the POST, keyboard order, axe, 320px).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, idsIn, startTags } from "../scripts/ci/lib.mjs";
@@ -375,7 +375,7 @@ test("contact: the selects offer the nine industries and Other, the organisation
   assert.deepEqual(options("interest"), [placeholder, ...fixtureSite.solutions.map((s) => [s.id, s.shortName]), ...EXTRA_INTERESTS.map((e) => [e.id, e.label])]);
 });
 
-test("contact: every visible control has a visible <label for>; the privacy policy is plain text while its page isn't shown", () => {
+test("contact: every visible control has a visible <label for>; the consent and the collection notice link to the privacy policy (WB-12)", () => {
   const form = one(mainOf(page("contact")), "data-contact-form");
   const labels = new Map(tagged(form.inner, "label").map((l) => [l.attrs.for, l]));
   const honeypot = one(form.inner, "data-honeypot");
@@ -386,11 +386,20 @@ test("contact: every visible control has a visible <label for>; the privacy poli
     assert.ok(text(label.inner).length > 0, `${c.attrs.name}'s label is empty`);
     assert.doesNotMatch(label.attrs.class ?? "", /sr-only|visually-hidden/, `${c.attrs.name}'s label is hidden`);
   }
-  assert.equal(fixtureSite.page("privacy").href, null, "the gallery doesn't show the privacy page");
+  // The specimen shows the privacy page at its gallery page, because the form won't render without it.
+  const privacy = fixtureSite.page("privacy").path;
+  const links = (html) => tagged(html, "a").map((a) => [a.attrs.href, text(a.inner)]);
   const consent = labels.get("contact-consent");
   assert.match(text(consent.inner), /privacy policy/);
-  assert.equal(tagged(consent.inner, "a").length, 0, "the consent label links to a page that isn't shown");
-  assert.equal(tagged(one(form.inner, "data-collection-notice").inner, "a").length, 0, "the collection notice links to a page that isn't shown");
+  assert.deepEqual(links(consent.inner), [[privacy, "privacy policy"]]);
+  assert.deepEqual(links(one(form.inner, "data-collection-notice").inner), [[privacy, "privacy policy"]]);
+});
+
+test("contact: the form refuses to render while the privacy page isn't shown, as it does without an endpoint (WB-12)", () => {
+  const form = readFileSync(new URL("../src/components/page/ContactForm.astro", import.meta.url), "utf8");
+  assert.match(form, /if \(privacyHref === null\) \{\s*throw new Error\("ContactForm: the privacy page isn't shown; /);
+  assert.doesNotMatch(form, /privacyHref \?/, "the form still has a plain-text fallback for the privacy policy");
+  assert.equal(fixtureSite.page("privacy").href, null, "the gallery's shared SiteContext still leaves the privacy page unshown");
 });
 
 test("contact: the honeypot is hidden from everyone and never required", () => {
@@ -411,7 +420,7 @@ test("contact: the collection notice names both providers, directly above the Se
   const notice = one(form.inner, "data-collection-notice");
   const { formProvider: f, emailProvider: e } = contactFixture;
   assert.equal(
-    text(notice.inner),
+    inlineText(notice.inner),
     `Your enquiry is sent via ${f.name} (${f.country}) to our mailbox (${e.name}, ${e.country}). See our privacy policy.`,
   );
   const button = tagged(form.inner, "button");

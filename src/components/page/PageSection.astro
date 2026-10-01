@@ -2,7 +2,10 @@
 // One page section: a <section> named by its heading, on bone (the default reading surface) or
 // carbon, with the 80rem container (or a 48rem reading measure for `width="prose"`), a
 // SectionHeader whose heading id is "{id}-heading", then the slot in a column with a 2rem gap.
-// Vertical rhythm: 4rem, 6rem from 64rem. A carbon section also carries bg-carbon, so it stays a
+// Vertical rhythm: 4rem, 6rem from 64rem. A bone section that directly follows another bone band
+// (a bone PageSection, or an industry page's jurisdiction band) has no top padding: nothing marks
+// the boundary between two bone surfaces, so both paddings together read as one empty band (WB-13).
+// A carbon section also carries bg-carbon, so it stays a
 // dark island if it is ever nested inside bone. A PageSection nested in another PageSection drops
 // its own gutters and most of its top padding: it is a sub-block (level 3) of its parent.
 import SectionHeader from "../ui/SectionHeader.astro";
@@ -68,6 +71,12 @@ const headingId = `${id}-heading`;
   }
   .page-section-prose .page-section-body {
     max-width: 48rem;
+  }
+
+  /* Bone straight after a bone band (a PageSection, or an industry page's jurisdiction band): the
+     band above already ends in one full rhythm step. Any other bone element above keeps the gap. */
+  :global(:where(.page-section, .ind-band).surface-bone) + .page-section.surface-bone {
+    padding-top: 0;
   }
 
   /* A nested section is a sub-block of its parent: no second gutter, a smaller top gap. */

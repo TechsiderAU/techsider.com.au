@@ -16,8 +16,9 @@
 // JavaScript: a honeypot input that its display:none wrapper hides from everyone (tabindex="-1",
 // autocomplete="off"), plus the provider's own filtering.
 // The collection notice sits directly above the submit button. It reads the same contact data as
-// the Trust page's sub-processor table, so the two can't disagree. The privacy policy is a link
-// only while its page is shown; otherwise it is plain text, never a dead link.
+// the Trust page's sub-processor table, so the two can't disagree. The consent and the notice both
+// link to the privacy policy, and spec §8.11 needs the policy live before the form, so the form
+// refuses to render while the privacy page isn't shown, as it does without an endpoint (WB-12).
 import type { ContactData } from "../../content/page-schemas";
 import type { SiteContext } from "../../lib/site";
 import { EXTRA_INTERESTS, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../../lib/fixed-copy";
@@ -34,6 +35,9 @@ if (endpoint === null) {
   throw new Error("ContactForm: contact.formEndpoint is null; the contact page shows the email address instead");
 }
 const privacyHref = site.page("privacy").href;
+if (privacyHref === null) {
+  throw new Error("ContactForm: the privacy page isn't shown; the consent and the collection notice link to the privacy policy, so the form waits for it (spec §8.11, §12 item 5)");
+}
 const { formProvider, emailProvider } = contact;
 if (formProvider === null) {
   throw new Error("ContactForm: contact.formProvider is null; the collection notice names the form provider, so the form needs one (spec §10.2)");
@@ -135,7 +139,7 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
   <div class="contact-field">
     <label for="contact-consent" class="contact-consent">
       <input id="contact-consent" name="consent" type="checkbox" value="yes" required class="contact-checkbox" />
-      <span>I agree to Techsider handling this enquiry as the {privacyHref ? <a href={privacyHref} class="contact-link">privacy policy</a> : "privacy policy"} describes.</span>
+      <span>I agree to Techsider handling this enquiry as the <a href={privacyHref} class="contact-link">privacy policy</a> describes.</span>
     </label>
     <p id="contact-consent-error" class="contact-error" data-error-for="consent" {...words("consent")} hidden></p>
   </div>
@@ -143,7 +147,7 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
     <label for="contact-website">Website</label>
     <input id="contact-website" name={contact.honeypotField} type="text" tabindex="-1" autocomplete="off" />
   </div>
-  <p class="contact-notice" data-collection-notice>Your enquiry is sent via {formProvider.name} ({formProvider.country}) to our mailbox ({emailProvider.name}, {emailProvider.country}). See our {privacyHref ? <a href={privacyHref} class="contact-link">privacy policy</a> : "privacy policy"}.</p>
+  <p class="contact-notice" data-collection-notice>Your enquiry is sent via {formProvider.name} ({formProvider.country}) to our mailbox ({emailProvider.name}, {emailProvider.country}). See our <a href={privacyHref} class="contact-link">privacy policy</a>.</p>
   <button type="submit" class="btn btn-primary contact-submit">Send enquiry</button>
 </form>
 

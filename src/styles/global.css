@@ -44,6 +44,11 @@
     html:focus-within {
       scroll-behavior: smooth;
     }
+    /* Desktop Safari doesn't focus a link on a mouse click, so src/scripts/anchor-scroll.ts marks
+       the page while a clicked in-page link scrolls (NB-1). */
+    html.anchor-scroll {
+      scroll-behavior: smooth;
+    }
   }
 
   body {

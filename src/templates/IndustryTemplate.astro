@@ -305,6 +305,12 @@ const mapRows = (b: RegulatoryBlockView) =>
       padding-block: 6rem;
     }
   }
+  /* A jurisdiction section straight after another bone band (the Designed around jump links, or
+     the previous jurisdiction) has no top padding, as PageSection does: two paddings on one bone
+     surface read as an empty band (WB-5, WB-13). */
+  :global(:where(.page-section, .ind-band).surface-bone) + .ind-band.surface-bone {
+    padding-top: 0;
+  }
   .ind-sub {
     display: grid;
     gap: 1.5rem;
