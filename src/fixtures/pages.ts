@@ -148,9 +148,7 @@ export const contactFixture: ContactData = {
     "Fixture step: a fixture proposal",
   ],
   deflection: [
-    { title: "Fixture security disclosure", body: "Fixture body: report a fixture security issue.", email: "fixture-security@example.com" },
-    { title: "Fixture privacy request", body: "Fixture body: ask about your fixture data.", email: "fixture-privacy@example.com" },
-    { title: "Fixture press", body: "Fixture body: fixture media questions.", email: "fixture-press@example.com" },
+    { title: "Fixture security, privacy and media", body: "Fixture body: send fixture security reports, privacy requests or media enquiries to this fixture mailbox.", email: "fixture-contact@example.com" },
   ],
 };
 

@@ -61,8 +61,6 @@ export const CONTACT: ContactData = {
   ],
   // ⚑ owner: a security contact address for security.txt (spec §12 item 7); every request goes to the one mailbox until then
   deflection: [
-    { title: "Security disclosure", body: "Report a weakness in this website or our email: what you found, where and when.", email: SITE.email },
-    { title: "Privacy request", body: "Ask what personal information we hold about you, or ask us to correct or delete it.", email: SITE.email },
-    { title: "Press", body: "Send media questions about Techsider.", email: SITE.email },
+    { title: "Security, privacy and media", body: "For security reports, privacy requests or media enquiries, email us with the details.", email: SITE.email },
   ],
 };

@@ -79,11 +79,11 @@ test("SITE.securityContact is null or a bare address, and nav.ts holds the owner
   }
 });
 
-test("one security address: the contact page's Security disclosure and Trust's Part A name the one security.txt names", () => {
+test("one security address: the contact page's shared enquiry section and Trust's Part A name the one security.txt names", () => {
   // Every security report goes to the one mailbox until the owner names a security contact.
   const address = SITE.securityContact ?? SITE.email;
   const fix = "point it at SITE.securityContact, and drop that file's own ⚑ for spec §12 item 7";
-  assert.equal(CONTACT.deflection.find((d) => d.title === "Security disclosure")?.email, address, `src/data/contact.ts: ${fix}`);
+  assert.equal(CONTACT.deflection.find((d) => d.title === "Security, privacy and media")?.email, address, `src/data/contact.ts: ${fix}`);
   assert.equal(TRUST.partA.securityContact, address, `src/data/trust.ts: ${fix}`);
 });
 
