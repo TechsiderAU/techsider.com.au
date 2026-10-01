@@ -79,7 +79,7 @@ test("production: planned pages get a null href, and contact links reach the liv
   // item 6); Trust and Legal wait for the owner (spec §12).
   assert.deepEqual(
     Object.keys(PAGE_PATHS).filter((key) => site.page(key).href !== null),
-    ["home", "solutions", "industries", "services", "evaluationPartner", "resources", "insights", "demos", "payFor", "evaluationMethod", "about", "contact"],
+    ["home", "solutions", "industries", "services", "evaluationPartner", "resources", "insights", "demos", "payFor", "evaluationMethod", "about", "contact", "sent"],
   );
   assert.ok(site.solutions.every((s) => s.href !== null), "a solution page is hidden");
   assert.ok(site.industries.every((i) => i.href !== null), "an industry page is hidden");

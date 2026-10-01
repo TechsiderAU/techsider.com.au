@@ -59,6 +59,7 @@ export function initContactForm(form: HTMLFormElement): void {
   }
 
   form.noValidate = true;
+  let nativeSubmitted = false;
   let active: { controller: AbortController; timer: number } | null = null;
   const cancel = () => {
     if (!active) return;
@@ -71,6 +72,7 @@ export function initContactForm(form: HTMLFormElement): void {
   window.addEventListener("pageshow", (event) => {
     if (!event.persisted) return;
     cancel();
+    nativeSubmitted = false;
     summary.replaceChildren();
     delete summary.dataset.state;
   });
@@ -130,8 +132,10 @@ export function initContactForm(form: HTMLFormElement): void {
   form.addEventListener("change", recheck);
 
   form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (active) return;
+    if (active || nativeSubmitted) {
+      event.preventDefault();
+      return;
+    }
     const invalid: EnquiryField[] = [];
     for (const name of ENQUIRY_FIELDS) {
       const problem = problemOf(field(name).control.validity);
@@ -139,9 +143,17 @@ export function initContactForm(form: HTMLFormElement): void {
       if (problem !== null) invalid.push(name);
     }
     if (invalid.length > 0) {
+      event.preventDefault();
       report(invalid);
       return;
     }
+    // Keep the provider's browser POST, spam challenge and redirect intact.
+    if (form.dataset.submitMode === "native") {
+      nativeSubmitted = true;
+      tell("sending", say.saySending);
+      return;
+    }
+    event.preventDefault();
     const attempt = { controller: new AbortController(), timer: 0 };
     active = attempt;
     attempt.timer = window.setTimeout(() => {

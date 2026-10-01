@@ -67,6 +67,8 @@ export const contactData = z.strictObject({
   // null until the owner chooses a form provider (spec §12 item 1): the page then shows the email
   // fallback only. https only: the form posts personal data.
   formEndpoint: z.url({ protocol: /^https$/ }).nullable(),
+  // Native providers handle their own spam challenge and redirect; others accept JSON fetch.
+  submitMode: z.enum(["ajax", "native"]).optional(),
   // null until then too: no placeholder names a provider (blueprint ruling 16). A form endpoint
   // needs it, because the collection notice names it (spec §10.2).
   formProvider: z.strictObject({ name: z.string(), country: z.string() }).nullable(),

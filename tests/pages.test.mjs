@@ -18,7 +18,7 @@ const BUILT = [{ params: { page: undefined } }];
  * Pages that stay planned through Phase C and still are: the Trust and legal pages, the kits and
  * Sent. The demos stayed planned through Phase C too, until Phase D Task 7 put them live.
  */
-const PLANNED_THROUGH_PHASE_C = ["/trust/", "/legal/", "/legal/privacy/", "/legal/website-terms/", "/resources/safe-use-kits/", "/contact/sent/"];
+const PLANNED_THROUGH_PHASE_C = ["/trust/", "/legal/", "/legal/privacy/", "/legal/website-terms/", "/resources/safe-use-kits/"];
 
 /** Runs `fn` as the production build (preview false) or the preview build sees nav.ts. */
 function inBuild(preview, fn) {
@@ -59,6 +59,7 @@ test("pageAt: the nav entry at a path, and a throw for a path nav.ts doesn't hav
 test("singletonPaths: production builds a live page once and a planned page not at all", () => {
   inBuild(false, () => {
     assert.deepStrictEqual(singletonPaths("/insights/"), BUILT);
+    assert.deepStrictEqual(singletonPaths("/contact/sent/"), BUILT);
     assert.deepStrictEqual(singletonPaths("/404"), BUILT);
     for (const path of PLANNED_THROUGH_PHASE_C) assert.deepStrictEqual(singletonPaths(path), [], path);
   });
