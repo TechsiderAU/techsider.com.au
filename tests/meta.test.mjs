@@ -44,9 +44,9 @@ function metaContent(html, attr, value) {
 test("pageTitle: Home, industry pages and every other page follow spec §11.3", () => {
   assert.equal(pageTitle(at("/")), "AI Automation Solutions in Australia | Techsider");
   assert.equal(pageTitle(at("/industries/government/")), "AI for Government in Australia | Techsider");
-  assert.equal(pageTitle(at("/industries/legal-and-professional/")), "AI for Legal & professional in Australia | Techsider");
+  assert.equal(pageTitle(at("/industries/legal-and-professional/")), "AI for Legal and Professional Services | Techsider");
   assert.equal(pageTitle(at("/industries/")), "Industries | Techsider");
-  assert.equal(pageTitle(at("/solutions/document-registers/")), "Document Registers & Evidence Packs | Techsider");
+  assert.equal(pageTitle(at("/solutions/document-registers/")), "AI Document Processing in Australia | Techsider");
   assert.equal(pageTitle(at("/demos/ai-evaluation/")), "Independent AI Evaluation demo | Techsider");
   assert.equal(pageTitle(at("/insights/")), "Insights | Techsider");
   assert.equal(pageTitle(at("/legal/privacy/")), "Privacy policy | Techsider");

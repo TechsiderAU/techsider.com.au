@@ -45,7 +45,7 @@ export interface SolutionView {
 }
 
 /** The template's section ids. A package id that matches one would give the page two elements with that id. */
-const SECTION_IDS = ["job", "who", "packages", "program", "testing", "where-it-runs", "independence", "limits", "faq", "contact"];
+const SECTION_IDS = ["job", "who", "packages", "program", "testing", "where-it-runs", "independence", "limits", "faq", "guides", "contact"];
 
 export function solutionView(input: { id: string; data: SolutionData; shared: SharedOfferCopy; site: SiteContext }): SolutionView {
   const { id, data, shared, site } = input;

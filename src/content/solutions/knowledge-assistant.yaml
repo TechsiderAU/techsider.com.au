@@ -6,13 +6,9 @@
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: knowledge-assistant
 job: >-
-  Answers staff questions from one collection of your own manuals, policies or procedures, and shows
-  the document, section and version it used. When the documents don't support an answer, it says
-  "not in our documents" instead of guessing.
+  An internal AI knowledge assistant answers staff questions from an agreed collection of company documents. It shows the source and version, respects access permissions and declines unsupported questions.
 artefact: >-
-  An assistant your staff reach inside Microsoft 365 where you license it, or on the web, that keeps
-  the permissions staff already have. You also get a test report on 50–100 questions your staff
-  wrote, with false answers counted separately from false refusals.
+  An assistant in the agreed workspace, plus a test report on your questions. Correct answers, wrong answers and unnecessary refusals are reported separately, with instructions for updating the documents.
 forLine: Manufacturers, independent schools, non-clinical health teams and councils
 needProfiles:
   - title: The answer is in the manual, somewhere.

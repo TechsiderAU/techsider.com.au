@@ -132,6 +132,22 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
       <p id="contact-message-hint" class="contact-hint">Up to {MESSAGE_MAX.toLocaleString("en-AU")} characters.</p>
       <p id="contact-message-error" class="contact-error" data-error-for="message" {...words("message")} hidden></p>
     </div>
+    <div class="contact-field contact-field-wide">
+      <label for="contact-discovery" class="contact-label">How did you find us? (optional)</label>
+      <span class="contact-select">
+        <select id="contact-discovery" name="discovery" class="contact-control">
+          <option value="">Prefer not to say</option>
+          <option value="Google Search">Google Search</option>
+          <option value="Bing Search">Bing Search</option>
+          <option value="ChatGPT">ChatGPT</option>
+          <option value="Microsoft Copilot">Microsoft Copilot</option>
+          <option value="Other AI assistant">Other AI assistant</option>
+          <option value="LinkedIn">LinkedIn</option>
+          <option value="Referral">Referral</option>
+          <option value="Other">Other</option>
+        </select>
+      </span>
+    </div>
   </div>
   <div class="contact-field">
     <label for="contact-consent" class="contact-consent">

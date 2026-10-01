@@ -27,3 +27,26 @@ export const AUTOMATION = {
 export function solutionArtwork(number: string): "documents" | "knowledge" | "workflow" | "hero" {
   return number === "①" ? "documents" : number === "②" ? "knowledge" : number === "③" ? "workflow" : "hero";
 }
+
+export const SOLUTION_GUIDES: Record<string, { title: string; href: string }[]> = {
+  "draft-for-approval": [
+    { title: "Choose your first AI workflow", href: "/insights/choose-first-ai-workflow/" },
+    { title: "Understand an automation project's scope", href: "/insights/ai-automation-project-scope/" },
+  ],
+  "document-registers": [
+    { title: "Choose a process with checkable inputs and outputs", href: "/insights/choose-first-ai-workflow/" },
+    { title: "Check the AI in your practice software first", href: "/insights/ai-inside-your-practice-software/" },
+  ],
+  "knowledge-assistant": [
+    { title: "Follow a fictional SOP-assistant evaluation", href: "/insights/water-utility-sop-assistant-scenario/" },
+    { title: "Compare model hosting and processing locations", href: "/insights/sovereign-llm-hosting-decision-matrix/" },
+  ],
+  "ai-switch-on": [
+    { title: "Assess the AI in your existing practice software", href: "/insights/ai-inside-your-practice-software/" },
+    { title: "Understand implementation scope and responsibilities", href: "/insights/ai-automation-project-scope/" },
+  ],
+  "ai-evaluation": [
+    { title: "Build an acceptance checklist before a Copilot rollout", href: "/insights/copilot-agents-leaving-pilot/" },
+    { title: "Inspect the synthetic workflow control check", href: "/insights/choose-first-ai-workflow/#check-the-controls-before-connecting-systems" },
+  ],
+};

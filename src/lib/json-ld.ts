@@ -40,7 +40,7 @@ export interface JsonLdGraph {
  * what Techsider builds on mid-market and government pages, and the Organization is on every page,
  * so no topic names agents (the Phase C review's WB-3).
  */
-export const KNOWS_ABOUT = ["LLM Ops", "Retrieval-Augmented Generation", "AI Evaluation"];
+export const KNOWS_ABOUT = ["AI Workflow Automation", "AI Document Processing", "Internal Knowledge Assistants", "AI Implementation", "AI Evaluation"];
 
 const AUSTRALIA = { "@type": "Country", name: "Australia" };
 const homeUrl = (site: SiteUrl): string => new URL("/", site).href;

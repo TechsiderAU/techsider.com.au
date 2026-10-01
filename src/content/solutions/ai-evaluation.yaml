@@ -8,13 +8,9 @@
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: ai-evaluation
 job: >-
-  Tests one AI system you bought, licensed or had built elsewhere, for one use case, on your own
-  questions and cases in your own environment. The method is set out in advance, and the thresholds
-  are agreed before testing starts.
+  Independent AI evaluation tests a system supplied or built by another party on your own questions and cases. Agree the use case, thresholds and test method before comparing results.
 artefact: >-
-  An Independent Evaluation Report: findings rated to your risk matrix and mapped to the instrument
-  you report to, with an explicit list of failures. You also get a reproducible evidence bundle and a
-  replay script that runs in your own subscription, so your team can re-run the test without us.
+  A findings report with rated failures, test inputs and a replay script. Your accountable decision maker decides whether to proceed; a test by Techsider of a system it built is acceptance testing.
 forLine: Government agencies, APRA-regulated entities, law firms and health services
 needProfiles:
   - title: A pilot is about to scale.

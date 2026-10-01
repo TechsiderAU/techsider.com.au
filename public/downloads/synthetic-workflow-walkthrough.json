@@ -1,0 +1,14 @@
+{
+  "label": "Synthetic workflow walkthrough, not a customer system or measured AI run",
+  "item": "syn-01",
+  "input": "Invented supplier request: please review the attached information before replying.",
+  "steps": [
+    {"step":"receive","state":"received","action":"Record the request under a unique item ID."},
+    {"step":"prepare","state":"draft","version":1,"action":"Prepare a suggested reply. Sending remains blocked."},
+    {"step":"review","state":"needs-information","action":"A reviewer identifies missing information. Keep the item in the review queue."},
+    {"step":"revise","state":"draft","version":2,"action":"Revise the draft. Any earlier version's approval no longer applies."},
+    {"step":"approve","state":"approved","version":2,"action":"An authorised reviewer approves this item and version."},
+    {"step":"execute","state":"simulated-completion","action":"Show where an approved connector action would occur. This walkthrough sends nothing."},
+    {"step":"record","state":"recorded","action":"Record the outcome and execution ID before another attempt."}
+  ]
+}

@@ -7,6 +7,8 @@
 
 /** The fields ContactForm posts, in form order (spec §10.2). A provider's own fields never reuse these names. */
 export const ENQUIRY_FIELDS = ["name", "email", "organisation", "industry", "size", "interest", "message", "consent"] as const;
+/** Optional answers travel with the enquiry; they do not add validation requirements. */
+export const OPTIONAL_ENQUIRY_FIELDS = ["discovery"] as const;
 export type EnquiryField = (typeof ENQUIRY_FIELDS)[number];
 
 /** The longest message the form takes (spec §10.2: up to 1,000 characters). */

@@ -5,7 +5,7 @@
 # conditional second benefit; the ATO Letter Sorter stays on request; no First AML gap claim.
 # Mid-market page (spec §3.4): plain English, and no "agent" for anything we build.
 # ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/accounting.json, must be in the standard engagement terms (spec §12 item 2)
-promise: Every client trust deed in one register you can check.
+promise: AI automation for accounting firms.
 constraintSet: Designed around TPB(GS) 55/2026, the TFN Rule, the Privacy Act and, for AUSTRAC-regulated services, AML/CTF due diligence.
 constraintHook: TPB AI guidance, the TFN Rule and AML/CTF CDD for trusts
 flagshipUseCases:

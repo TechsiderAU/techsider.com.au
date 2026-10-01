@@ -4,7 +4,7 @@
 # independent evaluation. Four rows keep the page inside §8.5's word range. The joint statement binds NSW, Victoria
 # and WA only (the dossier's correction 1), so the page names its three regulators.
 # ⚑ owner: every commitment in this file, and in the design lines of src/data/regulatory/legal-and-professional.json, must be in the standard engagement terms (spec §12 item 2)
-promise: Test legal AI on your own matters before anyone relies on it.
+promise: AI for legal and professional services.
 constraintSet: Built around the NSW, Victorian and WA regulators' joint AI statement, NSW SC Gen 23 and Vic SC Gen 25.
 constraintHook: Joint AI statement, NSW SC Gen 23 and Vic SC Gen 25.
 flagshipUseCases:

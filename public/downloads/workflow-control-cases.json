@@ -1,0 +1,15 @@
+{
+  "label": "Synthetic inputs, not customer records",
+  "cases": [
+    {"id":"draft","control":"Preparing a draft needs authorised access","input":{"id":"syn-01","version":1,"action":"draft","authorised":true},"expected":true},
+    {"id":"unapproved-send","control":"An unapproved draft cannot be sent","input":{"id":"syn-01","version":1,"action":"send","authorised":true,"canWrite":true},"expected":false},
+    {"id":"approved-send","control":"Approval matches the item and version","input":{"id":"syn-01","version":1,"action":"send","authorised":true,"canWrite":true,"approval":{"item":"syn-01","version":1}},"expected":true},
+    {"id":"stale-approval","control":"Editing a draft invalidates its old approval","input":{"id":"syn-01","version":2,"action":"send","authorised":true,"canWrite":true,"approval":{"item":"syn-01","version":1}},"expected":false},
+    {"id":"wrong-item","control":"Approval cannot be reused for another item","input":{"id":"syn-02","version":1,"action":"send","authorised":true,"canWrite":true,"approval":{"item":"syn-01","version":1}},"expected":false},
+    {"id":"paused","control":"A pause blocks even an approved action","input":{"id":"syn-01","version":1,"action":"send","authorised":true,"canWrite":true,"paused":true,"approval":{"item":"syn-01","version":1}},"expected":false},
+    {"id":"duplicate","control":"A recorded completed action is not repeated","input":{"id":"syn-01","version":1,"action":"send","authorised":true,"canWrite":true,"alreadyExecuted":true,"approval":{"item":"syn-01","version":1}},"expected":false},
+    {"id":"read-only","control":"Approval does not grant write permission","input":{"id":"syn-01","version":1,"action":"update","authorised":true,"canWrite":false,"approval":{"item":"syn-01","version":1}},"expected":false},
+    {"id":"unauthorised-read","control":"Reading needs authorised access","input":{"id":"syn-01","version":1,"action":"read","authorised":false},"expected":false},
+    {"id":"unknown-action","control":"Unrecognised actions are denied","input":{"id":"syn-01","version":1,"action":"delete","authorised":true,"canWrite":true},"expected":false}
+  ]
+}

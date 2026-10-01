@@ -6,7 +6,7 @@
 // Package markup is CI check 10's contract: the generic package is the first full block, launch
 // packages are tabs whose panel ids are the package ids (so #<package-id> selects one), on-request
 // packages are one-line entries, and internal packages never reach the view.
-import { solutionArtwork } from "../lib/marketing";
+import { solutionArtwork, SOLUTION_GUIDES } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import ChipRow from "../components/page/ChipRow.astro";
@@ -161,6 +161,14 @@ const hero = {
 
   <PageSection id="faq" title="Questions" width="prose">
     <FaqList items={view.faq} />
+  </PageSection>
+
+  <PageSection id="guides" title="Practical guides" width="prose">
+    <ul class="solution-list">
+      {(SOLUTION_GUIDES[view.id] ?? []).map((guide) => (
+        <li><a href={guide.href} class="solution-link">{guide.title}</a></li>
+      ))}
+    </ul>
   </PageSection>
 
   <section id="contact" class="solution-closing">

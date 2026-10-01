@@ -1,0 +1,158 @@
+{
+  "name": "Synthetic workflow control check",
+  "version": "1.0",
+  "recordedDate": "2026-10-02",
+  "method": "Execute the local permission function against ten separately specified expected decisions. Also run a deliberately unsafe comparison to show which cases detect missing controls.",
+  "scope": "Deterministic permission decisions only. No AI model, external system or real message is used. These results do not measure AI accuracy, production security or time saved.",
+  "fixtureSha256": "59c9f0badc08289f624650c28d6f681572967bf080651295c13fb38f6f468c27",
+  "command": "node scripts/workflow-control-check.mjs",
+  "cases": 10,
+  "passed": 10,
+  "results": [
+    {
+      "id": "draft",
+      "control": "Preparing a draft needs authorised access",
+      "expected": true,
+      "observed": true,
+      "pass": true
+    },
+    {
+      "id": "unapproved-send",
+      "control": "An unapproved draft cannot be sent",
+      "expected": false,
+      "observed": false,
+      "pass": true
+    },
+    {
+      "id": "approved-send",
+      "control": "Approval matches the item and version",
+      "expected": true,
+      "observed": true,
+      "pass": true
+    },
+    {
+      "id": "stale-approval",
+      "control": "Editing a draft invalidates its old approval",
+      "expected": false,
+      "observed": false,
+      "pass": true
+    },
+    {
+      "id": "wrong-item",
+      "control": "Approval cannot be reused for another item",
+      "expected": false,
+      "observed": false,
+      "pass": true
+    },
+    {
+      "id": "paused",
+      "control": "A pause blocks even an approved action",
+      "expected": false,
+      "observed": false,
+      "pass": true
+    },
+    {
+      "id": "duplicate",
+      "control": "A recorded completed action is not repeated",
+      "expected": false,
+      "observed": false,
+      "pass": true
+    },
+    {
+      "id": "read-only",
+      "control": "Approval does not grant write permission",
+      "expected": false,
+      "observed": false,
+      "pass": true
+    },
+    {
+      "id": "unauthorised-read",
+      "control": "Reading needs authorised access",
+      "expected": false,
+      "observed": false,
+      "pass": true
+    },
+    {
+      "id": "unknown-action",
+      "control": "Unrecognised actions are denied",
+      "expected": false,
+      "observed": false,
+      "pass": true
+    }
+  ],
+  "deliberatelyUnsafeComparison": {
+    "passed": 4,
+    "results": [
+      {
+        "id": "draft",
+        "control": "Preparing a draft needs authorised access",
+        "expected": true,
+        "observed": true,
+        "pass": true
+      },
+      {
+        "id": "unapproved-send",
+        "control": "An unapproved draft cannot be sent",
+        "expected": false,
+        "observed": true,
+        "pass": false
+      },
+      {
+        "id": "approved-send",
+        "control": "Approval matches the item and version",
+        "expected": true,
+        "observed": true,
+        "pass": true
+      },
+      {
+        "id": "stale-approval",
+        "control": "Editing a draft invalidates its old approval",
+        "expected": false,
+        "observed": true,
+        "pass": false
+      },
+      {
+        "id": "wrong-item",
+        "control": "Approval cannot be reused for another item",
+        "expected": false,
+        "observed": true,
+        "pass": false
+      },
+      {
+        "id": "paused",
+        "control": "A pause blocks even an approved action",
+        "expected": false,
+        "observed": true,
+        "pass": false
+      },
+      {
+        "id": "duplicate",
+        "control": "A recorded completed action is not repeated",
+        "expected": false,
+        "observed": true,
+        "pass": false
+      },
+      {
+        "id": "read-only",
+        "control": "Approval does not grant write permission",
+        "expected": false,
+        "observed": true,
+        "pass": false
+      },
+      {
+        "id": "unauthorised-read",
+        "control": "Reading needs authorised access",
+        "expected": false,
+        "observed": false,
+        "pass": true
+      },
+      {
+        "id": "unknown-action",
+        "control": "Unrecognised actions are denied",
+        "expected": false,
+        "observed": false,
+        "pass": true
+      }
+    ]
+  }
+}
