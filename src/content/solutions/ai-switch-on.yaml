@@ -8,12 +8,9 @@
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: ai-switch-on
 job: >-
-  Gets value from the AI already inside software you pay for, such as Microsoft 365, Xero, Karbon,
-  Dext or PropertyMe. It configures the features you already own, applies the Safe-Use Kit for your
-  industry where one is published, trains staff and measures the hours saved.
+  AI implementation starts with the software you already license. Check which features fit the job, configure the agreed access and review rules, then help staff use them and measure the change.
 artefact: >-
-  An hours map of where staff time goes, the features you already own set up and in use, trained
-  staff, and an hours-saved report at day 30 in your own units.
+  An agreed use case, configuration record, staff guidance and a before-and-after workload review. Any policy or client-consent wording goes to your own adviser; vendor settings and availability are checked first.
 forLine: Principals and operations leads at 20–300-staff firms with no IT team
 needProfiles:
   - title: Your software may already include AI you don't use.

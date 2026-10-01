@@ -333,7 +333,7 @@ test("legal-document: breadcrumb, a sentence H1, the summary, both dates, then t
   assert.equal(text(prose.inner), text(legal.bodyHtml));
 });
 
-test("contact: a plain POST form to the endpoint, with native validation on every field", () => {
+test("contact: a plain POST form to the endpoint, with native validation on required fields and optional discovery", () => {
   const form = one(mainOf(page("contact")), "data-contact-form");
   assert.equal(form.name, "form");
   assert.equal(form.attrs.method, "post");
@@ -343,7 +343,9 @@ test("contact: a plain POST form to the endpoint, with native validation on ever
     elements(form.inner, (t) => ["input", "select", "textarea"].includes(t.name)).map((c) => [c.attrs.name, c]),
   );
   // The stand-in provider's hidden fields, the enquiry fields, then the honeypot under the provider's name.
-  assert.deepEqual(Object.keys(controls), ["_redirect", "_append", "name", "email", "organisation", "industry", "size", "interest", "message", "consent", "_gotcha"]);
+  assert.deepEqual(Object.keys(controls), ["_redirect", "_append", "name", "email", "organisation", "industry", "size", "interest", "message", "discovery", "consent", "_gotcha"]);
+  assert.equal(controls.discovery.name, "select");
+  assert.ok(!("required" in controls.discovery.attrs));
   const expect = {
     name: { tag: "input", type: "text", autocomplete: "name" },
     email: { tag: "input", type: "email", autocomplete: "email" },

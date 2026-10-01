@@ -5,13 +5,9 @@
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: document-registers
 job: >-
-  Reads one family of documents your team checks by hand, such as trust deeds or management
-  agreements, and fills a fixed field list for each one. Anything missing, unsigned, expired,
-  conflicting or amended goes to a short review queue.
+  AI document processing turns one family of deeds, agreements or records into a structured register. Each extracted value links to its source, and missing or conflicting details go to a person.
 artefact: >-
-  A register delivered as a spreadsheet, a CSV or an import your destination system accepts, with
-  every field linked to the page it came from. You also get the error rate for each field, measured
-  on documents your own seniors already know.
+  A spreadsheet, CSV or supported import with source links and a review queue. The test on your agreed answer key reports errors by field before the full document set is processed.
 forLine: Accounting practices and property-management groups that read documents by hand
 needProfiles:
   - title: Your team keeps re-reading the same documents.

@@ -1,39 +1,51 @@
 ---
-title: "Self-hosted vs Bedrock vs Azure OpenAI for sovereign workloads in Australia"
-description: "A practical decision framework for where your model runs when data residency and sovereignty are hard constraints — and how to keep the choice reversible."
+title: "AI hosting in Australia: check the data path."
+description: "Compare self-hosted models, Amazon Bedrock and Azure OpenAI. Check routing, storage, access and model availability before choosing an Australian deployment."
 publishDate: 2026-06-14
+updatedDate: 2026-10-02
 type: article
 industries: [government, financial-services]
-solutions: []
+solutions: [knowledge-assistant, ai-evaluation]
 draft: false
 ---
 
-"Which model should we use?" is almost never the real question. Underneath it is a harder one: *where does our data go, and who is able to touch it?* For Australian regulated workloads, residency and control frequently decide the architecture before raw model capability gets a vote. This is a framework for making that decision deliberately — and for making sure you can change your mind later.
+Choosing an Australian cloud region does not by itself establish where every AI request is processed. Check the model, deployment type, inference routing, stored data and access arrangements separately. Record the settings and evidence for the actual workload before agreeing a deployment.
 
-## The three shapes of the answer
+## Compare the delivery options
 
-- **Self-hosted** — open-weight models running on infrastructure you control (your VPC, or on-prem). Maximum control over data and isolation; you own the operational burden of serving, scaling, and patching.
-- **AWS Bedrock (Sydney region)** — managed, regional access to multiple model families including Anthropic's, with data kept in-region under AWS's contractual terms.
-- **Azure OpenAI (Australia East)** — managed, regional access to the OpenAI model family, often the path of least resistance for organisations already standardised on Microsoft and aligned to government frameworks.
+| Option | Processing location to verify | Responsibility to plan for |
+|---|---|---|
+| Self-hosted model | The infrastructure, backups and supporting services you select | Model serving, patching, capacity, access and monitoring |
+| Amazon Bedrock | The selected model's regional endpoint or inference profile and its permitted destination regions | Application controls, routing, logging and the provider's terms |
+| Azure OpenAI | The model's deployment type and applicable geography or data zone | Application controls, deployment configuration and the provider's terms |
 
-## A decision matrix, not a favourite
+A workload that needs strict isolation has different requirements from an internal assistant that can use a managed service. Compare the permitted processing locations before comparing capability or throughput.
 
-| Dimension | Self-hosted | Bedrock (Sydney) | Azure OpenAI (AU East) |
-|---|---|---|---|
-| Data residency | Wherever you run it | In-region | In-region |
-| Control over data use | Full | Contractual | Contractual |
-| Model choice | Open weights | Multi-vendor (incl. Anthropic) | OpenAI family |
-| Operational burden | High | Low | Low |
-| Typical best fit | Strict isolation / IRAP-heavy | Multi-model needs / AWS estate | Microsoft estate / gov alignment |
+## Amazon Bedrock
 
-There is no globally correct row. A government agency with strict isolation requirements lands in a different place than a bank already deep in one cloud. The job is to weight the dimensions against *your* constraints — and the residency and control columns usually carry the most weight in regulated settings.
+AWS's [geographic cross-Region inference documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/geographic-cross-region-inference.html) explains that prompts and results can leave the source region while remaining inside the selected geography. Its storage notes also distinguish ordinary storage from abuse-detection storage. Confirm the actual destination regions and settings; a regional entry point is not an Australia-only processing guarantee.
 
-> Cloud regions, model availability, and certifications change frequently. Treat the specifics above as a starting framework and confirm current regional and compliance details for your own procurement.
+Check [regional model availability](https://docs.aws.amazon.com/bedrock/latest/userguide/models-region-compatibility.html) for the exact model and inference mode. Availability can change; do not carry a deployment assumption from one model to another.
 
-## Build so the choice is reversible
+## Azure OpenAI
 
-Whatever you pick first, you will eventually want to change it — a new model lands, pricing shifts, a residency rule tightens. We put a **model gateway** between the application and the provider, so the model is a configuration choice rather than an architectural commitment. Prompts, evals, and tracing sit above the gateway and don't care who serves the tokens. Done well, switching providers is a config change and a re-run of the eval suite — not a rebuild.
+Microsoft's [deployment-types documentation](https://learn.microsoft.com/azure/ai-services/openai/how-to/deployment-types) distinguishes stored data from processing. Global deployments can process requests across Azure regions; Data Zone deployments use the specified zone; Standard and Regional Provisioned deployments use the specified Azure geography, subject to availability. A zone spanning several countries is not equivalent to Australia-only processing.
 
-## How we actually choose
+Check the deployment type rather than inferring it from the resource's region. Record the model version and supported configuration alongside the data-flow diagram.
 
-Not by a partner badge. We run a bake-off on your real workload — capability on your tasks, latency, cost, and residency — and let the evidence decide. Being vendor-neutral isn't a slogan; it's the only honest way to recommend an option when we don't earn a referral fee on any of them.
+## Questions to settle before using real documents
+
+1. Where are prompts, outputs, indexes, logs and backups processed and stored?
+2. Which people and services can access each part?
+3. What do the current retention and review settings permit?
+4. Which inference destinations are possible with the selected configuration?
+5. What changes when a model, connector or hosting setting changes?
+6. What evidence will the organisation retain to approve and later review the choice?
+
+The provider sources above were checked on 2 October 2026. This guide describes deployment considerations, not a procurement approval or a claim that a proposed system meets a particular organisation's obligations.
+
+## Keep the choice reviewable
+
+Keep test inputs, expected answers and deployment settings together. A provider change should trigger a review of the data path and a rerun of the relevant tests. Replacing a model may also require changing prompts, retrieval or connectors; do not assume it is always a configuration-only change.
+
+Explore the [internal knowledge-assistant offer](/solutions/knowledge-assistant/), read the [evaluation method](/resources/evaluation-method/).

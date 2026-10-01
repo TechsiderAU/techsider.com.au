@@ -40,6 +40,8 @@ for (const javaScriptEnabled of [true, false]) {
       await page.getByLabel("Organisation size").selectOption({ index: 1 });
       await page.getByLabel("Interest").selectOption("ai-evaluation");
       await page.getByLabel("Message").fill("Test enquiry. No real message should be delivered.");
+      await expect(page.getByLabel("How did you find us? (optional)")).not.toHaveAttribute("required");
+      if (javaScriptEnabled) await page.getByLabel("How did you find us? (optional)").selectOption("ChatGPT");
       await page.getByLabel(/I agree/).check();
       await form.getByRole("button", { name: "Send enquiry" }).click();
       await expect(page).toHaveURL(/\/contact\/sent\/$/);
@@ -54,6 +56,7 @@ for (const javaScriptEnabled of [true, false]) {
         _next: "https://techsider.com.au/contact/sent/", ...CONTACT.hiddenFields,
       });
       expect(submission.fields).not.toHaveProperty("_captcha");
+      expect(submission.fields.discovery).toBe(javaScriptEnabled ? "ChatGPT" : "");
       expect(new URL(page.url()).search).toBe("");
     });
   });

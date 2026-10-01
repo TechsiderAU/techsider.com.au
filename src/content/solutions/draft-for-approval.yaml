@@ -7,13 +7,9 @@
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: draft-for-approval
 job: >-
-  Handles one repetitive back-office job across the two or three systems it spans: it sorts,
-  summarises, drafts and routes. Anything that would be sent, changed or decided waits for a person
-  to approve it.
+  AI workflow automation for one repeated business process. It reads incoming work, prepares a draft and routes exceptions; a person approves anything sent or changed.
 artefact: >-
-  A working automation for one named job, with an approval gate, a trace log of every step and a
-  kill switch. You also get its results on 50–100 of your own past cases, with every mis-route and
-  bad draft shown.
+  A scoped workflow, approval queue, trace log and operating instructions. Its test on your past examples shows drafts, routing decisions and exceptions before you decide to launch.
 forLine: Mid-market operations teams, usually after a first register or assistant
 needProfiles:
   - title: One job eats hours across several systems.

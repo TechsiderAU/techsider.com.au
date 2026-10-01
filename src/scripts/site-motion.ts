@@ -1,4 +1,4 @@
-// Visible HTML is the baseline. Animate only on entry; never hide content while waiting for JS.
+// Visible HTML is the baseline. Keep text contrast throughout the entrance animation.
 export function initSiteMotion(): void {
   const root = document.documentElement;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
@@ -16,8 +16,8 @@ export function initSiteMotion(): void {
   refresh();
   const enter = (el: HTMLElement, distance: number, delay: number) => {
     const animation = el.animate([
-      { opacity: .75, transform: `translateY(${distance}px)` },
-      { opacity: 1, transform: "translateY(0)" },
+      { transform: `translateY(${distance}px)` },
+      { transform: "translateY(0)" },
     ], { duration: 560, delay, easing: "cubic-bezier(.22,1,.36,1)" });
     active.add(animation);
     animation.addEventListener("finish", () => active.delete(animation), { once: true });

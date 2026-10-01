@@ -1,7 +1,7 @@
 import { z } from "astro/zod";
 import { deliveryChoice, faqItem, slug } from "./schemas.ts";
 import { HOME_TRUST_QUESTION } from "../lib/fixed-copy.ts";
-import { ENQUIRY_FIELDS } from "../lib/contact-form.ts";
+import { ENQUIRY_FIELDS, OPTIONAL_ENQUIRY_FIELDS } from "../lib/contact-form.ts";
 // Typed page data for the singleton pages (Services, Evaluation Partner, Contact, Trust, About,
 // Home) and the positioning copy they share. Phase C writes the data in src/data/*.ts; long
 // prose (the legal documents and the evaluation method) is the `documents` markdown collection.
@@ -91,7 +91,7 @@ export const contactData = z.strictObject({
 }).superRefine((c, ctx) => {
   // Every name the form posts is used once: a provider field that reused an enquiry field's name, or
   // another provider field's, would overwrite it.
-  const taken = new Set<string>(ENQUIRY_FIELDS);
+  const taken = new Set<string>([...ENQUIRY_FIELDS, ...OPTIONAL_ENQUIRY_FIELDS]);
   const claim = (name: string, path: (string | number)[]) => {
     if (taken.has(name)) ctx.addIssue({ code: "custom", path, message: `"${name}" is already a field of the enquiry form` });
     taken.add(name);

@@ -38,7 +38,7 @@ const NEW_POSTS = {
 const MIGRATED = {
   "evals-before-vibes": { industries: [], solutions: ["ai-evaluation"] },
   "rag-that-survives-an-apra-audit": { industries: ["financial-services"], solutions: ["knowledge-assistant", "ai-evaluation"] },
-  "sovereign-llm-hosting-decision-matrix": { industries: ["government", "financial-services"], solutions: [] },
+  "sovereign-llm-hosting-decision-matrix": { industries: ["government", "financial-services"], solutions: ["knowledge-assistant", "ai-evaluation"] },
 };
 // Spec §3.4 treats these subjects as mid-market pages: "agent(s)" only names a system the client runs.
 const MID_MARKET = ["ai-inside-your-practice-software", "schools-framework-tested-before-use", "software-updates-are-procedure-changes", "property-platform-ai-and-tenant-data"];
@@ -199,14 +199,19 @@ test("each new post's body runs 800–1,400 words", () => {
   }
 });
 
-test("each new post cites its sources inline: at least four https links, all to primary-source hosts", () => {
+test("each researched post cites four primary sources and its internal links resolve", () => {
   for (const id of Object.keys(NEW_POSTS)) {
     const hrefs = elements(proseOf(id).inner, (t) => t.name === "a").map((a) => a.attrs.href);
-    for (const href of hrefs) {
+    for (const href of hrefs.filter((href) => href.startsWith("/"))) {
+      const local = href.split(/[?#]/)[0];
+      assert.ok(existsSync(join(DIST, local, local.endsWith("/") ? "index.html" : "")), `${id}: ${href} is missing`);
+    }
+    const sources = hrefs.filter((href) => !href.startsWith("/"));
+    for (const href of sources) {
       assert.match(href, /^https:\/\//, `${id}: ${href} is not an https source link`);
       assert.ok(primary(new URL(href).host), `${id}: ${new URL(href).host} is not a primary-source host`);
     }
-    assert.ok(new Set(hrefs).size >= 4, `${id}: ${new Set(hrefs).size} distinct sources`);
+    assert.ok(new Set(sources).size >= 4, `${id}: ${new Set(sources).size} distinct sources`);
   }
 });
 

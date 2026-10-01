@@ -2,6 +2,7 @@
 title: "Your practice software already runs AI."
 description: "What JAX, MYOB AI BAS, Dext and Karbon AI do, whether each vendor says where its AI runs, and what the TPB asks before client information goes into any AI tool."
 publishDate: 2026-09-29
+updatedDate: 2026-10-02
 type: platform-guide
 industries: [accounting]
 solutions: [ai-switch-on]
@@ -12,6 +13,19 @@ draft: false
 Before a practice builds anything, it's worth knowing what the software it already licenses does with AI. This guide covers Xero, MYOB, Dext, Karbon and Microsoft 365 as at 29 September 2026. Each line links the vendor's own page. Vendor pages change, so check them again before you rely on any of it.
 
 For each tool, four questions matter: what it does, who can see what, where the vendor says the AI runs, and whether it's on by default.
+
+## Configure existing software or build a workflow?
+
+| Situation | First step |
+|---|---|
+| One licensed feature already covers the job | Check access, settings and staff training before adding software |
+| The task crosses an inbox, documents and another system | Map the gap, supported connections and approval steps |
+| Staff need consistent answers from internal policies | Check document versions and permissions before testing an assistant |
+| Nobody knows whether the feature helps | Record the workload baseline and define a useful trial |
+
+The decision table was added on 2 October 2026. The vendor and regulatory summaries below retain their stated 29 September reference date; check the source and your subscription before using a feature.
+
+For a practical starting point, see [AI implementation and adoption](/solutions/ai-switch-on/) and [choosing a first AI workflow](/insights/choose-first-ai-workflow/).
 
 ## Xero
 

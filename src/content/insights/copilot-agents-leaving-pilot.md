@@ -2,6 +2,7 @@
 title: "Test a Copilot agent before it leaves pilot."
 description: "What the DTA policy, NSW's AI circular and Queensland's FAIRA ask of a Copilot agent leaving pilot, and what an independent test adds to Copilot Studio's own."
 publishDate: 2026-09-29
+updatedDate: 2026-10-02
 type: article
 industries: [government]
 solutions: [ai-evaluation]
@@ -63,3 +64,20 @@ An Agentic AI Control Evaluation checks each agent's identity, permissions, appr
 ## Start before the data is approved
 
 Approval to use staff data takes time, and the test plan doesn't have to wait for it. Questions written from the published policy set, with thresholds agreed, can produce a first failure list before any staff data is touched. Your accountable official then decides whether to continue on that evidence, and the test set and replay script stay with your agency either way.
+
+
+## A practical acceptance checklist
+
+Write representative questions and expected evidence. Include unsupported requests and restricted access. Keep input versions and deployment settings with the results.
+
+| Check | Evidence to retain |
+|---|---|
+| Supported answer | The answer and the exact document passage supporting it |
+| Missing evidence | A refusal or escalation instead of a guessed answer |
+| Access restriction | What each authorised test identity can retrieve |
+| Proposed action | The required approval and the action log |
+| Changed system | A rerun of the same cases and the differences |
+
+Microsoft's [agent evaluation checklist](https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/evaluation-checklist) describes building test sets, establishing a baseline and expanding evaluation over the lifecycle. Check evidence behind consequential answers.
+
+Checklist added 2 October 2026; the dated regulatory discussion is unchanged. Explore [independent AI evaluation](/solutions/ai-evaluation/).

@@ -9,6 +9,15 @@ import { SITE, type PageEntry } from "../data/nav.ts";
 export const DESCRIPTION_LENGTH = { min: 150, max: 160 } as const;
 
 export function pageTitle(entry: PageEntry): string {
+  const serviceTitles: Record<string, string> = {
+    "/solutions/document-registers/": "AI Document Processing in Australia",
+    "/solutions/draft-for-approval/": "AI Workflow Automation in Australia",
+    "/solutions/knowledge-assistant/": "Internal AI Knowledge Assistant",
+    "/solutions/ai-switch-on/": "AI Implementation Consulting Australia",
+    "/industries/accounting/": "AI Automation for Accounting Firms",
+    "/industries/legal-and-professional/": "AI for Legal and Professional Services",
+  };
+  if (serviceTitles[entry.path]) return `${serviceTitles[entry.path]} | ${SITE.name}`;
   if (entry.path === "/") return `AI Automation Solutions in Australia | ${SITE.name}`;
   if (entry.base === "/industries/") return `AI for ${entry.shortName} in Australia | ${SITE.name}`;
   return `${entry.fullName} | ${SITE.name}`;

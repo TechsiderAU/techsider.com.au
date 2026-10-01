@@ -2,6 +2,7 @@
 title: "A fictional utility tests its SOP assistant."
 description: "An illustrative scenario: a made-up water utility tests a procedures assistant on its crews' questions and maps where schematics would go under the CIRMP Rules."
 publishDate: 2026-09-29
+updatedDate: 2026-10-02
 type: reference-scenario
 illustrative: true
 industries: [resources-and-energy]
@@ -64,3 +65,10 @@ Copilot gets the same test. If its answers pass and the risk team accepts where 
 What ships first is paper, not software: a test plan with agreed thresholds, the data-flow map and the access list, all before any document is indexed. Then the utility decides whether to go on.
 
 None of this meets the utility's CIRMP obligations for it. The CIRMP, its reviews and its annual report stay the utility's, and what its risk team concludes from the artefacts is its own call. It isn't legal advice. For a utility that wants the same mapping across the AI it already runs, SOCI AI Risk Evidence, available on request, maps each AI use to the relevant CIRMP rule items.
+
+
+## Inspect the example as a reviewer
+
+Follow one fictional question from the crew's request to the source passage, proposed answer and review decision. Check the procedure version, the user's access and whether the passage supports every material step. If the documents disagree or omit the requested detail, the appropriate outcome is escalation rather than a confident answer.
+
+The walkthrough was added on 2 October 2026. It adds no measured outcome and describes no real deployment. The [illustrative knowledge-assistant demo](/demos/knowledge-assistant/) shows source-supported answers and refusals. The [knowledge-assistant offer](/solutions/knowledge-assistant/) explains the scope and testing of a proposed build.
