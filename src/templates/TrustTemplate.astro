@@ -18,6 +18,7 @@ import BracketChip from "../components/ui/BracketChip.astro";
 import DataTable from "../components/ui/DataTable.astro";
 import FaqList from "../components/ui/FaqList.astro";
 import type { ContactData, ServicesData, TrustData } from "../content/page-schemas";
+import { formatDate, isoDate } from "../lib/dates";
 import type { SiteContext } from "../lib/site";
 import { trustView } from "../lib/views/company";
 
@@ -29,8 +30,6 @@ interface Props {
 }
 
 const { trust, contact, services } = Astro.props;
-const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 const { terms: confirmed, faq: answers } = trustView(trust);
 const faq = answers.map((item) => ({ q: item.q, a: item.a, meta: `Part ${item.part} · as at ${formatDate(item.asAt)}` }));
 const changes = [...trust.changes].sort((a, b) => b.date.getTime() - a.date.getTime());

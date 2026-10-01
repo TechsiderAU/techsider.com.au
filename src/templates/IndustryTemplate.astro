@@ -27,6 +27,7 @@ import SectionHeader from "../components/ui/SectionHeader.astro";
 import TabPanel from "../components/ui/TabPanel.astro";
 import Tabs from "../components/ui/Tabs.astro";
 import TracePanel from "../components/ui/TracePanel.astro";
+import { formatDate, isoDate } from "../lib/dates";
 import { NOT_LEGAL_ADVICE, SCENARIO_LABEL } from "../lib/fixed-copy";
 import type { IndustryView, RegulatoryBlockView } from "../lib/views/industry";
 
@@ -36,10 +37,6 @@ interface Props {
 
 const { view } = Astro.props;
 const packagesTitle = `What we build for ${view.shortName.toLowerCase()}`;
-
-// Content dates are UTC midnights ("2026-09-01"), so they print in UTC: "1 September 2026".
-const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
 const solutionLabel = (s: { number: string; shortName: string }) => `${s.number} ${s.shortName}`;
 const obligationChips = (b: RegulatoryBlockView) => b.chips.map((c) => ({ label: c.label, href: c.href }));
