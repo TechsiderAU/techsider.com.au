@@ -1,7 +1,9 @@
 ---
 // One launch package in full (spec §8.3 block 4, §4.5, §4.6): the solution page's generic
 // package, and the body of each launch-package tab. Every block carries data-package-tab and
-// data-package-status="launch": CI check 10 fails any tab or full block for another status.
+// data-package-status="launch": CI check 10 fails any tab or full block for another status. It
+// also carries data-package-id, so check 10 can hold the onshore pillar to the package's own
+// onshore flag in its solution's YAML (WB-10).
 // Ids: blockId = pkg.id + idSuffix on the <section>, `${blockId}-heading` on its heading and
 // `${blockId}-onshore-note` on the onshore note. Inside a TabPanel, which owns the bare package
 // id, pass idSuffix "-block" so the ids stay unique.
@@ -22,7 +24,7 @@ const { pkg, standardInclusions, headingLevel = 3, idSuffix = "" } = Astro.props
 const blockId = `${pkg.id}${idSuffix}`;
 const headingId = `${blockId}-heading`;
 ---
-<section id={blockId} class="package-block" aria-labelledby={headingId} data-package-tab data-package-status="launch">
+<section id={blockId} class="package-block" aria-labelledby={headingId} data-package-tab data-package-status="launch" data-package-id={pkg.id}>
   {headingLevel === 4 ? (
     <h4 id={headingId} class="package-heading">{pkg.name}</h4>
   ) : (

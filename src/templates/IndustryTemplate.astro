@@ -10,7 +10,8 @@
 //   row anchors. #packages keeps the page-wide half of block 5 (lead solutions, "Use your
 //   platform's AI first", "What we don't do", the demo link) once, after the workflow.
 // - The scenario is a carbon section marked data-provenance="illustrative" whose first child is
-//   the fixed label (CI check 06 reads it). Its container is padding, not a wrapper element.
+//   the fixed label, marked data-provenance-label: CI check 06 reads it, and not the trace panel's
+//   own label nested below it. Its container is padding, not a wrapper element.
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import ChipRow from "../components/page/ChipRow.astro";
@@ -223,7 +224,7 @@ const mapRows = (b: RegulatoryBlockView) =>
   )}
 
   <section id="scenario" class="ind-band ind-scenario" aria-labelledby="scenario-heading" data-provenance="illustrative">
-    <p class="ind-scenario-label">{SCENARIO_LABEL}</p>
+    <p class="ind-scenario-label" data-provenance-label>{SCENARIO_LABEL}</p>
     <SectionHeader id="scenario-heading" title={view.scenario.title} />
     <ol class="ind-steps">
       <li class="ind-step">

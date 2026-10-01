@@ -603,3 +603,18 @@ test("06: a checker demo declares sourced vendor facts, only a checker may, and 
     /sourced-trace\.json: "provenance" must be "measured" or "illustrative" \(got "sourced"\)/,
   ]);
 });
+
+test("06: an illustrative element's label is its own: a nested trace's label, or body copy saying 'illustrative', doesn't count (WB-9)", async () => {
+  const res = await check(provenance, {
+    "dist/industries/gamma-and-fixture/index.html": page(`<h1>Gamma Fixture</h1>
+      <section id="unlabelled" data-provenance="illustrative"><h2>Fixture scenario</h2>${TRACE}</section>
+      <article data-provenance="illustrative"><h2>Fixture post</h2><p>An illustrative walk-through of fixture copy.</p></article>
+      <section id="labelled" data-provenance="illustrative"><p data-provenance-label>Illustrative scenario: not a client engagement</p>${TRACE}</section>`),
+  });
+  assertErrors(res, [
+    /gamma-and-fixture\/index\.html: <section data-provenance="illustrative"> renders no visible "Illustrative" label of its own/,
+    /gamma-and-fixture\/index\.html: <article data-provenance="illustrative"> renders no visible "Illustrative" label of its own/,
+  ]);
+  assert.deepEqual(provenance.ownLabels(`<p data-provenance-label>Illustrative data</p>${TRACE}`), ["Illustrative data"]);
+  assert.deepEqual(provenance.ownLabels(TRACE.replace(/^<figure[^>]*>|<\/figure>$/g, "")), ["Illustrative trace"]);
+});

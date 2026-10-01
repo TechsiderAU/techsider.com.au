@@ -28,7 +28,7 @@ const shownDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", m
   <article class="post" data-post data-provenance={view.illustrativeLabel ? "illustrative" : undefined}>
     <PageHero title={card.title} display={false} eyebrow={card.typeLabel.toLowerCase()} breadcrumb={view.breadcrumb}>
       <p class="post-meta" data-post-meta><time datetime={isoDate(card.date)}>{shownDate(card.date)}</time>{view.updated && <Fragment> · Updated <time datetime={isoDate(view.updated)}>{shownDate(view.updated)}</time></Fragment>} · {card.minutes} min read</p>
-      {view.illustrativeLabel && <p class="post-illustrative" data-illustrative-label>{view.illustrativeLabel}</p>}
+      {view.illustrativeLabel && <p class="post-illustrative" data-illustrative-label data-provenance-label>{view.illustrativeLabel}</p>}
     </PageHero>
     <div class="post-body surface-bone" data-surface="bone">
       <div class="post-column">
