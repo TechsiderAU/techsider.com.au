@@ -6,6 +6,9 @@
 // ARIA roles keep the table semantics that some browsers drop once a table's display changes.
 // Every row renders once, so a row id is unique on the page and a #row link lands on its row at
 // every width, without JavaScript.
+// A wide table, of seven or more columns (the ⑤ vendor facts), stays as cards until 53rem: from 768px
+// to 832px it was wider than a DemoFrame's content box, and its dates broke mid-word (Phase D ledger
+// NB-1). Its wrapper carries data-table-wide.
 import { cellHref, cellText, checkTable, type Cell } from "../../lib/data-table";
 
 interface Props {
@@ -23,8 +26,9 @@ checkTable({ caption, columns, rows, rowHeader, rowIds, rowMarker });
 // and tests. Each row spreads a fresh object: Astro writes its scope class into a spread object,
 // so one shared object would collect another copy of that class on every row.
 const markerOf = () => (rowMarker ? { [rowMarker]: "" } : {});
+const wide = columns.length >= 7;
 ---
-<div class="data-table" data-data-table>
+<div class:list={["data-table", { "data-table-wide": wide }]} data-data-table>
   <table class="dt-table" role="table">
     <caption>{caption}</caption>
     <thead role="rowgroup">
@@ -116,6 +120,33 @@ const markerOf = () => (rowMarker ? { [rowMarker]: "" } : {});
   .dt-link:hover {
     text-decoration-thickness: 2px;
   }
+  /* A wide table stays as cards until 53rem (NB-1): the same rules as below 768px. */
+  @media (48rem <= width < 53rem) {
+    .data-table-wide .dt-table,
+    .data-table-wide .dt-table caption,
+    .data-table-wide .dt-table tbody,
+    .data-table-wide .dt-table th,
+    .data-table-wide .dt-table td {
+      display: block;
+    }
+    .data-table-wide .dt-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .data-table-wide .dt-table tbody tr {
+      display: grid;
+      gap: 0.5rem;
+      padding-block: 1rem;
+      border-top: 1px solid var(--dt-line);
+    }
+    .data-table-wide .dt-table tbody tr:last-child {
+      border-bottom: 1px solid var(--dt-line);
+    }
+  }
   /* Below 768px: every body row is a card, and the header row is visually hidden. */
   @media (width < 48rem) {
     .dt-table,
@@ -143,14 +174,24 @@ const markerOf = () => (rowMarker ? { [rowMarker]: "" } : {});
       border-bottom: 1px solid var(--dt-line);
     }
   }
-  /* 768px and up: a table with row rules, and no in-cell labels. */
+  /* 768px and up (53rem and up for a wide table): a table with row rules, and no in-cell labels. */
   @media (width >= 48rem) {
-    .dt-table th,
-    .dt-table td {
+    .data-table:not(.data-table-wide) .dt-table th,
+    .data-table:not(.data-table-wide) .dt-table td {
       padding: 0.75rem 1rem 0.75rem 0;
       border-bottom: 1px solid var(--dt-line);
     }
-    .dt-label {
+    .data-table:not(.data-table-wide) .dt-label {
+      display: none;
+    }
+  }
+  @media (width >= 53rem) {
+    .data-table-wide .dt-table th,
+    .data-table-wide .dt-table td {
+      padding: 0.75rem 1rem 0.75rem 0;
+      border-bottom: 1px solid var(--dt-line);
+    }
+    .data-table-wide .dt-label {
       display: none;
     }
   }

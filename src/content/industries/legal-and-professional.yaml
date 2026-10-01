@@ -133,14 +133,14 @@ firstEngagement:
     - Access to each tool, in accounts your firm controls.
   youGet:
     - A side-by-side report listing every wrong answer and unsupported citation.
-    - A data note per tool on where inputs are stored and processed.
+    - A data note per tool, with its vendor's published storage and processing locations and their dates.
     - The question set and a replay script for the next model change.
   exitRamp: Once the questions and thresholds are agreed, you decide whether to continue. The question set is yours either way.
 faq:
   - q: You have no clients yet. Why trust your evaluation?
     a: "Don't take it on trust: we have no clients yet. Your lawyers write and grade the questions, and you can re-run the test without us."
   - q: Does testing mean our client files leave the firm?
-    a: Only to the tools under test. Tests run in tool accounts your firm controls, on cleared matters or de-identified copies, and a data note first records where each tool stores and processes inputs. Whether a client must consent is your call.
+    a: Only to the tools under test. Tests run in tool accounts your firm controls, on cleared matters or de-identified copies, and a data note first records each vendor's published storage and processing locations, with their dates. Whether a client must consent is your call.
   - q: Are you paid by legal AI vendors?
     a: No. We take no resale margin or referral fees from vendors we evaluate, and disclose any vendor relationship. We never issue an independent evaluation of a system we built, configured or advised on for the same firm.
   - q: Does your verification record meet the practice notes?

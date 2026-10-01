@@ -11,6 +11,7 @@
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
+import { formatDate, isoDate } from "../lib/dates";
 import { CHECKER_BADGE } from "../lib/fixed-copy";
 import { crumbs, type SiteContext } from "../lib/site";
 
@@ -22,10 +23,6 @@ interface Props {
 const { site, asAt } = Astro.props;
 const page = site.page("payFor");
 const switchOn = site.solutions[4];
-
-// Content dates are UTC midnights ("2026-09-01"), so they print in UTC: "1 September 2026".
-const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 ---
 <div class="template" data-template="pay-for">
   <PageHero

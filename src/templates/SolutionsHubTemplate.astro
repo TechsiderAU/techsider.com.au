@@ -3,6 +3,7 @@
 // solutionsHubView() and wraps this in BaseLayout. A hero with no CTA; one switcher with three
 // views (By job, By industry, By buyer), stacked sections without JavaScript; the closing prompt.
 // Every link comes from the view: a null href renders as plain text, never as a dead link.
+import { solutionArtwork } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import LinkCard from "../components/page/LinkCard.astro";
@@ -25,7 +26,7 @@ const buyerLists: { id: string; title: string; items: BuyerItem[] }[] = [
 ];
 ---
 <div class="template" data-template="solutions-hub">
-  <PageHero title="Solutions." highlight="Solutions" />
+  <PageHero title="AI solutions for the work that matters." display={false} art="hero" eyebrow="Our solutions" sub="Automate workflows, understand documents and make your knowledge easier to use. Built around your systems, with people in control." />
 
   <PageSection id="browse" title="Browse solutions">
     <Tabs id="solutions-switcher" label="Browse solutions">
@@ -33,7 +34,7 @@ const buyerLists: { id: string; title: string; items: BuyerItem[] }[] = [
         <ul class="hub-jobs">
           {view.jobs.map((job) => (
             <li class="hub-job">
-              <LinkCard title={`${job.number} ${job.shortName}`} href={job.href} body={job.job} level={4} />
+              <LinkCard title={`${job.number} ${job.shortName}`} href={job.href} body={job.oneLiner} art={["①", "②", "③"].includes(job.number) ? solutionArtwork(job.number) : undefined} level={4} />
             </li>
           ))}
         </ul>
@@ -74,7 +75,7 @@ const buyerLists: { id: string; title: string; items: BuyerItem[] }[] = [
   </PageSection>
 
   <div id="contact" class="template-closing">
-    <PromptBlock command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
+    <PromptBlock title="Start with one workflow." command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
   </div>
 </div>
 

@@ -9,7 +9,7 @@ import { SITE, type PageEntry } from "../data/nav.ts";
 export const DESCRIPTION_LENGTH = { min: 150, max: 160 } as const;
 
 export function pageTitle(entry: PageEntry): string {
-  if (entry.path === "/") return `${SITE.name}: ${SITE.slogan} ${SITE.proofLine}`;
+  if (entry.path === "/") return `AI Automation Solutions in Australia | ${SITE.name}`;
   if (entry.base === "/industries/") return `AI for ${entry.shortName} in Australia | ${SITE.name}`;
   return `${entry.fullName} | ${SITE.name}`;
 }

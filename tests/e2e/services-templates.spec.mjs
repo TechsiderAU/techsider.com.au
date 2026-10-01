@@ -91,13 +91,13 @@ test("services: the connectors are hidden from assistive technology, and the pha
   }
 });
 
-test("services: the keyboard reaches the Fit Call CTA, then the method CTA, with a lime ring on the carbon hero", async ({ page, browserName }) => {
+test("services: the keyboard reaches the Fit Call CTA, then the method CTA, with a carbon ring on the light hero", async ({ page, browserName }) => {
   await open(page, SERVICES);
   const { next } = focusKeys(browserName);
   const hero = page.locator("[data-page-hero]");
   const fitCall = hero.getByRole("link", { name: "Talk to us about a Fit Call" });
   await tabTo(page, browserName, fitCall);
-  expect(await ring(page)).toEqual({ visible: true, style: "solid", width: "2px", color: ACID });
+  expect(await ring(page)).toEqual({ visible: true, style: "solid", width: "2px", color: "rgb(11, 11, 12)" });
   await page.keyboard.press(next);
   await expect(hero.getByRole("link", { name: "Read the evaluation method" })).toBeFocused();
   await page.keyboard.press("Enter");

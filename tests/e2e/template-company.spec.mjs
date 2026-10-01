@@ -19,7 +19,10 @@ const NARROW = { width: 390, height: 844 };
 const CARBON = "rgb(11, 11, 12)";
 const MUTED_DARK = "rgb(92, 91, 85)";
 // The order Tab visits the form's controls; the honeypot (tabindex="-1", display:none) is never one.
-const FORM_ORDER = ["contact-name", "contact-email", "contact-organisation", "contact-industry", "contact-size", "contact-interest", "contact-message", "contact-consent", "submit"];
+// The consent and the collection notice each link to the privacy policy (WB-12), so Tab reaches
+// both links, after the checkbox and before the submit button.
+const PRIVACY = `${BASE}/legal-document/`;
+const FORM_ORDER = ["contact-name", "contact-email", "contact-organisation", "contact-industry", "contact-size", "contact-interest", "contact-message", "contact-consent", PRIVACY, PRIVACY, "submit"];
 
 const axe = (page) => new AxeBuilder({ page }).include("main").withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]);
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -174,7 +177,7 @@ test("Tab moves through the form's controls in order and never reaches the honey
   await page.getByLabel("Name").focus();
   const visited = [];
   for (let i = 0; i < FORM_ORDER.length; i++) {
-    visited.push(await page.evaluate(() => document.activeElement.id || document.activeElement.getAttribute("type")));
+    visited.push(await page.evaluate(() => document.activeElement.id || document.activeElement.getAttribute("type") || document.activeElement.getAttribute("href")));
     await page.keyboard.press(focusKeys(browserName).next);
   }
   expect(visited).toEqual(FORM_ORDER);
@@ -197,8 +200,11 @@ test("on bone a field has a muted-dark border that turns carbon, with the carbon
 test("every form control is at least 44px tall at 390px; the consent row is the checkbox's 44px target", async ({ page }) => {
   await page.setViewportSize(NARROW);
   await page.goto(CONTACT);
+  // The two privacy-policy links sit inside sentences, the consent and the collection notice: WCAG
+  // 2.5.8's inline exception, as for links in running prose across the site (WB-12).
+  await expect(form(page).locator("a.contact-link")).toHaveCount(2);
   const small = await form(page).evaluate((f) =>
-    [...f.querySelectorAll('input:not([type="checkbox"]):not([type="hidden"]):not([tabindex="-1"]), select, textarea, button, label.contact-consent, a')]
+    [...f.querySelectorAll('input:not([type="checkbox"]):not([type="hidden"]):not([tabindex="-1"]), select, textarea, button, label.contact-consent, a:not(.contact-link)')]
       .map((el) => ({ what: el.id || el.className || el.textContent.trim(), h: el.getBoundingClientRect().height, w: el.getBoundingClientRect().width }))
       .filter((t) => t.h < 44 || t.w < 44),
   );

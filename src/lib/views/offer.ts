@@ -28,6 +28,8 @@ export interface PackageView {
   precondition: string | null;
   /** true → ONSHORE_PILLAR (data-onshore-pillar data-onshore="true"); false → PROCESSING_NOTE, linking to the block's onshore note. */
   onshore: boolean;
+  /** false → the block leaves out the standard test inclusion (isTestInclusion): the package holds no test on your own examples. */
+  testInclusion: boolean;
 }
 
 export interface ListedPackageView {
@@ -42,6 +44,11 @@ export interface ListedPackageView {
 
 /** The services copy every solution page repeats: §4.5 inclusions, §4.6 delivery choices and onshore note, §4.4 independence. */
 export type SharedOfferCopy = Pick<ServicesData, "standardInclusions" | "deliveryChoices" | "independence" | "onshoreNote">;
+
+/** The standard inclusion that promises a test on your own examples: the one that names thresholds (spec §4.5). */
+export function isTestInclusion(line: string): boolean {
+  return /\bthresholds\b/.test(line);
+}
 
 function launchView(p: LaunchPackageData): PackageView {
   return {
@@ -59,6 +66,7 @@ function launchView(p: LaunchPackageData): PackageView {
     onshoreNote: p.onshoreNote,
     precondition: p.precondition ?? null,
     onshore: p.onshore,
+    testInclusion: p.testInclusion !== false,
   };
 }
 

@@ -22,8 +22,8 @@ const WHOLE_RUN = 10 * 60_000;
 async function openHome(page, { width = 1280, clock = true } = {}) {
   if (clock) await page.clock.install();
   await page.setViewportSize({ width, height: 900 });
-  await page.goto("/");
-  const frame = page.locator("#demo [data-demo-frame]");
+  await page.goto("/demos/knowledge-assistant/#next");
+  const frame = page.locator("[data-demo-frame]");
   const log = frame.locator("[data-demo-log]");
   return {
     frame,
@@ -205,14 +205,14 @@ for (const width of [390, 1280]) {
   test(`without JavaScript the static transcript reads in full at ${width}px, with no controls`, async ({ browser }) => {
     const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width, height: 900 } });
     const page = await ctx.newPage();
-    await page.goto("/");
-    const frame = page.locator("#demo [data-demo-frame]");
+    await page.goto("/demos/knowledge-assistant/#next");
+    const frame = page.locator("[data-demo-frame]");
     const transcript = frame.locator("[data-demo-transcript]");
     await expect(transcript).toBeVisible();
     await expect(frame.locator("[data-demo-controls]")).toBeHidden();
     await expect(frame.locator("[data-demo-stage]")).toBeHidden();
     for (const scenario of DATA.scenarios) {
-      await expect(transcript.getByRole("heading", { level: 3, name: scenario.title })).toBeVisible();
+      await expect(transcript.getByRole("heading", { level: 2, name: scenario.title })).toBeVisible();
       for (const turn of scenario.turns) {
         await expect(transcript).toContainText(turn.question);
         for (const segment of turn.answer) if (segment.text.trim()) await expect(transcript).toContainText(segment.text.trim());
@@ -229,7 +229,7 @@ for (const width of [390, 1280]) {
   // Real time here: axe runs its own timers in the page, so the page clock stays uninstalled.
   test(`no axe violations in the demo band at ${width}px, before, during (paused) and after a run; the controls are 44px targets`, async ({ page }) => {
     const d = await openHome(page, { width, clock: false });
-    const axe = async (when) => expect((await new AxeBuilder({ page }).include("#demo").withTags(WCAG).analyze()).violations, when).toEqual([]);
+    const axe = async (when) => expect((await new AxeBuilder({ page }).include("main").withTags(WCAG).analyze()).violations, when).toEqual([]);
     await axe("before the run");
     await start(d);
     await d.pause.click();

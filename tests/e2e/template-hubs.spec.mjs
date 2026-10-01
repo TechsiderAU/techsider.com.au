@@ -173,6 +173,7 @@ test("the Industries hub shows nine cards; the unshown industry's card has no li
     await expect(card.locator("[data-bracket-chip]")).toHaveCount(3);
   }
   // An on-request flagship use case carries a visible "On request" label (spec §5).
+  await page.locator('[data-industry-card="fixture-industry"] summary').click();
   const onRequest = page.locator('[data-industry-card="fixture-industry"] .industry-card-uses > li').nth(2);
   await expect(onRequest.locator(".industry-card-on-request")).toBeVisible();
   await expect(onRequest.locator(".industry-card-on-request")).toHaveText("On request");
@@ -186,6 +187,7 @@ for (const vp of [WIDE, NARROW]) {
     await page.setViewportSize(vp);
     for (const id of ["fixture-industry", "fixture-government"]) {
       await page.goto(INDUSTRIES);
+      await page.locator(`[data-industry-card="${id}"] summary`).click();
       const chip = page.locator(`[data-industry-card="${id}"] a[data-bracket-chip]`).first();
       const href = await chip.getAttribute("href");
       await chip.click();

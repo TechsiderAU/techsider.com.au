@@ -12,6 +12,7 @@ import PageHero from "../components/page/PageHero.astro";
 import ChipRow from "../components/page/ChipRow.astro";
 import Prose from "../components/page/Prose.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
+import { formatDate, isoDate } from "../lib/dates";
 import type { PostView } from "../lib/views/post";
 
 interface Props {
@@ -20,15 +21,12 @@ interface Props {
 
 const { view } = Astro.props;
 const { card, closing } = view;
-// Content dates are calendar dates, parsed as UTC midnight, so they are shown in UTC.
-const isoDate = (d: Date) => d.toISOString().slice(0, 10);
-const shownDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 ---
 <BaseLayout title={view.metaTitle} description={card.description} graph={[view.jsonLd]}>
   <article class="post" data-post data-provenance={view.illustrativeLabel ? "illustrative" : undefined}>
     <PageHero title={card.title} display={false} eyebrow={card.typeLabel.toLowerCase()} breadcrumb={view.breadcrumb}>
-      <p class="post-meta" data-post-meta><time datetime={isoDate(card.date)}>{shownDate(card.date)}</time>{view.updated && <Fragment> · Updated <time datetime={isoDate(view.updated)}>{shownDate(view.updated)}</time></Fragment>} · {card.minutes} min read</p>
-      {view.illustrativeLabel && <p class="post-illustrative" data-illustrative-label>{view.illustrativeLabel}</p>}
+      <p class="post-meta" data-post-meta><time datetime={isoDate(card.date)}>{formatDate(card.date)}</time>{view.updated && <Fragment> · Updated <time datetime={isoDate(view.updated)}>{formatDate(view.updated)}</time></Fragment>} · {card.minutes} min read</p>
+      {view.illustrativeLabel && <p class="post-illustrative" data-illustrative-label data-provenance-label>{view.illustrativeLabel}</p>}
     </PageHero>
     <div class="post-body surface-bone" data-surface="bone">
       <div class="post-column">

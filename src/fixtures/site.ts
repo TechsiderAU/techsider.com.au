@@ -86,3 +86,14 @@ export const fixtureSite: SiteContext = {
   },
   email: "fixture@example.com",
 };
+
+// The contact form links its consent and collection notice to the privacy policy, and won't render
+// while that page isn't shown (WB-12). The contact specimen uses this: fixtureSite with the privacy
+// page shown, at its gallery page.
+export const fixtureSiteWithPrivacy: SiteContext = {
+  ...fixtureSite,
+  page(key) {
+    const link = page(key);
+    return key === "privacy" ? { ...link, href: link.path } : link;
+  },
+};

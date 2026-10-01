@@ -10,7 +10,9 @@
 //   row anchors. #packages keeps the page-wide half of block 5 (lead solutions, "Use your
 //   platform's AI first", "What we don't do", the demo link) once, after the workflow.
 // - The scenario is a carbon section marked data-provenance="illustrative" whose first child is
-//   the fixed label (CI check 06 reads it). Its container is padding, not a wrapper element.
+//   the fixed label, marked data-provenance-label: CI check 06 reads it, and not the trace panel's
+//   own label nested below it. Its container is padding, not a wrapper element.
+import { AUTOMATION } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import ChipRow from "../components/page/ChipRow.astro";
@@ -26,6 +28,7 @@ import SectionHeader from "../components/ui/SectionHeader.astro";
 import TabPanel from "../components/ui/TabPanel.astro";
 import Tabs from "../components/ui/Tabs.astro";
 import TracePanel from "../components/ui/TracePanel.astro";
+import { formatDate, isoDate } from "../lib/dates";
 import { NOT_LEGAL_ADVICE, SCENARIO_LABEL } from "../lib/fixed-copy";
 import type { IndustryView, RegulatoryBlockView } from "../lib/views/industry";
 
@@ -35,10 +38,6 @@ interface Props {
 
 const { view } = Astro.props;
 const packagesTitle = `What we build for ${view.shortName.toLowerCase()}`;
-
-// Content dates are UTC midnights ("2026-09-01"), so they print in UTC: "1 September 2026".
-const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
 const solutionLabel = (s: { number: string; shortName: string }) => `${s.number} ${s.shortName}`;
 const obligationChips = (b: RegulatoryBlockView) => b.chips.map((c) => ({ label: c.label, href: c.href }));
@@ -68,9 +67,10 @@ const mapRows = (b: RegulatoryBlockView) =>
 <div class="template" data-template="industry">
   <PageHero
     title={view.promise}
+    art="workflow"
     display={false}
     eyebrow="industry"
-    sub={view.constraintSet}
+    sub={AUTOMATION.industries[view.shortName] ?? view.constraintSet}
     breadcrumb={view.breadcrumb}
     ctas={view.ctas}
   />
@@ -223,7 +223,7 @@ const mapRows = (b: RegulatoryBlockView) =>
   )}
 
   <section id="scenario" class="ind-band ind-scenario" aria-labelledby="scenario-heading" data-provenance="illustrative">
-    <p class="ind-scenario-label">{SCENARIO_LABEL}</p>
+    <p class="ind-scenario-label" data-provenance-label>{SCENARIO_LABEL}</p>
     <SectionHeader id="scenario-heading" title={view.scenario.title} />
     <ol class="ind-steps">
       <li class="ind-step">
@@ -284,7 +284,7 @@ const mapRows = (b: RegulatoryBlockView) =>
   </PageSection>
 
   <div id="contact" class="ind-closing">
-    <PromptBlock command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
+    <PromptBlock title="Let’s discuss your workflow." command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
   </div>
 </div>
 
@@ -306,6 +306,12 @@ const mapRows = (b: RegulatoryBlockView) =>
     .ind-band {
       padding-block: 6rem;
     }
+  }
+  /* A jurisdiction section straight after another bone band (the Designed around jump links, or
+     the previous jurisdiction) has no top padding, as PageSection does: two paddings on one bone
+     surface read as an empty band (WB-5, WB-13). */
+  :global(:where(.page-section, .ind-band).surface-bone) + .ind-band.surface-bone {
+    padding-top: 0;
   }
   .ind-sub {
     display: grid;

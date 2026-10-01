@@ -6,7 +6,7 @@ import { readDist, visibleText } from "./helpers.mjs";
 // replay only types the same text over it), so these assertions cover what every visitor, and a
 // crawler, sees. The CPS 230 pins are the spec §9.4 corrections, carried in the demo's second
 // scenario (src/data/demos/knowledge-assistant.json).
-const home = visibleText(readDist("index.html"));
+const home = visibleText(readDist("demos/knowledge-assistant/index.html"));
 
 test("critical-operations definition is cited as ¶34 under APRA's heading", () => {
   assert.match(home, /CPS 230 · Critical operations and tolerance levels · ¶34/);
@@ -44,5 +44,5 @@ test("demo is described as a canned replay, not a recording", () => {
   assert.doesNotMatch(home, /Recorded illustrative demo|recorded walkthrough/i);
   assert.match(home, /Canned replay · synthetic or public data/);
   // The legacy band's lede went with it (Phase D Task 8); the Home FAQ says what the demo is.
-  assert.match(home, /It's a canned replay over public documents: it runs in your browser and never calls a model\./);
+  assert.match(visibleText(readDist("index.html")), /They do not call a model\./);
 });

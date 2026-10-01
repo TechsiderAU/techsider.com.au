@@ -13,6 +13,7 @@
 // location a vendor didn't publish (Phase D Review Focus 4).
 import type { PlatformAiEntry, PlatformAiFile } from "../../content/schemas.ts";
 import { slugify } from "../../data/nav.ts";
+import { formatDate, isoDate } from "../dates.ts";
 import type { SiteContext } from "../site.ts";
 
 // Task 1's types, re-exported so a page that renders the checker imports everything from here.
@@ -111,12 +112,9 @@ export interface CheckerView {
   kits: KitLink[];
 }
 
-// Content dates are UTC midnights ("2026-09-29"), so they print in UTC: "29 September 2026".
+// Content dates print through src/lib/dates.ts, as on every other page (WB-14).
 function dateLabel(d: Date): DateLabel {
-  return {
-    iso: d.toISOString().slice(0, 10),
-    text: d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }),
-  };
+  return { iso: isoDate(d), text: formatDate(d) };
 }
 
 /** "Not published" for a location that starts with it; otherwise platform-ai.json's statement, word for word. */

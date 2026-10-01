@@ -1,6 +1,6 @@
 // The ② Knowledge Assistant demo (spec §8.8, §9.1; Phase D Review Focus 2): its words
 // (src/lib/assistant-copy.ts), its replay (src/scripts/demo/assistant.ts) over the real data file,
-// and its static transcript as the built Home renders it (dist/index.html, `npm run build` first).
+// and its static transcript as the dedicated demo page renders it (dist/index.html, `npm run build` first).
 // The replay and the transcript are held to the same text, so a finished or skipped run shows
 // exactly what was typed, and the replay can never say what the transcript doesn't.
 import { test } from "node:test";
@@ -28,10 +28,10 @@ async function replayAll(data = DATA) {
   return { stage, steps };
 }
 
-/** The Home's transcript: its HTML, without the "Source " words only a screen reader hears. */
+/** The dedicated demo's transcript: its HTML, without the "Source " words only a screen reader hears. */
 const transcriptHtml = () => {
-  const [transcript] = elementsWith(readDist("index.html"), "data-assistant-transcript");
-  assert.ok(transcript, "the built Home has no [data-assistant-transcript]");
+  const [transcript] = elementsWith(readDist("demos/knowledge-assistant/index.html"), "data-assistant-transcript");
+  assert.ok(transcript, "the dedicated demo page has no [data-assistant-transcript]");
   return transcript.inner;
 };
 const withoutSrOnly = (html) => html.replace(/<span class="sr-only"[^>]*>[^<]*<\/span>/g, "");
@@ -150,16 +150,16 @@ test("a cancelled run draws nothing more into the stage, whether cancelled befor
   assert.equal(stage.textContent, drawn);
 });
 
-test("the replay draws exactly the Home transcript's text, in the same order", async () => {
+test("the replay draws exactly the dedicated demo transcript's text, in the same order", async () => {
   const { stage } = await replayAll();
   assert.equal(squash(stage.textContent), squash(visibleText(withoutSrOnly(transcriptHtml()))));
 });
 
-test("the Home transcript: every scenario's title is an h3 under the band's h2, and every question, answer, catch, source and attribution is there", () => {
+test("the dedicated demo transcript: every scenario's title is an h2 under the demo headline, and every question, answer, catch, source and attribution is there", () => {
   const html = transcriptHtml();
   const text = visibleText(html);
   const titles = elements(html, (t) => /^h[1-6]$/.test(t.name));
-  assert.deepEqual(titles.map((t) => t.name), DATA.scenarios.map(() => "h3"));
+  assert.deepEqual(titles.map((t) => t.name), DATA.scenarios.map(() => "h2"));
   assert.deepEqual(titles.map((t) => visibleText(t.inner).trim()), DATA.scenarios.map((s) => s.title));
   for (const scenario of DATA.scenarios) {
     for (const turn of scenario.turns) {

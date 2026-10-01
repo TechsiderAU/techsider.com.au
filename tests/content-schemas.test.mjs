@@ -567,7 +567,8 @@ test("inbox data: eight messages, exactly one escalated, and every draft-for-app
   badWith(inboxData, withMessage(7, message(8, "file")), "messages", "exactly one message is escalated (spec §9.1); found 0");
   const { draft, ...undrafted } = INBOX.messages[0];
   badWith(inboxData, withMessage(0, undrafted), "messages.0.draft", 'message "test-message-1" is drafted for approval, so it needs a draft');
-  // Drafts are internal (controller ruling 5), so each one says who it goes to.
+  // No draft goes to a tenant (controller ruling 5), so each one says who it goes to: a contractor, a
+  // property manager or an owner.
   const { to, ...unaddressed } = INBOX.messages[0];
   badWith(inboxData, withMessage(0, unaddressed), "messages.0.to", 'message "test-message-1" is drafted for approval, so it says who the draft goes to');
   badWith(

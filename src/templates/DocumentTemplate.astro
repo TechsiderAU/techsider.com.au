@@ -6,6 +6,7 @@
 import PageHero from "../components/page/PageHero.astro";
 import Prose from "../components/page/Prose.astro";
 import type { DocumentData } from "../content/page-schemas";
+import { formatDate, isoDate } from "../lib/dates";
 import type { Link } from "../lib/site";
 
 interface Props {
@@ -14,8 +15,6 @@ interface Props {
 }
 
 const { doc, breadcrumb } = Astro.props;
-const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 ---
 <div class="template" data-template="document">
   <PageHero title={doc.title} display={false} sub={doc.summary} breadcrumb={breadcrumb}>

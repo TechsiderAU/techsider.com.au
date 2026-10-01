@@ -42,7 +42,7 @@ function metaContent(html, attr, value) {
 }
 
 test("pageTitle: Home, industry pages and every other page follow spec §11.3", () => {
-  assert.equal(pageTitle(at("/")), "Techsider: AI that ships. Measured before it ships.");
+  assert.equal(pageTitle(at("/")), "AI Automation Solutions in Australia | Techsider");
   assert.equal(pageTitle(at("/industries/government/")), "AI for Government in Australia | Techsider");
   assert.equal(pageTitle(at("/industries/legal-and-professional/")), "AI for Legal & professional in Australia | Techsider");
   assert.equal(pageTitle(at("/industries/")), "Industries | Techsider");

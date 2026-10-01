@@ -29,6 +29,9 @@ export const launchPackage = z.strictObject({
   forWhom: z.string(), scope: z.string(), inclusions: z.array(z.string()).min(1),
   clientTime: z.string(), timeline: z.string(), outOfScope: z.array(z.string()).min(1),
   gate: z.string(), onshoreNote: z.string(), precondition: z.string().optional(),
+  // false where the package holds no test on your own examples (④'s Agentic AI Control Evaluation
+  // is a configuration review): its block leaves out the standard inclusion that promises one.
+  testInclusion: z.literal(false).optional(),
 });
 export const listedPackage = z.strictObject({
   id: slug, name: z.string(), status: z.enum(["on-request", "internal"]), oneLiner: z.string(),

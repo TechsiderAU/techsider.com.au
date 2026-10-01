@@ -8,6 +8,7 @@
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import LinkCard from "../components/page/LinkCard.astro";
+import { formatDate } from "../lib/dates";
 import type { SiteContext } from "../lib/site";
 import { legalHubDocs, type LegalDoc } from "../lib/views/company";
 
@@ -18,7 +19,6 @@ interface Props {
 
 const { docs } = Astro.props;
 const shown = legalHubDocs(docs);
-const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 ---
 <div class="template" data-template="legal-hub">
   <PageHero title="Legal." highlight="Legal" />

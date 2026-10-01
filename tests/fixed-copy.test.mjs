@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import * as copy from "../src/lib/fixed-copy.ts";
 
-test("fixed copy: every constant is the spec's text, word for word", () => {
+test("fixed copy: every constant is pinned word for word: the spec's text, and REPORT_BADGE's ruling copy", () => {
   assert.equal(copy.PACKAGED_OFFER_DISCLAIMER, "This page describes a packaged offer, not a delivered engagement.");
   assert.equal(copy.NOT_LEGAL_ADVICE, "General information, not legal advice.");
   assert.equal(
@@ -54,8 +54,11 @@ test("fixed copy: the module exports exactly the blueprint's constants", () => {
   assert.ok(copy.kitReviewedNote("x").startsWith(`${copy.NOT_LEGAL_ADVICE} `));
 });
 
-test("fixed copy: the header names the one constant that is ruling copy, not spec text (final review D7-F4)", () => {
+test("fixed copy: the header, and the pin's title, name the one constant that is ruling copy, not spec text (final review D7-F4; Phase D ruling R6)", () => {
   const source = readFileSync(new URL("../src/lib/fixed-copy.ts", import.meta.url), "utf8");
   const header = source.slice(0, source.indexOf("export "));
   assert.match(header, /\bREPORT_BADGE\b[^.]*\bruling\b/, "the header says every constant copies the spec");
+  // This file's first test pins every value: its title mustn't call REPORT_BADGE spec text.
+  const titles = [...readFileSync(new URL(import.meta.url), "utf8").matchAll(/^test\("([^"]+)"/gm)].map((m) => m[1]);
+  assert.match(titles[0], /\bREPORT_BADGE\b.*\bruling\b/, `the pin's title: "${titles[0]}"`);
 });

@@ -44,6 +44,11 @@
     html:focus-within {
       scroll-behavior: smooth;
     }
+    /* Desktop Safari doesn't focus a link on a mouse click, so src/scripts/anchor-scroll.ts marks
+       the page while a clicked in-page link scrolls (NB-1). */
+    html.anchor-scroll {
+      scroll-behavior: smooth;
+    }
   }
 
   body {
@@ -165,7 +170,7 @@ html.menu-open {
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
-    min-height: 2.75rem; /* 44px tap target, spec §6.6 */
+    min-height: 2.8125rem; /* 45px keeps the 44px target clear of fractional browser rounding. */
     padding: 0 0.875rem;
     border-radius: 6px;
     font-size: 0.875rem;

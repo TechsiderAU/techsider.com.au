@@ -14,6 +14,7 @@ import PromptBlock from "../components/ui/PromptBlock.astro";
 import SampleReport from "../components/ui/SampleReport.astro";
 import type { SampleReportData } from "../content/schemas";
 import type { DocumentData } from "../content/page-schemas";
+import { formatDate, isoDate } from "../lib/dates";
 import { crumbs, type SiteContext } from "../lib/site";
 
 interface Props {
@@ -25,10 +26,6 @@ interface Props {
 
 const { doc, report, harnessUrl, site } = Astro.props;
 const evaluation = site.solutions[3];
-
-// Content dates are UTC midnights ("2026-09-10"), so they print in UTC: "10 September 2026".
-const formatDate = (d: Date) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 ---
 <div class="template" data-template="evaluation-method">
   <PageHero

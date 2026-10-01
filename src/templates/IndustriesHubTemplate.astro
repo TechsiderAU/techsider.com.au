@@ -5,6 +5,7 @@
 // labelled "On request", three obligation chips linking to their regulatory-map rows); the
 // solution × industry matrix; the closing prompt.
 // Every link comes from the view: a null href renders as plain text, never as a dead link.
+import { AUTOMATION } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import ChipRow from "../components/page/ChipRow.astro";
@@ -19,9 +20,9 @@ interface Props {
 const { view } = Astro.props;
 ---
 <div class="template" data-template="industries-hub">
-  <PageHero title="Industries." highlight="Industries" />
+  <PageHero title="Your industry. Your workflows." display={false} art="workflow" eyebrow="Industries" sub="Practical AI automation shaped by the tools you use and the requirements your team works under." />
 
-  <PageSection id="industries" title="Nine industries">
+  <PageSection id="industries" title="Find your industry">
     <ul class="industry-cards">
       {view.cards.map((card) => (
         <li class="industry-cell">
@@ -29,13 +30,15 @@ const { view } = Astro.props;
             <h3 id={`industry-${card.id}-heading`} class="industry-card-title">
               {card.href ? <a href={card.href} class="industry-card-link">{card.shortName}</a> : card.shortName}
             </h3>
-            <p class="industry-card-hook">{card.hook}</p>
+            <p class="industry-card-hook">{AUTOMATION.industries[card.shortName] ?? card.hook}</p>
+            <details class="industry-details"><summary>Use cases and requirements</summary>
             <ul class="industry-card-uses">
               {card.useCases.map((useCase) => (
                 <li><span class="industry-card-number">{useCase.number}</span> <span>{useCase.name}{useCase.onRequest && " "}{useCase.onRequest && <span class="industry-card-on-request">On request</span>}</span></li>
               ))}
             </ul>
             <ChipRow id={`industry-${card.id}-chips`} label="Designed around" chips={card.chips} />
+            </details>
           </article>
         </li>
       ))}
@@ -54,11 +57,14 @@ const { view } = Astro.props;
   </PageSection>
 
   <div id="contact" class="template-closing">
-    <PromptBlock command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
+    <PromptBlock title="Find a useful first step." command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
   </div>
 </div>
 
 <style>
+  .industry-details summary { min-height: 44px; display: list-item; cursor: pointer; font-size: .875rem; font-weight: 500; }
+  .industry-details[open] summary { margin-bottom: 1rem; }
+  .industry-details :global(.chip-row) { margin-top: 1rem; }
   /* The cards share hairlines: the one hairline cell grid on this page, on bone only (spec §6.4). */
   .industry-cards {
     display: grid;

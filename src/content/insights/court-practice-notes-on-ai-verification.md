@@ -48,7 +48,7 @@ A test on your own closed matters answers that:
 - **Results by task type.** Wrong answers are counted by task type, so you can see which tasks are easy to verify and which need a full review.
 - **Every bad citation listed.** Each citation that doesn't exist, or doesn't support its proposition, is listed with the question it came from.
 - **Refusals counted.** The test records how often a tool said it didn't know when the answer was in the file.
-- **A data note per tool.** It records where the tool stores and processes inputs, and its retention and training settings.
+- **A data note per tool.** It records the vendor's published storage and processing locations, with their dates, and the tool's retention and training settings.
 
 Run the tools you're comparing on the same questions, side by side, in accounts your firm controls. If a vendor won't allow a structured trial on your own matters, you learn that before you sign. And the evaluation is only independent if the evaluator didn't set up or advise on the tool for your firm, and takes no resale margin or referral fees from the vendors being tested.
 

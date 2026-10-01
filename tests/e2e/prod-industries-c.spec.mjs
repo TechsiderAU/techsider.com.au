@@ -60,6 +60,7 @@ test.describe(() => {
     test(`a hub card chip opens its industry page on the row it names at ${vp.width}px`, async ({ page }) => {
       await page.setViewportSize(vp);
       await page.goto(HUB);
+      await page.locator('[data-industry-card="legal-and-professional"] summary').click();
       const chip = page.locator('[data-industry-card="legal-and-professional"] a[href*="#reg-"]').first();
       const href = await chip.getAttribute("href");
       await chip.click();

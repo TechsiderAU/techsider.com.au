@@ -27,7 +27,9 @@ export interface HomeView {
     ctas: { primary: Link; secondary: Link };
     trace: TraceData;
   };
-  /** All 9 industries, in spec §5 order. */
+  /** The method link is omitted while its page is held. */
+  servicesHref: string | null;
+  /** All 9 industries, in nav order. */
   industrySwitcher: { label: string; href: string | null }[];
   /** All 5 solutions, ①–⑤ in spec §4.1 order. */
   solutions: { number: string; shortName: string; oneLiner: string; forLine: string; href: string | null }[];
@@ -85,6 +87,7 @@ export function homeView(input: {
       },
       trace,
     },
+    servicesHref: site.page("services").href,
     industrySwitcher: site.industries.map((i) => ({ label: i.shortName, href: i.href })),
     solutions: site.solutions.map((s) => ({
       number: s.number,

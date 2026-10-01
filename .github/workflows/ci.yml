@@ -13,6 +13,11 @@ on:
   schedule:
     - cron: "0 21 * * 0"
   workflow_dispatch:
+    inputs:
+      contact_regression:
+        description: Run the Firefox contact regression and isolated mobile vitals
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -23,6 +28,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  contact-regression:
+    name: Firefox contact regression and mobile vitals
+    if: github.event_name == 'workflow_dispatch' && inputs.contact_regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22.18"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build production and preview
+        run: npm run build && npm run build:preview
+      - name: Unit and markup tests
+        run: npm test
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium firefox
+      - name: Firefox contact regression
+        run: npx playwright test tests/e2e/contact-form.spec.mjs --project=firefox
+      - name: Isolated mobile vitals
+        run: npx playwright test tests/e2e/prod-vitals.spec.mjs --project=prod-vitals --no-deps
+      - name: Upload Playwright results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: contact-regression-results
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
   test:
     name: Build, check and test
     if: github.event_name == 'push' || github.event_name == 'pull_request'

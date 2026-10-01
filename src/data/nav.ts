@@ -126,10 +126,9 @@ function describe(entry: PageEntry, description: string): PageEntry {
   return entry;
 }
 
-// The Home description keeps the sub-promise's audience range word for word (ruling 12,
-// src/data/positioning.ts), so the owner's one decision on spec §12 item 12 covers both.
+// The business homepage leads with AI automation, connected systems and human control.
 const HOME = describe(page("home", "Home", "/", "/", "live", "Techsider"),
-  "AI that ships. Measured before it ships. Five AI solutions for Australian organisations, from 40-person practices to federal agencies, with demos to try.");
+  "AI automation for Australian organisations. We design, build and support workflows that connect your systems, process documents and keep people in control.");
 // Always built: GitHub Pages serves dist/404.html for any path it has no file for.
 const NOT_FOUND = describe(page("system", "Not found", "/", "/404", "live"),
   "No page lives at this address. It may be mistyped or out of date. Follow a link below to a section of the Techsider site, or report the broken link by email.");
@@ -197,7 +196,7 @@ const SAFE_USE_KITS = describe(page("resources", "Safe-Use Kits", "/resources/",
   "Starter kits for accounting, legal and property teams, each naming its source."),
   "Safe-Use Kits for accounting, legal and property teams: a starting policy, checks and logs for using AI with client or tenant data, each naming its source.");
 const PAY_FOR = describe(page("resources", "What you already pay for", "/resources/", "/resources/what-you-already-pay-for/", "live", "What you already pay for",
-  "Check which AI features your software already includes."),
+  "Check which AI features your software includes, and which are add-ons."),
   "Tick the software you pay for to see the AI features it includes or sells as add-ons, their plans, and whether each vendor says where the AI is processed.");
 const EVAL_METHOD = describe(page("resources", "Evaluation method", "/resources/", "/resources/evaluation-method/", "live", "Evaluation method",
   "How we test AI, published so you can check it."),

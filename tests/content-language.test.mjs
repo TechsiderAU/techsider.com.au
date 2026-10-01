@@ -185,15 +185,17 @@ const UNVERIFIED_SYSTEMS = {
 
 // Spec §3.4. The mid-market pages: the accounting, education, manufacturing and real-estate
 // industry pages, the solutions whose every package is for mid-market buyers (①, ③ and ⑤), the
-// ① and ③ demo pages, and the checker's own page (final review D6-M5). The checker quotes vendors'
-// own feature names, such as "Agents in Copilot Chat", which spec §3.4 lets a page name as systems a
-// client runs: CHECKER_FEATURES allows those four phrases there, and nowhere else, so the checker's
-// own copy still can't say "agent".
+// ①, ③ and ⑤ demo pages (⑤'s since Phase D ruling R6), and the checker's own page (final review
+// D6-M5). The checker quotes vendors' own feature names, such as "Agents in Copilot Chat", which
+// spec §3.4 lets a page name as systems a client runs: CHECKER_FEATURES allows those four phrases
+// there and on the ⑤ demo page, which shows the same vendor table, and nowhere else, so the
+// checker's own copy still can't say "agent".
 const CHECKER = "/resources/what-you-already-pay-for/";
+const SWITCH_ON_DEMO = "/demos/ai-switch-on/";
 const MID_MARKET = [
   "/industries/accounting/", "/industries/education/", "/industries/manufacturing/", "/industries/real-estate/",
   "/solutions/document-registers/", "/solutions/draft-for-approval/", "/solutions/ai-switch-on/",
-  "/demos/document-registers/", "/demos/draft-for-approval/", CHECKER,
+  "/demos/document-registers/", "/demos/draft-for-approval/", SWITCH_ON_DEMO, CHECKER,
 ];
 /** The vendors' own feature wording the checker quotes from src/data/platform-ai.json (Microsoft, MYOB, Zoom). */
 const CHECKER_FEATURES = ["Agents in Copilot Chat", "advanced agent experiences", "AI agents and features", "custom agent builder"];
@@ -205,8 +207,8 @@ const MANUFACTURING = "/industries/manufacturing/";
 const AGENT = rule("agent", /\bagent(?:s|ic)?\b/gi, "name the job, not an agent, on a mid-market page (spec §3.4; ruling 8)", [
   // ④'s package name (spec §4.1 import rule 4), wherever ④ is offered, except Manufacturing (ruling 8).
   ...MID_MARKET.filter((url) => url !== MANUFACTURING).map((url) => ({ phrase: "Agentic AI Control Evaluation", url })),
-  // The vendor feature names the checker quotes, on the checker's page only.
-  ...CHECKER_FEATURES.map((phrase) => ({ phrase, url: CHECKER })),
+  // The vendor feature names the checker quotes, on the checker's page and the ⑤ demo page only.
+  ...[CHECKER, SWITCH_ON_DEMO].flatMap((url) => CHECKER_FEATURES.map((phrase) => ({ phrase, url }))),
   // Professions, and the statutes named after them.
   ...[
     "tax agent", "tax agents", "Tax Agent Services", "BAS agent", "BAS agents", "estate agent", "estate agents", "real estate agent",
@@ -327,6 +329,10 @@ test("the sweep reads both builds and their feeds", () => {
     assert.ok(pages.some((p) => p.url === "/") && pages.some((p) => p.url === "/rss.xml"), `${build}: run both builds first`);
   }
   for (const url of MID_MARKET) assert.ok(page(url), `production has no ${url}`);
+  // Every mid-market solution's demo page is held too (Phase D ruling R6: ⑤'s was missing).
+  for (const id of ["document-registers", "draft-for-approval", "ai-switch-on"]) {
+    assert.ok(MID_MARKET.includes(`/demos/${id}/`), `/demos/${id}/ isn't in MID_MARKET`);
+  }
 });
 
 test("no keep-off statement is in either build (Review Focus 3)", () => {

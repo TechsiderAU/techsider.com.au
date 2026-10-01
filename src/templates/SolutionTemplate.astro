@@ -2,10 +2,11 @@
 // Solution page body (spec §8.3), rendered from a SolutionView (src/lib/views/solution.ts).
 // Phase C's /solutions/<slug>/ route builds the view and wraps this in BaseLayout; in B2 only the
 // preview gallery renders it. Named slot "demo": the solution's demo (or, on ④, the sample
-// report), shown in the hero with the CTAs below it (block 1).
+// report), shown in an expandable example below the introduction.
 // Package markup is CI check 10's contract: the generic package is the first full block, launch
 // packages are tabs whose panel ids are the package ids (so #<package-id> selects one), on-request
 // packages are one-line entries, and internal packages never reach the view.
+import { solutionArtwork } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import ChipRow from "../components/page/ChipRow.astro";
@@ -24,29 +25,26 @@ interface Props {
 }
 
 const { view } = Astro.props;
-// PageHero renders its slot wrapper only when the slot is filled, so the hero gets children only
-// when this template's "demo" slot has content (⑤'s specimen leaves it empty).
+// A page without an example renders no disclosure. Examples retain their full transcripts.
 const hasDemo = Astro.slots.has("demo");
 const hero = {
   title: view.fullName,
+  art: solutionArtwork(view.number),
   display: false,
   eyebrow: `solution ${view.number}`,
   sub: view.oneLiner,
   breadcrumb: view.breadcrumb,
   ctas: view.ctas,
-  ctaPosition: "after-slot" as const,
+  ctaPosition: "before-slot" as const,
 };
 ---
 <div class="template" data-template="solution">
-  {hasDemo ? (
-    <PageHero {...hero}>
-      <div class="solution-demo" data-solution-demo>
-        <slot name="demo" />
-      </div>
-    </PageHero>
-  ) : (
-    <PageHero {...hero} />
-  )}
+  <PageHero {...hero} />
+  {hasDemo && <PageSection id="demo" title="Explore an example" surface="carbon">
+    <details class="solution-example"><summary>Open the illustrative example</summary>
+      <div class="solution-demo" data-solution-demo><slot name="demo" /></div>
+    </details>
+  </PageSection>}
 
   <PageSection id="job" title="The job" width="prose">
     <div class="solution-flow">
@@ -167,12 +165,14 @@ const hero = {
 
   <section id="contact" class="solution-closing">
     <div class="solution-closing-inner">
-      <PromptBlock command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
+      <PromptBlock title="Let’s put AI to work." command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
     </div>
   </section>
 </div>
 
 <style>
+  .solution-example summary { cursor: pointer; min-height: 44px; font-size: 1.125rem; font-weight: 500; }
+  .solution-example[open] summary { margin-bottom: 1.5rem; }
   /* Every section but the hero and the closing prompt is bone (PageSection's default), so the
      template's own text uses the bone pairs: carbon, muted-dark, bone-line and acid-deep.
      Each section body is one .solution-flow (or one list), so its rhythm doesn't depend on how

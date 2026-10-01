@@ -15,6 +15,7 @@ const CHECKER = "/resources/what-you-already-pay-for/";
 async function open(page, path) {
   const response = await page.goto(path);
   expect(response.status(), path).toBe(200);
+  if(path.startsWith("/solutions/") && !path.includes("#faq")) await page.locator(".solution-example > summary").click();
 }
 /**
  * How much a frame's polite log has announced. The engine writes the log from a run's first step
@@ -28,16 +29,18 @@ test.describe("with JavaScript", () => {
   test("a demo page starts its replay on load; a solution hero waits until its frame scrolls into view", async ({ page }) => {
     for (const id of REPLAYS) {
       await open(page, `/demos/${id}/`);
-      const demoFrame = page.locator("[data-page-hero] [data-demo-frame]");
+      const demoFrame = page.locator("[data-demo-frame]");
       await expect.poll(() => logged(demoFrame), { message: `/demos/${id}/ didn't start on load`, timeout: 10_000 }).toBeGreaterThan(0);
 
       // Opened at its FAQ, the solution page's hero is out of view, so its replay waits.
       await open(page, `/solutions/${id}/#faq`);
-      const frame = page.locator("[data-page-hero] [data-demo-frame]");
+      const frame = page.locator("[data-demo-frame]");
       await expect(frame).not.toBeInViewport();
       await page.waitForTimeout(1_000);
       expect(await logged(frame), `/solutions/${id}/ started out of view`).toBe(0);
       await expect(frame.locator("[data-demo-stage]"), `/solutions/${id}/ shows its stage out of view`).toBeHidden();
+      const disclosure=page.locator(".solution-example:not([open]) > summary");
+      if(await disclosure.count()) await disclosure.click();
       await frame.scrollIntoViewIfNeeded();
       await expect.poll(() => logged(frame), { message: `/solutions/${id}/ didn't start in view`, timeout: 10_000 }).toBeGreaterThan(0);
     }
@@ -46,7 +49,7 @@ test.describe("with JavaScript", () => {
   test("in each solution hero, a running replay offers Pause, Skip and Replay, and Skip from the keyboard leaves focus on Replay, never on <body>", async ({ page }) => {
     for (const id of REPLAYS) {
       await open(page, `/solutions/${id}/`);
-      const frame = page.locator("[data-page-hero] [data-demo-frame]");
+      const frame = page.locator("[data-demo-frame]");
       const part = (name) => frame.locator(`[data-demo-${name}]`);
       await frame.scrollIntoViewIfNeeded();
       await expect.poll(() => logged(frame), { message: `/solutions/${id}/ didn't start`, timeout: 10_000 }).toBeGreaterThan(0);
@@ -87,7 +90,7 @@ test.describe("with JavaScript", () => {
 
   test("⑤: the hero's compact frame opens the full checker; the demo page embeds the checker and points search at the checker's page", async ({ page }) => {
     await open(page, "/solutions/ai-switch-on/");
-    await page.locator("[data-page-hero] [data-demo-frame]").getByRole("link", { name: "Open the checker" }).click();
+    await page.locator("[data-demo-frame]").getByRole("link", { name: "Open the checker" }).click();
     await expect(page).toHaveURL(new RegExp(`${CHECKER}$`));
     await expect(page.locator("h1")).toHaveText("What you already pay for.");
     await open(page, "/demos/ai-switch-on/");
@@ -97,7 +100,7 @@ test.describe("with JavaScript", () => {
 
   test("④: the frame's summary leads down to the sample report", async ({ page }) => {
     await open(page, "/demos/ai-evaluation/");
-    await page.locator("[data-page-hero] [data-demo-frame]").getByRole("link", { name: "Read the sample report" }).click();
+    await page.locator("[data-demo-frame]").getByRole("link", { name: "Read the sample report" }).click();
     await expect(page).toHaveURL(/#sample-report$/);
     await expect(page.locator("#sample-report [data-sample-report]")).toBeInViewport();
   });
@@ -111,7 +114,7 @@ test.describe("under reduced motion", () => {
     for (const id of REPLAYS) {
       for (const path of [`/demos/${id}/`, `/solutions/${id}/`]) {
         await open(page, path);
-        const frame = page.locator("[data-page-hero] [data-demo-frame]");
+        const frame = page.locator("[data-demo-frame]");
         await frame.scrollIntoViewIfNeeded();
         await page.waitForTimeout(1_500);
         await expect(frame.locator("[data-demo-transcript]"), path).toBeVisible();
@@ -130,7 +133,7 @@ test.describe("without JavaScript", () => {
     for (const id of REPLAYS) {
       for (const path of [`/demos/${id}/`, `/solutions/${id}/`]) {
         await open(page, path);
-        const frame = page.locator("[data-page-hero] [data-demo-frame]");
+        const frame = page.locator("[data-demo-frame]");
         await expect(frame.locator("[data-demo-transcript]"), path).toBeVisible();
         await expect(frame.locator("[data-demo-controls]"), path).toBeHidden();
         await expect(frame.locator("[data-demo-stage]"), path).toBeHidden();
@@ -140,10 +143,10 @@ test.describe("without JavaScript", () => {
     await expect(page.locator("[data-page-hero] [data-demo-frame] [data-report-summary]")).toBeVisible();
     await expect(page.locator("#sample-report [data-sample-report]")).toBeVisible();
     await open(page, "/demos/ai-switch-on/");
-    const checkerFrame = page.locator("[data-page-hero] [data-demo-frame]");
+    const checkerFrame = page.locator("[data-demo-frame]");
     await expect(checkerFrame.locator("[data-demo-transcript] [data-platform-facts]")).toBeVisible();
     await expect(checkerFrame.locator("[data-checker-form]")).toBeHidden();
     await open(page, "/solutions/ai-switch-on/");
-    await expect(page.locator("[data-page-hero] [data-demo-frame] [data-checker-summary]")).toBeVisible();
+    await expect(page.locator("[data-demo-frame] [data-checker-summary]")).toBeVisible();
   });
 });

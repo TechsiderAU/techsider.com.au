@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
+import { shikiClasses } from "./src/lib/shiki-classes.ts";
 import { PAGES } from "./src/data/nav.ts";
 import { previewGallery } from "./src/preview/integration.mjs";
 
@@ -13,6 +14,11 @@ export default defineConfig({
   site: "https://techsider.com.au",
   // previewGallery() adds the /preview/ template gallery to preview builds only (TECHSIDER_NAV_PREVIEW=1).
   integrations: [previewGallery(), sitemap({ filter: (page) => !NOT_LISTED.has(new URL(page).pathname) })],
+  // Code blocks in Markdown: Shiki's css-variables theme, turned into classes that Prose.astro
+  // colours with the spec §6.1 tokens, so no code block carries an inline style (WB-8).
+  markdown: {
+    shikiConfig: { theme: "css-variables", transformers: [shikiClasses()] },
+  },
   vite: {
     plugins: [tailwindcss()],
   },

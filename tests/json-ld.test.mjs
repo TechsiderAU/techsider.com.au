@@ -149,16 +149,9 @@ const nodesOf = (scripts) => scripts.map((s) => JSON.parse(s)).flatMap((doc) => 
 /** Every object inside a value, the value itself included, depth-first. */
 const objectsIn = (v) => (Array.isArray(v) ? v.flatMap(objectsIn) : v && typeof v === "object" ? [v, ...Object.values(v).flatMap(objectsIn)] : []);
 
-/**
- * The properties each type must carry. Google's structured-data docs (fetched 2026-09-29) require
- * WebSite's name and url (site names); BreadcrumbList's itemListElement, with each ListItem's
- * position, name and item (item may be left off the last, but ours never is); and FAQPage's
- * mainEntity, with each Question's name and acceptedAnswer and each Answer's text. They require
- * nothing of Organization or BlogPosting, and have no Service feature, so those rows are ours: the
- * Organization's @id, name and url, which every page's nodes point to; a Service's page-visible name
- * and description, its url and its provider; a BlogPosting's headline, dates of record, author and
- * publisher (Google's recommended set). A type without a row fails, so a new one is decided here.
- */
+/** Project-enforced shape for the types this site emits. These rows are our assertions, not a
+ * complete statement of any vendor's structured-data requirements. New types need rows in both
+ * REQUIRED (filled properties) and ALLOWED (permitted keys). */
 const REQUIRED = {
   Organization: ["@id", "name", "url"],
   WebSite: ["@id", "name", "url"],
@@ -175,7 +168,7 @@ const REQUIRED = {
  * Every property each type may carry: what src/lib/json-ld.ts, Breadcrumb and FaqList emit (with
  * the Organization's legalName, once the owner sets it), so a misspelt or unplanned key fails. A
  * standalone BreadcrumbList or FAQPage carries its own @context; a graph node doesn't. A type
- * without a row fails the REQUIRED check first.
+ * without a row fails an independent table assertion, even if REQUIRED already has its row.
  */
 const ALLOWED = {
   Organization: ["@type", "@id", "name", "url", "legalName", "email", "logo", "slogan", "areaServed", "knowsAbout"],
@@ -190,6 +183,24 @@ const ALLOWED = {
   Country: ["@type", "name"],
 };
 const filled = (v) => v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0);
+/** Assert both tables separately before reading either row. */
+function checkTypeProperties(obj, url) {
+  const type = obj["@type"];
+  assert.ok(type in REQUIRED, `${url}: a ${type} has no row in REQUIRED`);
+  assert.ok(type in ALLOWED, `${url}: a ${type} has no row in ALLOWED`);
+  for (const key of REQUIRED[type]) assert.ok(filled(obj[key]), `${url}: a ${type} without ${key}`);
+  for (const key of Object.keys(obj)) assert.ok(ALLOWED[type].includes(key), `${url}: a ${type} carries "${key}", which ALLOWED doesn't list for it`);
+}
+
+test("a type added only to REQUIRED gets an actionable missing-ALLOWED-row diagnostic", () => {
+  REQUIRED.RequiredOnly = ["name"];
+  try {
+    assert.throws(() => checkTypeProperties({ "@type": "RequiredOnly", name: "fixture" }, "/fixture/"), /RequiredOnly has no row in ALLOWED/);
+  } finally {
+    delete REQUIRED.RequiredOnly;
+  }
+});
+
 /** Offers and prices (D4, check 11), people (spec §11.3) and a headcount (D14): no node carries one. */
 const FORBIDDEN_KEYS = ["offers", "price", "priceRange", "priceSpecification", "hasOfferCatalog", "founder", "founders", "employee", "employees", "member", "members", "numberOfEmployees"];
 const FORBIDDEN_TYPES = ["Person", "Offer", "AggregateOffer", "OfferCatalog", "PriceSpecification"];
@@ -215,9 +226,7 @@ for (const dir of ["dist", "dist-preview"]) {
           assert.deepEqual(keys, ["@id"], `${url}: an untyped object that isn't an @id reference: ${JSON.stringify(obj)}`);
           continue;
         }
-        assert.ok(type in REQUIRED, `${url}: a ${type} has no row in REQUIRED`);
-        for (const key of REQUIRED[type]) assert.ok(filled(obj[key]), `${url}: a ${type} without ${key}`);
-        for (const key of keys) assert.ok(ALLOWED[type].includes(key), `${url}: a ${type} carries "${key}", which ALLOWED doesn't list for it`);
+        checkTypeProperties(obj, url);
         if (type === "BreadcrumbList") {
           assert.deepEqual(obj.itemListElement.map((i) => i.position), obj.itemListElement.map((_, i) => i + 1), `${url}: breadcrumb positions`);
           for (const item of obj.itemListElement) assert.ok(item.item.startsWith(`${ORIGIN}/`), `${url}: breadcrumb item ${item.item}`);

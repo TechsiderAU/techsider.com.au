@@ -2,9 +2,11 @@
 // Typography for rendered markdown (the legal documents, the evaluation method, insight posts):
 // h2, h3, p, lists, links, code, pre, blockquote and tables, in a 48rem measure. The slot holds
 // HTML this component doesn't render itself, so every rule reaches it through :global().
-// Written for bone (its home surface) and carbon, like the ui components. Nothing scrolls
-// sideways at 320px: code blocks and table cells wrap instead (a scrolling region would need
-// to be focusable, and the markdown can't carry a tabindex).
+// Written for bone (its home surface) and carbon, like the ui components. At 320px the page never
+// scrolls sideways. A highlighted code block scrolls inside itself: Shiki gives its <pre>
+// tabindex="0", so the keyboard can scroll it (WB-8). Any other <pre>, and table cells, wrap
+// instead, because a scrolling region has to be focusable and plain markdown can't carry a tabindex.
+// Syntax colours are classes (src/lib/shiki-classes.ts), styled here with spec §6.1 tokens.
 ---
 <div class="prose" data-prose><slot /></div>
 
@@ -82,6 +84,29 @@
     padding: 0;
     background: none;
     font-size: inherit;
+  }
+  .prose :global(pre[tabindex]) {
+    overflow-x: auto;
+    white-space: pre;
+    overflow-wrap: normal;
+  }
+  /* Syntax tokens, on both code surfaces (graphite here, carbon on bone): keywords, functions and
+     constants in acid (at least 12:1), comments and punctuation in muted (at least 5:1), and the
+     rest in the block's bone, as the trace panels colour their lines (spec §6.1). */
+  .prose :global(:is(.tok-keyword, .tok-function, .tok-constant)) {
+    color: var(--color-acid);
+  }
+  .prose :global(:is(.tok-comment, .tok-punctuation)) {
+    color: var(--color-muted);
+  }
+  .prose :global(.tok-italic) {
+    font-style: italic;
+  }
+  .prose :global(.tok-bold) {
+    font-weight: 700;
+  }
+  .prose :global(.tok-underline) {
+    text-decoration: underline;
   }
   .prose :global(blockquote) {
     padding-left: 1rem;

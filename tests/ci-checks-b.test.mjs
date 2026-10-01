@@ -381,6 +381,76 @@ test("11: an exception without a reason is reported and excuses nothing", async 
   assert.equal(where(errors[1]), 'dist/index.html: "payback"');
 });
 
+// ---------- 10 and 11, hardened in Phase E (WB-10, WB-11) ----------
+
+const PILLAR = '<p data-onshore-pillar data-onshore="true">Your data stays onshore.</p>';
+const NOTE = "<p data-processing-note>We show you where your data is processed.</p>";
+const block = (id, body) => `<section id="${id}" data-package-tab data-package-status="launch" data-package-id="${id}">${body}</section>`;
+const onshoreSolution = {
+  genericPackage: { id: "fixture-generic", status: "launch", onshore: true },
+  packages: [
+    { id: "fixture-onshore", status: "launch", onshore: true },
+    { id: "fixture-offshore", status: "launch", onshore: false },
+    { id: "fixture-listed", status: "on-request", oneLiner: "Fixture on-request package" },
+  ],
+};
+
+test("10: on a solution's page each block shows the onshore pillar exactly when its package has onshore: true in the YAML (WB-10)", async () => {
+  const clean = tree({
+    "src/content/solutions/fixture-solution.yaml": onshoreSolution,
+    "dist/solutions/fixture-solution/index.html": page(
+      `${block("fixture-generic", PILLAR)}${block("fixture-onshore", PILLAR)}${block("fixture-offshore", NOTE)}`,
+    ),
+  });
+  assert.deepEqual(await packageStatus({ ...clean, mode: "gate" }), { name: "10-package-status", errors: [], warnings: [] });
+
+  const t = tree({
+    "src/content/solutions/fixture-solution.yaml": onshoreSolution,
+    "dist/solutions/fixture-solution/index.html": page(`
+      ${block("fixture-generic", NOTE)}
+      ${block("fixture-offshore", PILLAR)}
+      <section data-package-tab data-package-status="launch">${NOTE}</section>
+      ${block("fixture-listed", NOTE)}`),
+  });
+  const at = "dist/solutions/fixture-solution/index.html: ";
+  assert.deepEqual((await packageStatus({ ...t, mode: "report" })).errors, [
+    `${at}package "fixture-generic" has onshore: true in src/content/solutions/fixture-solution.yaml, but its block shows no onshore pillar`,
+    `${at}package "fixture-offshore" has onshore: false in src/content/solutions/fixture-solution.yaml, but its block shows the onshore pillar`,
+    `${at}a package block has no data-package-id, so its onshore pillar can't be checked against the data`,
+    `${at}data-package-id "fixture-listed" is not a launch package in src/content/solutions/fixture-solution.yaml, so its onshore pillar can't be checked against the data`,
+  ]);
+});
+
+test("10: the pillar's words outside a flagged pillar fail in any package block, the gallery's included (WB-10)", async () => {
+  const t = tree({
+    "dist/preview/templates/solution/index.html": page(`
+      <section data-package-tab data-package-status="launch"><p>Your data stays onshore.</p>${NOTE}</section>
+      <section data-package-tab data-package-status="launch">${PILLAR}</section>
+      <p>Your data stays onshore.</p>`),
+  });
+  assert.deepEqual((await packageStatus({ ...t, mode: "report" })).errors, [
+    'dist/preview/templates/solution/index.html: a package block shows "Your data stays onshore." outside its [data-onshore-pillar] element',
+  ]);
+});
+
+test("11: in the preview build, the gallery's offer templates follow the currency rule; its other templates don't (WB-11)", async () => {
+  const t = tree({
+    "dist/preview/templates/solution/index.html": page("<p>Fixture package at A$5,000</p>"),
+    "dist/preview/templates/home-stale-insights/index.html": page("<p>Fixture home from $900</p>"),
+    "dist/preview/templates/contact-no-endpoint/index.html": page("<p>Fixture day rate</p>"),
+    "dist/preview/templates/sent/index.html": page("<p>Fixture fee credit</p>"),
+    "dist/preview/templates/industry/index.html": page("<p>Fixture penalty up to $1.5 million</p>"),
+    "dist/preview/templates/demo/index.html": page("<p>Fixture owner repair limit $500</p>"),
+  });
+  const { errors } = await pricing({ ...t, mode: "report" });
+  assert.deepEqual(sorted(errors.map(where)), [
+    'dist/preview/templates/contact-no-endpoint/index.html: "day rate"',
+    'dist/preview/templates/home-stale-insights/index.html: "from $9"',
+    'dist/preview/templates/sent/index.html: "fee credit"',
+    'dist/preview/templates/solution/index.html: "A$5"',
+  ]);
+});
+
 // ---------- the repo's exception lists ----------
 
 test("the exception lists are well-formed, and every banned-phrase exception is still needed", () => {

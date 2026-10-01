@@ -2,6 +2,7 @@
 // the Industries hub, as the production build renders them (dist/), and the content they are built
 // from. Run `npm run build` first. Expected values come from the content files and nav.ts; the
 // only literals are the held rows and keep-off strings the Phase C rulings name.
+import { AUTOMATION } from "../src/lib/marketing.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -33,7 +34,7 @@ const built = (path) => readDist(`${path.slice(1)}index.html`);
 const mainOf = (html) => elements(html, (t) => t.name === "main")[0].inner;
 const byId = (html, id) => elements(html, (t) => t.attrs.id === id)[0];
 const text = (html) => visibleText(html).trim();
-// Text as a browser shows it inline: tags dropped without adding spaces ("<span>Industries</span>." → "Industries.").
+// Text as a browser shows it inline: tags dropped without adding spaces ("<span>Industries</span>." → "Your industry. Your workflows.").
 const inlineText = (html) => decodeEntities(html.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
 
 // The section (paragraph, rule or item) a row's obligation cites: "¶9A", "s 8A(2)(c)–(d)", "r 9.1".
@@ -179,7 +180,7 @@ test("hub: one h1, then nine cards in nav order, each heading linking to its liv
   const main = mainOf(built("/industries/"));
   const h1 = elements(main, (t) => t.name === "h1");
   assert.equal(h1.length, 1);
-  assert.equal(inlineText(h1[0].inner), "Industries.");
+  assert.equal(inlineText(h1[0].inner), "Your industry. Your workflows.");
   const cards = elementsWith(main, "data-industry-card");
   assert.deepEqual(cards.map((c) => c.attrs["data-industry-card"]), INDUSTRY_IDS);
   for (const [i, card] of cards.entries()) {
@@ -194,7 +195,7 @@ test("hub: each card shows its hook, three flagship use cases and three chips th
   for (const card of cards) {
     const id = card.attrs["data-industry-card"];
     const data = industryData(id);
-    assert.ok(text(card.inner).includes(data.constraintHook), `${id}: hook`);
+    assert.ok(text(card.inner).includes(AUTOMATION.industries[site.industries.find(i=>i.id===id).shortName]), `${id}: hook`);
     const uses = elements(elements(card.inner, (t) => /industry-card-uses/.test(t.attrs.class ?? ""))[0].inner, (t) => t.name === "li");
     assert.equal(uses.length, 3, `${id}: use cases`);
     data.flagshipUseCases.slice(0, 3).forEach((u, k) => {

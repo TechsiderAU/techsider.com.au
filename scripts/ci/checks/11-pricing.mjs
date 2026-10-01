@@ -3,7 +3,8 @@
 // - the offer sources: src/content/solutions/, src/content/kits/ and src/data/demos/
 //   (every file but README.md and dotfiles), src/data/services.ts and src/data/contact.ts;
 // - the visible text of the built offer pages: /, /solutions/**, /services/** (with
-//   Evaluation Partner) and /contact/**.
+//   Evaluation Partner) and /contact/**, and, in the preview build, the gallery's templates
+//   of those pages (WB-11): home*, solution*, services, evaluation-partner, contact* and sent.
 // Regulatory JSON, src/data/platform-ai.json and insights are out of scope. Exceptions
 // are check 04's: src/data/banned-phrase-exceptions.json, matched the same way.
 import { existsSync } from "node:fs";
@@ -22,6 +23,8 @@ export const OFFER_RULES = [...PRICING, CURRENCY];
 export const OFFER_DIRS = ["src/content/solutions", "src/content/kits", "src/data/demos"];
 export const OFFER_FILES = ["src/data/services.ts", "src/data/contact.ts"];
 export const OFFER_PAGES = /^(index\.html|(solutions|services|contact)\/.+\.html)$/;
+/** The gallery's offer templates, which only the preview build has: the same rule as the pages they preview. */
+export const GALLERY_OFFER_PAGES = /^preview\/templates\/(home[a-z-]*|solutions?[a-z-]*|services|evaluation-partner|contact[a-z-]*|sent)\/index\.html$/;
 const NOT_COPY = /(^|\/)(README\.md|\.[^/]*)$/; // notes for editors, and dotfiles
 
 export async function run({ root, dist }) {
@@ -39,7 +42,7 @@ export async function run({ root, dist }) {
   if (pages.length === 0) r.add("error", `${dist}: no built HTML found (run the build first)`);
   for (const file of pages) {
     const page = relPath(out, file);
-    if (OFFER_PAGES.test(page)) scan(visibleText(readText(file)), `dist/${page}`, exceptions, r, { phrases: OFFER_RULES });
+    if (OFFER_PAGES.test(page) || GALLERY_OFFER_PAGES.test(page)) scan(visibleText(readText(file)), `dist/${page}`, exceptions, r, { phrases: OFFER_RULES });
   }
   return { name: NAME, errors: r.errors, warnings: r.warnings };
 }

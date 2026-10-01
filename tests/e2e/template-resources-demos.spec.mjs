@@ -71,8 +71,9 @@ for (const width of [390, 1280]) {
       await expect(badge).toHaveText(kind === "demo" ? DEMO_BADGE : REPORT_BADGE);
       // Both fixture demos are illustrative (spec §9.3): the frame's own label, not the ④ trace's.
       await expect(frame).toHaveAttribute("data-provenance", "illustrative");
+      // The report's badge says "Illustrative" itself, so it is the frame's one label (Phase D ruling R6).
       const label = frame.locator(":scope > [data-provenance-label]");
-      await expect(label).toHaveText("Illustrative data");
+      await expect(label).toHaveText(kind === "demo" ? "Illustrative data" : REPORT_BADGE);
       await expect(label).toBeVisible();
       // With JavaScript the register demo's replay can hold the transcript's place (Phase D Task 3), so
       // the engine slot is what shows under the badge there; the ④-like demo is static.

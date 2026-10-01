@@ -109,16 +109,15 @@ test("the hero: breadcrumb, eyebrow, H1 and one-liner, then the demo slot, then 
     const demo = fixtureSite.demo(id);
     const secondary = demo ? linkTo(h, demo) : undefined;
     if (demo) assert.ok(secondary && secondary.start > primary.start, `${PAGES[id]}: "Try the demo" doesn't follow the primary CTA`);
-    const slot = startTags(h).find((tag) => "data-solution-demo" in tag.attrs);
+    const slot = startTags(t).find((tag) => "data-solution-demo" in tag.attrs);
     if (id === "fixture-solution-5") {
       assert.equal(slot, undefined, "the ⑤ specimen fills no demo slot, so the hero has no demo wrapper");
     } else {
-      assert.ok(slot && slot.start < primary.start, `${PAGES[id]}: the demo slot doesn't come before the CTAs`);
+      assert.ok(slot && slot.start >= t.indexOf(hero.outer) + hero.outer.length, `${PAGES[id]}: the example should follow the concise hero`);
     }
   }
   assert.ok(template("fixture-solution").includes("data-demo-placeholder"));
-  const [hero4] = elementsWith(template("fixture-solution-4"), "data-page-hero");
-  assert.equal(elementsWith(hero4.outer, "data-sample-report").length, 1, "the ④ hero holds the sample report");
+  assert.equal(elementsWith(template("fixture-solution-4"), "data-sample-report").length, 1, "the ④ hero holds the sample report");
 });
 
 test("packages: the generic package is the first full block, launch packages are tabs, on-request ones are listed, internal ones never render", () => {
@@ -313,7 +312,7 @@ test("the closing prompt asks about this solution and links to the contact page 
     const s = sectionOf(template(id), "contact");
     assert.ok(s, `${PAGES[id]}: no #contact`);
     const [prompt] = elementsWith(s.inner, "data-prompt-block");
-    assert.match(text(prompt.inner), new RegExp(`talk_to_us --about=${id}\\b`));
+    assert.ok(text(prompt.inner).includes("Let’s put AI to work."));
     const [a] = elements(prompt.inner, (t) => t.name === "a");
     assert.equal(a.attrs.href, fixtureSite.contact({ interest: id }));
     assert.equal(text(a.inner), `Talk to us about ${solutionLink(fixtureSite, id).shortName}`);

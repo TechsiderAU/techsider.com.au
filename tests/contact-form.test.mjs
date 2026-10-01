@@ -69,7 +69,6 @@ test("the enquiry fields are spec §10.2's, in form order, and each error line s
   assert.deepEqual(FORM_MESSAGES, {
     invalid: "Your enquiry wasn't sent. Check these answers:",
     sending: "Sending your enquiry…",
-    failed: "Your enquiry wasn't sent. Try again in a minute, or email us at the address on this page.",
     unconfirmed: "Your enquiry may not have been sent. Email us at the address on this page instead of sending it again.",
   });
   // A fetch that rejects (a provider answer the browser blocks for CORS, or a connection dropped
@@ -115,7 +114,7 @@ test("preselection: every /contact/ link the site builds (spec §10.1) preselect
   }
 });
 
-test("rejectedFields: a Formspree-style list or an object keyed by field, in form order; anything else names nothing", () => {
+test("rejectedFields: a local supported validation list or an object keyed by field, in form order; anything else names nothing", () => {
   assert.deepEqual(rejectedFields({ ok: false, errors: [{ field: "message", message: "Fixture" }, { field: "email", message: "Fixture" }] }), ["email", "message"]);
   assert.deepEqual(rejectedFields({ errors: { consent: "Fixture", name: ["Fixture"] } }), ["name", "consent"]);
   for (const body of [
@@ -237,7 +236,7 @@ test("data: the form, /contact/sent/ and the privacy policy go live together (sp
   assert.match(source("src/pages/contact/sent/[...page].astro"), /gatedPaths\("\/contact\/sent\/", CONTACT\.formEndpoint !== null, /);
 });
 
-test("data: until the owner chooses a provider, no form, no provider, and the honeypot name the three shortlisted providers read (spec §12 item 1)", () => {
+test("data: until the owner chooses a provider, no form, no provider, and the historical honeypot placeholder awaits selected-provider verification (spec §12 item 1)", () => {
   assert.equal(CONTACT.formEndpoint, null);
   assert.equal(CONTACT.formProvider, null);
   assert.equal(CONTACT.redirectField, null);
@@ -305,8 +304,8 @@ test("gallery: every enquiry field has one empty, hidden error line carrying its
   assert.equal(summary.attrs["aria-live"], "polite");
   assert.equal(summary.inner, "");
   assert.deepEqual(
-    ["data-say-invalid", "data-say-sending", "data-say-failed", "data-say-unconfirmed"].map((a) => decodeEntities(summary.attrs[a])),
-    [FORM_MESSAGES.invalid, FORM_MESSAGES.sending, FORM_MESSAGES.failed, FORM_MESSAGES.unconfirmed],
+    ["data-say-invalid", "data-say-sending", "data-say-unconfirmed"].map((a) => decodeEntities(summary.attrs[a])),
+    [FORM_MESSAGES.invalid, FORM_MESSAGES.sending, FORM_MESSAGES.unconfirmed],
   );
   assert.ok(form.inner.indexOf(summary.outer) < form.inner.indexOf('class="contact-fields"'), "the summary isn't above the fields");
 });

@@ -2,6 +2,12 @@
 
 The Techsider website, published at https://techsider.com.au. It is a static Astro site: production deploys from `main` only, and every push is built, checked and tested in CI.
 
+## Business presentation
+
+The homepage introduces Techsider as an AI automation solution provider, with three capability areas: workflow automation, document intelligence and knowledge assistants. Detailed evaluation, deployment and regulatory evidence remains on the solution and industry pages. Interactive examples live on the Demos pages; solution pages expose their examples through native disclosures that work without JavaScript.
+
+The responsive enterprise application concepts in `public/images/automation/` are generated examples, not screenshots of a proprietary platform or customer implementations. Their provenance and prompts are recorded in [the asset README](public/images/automation/README.md). `BusinessArtwork.astro` provides descriptions, visible captions, reserved dimensions and responsive loading; only hero images load eagerly.
+
 ## Stack
 
 - [Astro 7](https://astro.build/): static output, no UI framework. `astro check` type-checks every build.
@@ -202,7 +208,31 @@ The replay engine is `src/scripts/demo-engine.ts`, over `src/scripts/playback.ts
 
 The checker, `src/components/demo/PlatformChecker.astro` with `src/scripts/checker.ts`, renders on `/resources/what-you-already-pay-for/`, its canonical page, and on the ⑤ demo page. It reads the dated vendor facts in `src/data/platform-ai.json`, bundled at build time, and shows their "as at" date. Re-check every entry against its `source` every quarter (spec §11.6): update the entry and its `asAt`, then the file's `asAt`. A fact the research couldn't verify stays out of the file until someone does. A processing location the vendor doesn't publish starts with "Not published", and the checker shows exactly that.
 
-The ④ sample report stays illustrative until the evaluation harness produces a measured run. `SampleReport` labels it "Illustrative sample: not a real test run", and the `⚑` in `src/data/runs/README.md` keeps check `07-verify-markers` failing the launch build until the report comes from a committed run.
+The ④ sample report stays illustrative until the evaluation harness produces a measured run. `SampleReport` labels it "Illustrative sample: not a real test run", and the `⚑` in `src/data/runs/README.md` keeps check `07-verify-markers` failing the launch build until the report comes from a committed run. Where ④ sits in a `DemoFrame`, the frame's "Illustrative sample report · our own demo system" badge supplies its provenance label, so no adjacent "Illustrative data" label repeats it. The report's own label and fixed sample-report caption remain.
+
+### The contact form
+
+`/contact/` always shows the contact email as plain text, with a copy button, so anyone can write without the form (spec §10.2). The form renders only while `formEndpoint` in `src/data/contact.ts` holds the form provider's endpoint and `/contact/sent/`, where a sent form lands, is live in `src/data/nav.ts`: the build fails while the two disagree. Until a provider is connected, `formEndpoint` is `null`, with a `⚑` that keeps check `07-verify-markers` failing the launch build, so production's `/contact/` offers the email address alone.
+
+Once a provider is connected, the form keeps four rules:
+
+- **It works without JavaScript.** It is a plain HTML POST to the provider, which the browser holds back while a required field is empty or the email address is malformed. The provider then redirects to `/contact/sent/`: a hidden field named by `redirectField` asks it to, or, where `redirectField` is `null`, the provider's own settings do. `hiddenFields` adds any fixed field the provider needs, such as one that keeps the enquiry out of the redirect's query string, and `honeypotField` names the honeypot the way the provider's spam filter reads it.
+- **JavaScript only improves it.** The script checks the form itself: each error is tied to its field with `aria-describedby`, and a summary in an `aria-live` region links to the fields in error. A complete enquiry goes by `fetch`; a success opens `/contact/sent/`, and a supported 422 validation rejection shows linked field errors with the answers kept. The complete attempt has a 30-second deadline, including reading the response body. Generic server errors, unknown responses, timeouts and network/CORS failures leave delivery unconfirmed: the form preserves answers and advises email instead of resubmitting, with no automatic retry. Cancellation and attempt identity prevent late responses or a persisted page restore from changing a newer submission. `?industry=` and `?interest=` preselect their options when the value is one the form lists, and are ignored otherwise.
+- **No CAPTCHA and no JavaScript challenge.** A honeypot field that people never see, and the provider's own server-side filter, are the spam defence.
+- **The collection notice** above the submit button names the form provider and the email provider, each with its storage country, from the same data as the Trust page's sub-processor table.
+
+`/contact/sent/` is `noindex` and stays out of the sitemap. The tests never reach a real provider: Playwright starts `tests/support/mock-form.mjs`, a stand-in endpoint on its own port, which answers the plain POST with a 303 redirect to `/contact/sent/` and the `fetch` path with JSON.
+
+To connect a provider, one commit sets `formEndpoint`, `formProvider` (its name and storage country), `redirectField`, `hiddenFields` and `honeypotField` in `src/data/contact.ts`, adds the provider to its `subProcessors`, removes the two `⚑` on the endpoint and the provider, and puts `/contact/sent/` live in `src/data/nav.ts`. Two things come first. The privacy policy must be live, naming the provider and every overseas country where enquiries are stored or read (spec §8.11). And test submissions from a local build must show four things: the provider answers the plain POST with a redirect to `https://techsider.com.au/contact/sent/` and no query string; it sets no cookie; the `fetch` path gets JSON for a success and for an error; and a submission with the honeypot filled is dropped.
+
+### Search, sharing and `security.txt`
+
+Every page carries its own title and meta description, `lang="en-AU"`, Open Graph and Twitter card tags and structured data, and every page but the 404, which has no address of its own, a canonical URL (spec §11.3):
+
+- **JSON-LD.** The graph builders in `src/lib/json-ld.ts` give each page one `@graph`, with stable `@id`s. Home's graph describes the organisation in full, and the website; every other page carries a minimal organisation node that its own nodes point to. The organisation takes `legalName` from `SITE` in `src/data/nav.ts` once it differs from the name, and no node names a person. The solution pages, `/services/` and the Evaluation Partner page add their `Service` nodes, with no `offers` and no price. Posts are `BlogPosting`s whose author and publisher are the organisation. Breadcrumbs (`BreadcrumbList`) and FAQ blocks (`FAQPage`) keep their own scripts, in their components.
+- **Social images.** `public/og/` holds one 1200×630 PNG per page kind (home, solution, industry, service, insight, and a default), each with the `[techsider]` lock-up, the slogan and the proof line. `npm run og` draws them through `scripts/generate_brand.py`, from `src/lib/social-image.ts`: the text becomes glyph outlines in an SVG, which `sharp` turns into a PNG. The PNGs are committed, and `tests/social-images.test.mjs` fails when their inputs change without a new render.
+- **`security.txt`.** `src/lib/security-txt.ts` writes `/.well-known/security.txt` from `SITE.securityContact` in `src/data/nav.ts`, through the route `src/pages/.well-known/[name].txt.ts`: `Contact`, an `Expires` 180 days after the build day, `Preferred-Languages` and `Canonical` (RFC 9116). The weekly deploy renews `Expires`. Until a security contact exists, `SITE.securityContact` is `null` and no `security.txt` is built.
+- **Sitemap and robots.** `@astrojs/sitemap` writes `sitemap-index.xml`, which `public/robots.txt` names. The sitemaps list the canonical URL of every page meant to be found: they leave out `/contact/sent/`, the 404 and any page whose canonical URL is another page's. `tests/launch-sweep.test.mjs` holds them to exactly that list, and holds every page to `en-AU`, to the contact email as plain text (read as the live check reads it), and to no github.com URL.
 
 ### Tests
 
@@ -234,9 +264,21 @@ The specs move focus with `focusKeys()` from `tests/support/keys.mjs`, because W
 
 `tests/e2e/prod-vitals.spec.mjs` is the lab vitals gate (spec §11.4): LCP under 2.0 s and CLS under 0.05 on the pages in `tests/support/vitals.mjs` (Home, one solution page and one industry page). Each page loads five times on Lighthouse's mobile screen, with the CPU slowed 4× and every response held back 150 ms, and the median of each metric must be under budget. It runs in the real Chrome build, after every other project and one load at a time, so nothing else competes for the CPU. `--no-deps` runs it without the rest. The same workflow runs Lighthouse on those pages weekly, on demand, and on a pull request into `main`, through `scripts/ci/lighthouse-report.mjs`. That job only reports, in its summary: the vitals spec is the gate.
 
+`tests/perf-budget.test.mjs` holds the homepage's JavaScript under 40 KB gzipped and verifies that replay engines and scenario data are absent from its scripts. Detailed demos load their own renderer and data when needed.
+
 ## Deploy
 
-Push to `main`. `.github/workflows/deploy.yml` runs `npm run build` and publishes `dist/` to GitHub Pages. At launch the build runs with `VERIFY_MODE=gate`; during the owner's interim deploy (from 2026-09-30) it runs with `VERIFY_MODE=report`. It also rebuilds `main` on a weekly schedule, so date-based content, such as the Home page's latest insights, moves on without a push. No other branch deploys: a push to any branch, and every pull request, runs `.github/workflows/ci.yml` instead.
+Push to `main`. `.github/workflows/deploy.yml` runs `npm run build`, through `withastro/action` pinned to a commit SHA, and publishes `dist/` to GitHub Pages. At launch the build runs with `VERIFY_MODE=gate`; during the owner's interim deploy (from 2026-09-30) it runs with `VERIFY_MODE=report`. It also rebuilds `main` on a weekly schedule, so date-based content, such as the Home page's latest insights and the `Expires` date in `security.txt`, moves on without a push. No other branch deploys: a push to any branch, and every pull request, runs `.github/workflows/ci.yml` instead.
+
+Cloudflare sits in front of GitHub Pages and can rewrite pages on their way out, so each deploy ends with the `live-check` job. It runs `scripts/ci/live-check.mjs` against https://techsider.com.au, waits until the live home page carries the deploy's build stamp (`<meta name="build">`, set from `GITHUB_SHA`), and then checks that:
+
+- `/.well-known/security.txt` answers 200 as `text/plain; charset=utf-8`, with its `Contact`, one `Expires` at least 30 days away and its `Canonical`. While `SITE.securityContact` is `null`, the check reports the file missing;
+- the contact email is plain text on `/`, `/contact/`, the first live industry page, the 404 and, once `/contact/` has a form, `/contact/sent/`. Only the page's own text counts: nothing in `<head>`, `<script>`, `<noscript>` or `<textarea>`, which Email Address Obfuscation leaves alone, and nothing in a comment or an attribute;
+- no response carries Cloudflare's email obfuscation or Rocket Loader (`/cdn-cgi/l/email-protection`, `email-decode.min.js` and `rocket-loader.min.js` among the signatures).
+
+A Cloudflare challenge, or a 403 from Cloudflare's edge that carries no page of the site, is reported as a block at the edge (exit 2), not as a fault in the site. Until you have seen the live `security.txt`'s headers once, a wrong `Content-Type` on it is only a warning (exit 3, which the job lets pass with an annotation); then set `STRICT_TXT_TYPE` in `scripts/ci/live-check.mjs` to `true`. A daily scheduled run, the second cron in `deploy.yml`, builds and deploys nothing: it repeats the check without waiting for a build stamp, to catch a change made in the Cloudflare dashboard.
+
+Before the final launch deploy, turn off Cloudflare's Email Address Obfuscation and Rocket Loader for the zone, and every other feature that injects a script or sets a cookie (Bot Fight Mode's JavaScript detections, Web Analytics, Zaraz, NEL reporting), or list the ones kept on the Trust page (spec §12 item 1). The live check fails while email obfuscation or Rocket Loader is on.
 
 The custom domain is configured via `public/CNAME`. After enabling GitHub Pages (Settings → Pages → Source: GitHub Actions), point DNS at your registrar:
 
@@ -257,6 +299,6 @@ Then enable "Enforce HTTPS" once the cert provisions.
 - `src/pages/`: the routes.
 - `src/preview/`: the `/preview/` gallery, in preview builds only. `src/fixtures/`: its data.
 - `src/scripts/`: the client scripts (nav, mobile menu, tabs, the demo engine with its renderers in `src/scripts/demo/`, and the checker).
-- `scripts/ci/`: the build gate and the CI checks.
+- `scripts/ci/`: the build gate, the CI checks and the post-deploy live check.
 - `tests/`: the `node:test` suites, with Playwright specs in `tests/e2e/` and shared helpers in `tests/support/`.
-- `public/`: files copied into the build as they are.
+- `public/`: files copied into the build as they are, the social images in `public/og/` among them.

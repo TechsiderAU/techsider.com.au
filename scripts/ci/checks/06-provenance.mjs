@@ -3,7 +3,9 @@
 //      directory that exists and is non-empty (checking that the run holds the cited metric key
 //      waits for the harness's run format, which arrives with its first committed run: spec §9.2);
 //  (b) metric-shaped numbers never sit in free text (they belong in typed { value, unit } metrics);
-//  (c) every built element marked data-provenance="illustrative" shows its label.
+//  (c) every built element marked data-provenance="illustrative" shows its own label: a
+//      [data-provenance-label] that says "Illustrative" and sits in no nested [data-provenance]
+//      element. A nested trace's label, or body copy that says "illustrative", is not one (WB-9).
 // The ⑤ checker is the one exception to (a) and (c) (controller ruling 6): a demo file of kind
 // "checker" declares "sourced" (real, dated vendor facts), only such a file may, and its frame
 // (data-provenance="sourced") needs no label.
@@ -29,6 +31,17 @@ export function metricTokens(s) {
   const kept = [];
   for (const h of hits) if (!kept.some((k) => k.start <= h.start && h.end <= k.end)) kept.push(h);
   return kept;
+}
+
+/**
+ * The visible text of each label an element's inner HTML holds for the element itself: its
+ * [data-provenance-label] descendants, leaving out those inside a nested [data-provenance] element,
+ * which labels only itself (WB-9).
+ */
+export function ownLabels(inner) {
+  let own = inner;
+  for (const nested of elements(inner, (t) => "data-provenance" in t.attrs)) own = own.split(nested.outer).join(" ");
+  return elements(own, (t) => "data-provenance-label" in t.attrs).map((label) => visibleText(label.inner));
 }
 
 /**
@@ -103,8 +116,8 @@ export async function run({ root, dist }) {
       const value = el.attrs["data-provenance"];
       if (value === CHECKER_PROVENANCE) continue; // the ⑤ checker's frame: sourced vendor facts, no label
       if (!PROVENANCE.includes(value)) r.add("error", `${page}: <${el.name} data-provenance="${value}"> is neither measured nor illustrative`);
-      else if (value === "illustrative" && !/\billustrative\b/i.test(visibleText(el.inner))) {
-        r.add("error", `${page}: <${el.name} data-provenance="illustrative"> renders no visible "Illustrative" label`);
+      else if (value === "illustrative" && !ownLabels(el.inner).some((label) => /\billustrative\b/i.test(label))) {
+        r.add("error", `${page}: <${el.name} data-provenance="illustrative"> renders no visible "Illustrative" label of its own ([data-provenance-label], outside any nested [data-provenance] element)`);
       }
     }
   }

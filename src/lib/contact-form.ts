@@ -27,17 +27,11 @@ export const FIELD_ERRORS: Record<EnquiryField, { missing: string; invalid?: str
   consent: { missing: "Tick the box to agree to how we handle your enquiry." },
 };
 
-/**
- * The summary's lines: above the field errors, while an enquiry is on its way, when the provider
- * answered that it wasn't taken, and when no answer could be read. A fetch that rejects (an answer
- * the browser blocks for CORS, or a connection dropped after the enquiry went) can't tell whether
- * the provider has the enquiry, so that line says only that it may not have been sent, and points
- * to the address rather than to a second try.
- */
+/** Client validation or a supported 422 field rejection proves non-delivery. Server errors,
+ * network/CORS failures and timeouts leave delivery uncertain, so advise email without a retry. */
 export const FORM_MESSAGES = {
   invalid: "Your enquiry wasn't sent. Check these answers:",
   sending: "Sending your enquiry…",
-  failed: "Your enquiry wasn't sent. Try again in a minute, or email us at the address on this page.",
   unconfirmed: "Your enquiry may not have been sent. Email us at the address on this page instead of sending it again.",
 } as const;
 
@@ -71,9 +65,9 @@ export function preselection(search: string, offered: Record<Preselectable, read
 }
 
 /**
- * The enquiry fields a provider's JSON rejection names, in form order. Providers shape it two ways:
- * a list of `{ field, message }` (Formspree's `errors`) or an object keyed by field name. A name
- * that isn't an enquiry field, and a body that isn't JSON, name nothing.
+ * Fields named by the local mock's supported 422 validation shape: an `errors` list of
+ * `{ field, message }` or an object keyed by field. This does not verify any real provider's
+ * response contract; the chosen provider must be checked before connecting it.
  */
 export function rejectedFields(body: unknown): EnquiryField[] {
   if (typeof body !== "object" || body === null) return [];

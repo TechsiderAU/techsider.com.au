@@ -53,6 +53,7 @@ test("a PackageView carries every §4.5 and §4.6 field, with a null preconditio
     id: p.id, name: p.name, status: "launch", buyers: p.buyers, forWhom: p.forWhom, scope: p.scope,
     inclusions: p.inclusions, clientTime: p.clientTime, timeline: p.timeline, outOfScope: p.outOfScope,
     gate: p.gate, onshoreNote: p.onshoreNote, precondition: p.precondition ?? null, onshore: p.onshore,
+    testInclusion: p.testInclusion !== false,
   });
   assert.deepEqual(generic, expected(data.genericPackage));
   assert.deepEqual(launch, byStatus(data, "launch").map(expected));

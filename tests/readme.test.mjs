@@ -13,6 +13,8 @@ import { result } from "../scripts/ci/lib.mjs";
 import { FAIL_PHRASES, WARN_PHRASES, scan } from "../scripts/ci/checks/04-banned-phrases.mjs";
 import { CHECKS, LAUNCH_GATES } from "../scripts/ci/run-all.mjs";
 import { makeDemoSchema, plainRef } from "../src/content/schemas.ts";
+import { CONTACT } from "../src/data/contact.ts";
+import { SITE } from "../src/data/nav.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const README = readFileSync(join(ROOT, "README.md"), "utf8");
@@ -121,4 +123,38 @@ test("the README explains the demos and the checker: each demo kind, the engine'
   for (const gone of ["src/lib/demoScript.ts", "src/scripts/demo.ts"]) {
     assert.ok(!README.includes(gone), `the README names ${gone}, which no longer exists`);
   }
+});
+
+test("the README explains the contact form, search and sharing, security.txt, the performance gates and the live check, as the repo builds them", () => {
+  for (const s of [
+    "### The contact form", "src/data/contact.ts", "`formEndpoint`", "`formProvider`", "`redirectField`", "`hiddenFields`",
+    "`honeypotField`", "/contact/sent/", "aria-describedby", "aria-live", "?industry=", "?interest=", "tests/support/mock-form.mjs",
+    "### Search, sharing and `security.txt`", "src/lib/json-ld.ts", "`offers`", "public/og/", "npm run og",
+    "tests/social-images.test.mjs", "src/lib/security-txt.ts", "`SITE.securityContact`", "180 days", "tests/launch-sweep.test.mjs",
+    "tests/e2e/prod-vitals.spec.mjs", "tests/perf-budget.test.mjs",
+    "scripts/ci/live-check.mjs", "`live-check`", "Email Address Obfuscation", "Rocket Loader", "`STRICT_TXT_TYPE`",
+  ]) {
+    assert.ok(README.includes(s), `the README never mentions ${s}`);
+  }
+  // The README's account of the deploy holds only while deploy.yml agrees with it.
+  const deploy = parse(readFileSync(join(ROOT, ".github/workflows/deploy.yml"), "utf8"));
+  assert.deepEqual([deploy.jobs["live-check"]?.needs].flat(), ["deploy"], "deploy.yml has no live-check job that runs after the deploy job");
+  const action = deploy.jobs.build.steps.find((s) => s.uses?.startsWith("withastro/action@"))?.uses ?? "";
+  assert.match(action, /^withastro\/action@[0-9a-f]{40}$/, "the README says withastro/action is pinned to a commit SHA");
+});
+
+test("the README's 'until' sentences match the data: no form endpoint and no security contact yet, or neither sentence", () => {
+  const noEndpoint = CONTACT.formEndpoint === null;
+  assert.equal(
+    README.includes("Until a provider is connected, `formEndpoint` is `null`"),
+    noEndpoint,
+    noEndpoint ? "the README doesn't say the form waits for a provider" : "the README still says the form has no endpoint",
+  );
+  assert.ok(Object.hasOwn(SITE, "securityContact"), "the README names SITE.securityContact, which src/data/nav.ts doesn't have");
+  const noContact = !SITE.securityContact;
+  assert.equal(
+    README.includes("Until a security contact exists, `SITE.securityContact` is `null`"),
+    noContact,
+    noContact ? "the README doesn't say security.txt waits for a security contact" : "the README still says there is no security contact",
+  );
 });
