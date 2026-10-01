@@ -137,8 +137,10 @@ test("each demo page: its title as the one h1, its frame badged by kind and labe
     // Ledger ruling R4: only the replays are called replays.
     assert.equal(text(frame.outer).includes("Canned replay"), REPLAYS.includes(id), `${id}: "Canned replay"`);
     assert.equal(frame.attrs["data-provenance"], DEMOS[id].provenance, `${id}: provenance`);
-    const labelled = elementsWith(frame.outer, "data-provenance-label").some((l) => text(l.inner) === "Illustrative data");
-    assert.equal(labelled, DEMOS[id].provenance === "illustrative", `${id}: the "Illustrative data" label`);
+    // The frame's label: "Illustrative data", or ④'s badge, which says "Illustrative" itself (Phase D ruling R6).
+    const label = KIND[id] === "report" ? REPORT_BADGE : "Illustrative data";
+    const labelled = elementsWith(frame.outer, "data-provenance-label").some((l) => text(l.inner) === label);
+    assert.equal(labelled, DEMOS[id].provenance === "illustrative", `${id}: the frame's "${label}" label`);
     // Controller ruling 6: ⑤ is real, dated vendor data ("sourced"), so its frame has no label;
     // ①–④ are illustrative and keep theirs.
     assert.equal(DEMOS[id].provenance, id === "ai-switch-on" ? "sourced" : "illustrative", `${id}: provenance`);

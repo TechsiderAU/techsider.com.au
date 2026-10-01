@@ -7,7 +7,7 @@
 // `provenance` is the demo's declared provenance (spec §9.3), required so no demo renders
 // unlabelled. It sets data-provenance on the figure, and an illustrative demo shows a visible
 // "Illustrative data" label next to the badge, so CI check 06(c) covers demos as it covers traces
-// and sample reports. The ⑤ checker's "sourced" (real, dated vendor facts; controller ruling 6)
+// and sample reports. A badge that says "Illustrative" itself (the ④ report's) is that label. The ⑤ checker's "sourced" (real, dated vendor facts; controller ruling 6)
 // shows no label, as "measured" shows none: its badge already reads "Client-side tool · dated
 // vendor data".
 // The figcaption names the demo. The frame is a carbon island (bg-carbon): inside a bone section
@@ -25,10 +25,14 @@ if (!Astro.slots.has("transcript")) {
   throw new Error(`DemoFrame "${title}": fill the transcript slot. Every demo has a static no-JS transcript (spec §8.8).`);
 }
 const hasEngine = Astro.slots.has("engine");
+// A badge that already says it is illustrative (REPORT_BADGE, the ④ sample report) is the frame's
+// label: it carries data-provenance-label for check 06(c), and no second "Illustrative data" shows
+// beside it (Phase D ledger ruling R6).
+const badgeLabels = provenance === "illustrative" && /^Illustrative\b/.test(badge);
 ---
 <figure class="demo-frame bg-carbon" data-demo-frame data-provenance={provenance}>
-  <p class="demo-badge" data-demo-badge>{badge}</p>
-  {provenance === "illustrative" && <p class="demo-provenance" data-provenance-label>Illustrative data</p>}
+  {badgeLabels ? <p class="demo-badge" data-demo-badge data-provenance-label>{badge}</p> : <p class="demo-badge" data-demo-badge>{badge}</p>}
+  {provenance === "illustrative" && !badgeLabels && <p class="demo-provenance" data-provenance-label>Illustrative data</p>}
   {hasEngine && <div class="demo-engine" data-demo-engine><slot name="engine" /></div>}
   <div class="demo-transcript" data-demo-transcript><slot name="transcript" /></div>
   <figcaption class="demo-caption">{title}</figcaption>

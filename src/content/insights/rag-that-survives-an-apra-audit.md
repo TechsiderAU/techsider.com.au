@@ -30,7 +30,7 @@ We use hybrid retrieval — lexical and dense together — because pure embeddin
 
 ## The most important answer is "no"
 
-The single most valuable behaviour in a regulated RAG system is a clean refusal: *"That isn't stated in the provided documents."* We build an explicit abstention path with a confidence threshold, and when it trips, the system escalates to a human rather than guessing. A system that always produces a confident-sounding answer is the dangerous one — it has simply moved its failures somewhere you can't see them.
+The single most valuable behaviour in a regulated RAG system is a clean refusal: *"That isn't stated in the provided documents."* We build an explicit abstention path with a confidence threshold, and when it trips, the system escalates to a person rather than guessing. A system that always produces a confident-sounding answer is the dangerous one: it has simply moved its failures somewhere you can't see them.
 
 ## A trace per query, for the auditor
 

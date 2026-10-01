@@ -136,3 +136,50 @@ test("at 1280px no table cell breaks a word mid-letter, on any page that builds 
   }
   expect(broken, "words broken mid-letter at 1280px").toEqual([]);
 });
+
+/**
+ * Each shown table wider than its frame (the DemoFrame it sits in, or else the page's <main>),
+ * measured against the frame's content box. Runs in the page.
+ */
+function tablesWiderThanFrames() {
+  const out = [];
+  for (const table of document.querySelectorAll("table")) {
+    if (!table.checkVisibility()) continue;
+    const frame = table.closest("[data-demo-frame]") ?? table.closest("main");
+    const style = getComputedStyle(frame);
+    const box = frame.getBoundingClientRect();
+    const left = box.left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft);
+    const right = box.right - parseFloat(style.borderRightWidth) - parseFloat(style.paddingRight);
+    const t = table.getBoundingClientRect();
+    if (t.left < left - 1 || t.right > right + 1) {
+      out.push(`"${table.caption?.innerText.trim() ?? "a table"}" is ${Math.round(t.width)}px in a ${Math.round(right - left)}px frame`);
+    }
+  }
+  return out;
+}
+
+// Phase D ledger NB-1 (Phase E controller ruling 8): from 768px to 832px the ⑤ vendor tables, seven
+// columns each, were wider than their DemoFrame on /demos/ai-switch-on/, and "September" broke
+// mid-word there and on the checker's page. A wide table now stays as cards until 53rem. At 768px,
+// where tables start, 800px and 832px, no table is wider than its frame and no cell breaks a word
+// mid-letter, with or without JavaScript.
+for (const width of [768, 800, 832]) {
+  test(`at ${width}px no table is wider than its frame, and no cell breaks a word mid-letter, with or without JavaScript (Phase D NB-1)`, async ({ browser }) => {
+    test.slow();
+    const found = [];
+    const viewport = { width, height: 900 };
+    for (const options of [{ javaScriptEnabled: false, viewport }, { reducedMotion: "reduce", viewport }]) {
+      const ctx = await browser.newContext(options);
+      const page = await ctx.newPage();
+      const js = options.javaScriptEnabled === false ? "without JavaScript" : "with JavaScript";
+      for (const path of TABLE_PAGES) {
+        expect((await page.goto(path)).status(), path).toBe(200);
+        await page.evaluate(() => document.fonts.ready.then(() => undefined));
+        for (const problem of await page.evaluate(tablesWiderThanFrames)) found.push(`${path} ${js}: ${problem}`);
+        for (const word of await page.evaluate(brokenWords)) found.push(`${path} ${js}: ${word} broke mid-letter`);
+      }
+      await ctx.close();
+    }
+    expect(found, `at ${width}px`).toEqual([]);
+  });
+}

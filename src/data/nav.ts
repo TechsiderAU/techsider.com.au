@@ -197,7 +197,7 @@ const SAFE_USE_KITS = describe(page("resources", "Safe-Use Kits", "/resources/",
   "Starter kits for accounting, legal and property teams, each naming its source."),
   "Safe-Use Kits for accounting, legal and property teams: a starting policy, checks and logs for using AI with client or tenant data, each naming its source.");
 const PAY_FOR = describe(page("resources", "What you already pay for", "/resources/", "/resources/what-you-already-pay-for/", "live", "What you already pay for",
-  "Check which AI features your software already includes."),
+  "Check which AI features your software includes, and which are add-ons."),
   "Tick the software you pay for to see the AI features it includes or sells as add-ons, their plans, and whether each vendor says where the AI is processed.");
 const EVAL_METHOD = describe(page("resources", "Evaluation method", "/resources/", "/resources/evaluation-method/", "live", "Evaluation method",
   "How we test AI, published so you can check it."),

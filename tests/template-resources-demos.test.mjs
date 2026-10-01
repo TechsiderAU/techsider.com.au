@@ -316,7 +316,9 @@ test("every demo frame declares its provenance, and an illustrative one shows a 
     let own = frame.inner;
     for (const slot of [...byAttr(frame.inner, "data-demo-transcript"), ...byAttr(frame.inner, "data-demo-engine")]) own = own.replace(slot.outer, "");
     const labels = byAttr(own, "data-provenance-label");
-    assert.deepEqual(labels.map((l) => text(l.inner)), provenance === "illustrative" ? ["Illustrative data"] : [], `${kind}: the frame's provenance label`);
+    // The report frame's badge says "Illustrative" itself, so it is the label (Phase D ruling R6).
+    const label = kind === "demo-report" ? REPORT_BADGE : "Illustrative data";
+    assert.deepEqual(labels.map((l) => text(l.inner)), provenance === "illustrative" ? [label] : [], `${kind}: the frame's provenance label`);
     for (const label of labels) {
       assert.ok(!("hidden" in label.attrs), `${kind}: the label is hidden`);
       assert.notEqual(label.attrs["aria-hidden"], "true", `${kind}: the label is aria-hidden`);
