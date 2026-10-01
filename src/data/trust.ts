@@ -19,8 +19,7 @@ export const TRUST: TrustData = {
     analytics: "None. The site's code loads no analytics or tracking scripts.",
     // ⚑ owner: state how long enquiries are kept (spec §8.11, §12 item 1)
     enquiries: "Enquiries arrive by email or through FormSubmit and are kept in our Lark Suite mailbox. FormSubmit's documentation states that submissions are retained for 30 days. The website's static pages do not store your enquiry.",
-    // ⚑ owner: a security contact address for security.txt (spec §12 item 7)
-    securityContact: SITE.email,
+    securityContact: SITE.securityContact ?? SITE.email,
   },
   // Spec §8.11 Part B: each renders, tagged "Contract term", only once the owner confirms it is in
   // the standard engagement terms.
