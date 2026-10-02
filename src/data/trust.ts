@@ -9,14 +9,15 @@
 import type { TrustData } from "../content/page-schemas.ts";
 import { SITE } from "./nav.ts";
 
-const asAt = new Date("2026-10-01");
+const asAt = new Date("2026-10-02");
 
 export const TRUST: TrustData = {
   asAt,
   partA: {
-    // ⚑ owner: re-check once Cloudflare's Email Address Obfuscation, Rocket Loader and NEL reporting are off, or list them here and in the cookies answer below (spec §12 item 1)
+    // Owner retained Email Address Obfuscation on 2 October. Rocket Loader is off.
+    // ⚑ owner: confirm Cloudflare's NEL reporting and real-user-measurement configuration (spec §12 item 1)
     cookies: "None. The site's code sets no cookies.",
-    analytics: "None. The site's code loads no analytics or tracking scripts.",
+    analytics: "The site's code loads no analytics or tracking scripts. Cloudflare adds an email-decoding script to display our protected email address. That script requires JavaScript; it is not an analytics tool.",
     // ⚑ owner: state how long enquiries are kept (spec §8.11, §12 item 1)
     enquiries: "Enquiries arrive by email or through FormSubmit and are kept in our Lark Suite mailbox. FormSubmit's documentation states that submissions are retained for 30 days. The website's static pages do not store your enquiry.",
     securityContact: SITE.securityContact ?? SITE.email,
@@ -75,7 +76,7 @@ export const TRUST: TrustData = {
     },
     {
       q: "Does this website use cookies or analytics?",
-      a: "No. The site's code sets no cookies and loads no analytics or tracking scripts. GitHub Pages serves the files and Cloudflare sits in front of them, and each handles the requests it receives under its own terms; the sub-processor table above lists what each one touches.",
+      a: "The site's code sets no cookies and loads no analytics or tracking scripts. Cloudflare adds a script that displays our email address while protecting it from automated harvesting. The address needs JavaScript to display; the contact form can submit without JavaScript. GitHub Pages and Cloudflare handle requests under their own terms; the sub-processor table above lists what each one touches.",
       part: "A", asAt,
     },
     {

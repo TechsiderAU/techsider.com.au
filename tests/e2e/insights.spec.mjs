@@ -20,6 +20,8 @@ const CARBON = "rgb(11, 11, 12)";
 
 for (const vp of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
   test(`the index and every post have one h1 and no axe violations at ${vp.width}px`, async ({ page }) => {
+    // This test audits every published article; allow its budget to grow with the library.
+    test.setTimeout(Math.max(30_000, PAGES.length * 5_000));
     await page.setViewportSize(vp);
     for (const path of PAGES) {
       await page.goto(path);

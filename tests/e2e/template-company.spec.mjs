@@ -22,7 +22,7 @@ const MUTED_DARK = "rgb(92, 91, 85)";
 // The consent and the collection notice each link to the privacy policy (WB-12), so Tab reaches
 // both links, after the checkbox and before the submit button.
 const PRIVACY = `${BASE}/legal-document/`;
-const FORM_ORDER = ["contact-name", "contact-email", "contact-organisation", "contact-industry", "contact-size", "contact-interest", "contact-message", "contact-consent", PRIVACY, PRIVACY, "submit"];
+const FORM_ORDER = ["contact-name", "contact-email", "contact-organisation", "contact-industry", "contact-size", "contact-interest", "contact-message", "contact-discovery", "contact-consent", PRIVACY, PRIVACY, "submit"];
 
 const axe = (page) => new AxeBuilder({ page }).include("main").withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]);
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -167,6 +167,7 @@ test("without JavaScript, a complete enquiry is a plain form POST of every field
     size: "200–999",
     interest: "evaluation-partner",
     message: "Fixture message: what we are trying to fix.",
+    discovery: "",
     consent: "yes",
     _gotcha: "",
   });
@@ -228,7 +229,7 @@ test("a Trust FAQ answer opens to show its Part and as-at date", async ({ page }
 test("decorative generated content has empty alternative text: the select arrows and the About step numbers", async ({ page }) => {
   await page.goto(CONTACT);
   const selects = page.locator(".contact-select");
-  await expect(selects).toHaveCount(3);
+  await expect(selects).toHaveCount(4);
   for (const select of await selects.all()) {
     expect(await select.evaluate((el) => getComputedStyle(el, "::after").content)).toBe('"▾" / ""');
   }

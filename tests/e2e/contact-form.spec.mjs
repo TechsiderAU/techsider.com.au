@@ -31,6 +31,7 @@ const POSTED = {
   size: "200–999",
   interest: "evaluation-partner",
   message: "Fixture message: what we are trying to fix.",
+  discovery: "",
   consent: "yes",
   _gotcha: "",
 };

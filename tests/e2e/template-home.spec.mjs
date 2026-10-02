@@ -71,9 +71,11 @@ test("the business headline uses sentence case beside a labelled application con
   await expect(hero.locator("img")).toBeVisible();
   await expect(hero.getByText("Illustrative application concept")).toBeVisible();
 });
-test("keyboard moves from the hero CTA to the first capability without entering the static application image",async({page,browserName})=>{
+test("keyboard reaches the hero animation pause control before the first capability",async({page,browserName})=>{
   await page.goto(HOME);
   await page.locator("[data-page-hero]").getByRole("link",{name:"Explore solutions"}).focus();
+  await page.keyboard.press(focusKeys(browserName).next);
+  await expect(page.locator("[data-workflow-toggle]").first()).toBeFocused();
   await page.keyboard.press(focusKeys(browserName).next);
   await expect(page.locator("#services [data-capability] a").first()).toBeFocused();
 });

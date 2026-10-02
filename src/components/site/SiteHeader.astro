@@ -168,7 +168,8 @@ const isCurrent = (href: string) => (href === current ? "page" : undefined);
     opacity: 0;
     transform: translateY(-6px);
     pointer-events: none;
-    transition: opacity 180ms ease, transform 180ms cubic-bezier(.2, .7, .3, 1);
+    /* Keep text and its background opaque throughout the smooth movement. */
+    transition: transform 180ms cubic-bezier(.2, .7, .3, 1);
   }
   .nav-panel[data-nav-open] {
     opacity: 1;

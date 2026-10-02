@@ -5,13 +5,11 @@
 //    EXPECT_SHA and checks whatever is live.
 // 2. /.well-known/security.txt (RFC 9116): HTTP 200 as text/plain; charset=utf-8, Contact the
 //    security address, one Expires at least 30 days away, and a Canonical naming its own URL.
-// 3. The contact email as plain text on /, /contact/, the first live industry page, the 404 and,
-//    once /contact/ has a form, /contact/sent/. Only the page's own text counts: <head> (the
-//    JSON-LD), <script>, <noscript>, <textarea> and attributes are removed first, because Email
-//    Address Obfuscation leaves them alone, and an address there would pass while every visible
-//    one reads "[email protected]".
-// 4. No Cloudflare rewrite (Email Address Obfuscation, Rocket Loader) in any response: every
-//    sitemap page, security.txt, the 404 and /contact/sent/.
+// 3. A contact address on /, /contact/, the first live industry page, the 404 and, once the form
+//    exists, /contact/sent/. Accept plain text or the owner's retained Cloudflare-protected
+//    contact link, verifying the exact mailbox and the decoder. Metadata alone does not count.
+// 4. No Rocket Loader in any response: every sitemap page, security.txt, the 404 and /contact/sent/.
+//    Email Address Obfuscation is explicitly retained and disclosed (owner, 2 October 2026).
 // A Cloudflare challenge (cf-mitigated: challenge), or a 403 from Cloudflare's edge (cf-ray, and no
 // page of the site's in it), stops the run as a CDN block, not a site defect. A security.txt served
 // with another Content-Type is a warning until STRICT_TXT_TYPE is set (controller ruling 4).
@@ -45,6 +43,8 @@ export const EXPIRES_MIN_DAYS = 30;
  * headers have been seen, set this to true, and a wrong type fails the run like any other problem.
  */
 export const STRICT_TXT_TYPE = false;
+/** Owner decision, 2 October 2026: retain email harvesting protection. Trust discloses its decoder. */
+export const ALLOW_EMAIL_OBFUSCATION = true;
 /** What Cloudflare's edge features leave in a response (spec §12 item 1), and what each means. */
 export const EDGE_SIGNATURES = [
   ["/cdn-cgi/l/email-protection", "Email Address Obfuscation rewrote a mailto: link"],
@@ -114,8 +114,9 @@ export function plainText(html) {
 }
 
 /** The Cloudflare rewrites a response body carries, each as "<token>: <what it means>". */
-export function edgeRewrites(body) {
-  const found = EDGE_SIGNATURES.filter(([token]) => body.includes(token)).map(([token, what]) => `${token}: ${what}`);
+export function edgeRewrites(body, { allowEmailObfuscation = false } = {}) {
+  const found = EDGE_SIGNATURES.filter(([token, what]) => body.includes(token) &&
+    !(allowEmailObfuscation && what.startsWith("Email Address Obfuscation"))).map(([token, what]) => `${token}: ${what}`);
   if (ROCKET_TYPE.test(body)) found.push(`<script type="<hex>-…">: Rocket Loader rewrote a script's type`);
   return found;
 }
@@ -175,8 +176,25 @@ export function txtTypeProblem({ headers }) {
 }
 
 /** Spec §1 criterion 3: the address in the page's own text, which is what a visitor reads. */
-export function emailProblems({ path, body }, email) {
-  return plainText(body).includes(email) ? [] : [`${path}: ${email} isn't plain text in the page (outside <head>, <script> and attributes)`];
+export function emailProblems({ path, body }, email, { allowEmailObfuscation = false } = {}) {
+  if (plainText(body).includes(email)) return [];
+  if (allowEmailObfuscation) {
+    // Check a real protected contact link, not an address in head metadata, script or an unrelated attribute.
+    const publicBody = body.replace(/<!--[\s\S]*?-->/g, " ").replace(/<head\b[^>]*>[\s\S]*?<\/head\s*>/gi, " ");
+    let visibleBody = publicBody;
+    for (const tag of UNREWRITTEN) visibleBody = visibleBody.replace(new RegExp(`<${tag}\\b[^>]*>[\\s\\S]*?</${tag}\\s*>`, "gi"), " ");
+    const encoded = [...visibleBody.matchAll(/<a\b[^>]*\shref=["']\/cdn-cgi\/l\/email-protection#([0-9a-f]+)["'][^>]*>/gi)];
+    const matches = encoded.some(([, hex]) => {
+      if (hex.length < 4 || hex.length % 2) return false;
+      const key = parseInt(hex.slice(0, 2), 16);
+      const address = Buffer.from(hex.slice(2).match(/../g).map(byte => parseInt(byte, 16) ^ key)).toString("utf8");
+      return address === email;
+    });
+    const decoder = /<script\b[^>]*\ssrc=["']\/cdn-cgi\/scripts\/[0-9a-f]+\/cloudflare-static\/email-decode\.min\.js["'][^>]*>/i.test(publicBody);
+    if (matches && decoder) return [];
+    return [`${path}: ${email} has neither plain text nor a matching Cloudflare-protected contact link with its decoder`];
+  }
+  return [`${path}: ${email} isn't plain text in the page (outside <head>, <script> and attributes)`];
 }
 
 /** What nav.ts gives the check: the contact address, the security contact and the first live industry page. */
@@ -207,6 +225,7 @@ export async function liveCheck({
   log = console.log,
   pollBudgetMs = POLL_BUDGET_MS,
   strictTxtType = STRICT_TXT_TYPE,
+  allowEmailObfuscation = ALLOW_EMAIL_OBFUSCATION,
 }) {
   const get = async (path, bust = "") => {
     const url = new URL(path, base);
@@ -275,8 +294,8 @@ export async function liveCheck({
       problems.push(`${res.path}: HTTP ${res.status}, not ${status}`);
       return;
     }
-    problems.push(...edgeRewrites(res.body).map((found) => `${res.path}: ${found}`));
-    if (emailPage) problems.push(...emailProblems(res, email));
+    problems.push(...edgeRewrites(res.body, { allowEmailObfuscation }).map((found) => `${res.path}: ${found}`));
+    if (emailPage) problems.push(...emailProblems(res, email, { allowEmailObfuscation }));
   };
 
   if (securityContact === null) {
