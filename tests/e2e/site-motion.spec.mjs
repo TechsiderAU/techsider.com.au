@@ -5,8 +5,8 @@ import { withoutScripts } from "../support/no-scripts.mjs";
 test.use({ reducedMotion: "no-preference", viewport: { width: 1280, height: 900 } });
 test("section entrances finish with content fully readable", async ({ page }) => {
   await page.goto("/");
-  await page.locator("#industries-heading").scrollIntoViewIfNeeded();
-  const section = page.locator("#industries [data-section-header]");
+  await page.locator("#approach-heading").scrollIntoViewIfNeeded();
+  const section = page.locator("#approach [data-section-header]");
   await expect(section).toHaveAttribute("data-motion-seen", "true");
   await expect.poll(() => section.evaluate(el => getComputedStyle(el).opacity)).toBe("1");
 });
@@ -31,11 +31,11 @@ test("without site JavaScript, the artwork and all sections remain visible", asy
   await page.goto("/");
   await expect(page.locator("html")).toHaveClass(/\bno-js\b/);
   await expect(page.locator("h1")).toBeVisible();
-  await expect(page.locator('[data-business-artwork="hero"] img')).toBeVisible();
+  await expect(page.locator('[data-business-artwork="hero"] svg')).toBeVisible();
   await expect(page.locator("[data-workflow-artwork]")).toHaveAttribute("data-workflow-phase", "review");
   await expect(page.locator("[data-workflow-toggle]")).toBeHidden();
-  await page.locator("#industries-heading").scrollIntoViewIfNeeded();
-  await expect(page.locator("#industries-heading")).toBeVisible();
+  await page.locator("#approach-heading").scrollIntoViewIfNeeded();
+  await expect(page.locator("#approach-heading")).toBeVisible();
 });
 
 test("the sample workflow waits for approval before updating systems", async ({ page }) => {
@@ -75,7 +75,7 @@ test("keyboard pause freezes the run and leaving the viewport suspends it", asyn
   await page.keyboard.press("Enter");
   await expect(artwork).toHaveAttribute("data-workflow-motion", "running");
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
-  await page.locator("#industries-heading").scrollIntoViewIfNeeded();
+  await page.locator("#approach-heading").scrollIntoViewIfNeeded();
   await expect(artwork).toHaveAttribute("data-workflow-motion", "paused");
 });
 

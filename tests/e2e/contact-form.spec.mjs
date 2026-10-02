@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { SITE } from "../../src/data/nav.ts";
-import { ENQUIRY_FIELDS, FIELD_ERRORS, FORM_MESSAGES } from "../../src/lib/contact-form.ts";
+import { REQUIRED_ENQUIRY_FIELDS, FIELD_ERRORS, FORM_MESSAGES } from "../../src/lib/contact-form.ts";
 import { MOCK_FORM } from "../../src/preview/mock-form.ts";
 import { withoutScripts } from "../support/no-scripts.mjs";
 
@@ -53,7 +53,7 @@ async function fillEnquiry(page, org) {
   await page.getByLabel("Industry").selectOption(POSTED.industry);
   await page.getByLabel("Organisation size").selectOption(POSTED.size);
   await page.getByLabel("Interest").selectOption(POSTED.interest);
-  await page.getByLabel("Message").fill(POSTED.message);
+  await page.getByLabel("What would you like to improve?").fill(POSTED.message);
   await page.getByLabel(/I agree/).check();
 }
 
@@ -126,7 +126,7 @@ test("with JavaScript, an empty enquiry sends nothing: each field shows its erro
   await page.goto(CONTACT);
   await send(page).click();
   await expect(page.getByLabel("Name")).toBeFocused();
-  for (const name of ENQUIRY_FIELDS) {
+  for (const name of REQUIRED_ENQUIRY_FIELDS) {
     const id = CONTROL_ID[name];
     await expect(page.locator(`#${id}-error`)).toBeVisible();
     await expect(page.locator(`#${id}-error`)).toHaveText(FIELD_ERRORS[name].missing);
@@ -137,10 +137,10 @@ test("with JavaScript, an empty enquiry sends nothing: each field shows its erro
   await expect(summary(page)).toHaveAttribute("aria-live", "polite");
   await expect(summary(page).locator("p")).toHaveText(FORM_MESSAGES.invalid);
   const links = summary(page).getByRole("link");
-  await expect(links).toHaveText(ENQUIRY_FIELDS.map((name) => FIELD_ERRORS[name].missing));
+  await expect(links).toHaveText(REQUIRED_ENQUIRY_FIELDS.map((name) => FIELD_ERRORS[name].missing));
   for (const link of await links.all()) expect((await link.boundingBox()).height).toBeGreaterThanOrEqual(44);
-  await links.nth(ENQUIRY_FIELDS.indexOf("message")).click();
-  await expect(page.getByLabel("Message")).toBeFocused();
+  await links.nth(REQUIRED_ENQUIRY_FIELDS.indexOf("message")).click();
+  await expect(page.getByLabel("What would you like to improve?")).toBeFocused();
   await expect(page).toHaveURL(new RegExp(`${CONTACT}$`));
   expect(requests).toEqual([]);
 });
@@ -152,8 +152,8 @@ test("with JavaScript, an answered field loses its error; a resubmit re-checks t
   await expect(page.locator("#contact-name-error")).toBeHidden();
   await expect(page.getByLabel("Name")).not.toHaveAttribute("aria-invalid");
   await expect(page.getByLabel("Name")).not.toHaveAttribute("aria-describedby");
-  await page.getByLabel("Message").fill(POSTED.message);
-  await expect(page.getByLabel("Message")).toHaveAttribute("aria-describedby", "contact-message-hint");
+  await page.getByLabel("What would you like to improve?").fill(POSTED.message);
+  await expect(page.getByLabel("What would you like to improve?")).toHaveAttribute("aria-describedby", "contact-message-hint");
   await page.getByLabel("Industry").selectOption("other");
   await expect(page.locator("#contact-industry-error")).toBeHidden();
   await page.getByLabel(/I agree/).check();
@@ -162,7 +162,7 @@ test("with JavaScript, an answered field loses its error; a resubmit re-checks t
   await send(page).click();
   await expect(page.locator("#contact-email-error")).toHaveText(FIELD_ERRORS.email.invalid);
   await expect(summary(page).getByRole("link")).toHaveText([
-    FIELD_ERRORS.email.invalid, FIELD_ERRORS.organisation.missing, FIELD_ERRORS.size.missing, FIELD_ERRORS.interest.missing,
+    FIELD_ERRORS.email.invalid, FIELD_ERRORS.organisation.missing,
   ]);
   await expect(page.getByLabel("Work email")).toBeFocused();
 });
@@ -206,7 +206,7 @@ for (const [status, body] of [[500, { errors: [{ field: "email" }] }], [502, {}]
     await expect(summary(page).getByRole("link")).toHaveCount(0);
     await expect(page.getByLabel("Work email")).not.toHaveAttribute("aria-invalid");
     await expect(page.getByLabel("Organisation", { exact: true })).toHaveValue(org);
-    await expect(page.getByLabel("Message")).toHaveValue(POSTED.message);
+    await expect(page.getByLabel("What would you like to improve?")).toHaveValue(POSTED.message);
     await expect(page.getByLabel(/I agree/)).toBeChecked();
     await expect(page).toHaveURL(new RegExp(`${CONTACT}$`));
     expect(calls).toBe(1);
@@ -221,7 +221,7 @@ test("a connection failure keeps the answers and advises email with neutral unce
   await expect(summary(page)).toHaveText(FORM_MESSAGES.unconfirmed);
   await expect(summary(page)).toHaveAttribute("data-state", "unconfirmed");
   expect(await summary(page).evaluate((el) => getComputedStyle(el).borderTopColor === getComputedStyle(el).color)).toBe(true);
-  await expect(page.getByLabel("Message")).toHaveValue(POSTED.message);
+  await expect(page.getByLabel("What would you like to improve?")).toHaveValue(POSTED.message);
 });
 
 // A deliberately non-cooperative transport lets old continuations finish after cancellation.
@@ -261,7 +261,7 @@ for (const phase of ["headers", "body"]) {
       await page.clock.runFor(30_001);
       await expect(summary(page)).toHaveText(FORM_MESSAGES.unconfirmed);
       await expect(summary(page)).toHaveAttribute("data-state", "unconfirmed");
-      await expect(page.getByLabel("Message")).toHaveValue(POSTED.message);
+      await expect(page.getByLabel("What would you like to improve?")).toHaveValue(POSTED.message);
       await expect(page.getByLabel(/I agree/)).toBeChecked();
       expect(await page.evaluate(() => window.heldEnquiries.length)).toBe(1); // No automatic retry.
       expect(await page.evaluate(() => window.heldEnquiries[0].signal.aborted)).toBe(true);
@@ -351,7 +351,7 @@ for (const vp of [WIDE, NARROW]) {
     await page.setViewportSize(vp);
     await page.goto(CONTACT);
     await send(page).click();
-    await expect(summary(page).getByRole("link")).toHaveCount(ENQUIRY_FIELDS.length);
+    await expect(summary(page).getByRole("link")).toHaveCount(REQUIRED_ENQUIRY_FIELDS.length);
     expect((await axe(page).analyze()).violations).toEqual([]);
   });
 }
@@ -360,7 +360,7 @@ test("with its errors and summary showing, the form fits 320px with no horizonta
   await page.setViewportSize({ width: 320, height: 700 });
   await page.goto(CONTACT);
   await send(page).click();
-  await expect(summary(page).getByRole("link")).toHaveCount(ENQUIRY_FIELDS.length);
+  await expect(summary(page).getByRole("link")).toHaveCount(REQUIRED_ENQUIRY_FIELDS.length);
   expect(await overflow(page)).toBeLessThanOrEqual(0);
 });
 

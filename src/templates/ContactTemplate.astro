@@ -21,7 +21,7 @@ interface Props {
 const { contact, site } = Astro.props;
 ---
 <div class="template" data-template="contact">
-  <PageHero title={CONTACT_H1} highlight="fix" display={false} />
+  <PageHero title={CONTACT_H1} display={false} sub="Tell us what arrives, what your team does with it, and where the process slows down. You don’t need to know which AI tool you need." />
 
   <div class="contact-body surface-bone">
     <div class="contact-grid">
@@ -47,7 +47,6 @@ const { contact, site } = Astro.props;
       <div class="contact-side">
         <section id="next" class="contact-block" aria-labelledby="next-heading">
           <h2 id="next-heading" class="contact-heading">What happens next</h2>
-          <p class="contact-reply" data-reply-time>We reply within {contact.replyTime}.</p>
           <ol class="contact-steps">
             {contact.whatNext.map((step) => <li>{step}</li>)}
           </ol>

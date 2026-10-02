@@ -82,7 +82,7 @@ test("solutionsHubView: five jobs in §4.1 order, the matrix, the services link 
   );
   assert.deepEqual(v.matrix, matrixView(solutions, site));
   assert.equal(v.servicesHref, "/preview/templates/services/");
-  assert.deepEqual(v.closing, { command: "talk_to_us", args: "--about=<solution>", label: "Talk to us", href: site.contact() });
+  assert.deepEqual(v.closing, { command: "talk_to_us", args: "--about=<solution>", label: "Start with one workflow", href: site.contact() });
   assert.equal(v.closing.href, "/preview/templates/contact/");
 });
 
@@ -144,7 +144,7 @@ test("industriesHubView: nine deep cards in §5 order: hook, three use cases wit
   // An on-request use case says so (spec §5): fixture-industry's third one is on request.
   assert.deepEqual(v.cards.find((c) => c.id === "fixture-industry").useCases.map((u) => u.onRequest), [false, false, true]);
   assert.deepEqual(v.matrix, matrixView(solutions, site));
-  assert.deepEqual(v.closing, { command: "talk_to_us", args: "--about=<industry>", label: "Talk to us", href: site.contact() });
+  assert.deepEqual(v.closing, { command: "talk_to_us", args: "--about=<industry>", label: "Start with one workflow", href: site.contact() });
 });
 
 test("industriesHubView: each chip links to its row anchor, per section in jurisdiction mode, or is text", () => {

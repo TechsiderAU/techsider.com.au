@@ -15,6 +15,7 @@ const WCAG = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
 async function open(page, path) {
   const response = await page.goto(path);
   expect(response.status(), path).toBe(200);
+  for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
 }
 
 for (const vp of [NARROW, WIDE]) {

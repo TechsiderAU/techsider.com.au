@@ -31,7 +31,7 @@ const checker = (page, seen) => async (selector, min) => {
   expect.soft(targets.filter((t) => t.w < min || t.h < min), `${selector} (min ${min}px)`).toEqual([]);
 };
 
-const SECTIONS = ["Solutions", "Industries", "Services", "Resources", "About"];
+const SECTIONS = ["Solutions", "How we work", "Examples", "About"];
 
 test("header, footer and desktop panel targets are at least 44px at 1280", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
@@ -47,7 +47,7 @@ test("header, footer and desktop panel targets are at least 44px at 1280", async
     await check("[data-nav-panel]:not([hidden])", 44);
   }
   // Guard against a vacuous pass: the logo, every toggle, both CTAs, panel links and footer links were measured.
-  for (const name of ["Techsider home", ...SECTIONS.map((s) => `${s} menu`), "See a demo", "Talk to us", "Prove", "All industries", "Trust", "Privacy"]) {
+  for (const name of ["Techsider home", ...SECTIONS.map((s) => `${s} menu`), "Start with one workflow", "Assess and prove", "All industries", "Trust", "Privacy"]) {
     expect(seen, name).toContain(name);
   }
 });
@@ -69,7 +69,7 @@ test("header and footer targets are at least 44px at 390, and 48px inside the me
     await check("#site-menu", 48);
     await page.locator(`[data-menu-back="${id}"]`).click();
   }
-  for (const name of ["Techsider home", "Menu", "Close menu", "Talk to us", "See a demo", "Back to menu", "All solutions", "Prove", "Trust"]) {
+  for (const name of ["Techsider home", "Menu", "Close menu", "Start with one workflow", "See an example", "Back to menu", "All solutions", "Assess and prove", "Trust"]) {
     expect(seen, name).toContain(name);
   }
 });

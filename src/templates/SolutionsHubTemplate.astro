@@ -3,6 +3,7 @@
 // solutionsHubView() and wraps this in BaseLayout. A hero with no CTA; one switcher with three
 // views (By job, By industry, By buyer), stacked sections without JavaScript; the closing prompt.
 // Every link comes from the view: a null href renders as plain text, never as a dead link.
+import { SOLUTION_LABELS } from "../data/nav";
 import { solutionArtwork } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
@@ -26,9 +27,16 @@ const buyerLists: { id: string; title: string; items: BuyerItem[] }[] = [
 ];
 ---
 <div class="template" data-template="solutions-hub">
-  <PageHero title="AI solutions for the work that matters." display={false} art="hero" eyebrow="Our solutions" sub="Automate workflows, understand documents and make your knowledge easier to use. Built around your systems, with people in control." />
+  <PageHero title="AI workflows for everyday operations." display={false} eyebrow="Our solutions" sub="Automate workflows, understand documents and make your knowledge easier to use. Built around your systems, with people in control." />
 
-  <PageSection id="browse" title="Browse solutions">
+  <PageSection id="workflows" title="Choose the work you want to improve">
+    <ul class="hub-jobs">{["①", "③", "②"].map(number => view.jobs.find(job => job.number === number)).filter(job => job !== undefined).map(job => <li class="hub-job"><LinkCard title={SOLUTION_LABELS[job.href ?? ""] ?? job.shortName} href={job.href} body={job.oneLiner} /></li>)}</ul>
+  </PageSection>
+  <PageSection id="supporting" title="Already using AI?">
+    <ul class="hub-jobs">{view.jobs.filter(job => ["④", "⑤"].includes(job.number)).reverse().map(job => <li class="hub-job"><LinkCard title={SOLUTION_LABELS[job.href ?? ""] ?? job.shortName} href={job.href} body={job.oneLiner} /></li>)}</ul>
+  </PageSection>
+  <PageSection id="browse" title="Compare scope and industry options">
+    <details class="hub-options"><summary>View the detailed solution guide</summary>
     <Tabs id="solutions-switcher" label="Browse solutions">
       <TabPanel id="by-job" label="By job">
         <ul class="hub-jobs">
@@ -71,7 +79,7 @@ const buyerLists: { id: string; title: string; items: BuyerItem[] }[] = [
           </p>
         )}
       </TabPanel>
-    </Tabs>
+    </Tabs></details>
   </PageSection>
 
   <div id="contact" class="template-closing">
@@ -80,6 +88,7 @@ const buyerLists: { id: string; title: string; items: BuyerItem[] }[] = [
 </div>
 
 <style>
+  .hub-options summary { min-height: 44px; cursor: pointer; }
   /* Every block but the closing sits on bone: carbon text, bone-line hairlines, muted-dark
      secondary text (spec §6.1). Layout only; colours are tokens. */
   .hub-jobs {

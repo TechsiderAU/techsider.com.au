@@ -30,11 +30,11 @@ test("fixed copy: every constant is pinned word for word: the spec's text, and R
   assert.deepEqual(copy.HOME_PROMPT, { command: "applied_ai", args: "--region=au" });
   assert.deepEqual(copy.HOME_CLOSING, { command: "talk_to_us", args: "--about=<industry>" });
   assert.equal(copy.HOME_TRUST_QUESTION, "Why should we trust you?");
-  assert.equal(copy.CONTACT_H1, "Tell us what you're trying to fix.");
-  assert.equal(copy.SERVICES_H1, "From first use case to a system your team runs.");
+  assert.equal(copy.CONTACT_H1, "Start with one workflow.");
+  assert.equal(copy.SERVICES_H1, "Start small. Prove it. Build from there.");
   assert.equal(
     copy.MESSAGE_PLACEHOLDER,
-    "What are you trying to fix? Any deployment or data constraints? Please don't include sensitive personal information.",
+    "For example: documents arrive by email, someone checks them and enters details into another system. We want to reduce the handling. Please don't include sensitive personal information.",
   );
   assert.deepEqual(copy.ORG_SIZES, ["<20", "20–199", "200–999", "1,000+", "Government"]);
   assert.deepEqual(copy.EXTRA_INTERESTS, [{ id: "evaluation-partner", label: "Evaluation Partner" }, { id: "not-sure", label: "Not sure yet" }]);

@@ -70,17 +70,9 @@ test("the insights index tags every post with its type, then its date and readin
 });
 
 test("the Home page's latest insights tag each card by type, as the index does", () => {
-  const html = readDist("index.html");
-  const start = html.indexOf('id="insights"');
-  const end = html.indexOf("</section>", start);
-  assert.ok(start >= 0 && end > start, "home #insights section not found");
-  const section = html.slice(start, end);
-  const mode = section.match(/\bdata-latest-insights="(cards|link)"/)?.[1];
-  assert.ok(mode, "home #insights has no latest-insights block");
-  const cards = elementsWith(section, "data-insight-card").map(card => card.inner);
-  assert.equal(cards.length, mode === "cards" ? Math.min(3, PUBLISHED.length) : 0, `home #insights shows ${cards.length} cards in "${mode}" mode`);
-  for (const card of cards) assert.equal(chipTags(card.slice(0, card.indexOf("<h3"))), 1, "a Home card without its type chip above the title");
-  assertNoPillar(visibleText(section), "home #insights");
+  const main=readDist('index.html');
+  assert.equal(elementsWith(main,'data-insight-card').length,0);
+  assert.match(main,/<a[^>]*id="insights"[^>]*href="\/resources\/"/);
 });
 
 test("the content layer registers all eight collections from the shared schemas", () => {

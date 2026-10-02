@@ -367,7 +367,7 @@ test("preview: /contact/sent/ is built from the real contact data, noindex, with
   const main = mainOf(html);
   one(main, "data-template", "sent");
   assert.equal(tagged(main, "h1").length, 1);
-  assert.equal(text(one(main, "data-reply-time").inner), `We reply within ${CONTACT.replyTime}.`);
+  assert.equal(elementsWith(main, "data-reply-time").length, 0);
   const email = one(main, "data-email");
   assert.equal(text(email.inner), SITE.email);
   assert.equal(tagged(main, "a").filter((a) => a.attrs.href === `mailto:${SITE.email}`).length, 0, "the address is plain text");

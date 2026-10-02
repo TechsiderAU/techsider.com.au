@@ -90,7 +90,7 @@ test("solutionView names the solution from the site context and links the hero, 
     assert.deepEqual([v.id, v.number, v.shortName, v.fullName, v.oneLiner], [id, link.number, link.shortName, link.fullName, link.oneLiner]);
     assert.deepEqual(v.breadcrumb, crumbs(fixtureSite, ["solutions", { label: link.shortName, path: link.path }]));
     assert.deepEqual(v.breadcrumb.at(-1), { label: link.shortName, href: link.path });
-    const talk = { label: `Talk to us about ${link.shortName}`, href: fixtureSite.contact({ interest: id }) };
+    const talk = { label: "Start with one workflow", href: fixtureSite.contact({ interest: id }) };
     const demo = fixtureSite.demo(id);
     assert.deepEqual(v.ctas, { primary: talk, secondary: demo ? { label: "Try the demo", href: demo } : null });
     assert.deepEqual(v.closing, { command: "talk_to_us", args: `--about=${id}`, ...talk });
@@ -109,7 +109,7 @@ test("on the production site context every planned page is plain text and contac
   ]);
   // The demo pages are live from Phase D Task 7, so the hero's second CTA leads to ①'s.
   assert.deepEqual(live.ctas, {
-    primary: { label: "Talk to us about Document Registers", href: TALK_REGISTERS },
+    primary: { label: "Start with one workflow", href: TALK_REGISTERS },
     secondary: { label: "Try the demo", href: "/demos/document-registers/" },
   });
   assert.equal(live.closing.href, TALK_REGISTERS);

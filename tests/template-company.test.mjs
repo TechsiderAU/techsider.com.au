@@ -26,14 +26,13 @@ const PAGES = {
   "trust-no-terms": { template: "trust", h1: "Trust.", highlight: "Trust" },
   "legal-hub": { template: "legal-hub", h1: "Legal.", highlight: "Legal" },
   "legal-document": { template: "document", h1: documentFixtures[0].data.title, highlight: null },
-  contact: { template: "contact", h1: CONTACT_H1, highlight: "fix" },
-  "contact-no-endpoint": { template: "contact", h1: CONTACT_H1, highlight: "fix" },
+  contact: { template: "contact", h1: CONTACT_H1, highlight: undefined },
+  "contact-no-endpoint": { template: "contact", h1: CONTACT_H1, highlight: undefined },
   sent: { template: "sent", h1: "Message sent.", highlight: "sent" },
   "not-found": { template: "not-found", h1: "Page not found.", highlight: "found" },
 };
 // The hubs the 404 offers, in order; only the ones the SiteContext shows are listed.
 const NOT_FOUND_HUBS = ["home", "solutions", "industries", "services", "resources", "insights", "demos", "about"];
-const REPLY_SENTENCE = `We reply within ${contactFixture.replyTime}.`;
 const TEMPLATES_DIR = fileURLToPath(new URL("../dist-preview/preview/templates/", import.meta.url));
 
 const page = (kind) => readPreviewDist(`preview/templates/${kind}/index.html`);
@@ -105,7 +104,7 @@ test("about: the mission under the H1, then who, origin, principles, how we work
   assert.equal(text(one(who.inner, "id", "who-heading").inner), "Who we serve");
   assert.ok(text(who.inner).includes(aboutFixture.whoWeServe), "no who-we-serve paragraph");
   assert.ok(text(who.inner).includes(aboutFixture.whyControl), "no why-control paragraph");
-  assert.equal(text(one(main, "id", "origin").inner), `> ${positioningFixture.originLine}`);
+  assert.equal(text(one(main, "id", "origin").inner), positioningFixture.originLine);
   for (const [id, title, items] of [["principles", "Principles", aboutFixture.principles], ["how-we-work", "How we work", aboutFixture.howWeWork]]) {
     const section = one(main, "id", id);
     assert.equal(text(one(section.inner, "id", `${id}-heading`).inner), title);
@@ -116,7 +115,7 @@ test("about: the mission under the H1, then who, origin, principles, how we work
 
 test("about: the build log is a dated list, newest first, each date a <time datetime>", () => {
   const log = one(mainOf(page("about")), "id", "build-log");
-  assert.equal(text(one(log.inner, "id", "build-log-heading").inner), "Build log");
+  assert.equal(text(one(log.inner, "id", "build-log-heading").inner), "Our development log");
   const list = tagged(log.inner, "ol");
   assert.equal(list.length, 1, "the build log is one <ol>");
   const entries = tagged(list[0].inner, "li");
@@ -143,8 +142,8 @@ test("about: at most three insight cards, newest first, then All insights; the p
   assert.deepEqual(more.map((a) => a.attrs.href), ["/insights/"]);
   const contact = one(main, "id", "contact");
   const prompt = one(contact.inner, "data-prompt-block");
-  assert.match(text(prompt.inner), /talk_to_us --about=<industry>/);
-  assert.deepEqual(tagged(prompt.inner, "a").map((a) => [a.attrs.href, text(a.inner)]), [["/preview/templates/contact/", "Talk to us"]]);
+  assert.doesNotMatch(text(prompt.inner), /talk_to_us/);
+  assert.deepEqual(tagged(prompt.inner, "a").map((a) => [a.attrs.href, text(a.inner)]), [["/preview/templates/contact/", "Start with one workflow"]]);
 });
 
 test("trust: the blocks in order, and Part A dated with the sub-processor table from the contact data", () => {
@@ -359,7 +358,7 @@ test("contact: a plain POST form to the endpoint, with native validation on requ
   for (const [name, want] of Object.entries(expect)) {
     const c = controls[name];
     assert.equal(c.name, want.tag, name);
-    assert.ok("required" in c.attrs, `${name} is not required`);
+    assert.equal("required" in c.attrs, !["industry", "size", "interest"].includes(name), `${name}: qualification is optional, core answers required`);
     for (const attr of ["type", "autocomplete", "maxlength", "placeholder"]) {
       if (want[attr] !== undefined) assert.equal(c.attrs[attr], want[attr], `${name} ${attr}`);
     }
@@ -466,7 +465,7 @@ test("contact: the email address is plain text with a hidden copy button and a p
 
   const next = one(main, "id", "next");
   assert.equal(text(one(next.inner, "id", "next-heading").inner), "What happens next");
-  assert.equal(text(one(next.inner, "data-reply-time").inner), REPLY_SENTENCE);
+  assert.equal(elementsWith(next.inner, "data-reply-time").length, 0);
   assert.deepEqual(tagged(tagged(next.inner, "ol")[0].inner, "li").map((li) => text(li.inner)), contactFixture.whatNext);
   const elsewhere = one(main, "id", "elsewhere");
   assert.equal(text(one(elsewhere.inner, "id", "elsewhere-heading").inner), "Something else?");
@@ -491,7 +490,7 @@ test("sent: the reply-time sentence, what happens next and the email address as 
   assert.deepEqual(blockIds(main), ["next", "email"]);
   const next = one(main, "id", "next");
   assert.equal(text(one(next.inner, "id", "next-heading").inner), "What happens next");
-  assert.equal(text(one(next.inner, "data-reply-time").inner), REPLY_SENTENCE);
+  assert.equal(elementsWith(next.inner, "data-reply-time").length, 0);
   assert.deepEqual(tagged(tagged(next.inner, "ol")[0].inner, "li").map((li) => text(li.inner)), contactFixture.whatNext);
   const email = one(main, "id", "email");
   assert.equal(text(one(email.inner, "data-email").inner), fixtureSite.email);
@@ -501,7 +500,7 @@ test("sent: the reply-time sentence, what happens next and the email address as 
 test("the reply time is stated on the contact and sent pages only", () => {
   const kinds = readdirSync(TEMPLATES_DIR, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
   const stating = kinds.filter((kind) => visibleText(mainOf(page(kind))).includes(contactFixture.replyTime));
-  assert.deepEqual(stating, ["contact", "contact-no-endpoint", "sent"]);
+  assert.deepEqual(stating, []);
 });
 
 test("not-found: a card for every shown hub, then Report this link with the address as plain text", () => {

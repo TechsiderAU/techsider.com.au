@@ -110,7 +110,7 @@ test("each page renders its promise as the one h1, the §8.5 sections in order, 
     const found = startTags(template.inner).map((t) => t.attrs.id).filter((x) => ORDER.includes(x));
     const expected = ORDER.filter((x) => x !== "insights" || found.includes("insights"));
     assert.deepEqual(found, expected, `${id}: sections`);
-    const talk = `Talk to us about AI for ${site.industries.find((i) => i.id === id).shortName.toLowerCase()}`;
+    const talk = "Start with one workflow";
     const ctas = elements(main, (t) => t.name === "a").filter((a) => text(a.inner) === talk);
     assert.ok(ctas.length >= 2, `${id}: the hero and closing talk links`);
     for (const a of ctas) assert.equal(a.attrs.href, site.contact({ industry: id }), `${id}: talk link`);

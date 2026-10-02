@@ -7,9 +7,8 @@ test.use({ viewport: { width: 1280, height: 800 } });
 // The "All …" link at the foot of each panel: plain accessible name, arrow drawn aria-hidden.
 const ALL = [
   ["solutions", "Solutions", "All solutions", "/solutions/"],
-  ["industries", "Industries", "All industries", "/industries/"],
-  ["services", "Services", "How we work", "/services/"],
-  ["resources", "Resources", "All resources", "/resources/"],
+    ["services", "How we work", "How we work", "/services/"],
+  ["resources", "Examples", "All examples", "/demos/"],
   ["about", "About", "About Techsider", "/about/"],
 ];
 
@@ -34,10 +33,10 @@ test("Space toggles too, and only one panel is open at a time", async ({ page })
   await page.getByRole("button", { name: "Solutions menu" }).focus();
   await page.keyboard.press("Space");
   await expect(page.locator("#nav-panel-solutions")).toBeVisible();
-  await page.getByRole("button", { name: "Industries menu" }).click();
-  await expect(page.locator("#nav-panel-industries")).toBeVisible();
+  await page.getByRole("button", { name: "How we work menu" }).click();
+  await expect(page.locator("#nav-panel-services")).toBeVisible();
   await expect(page.locator("#nav-panel-solutions")).toBeHidden();
-  await expect(page.locator("#nav-panel-industries").getByRole("link")).toHaveCount(10); // 9 industries + "All industries"
+  await expect(page.locator("#nav-panel-services").getByRole("link")).toHaveCount(5); // 9 industries + "All industries"
 });
 
 test("Esc closes an open panel when focus is on <body> (Safari and Firefox leave it there after a click)", async ({ page }) => {
@@ -58,7 +57,7 @@ test("Esc closes an open panel when focus is on <body> (Safari and Firefox leave
 
 test("an outside click closes the open panel", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Resources menu" }).click();
+  await page.getByRole("button", { name: "Examples menu" }).click();
   await expect(page.locator("#nav-panel-resources")).toBeVisible();
   await page.locator("main").click({ position: { x: 20, y: 300 } });
   await expect(page.locator("#nav-panel-resources")).toBeHidden();
@@ -151,8 +150,8 @@ test("reentering during dismissal cancels the pending hide and switching groups 
   await page.waitForTimeout(350);
   await expect(panel).toBeVisible();
   await expect(panel).not.toHaveAttribute("inert", "");
-  await nav.getByRole("link", { name: "Industries", exact: true }).hover();
-  await expect(page.locator("#nav-panel-industries")).toHaveCSS("opacity", "1");
+  await nav.getByRole("link", { name: "How we work", exact: true }).hover();
+  await expect(page.locator("#nav-panel-services")).toHaveCSS("opacity", "1");
   await expect(panel).toBeHidden();
 });
 

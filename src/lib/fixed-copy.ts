@@ -31,9 +31,9 @@ export const ACCEPTANCE_TEST_LABEL = "Acceptance test (not independent)"; // §4
 export const HOME_PROMPT = { command: "applied_ai", args: "--region=au" } as const; // §8.1.1
 export const HOME_CLOSING = { command: "talk_to_us", args: "--about=<industry>" } as const; // §8.1.11
 export const HOME_TRUST_QUESTION = "Why should we trust you?"; // §8.1.10; wording updated by owner
-export const CONTACT_H1 = "Tell us what you're trying to fix."; // §8.11
-export const SERVICES_H1 = "From first use case to a system your team runs."; // §8.6.1
-export const MESSAGE_PLACEHOLDER = "What are you trying to fix? Any deployment or data constraints? Please don't include sensitive personal information."; // §10.2
+export const CONTACT_H1 = "Start with one workflow."; // §8.11
+export const SERVICES_H1 = "Start small. Prove it. Build from there."; // §8.6.1
+export const MESSAGE_PLACEHOLDER = "For example: documents arrive by email, someone checks them and enters details into another system. We want to reduce the handling. Please don't include sensitive personal information."; // §10.2
 export const ORG_SIZES = ["<20", "20–199", "200–999", "1,000+", "Government"] as const; // §10.2
 export const EXTRA_INTERESTS = [{ id: "evaluation-partner", label: "Evaluation Partner" }, { id: "not-sure", label: "Not sure yet" }] as const; // §10.2
 export const WORKS_METHOD_LABEL = { "read-only": "Read-only access", import: "File/CSV import", "draft-for-approval": "Drafts a person actions" } as const; // §5

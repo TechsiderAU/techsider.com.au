@@ -32,12 +32,12 @@ test("the concise demo teaser opens the live demo hub without loading replay cod
   await page.goto("/");await page.locator("#demo").scrollIntoViewIfNeeded();await page.waitForLoadState("networkidle");
   expect(await page.locator("[data-demo-frame]").count()).toBe(0);
   for(const response of scripts) expect(await response.text()).not.toContain("data-demo-root");
-  await page.locator("[data-all-demos]").click();await expect(page).toHaveURL(/\/demos\/$/);
-  await expect(page.locator("#demos [data-demo-kind]")).toHaveCount(5);
+  await page.locator("[data-all-demos]").click();await expect(page).toHaveURL(/\/demos\/document-registers\/$/);
+  await expect(page.locator("[data-demo-frame]")).toHaveCount(1);
 });
 test("without JavaScript, the same capability links, images and FAQ are usable",async({browser})=>{
   const context=await browser.newContext({javaScriptEnabled:false,viewport:sizes[1]});const page=await context.newPage();await page.goto("/");
   await expect(page.locator("#services [data-capability] a")).toHaveCount(3);
   await page.locator("#faq summary").first().click();await expect(page.locator("#faq details").first()).toHaveAttribute("open","");
-  await page.locator("[data-all-demos]").click();await expect(page).toHaveURL(/\/demos\/$/);await context.close();
+  await page.locator("[data-all-demos]").click();await expect(page).toHaveURL(/\/demos\/document-registers\/$/);await context.close();
 });

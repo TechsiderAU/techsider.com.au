@@ -52,7 +52,7 @@ async function fillEnquiry(page) {
   await page.getByLabel("Industry").selectOption("fixture-government");
   await page.getByLabel("Organisation size").selectOption("200–999");
   await page.getByLabel("Interest").selectOption("evaluation-partner");
-  await page.getByLabel("Message").fill("Fixture message: what we are trying to fix.");
+  await page.getByLabel("What would you like to improve?").fill("Fixture message: what we are trying to fix.");
   await page.getByLabel(/I agree/).check();
 }
 

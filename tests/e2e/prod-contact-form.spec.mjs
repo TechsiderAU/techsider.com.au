@@ -39,7 +39,7 @@ for (const javaScriptEnabled of [true, false]) {
       await page.getByLabel("Industry").selectOption("government");
       await page.getByLabel("Organisation size").selectOption({ index: 1 });
       await page.getByLabel("Interest").selectOption("ai-evaluation");
-      await page.getByLabel("Message").fill("Test enquiry. No real message should be delivered.");
+      await page.getByLabel("What would you like to improve?").fill("Test enquiry. No real message should be delivered.");
       await expect(page.getByLabel("How did you find us? (optional)")).not.toHaveAttribute("required");
       if (javaScriptEnabled) await page.getByLabel("How did you find us? (optional)").selectOption("ChatGPT");
       await page.getByLabel(/I agree/).check();

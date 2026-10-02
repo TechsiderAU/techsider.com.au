@@ -28,7 +28,7 @@ function one(html, attr, value) {
 const launchIds = (id) => [solutionFixtures[id].genericPackage, ...solutionFixtures[id].packages.filter((p) => p.status === "launch")].map((p) => p.id);
 
 for (const [file, name, h1] of [
-  [SOLUTIONS_HUB, "solutions-hub", "AI solutions for the work that matters."],
+  [SOLUTIONS_HUB, "solutions-hub", "AI workflows for everyday operations."],
   [INDUSTRIES_HUB, "industries-hub", "Your industry. Your workflows."],
 ]) {
   test(`${name}: one h1 with its highlight, a data-template root, headings in order, unique ids`, () => {
@@ -63,7 +63,7 @@ for (const [file, name, h1] of [
     const link = tagged(prompt.inner, "a");
     assert.equal(link.length, 1);
     assert.equal(link[0].attrs.href, "/preview/templates/contact/");
-    assert.equal(text(link[0].inner), "Talk to us");
+    assert.equal(text(link[0].inner), "Start with one workflow");
   });
 }
 
@@ -74,7 +74,7 @@ test("solutions-hub: the hero has no CTA or link, and #browse holds the switcher
   assert.equal(withClass(hero.outer, "btn").length, 0, "the hero renders a CTA");
   const browse = one(main, "id", "browse");
   assert.equal(browse.name, "section");
-  assert.equal(text(one(browse.inner, "id", "browse-heading").inner), "Browse solutions");
+  assert.equal(text(one(browse.inner, "id", "browse-heading").inner), "Compare scope and industry options");
   const switcher = one(browse.inner, "id", "solutions-switcher");
   assert.ok("data-tabs" in switcher.attrs, "#solutions-switcher is not a Tabs group");
   const panels = elementsWith(switcher.inner, "data-tab-panel");

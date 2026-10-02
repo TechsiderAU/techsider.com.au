@@ -31,7 +31,7 @@ export interface PostView {
   breadcrumb: Link[];
   /** SCENARIO_LABEL when the post is marked illustrative (spec §9.3), else null. */
   illustrativeLabel: string | null;
-  /** Spec §10.1: the first solution ref, else the first industry ref, else plain "Talk to us". */
+  /** Spec §10.1: the first solution ref, else the first industry ref, else plain "Start with one workflow". */
   closing: PostClosing;
   /**
    * Spec §11.3: the BlogPosting node (src/lib/json-ld.ts blogPosting()), authored and published by
@@ -47,7 +47,7 @@ function closingFor(site: SiteContext, solutions: string[], industries: string[]
     return {
       command: "talk_to_us",
       args: `--about=${solution.id}`,
-      label: `Talk to us about ${solution.shortName}`,
+      label: "Start with one workflow",
       href: site.contact({ interest: solution.id }),
     };
   }
@@ -57,11 +57,11 @@ function closingFor(site: SiteContext, solutions: string[], industries: string[]
     return {
       command: "talk_to_us",
       args: `--about=${industry.id}`,
-      label: `Talk to us about AI for ${industry.shortName.toLowerCase()}`,
+      label: "Start with one workflow",
       href: site.contact({ industry: industry.id }),
     };
   }
-  return { command: "talk_to_us", label: "Talk to us", href: site.contact() };
+  return { command: "talk_to_us", label: "Start with one workflow", href: site.contact() };
 }
 
 /**

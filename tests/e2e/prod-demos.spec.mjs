@@ -15,7 +15,7 @@ const CHECKER = "/resources/what-you-already-pay-for/";
 async function open(page, path) {
   const response = await page.goto(path);
   expect(response.status(), path).toBe(200);
-  if(path.startsWith("/solutions/") && !path.includes("#faq")) await page.locator(".solution-example > summary").click();
+  if(path.startsWith("/solutions/") && !path.includes("#faq")) await page.locator("#demo .solution-example > summary").click();
 }
 /**
  * How much a frame's polite log has announced. The engine writes the log from a run's first step
@@ -39,7 +39,7 @@ test.describe("with JavaScript", () => {
       await page.waitForTimeout(1_000);
       expect(await logged(frame), `/solutions/${id}/ started out of view`).toBe(0);
       await expect(frame.locator("[data-demo-stage]"), `/solutions/${id}/ shows its stage out of view`).toBeHidden();
-      const disclosure=page.locator(".solution-example:not([open]) > summary");
+      const disclosure=page.locator("#demo .solution-example:not([open]) > summary");
       if(await disclosure.count()) await disclosure.click();
       await frame.scrollIntoViewIfNeeded();
       await expect.poll(() => logged(frame), { message: `/solutions/${id}/ didn't start in view`, timeout: 10_000 }).toBeGreaterThan(0);

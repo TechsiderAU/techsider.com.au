@@ -170,10 +170,10 @@ test("production nav shows only live pages; preview shows every group", () => {
   assert.equal(pre[2].anchors.length, 3);
 });
 
-test("CTAs reach their live pages in both builds: Talk to us /contact/, See a demo /demos/ (Phase D Task 7)", () => {
+test("CTAs reach their live pages in both builds: Start with one workflow /contact/, See an example /demos/ (Phase D Task 7)", () => {
   for (const preview of [false, true]) {
-    assert.deepEqual(resolveCta(CTAS.talk, preview), { label: "Talk to us", href: "/contact/" });
-    assert.deepEqual(resolveCta(CTAS.demo, preview), { label: "See a demo", href: "/demos/" });
+    assert.deepEqual(resolveCta(CTAS.talk, preview), { label: "Start with one workflow", href: "/contact/" });
+    assert.deepEqual(resolveCta(CTAS.demo, preview), { label: "See an example", href: "/demos/" });
   }
   assert.equal(CTAS.talk.fallbackHref, `mailto:${SITE.email}`, "the fallback a planned /contact/ would use");
   assert.equal(CTAS.demo.fallbackHref, "/#demo", "the fallback a planned /demos/ would use");

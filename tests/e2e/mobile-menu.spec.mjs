@@ -7,9 +7,8 @@ const menuButton = (page) => page.getByRole("button", { name: "Menu", exact: tru
 // The "All …" link at the foot of each panel: plain accessible name, arrow drawn aria-hidden.
 const ALL = [
   ["solutions", "Solutions", "All solutions", "/solutions/"],
-  ["industries", "Industries", "All industries", "/industries/"],
-  ["services", "Services", "How we work", "/services/"],
-  ["resources", "Resources", "All resources", "/resources/"],
+    ["services", "How we work", "How we work", "/services/"],
+  ["resources", "Examples", "All examples", "/demos/"],
   ["about", "About", "About Techsider", "/about/"],
 ];
 const inDialog = (page) => page.evaluate(() => document.getElementById("site-menu").contains(document.activeElement));
@@ -63,12 +62,12 @@ test("the close button closes the menu", async ({ page }) => {
 test("drilling down focuses the panel heading; Back returns focus to the row", async ({ page }) => {
   await page.goto("/");
   await menuButton(page).click();
-  const row = page.locator('[data-menu-open-panel="industries"]');
+  const row = page.locator('[data-menu-open-panel="services"]');
   await row.click();
-  const panel = page.locator('[data-menu-panel="industries"]');
+  const panel = page.locator('[data-menu-panel="services"]');
   await expect(panel).toBeVisible();
-  await expect(page.locator("#menu-h-industries")).toBeFocused();
-  await expect(panel.getByRole("link")).toHaveCount(10); // 9 industries + "All industries"
+  await expect(page.locator("#menu-h-services")).toBeFocused();
+  await expect(panel.getByRole("link")).toHaveCount(5); // 9 services + "All services"
   await expect(panel.locator(".menu-ctas")).toHaveCount(0); // sub-panels carry no CTAs
   await panel.getByRole("button", { name: /Back to menu/ }).click();
   await expect(panel).toBeHidden();
@@ -120,7 +119,7 @@ test("following an in-page link closes the menu", async ({ page }) => {
   await page.evaluate(() => document.addEventListener("click", (e) => { if (e.target.closest("a[href]")) e.preventDefault(); }, true));
   await menuButton(page).click();
   await page.locator('[data-menu-open-panel="services"]').click();
-  await page.locator('[data-menu-panel="services"]').getByRole("link", { name: "Prove" }).click();
+  await page.locator('[data-menu-panel="services"]').getByRole("link", { name: "Assess and prove", exact: true }).click();
   await expect(page.locator("#site-menu")).toHaveCount(1);
   await expect(page.locator("#site-menu")).toBeHidden();
   await expect(menuButton(page)).toHaveAttribute("aria-expanded", "false");

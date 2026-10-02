@@ -53,17 +53,17 @@ const HEADCOUNT = /\b(?:\d+\+?|one|two|three|four|five|six|seven|eight|nine|ten|
 test("positioning: the sub-promise is ruling 12's safer wording; the origin line and pillar titles are spec §3.1–§3.2's", () => {
   assert.equal(
     POSITIONING.subPromise,
-    "We design, build and run AI solutions for Australian organisations, from 40-person practices to federal agencies. In your environment, with your data onshore by default.",
+    "We design, implement and support AI workflows for Australian businesses, starting with one repeated process and the tools you already use.",
   );
-  assert.equal(POSITIONING.originLine, "AI pilots are easy to start and hard to ship. We build the kind that survive scrutiny.");
+  assert.equal(POSITIONING.originLine, "A useful workflow begins with a clear task, a checkable result and someone responsible for the next step.");
   assert.deepEqual(POSITIONING.pillars.map((p) => p.title), [
-    "Cited, or it refuses.", "Measured before it ships.", "Your data stays onshore.", "You own what we build.",
+    "Cited, or it refuses.", "Measured before it ships.", "Clear data locations.", "You own what we build.",
   ]);
   assert.deepEqual(POSITIONING.pillars.map((p) => p.midMarket), [
     "Shows the page, or says it doesn't know.",
     "Tested the way you'd check a graduate's work.",
     // Spec §3.2: "Your data stays in Australia." waits for §12 item 1 (the enquiry mailbox's region).
-    "What we build keeps your data in Australia.",
+    "Check where each part of the workflow processes your data.",
     "Yours to keep, or ours to run, with the exit built in.",
   ]);
 });
@@ -257,10 +257,10 @@ for (const { name, read, site } of BUILDS) {
     const [hero] = elementsWith(main, "data-page-hero");
     const method = site.page("evaluationMethod").href;
     assert.deepEqual(links(hero.inner), [
-      ["Talk to us about a Fit Call", site.contact({ interest: "not-sure" })],
+      ["Start with one workflow", site.contact({ interest: "not-sure" })],
       ...(method === null ? [] : [["Read the evaluation method", method]]),
     ]);
-    assert.deepEqual(links(elementsWith(byId(main, "contact").outer, "data-prompt-block")[0].inner), [["Talk to us about a Fit Call", site.contact({ interest: "not-sure" })]]);
+    assert.deepEqual(links(elementsWith(byId(main, "contact").outer, "data-prompt-block")[0].inner), [["Start with one workflow", site.contact({ interest: "not-sure" })]]);
   });
 
   test(`${name}: /services/evaluation-partner/ renders its template once, from the Services data, with the Services breadcrumb`, () => {

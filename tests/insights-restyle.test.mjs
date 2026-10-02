@@ -33,25 +33,24 @@ const one = (html, attr, where) => {
 const classesOf = (el) => (el.attrs.class ?? "").split(/\s+/).filter(Boolean);
 const text = (html) => visibleText(html).trim();
 const DATE = /^\d{1,2} [A-Z][a-z]+ \d{4}$/;
-const shortName = (path) => PAGES.find((p) => p.path === path).shortName;
 // PostLayout's eyebrow is the type's label in lower case, not its id: "reference-scenario" reads
 // "[ reference scenario ]".
 const eyebrowOf = (type) => `[ ${INSIGHT_TYPE_LABEL[type].toLowerCase()} ]`;
-// Spec §10.1: the first solution reference, else the first industry, else plain "Talk to us".
+// Spec §10.1: the first solution reference, else the first industry, else plain "Start with one workflow".
 function expectedClosing({ solutions = [], industries = [] }) {
   if (solutions.length > 0) {
     return {
-      label: `Talk to us about ${shortName(`/solutions/${solutions[0]}/`)}`, prompt: `> talk_to_us --about=${solutions[0]}`,
+      label: "Start with one workflow", prompt: "Start with one workflow.",
       href: `/contact/?interest=${solutions[0]}`,
     };
   }
   if (industries.length > 0) {
     return {
-      label: `Talk to us about AI for ${shortName(`/industries/${industries[0]}/`).toLowerCase()}`, prompt: `> talk_to_us --about=${industries[0]}`,
+      label: "Start with one workflow", prompt: "Start with one workflow.",
       href: `/contact/?industry=${industries[0]}`,
     };
   }
-  return { label: "Talk to us", prompt: "> talk_to_us", href: "/contact/" };
+  return { label: "Start with one workflow", prompt: "Start with one workflow.", href: "/contact/" };
 }
 
 test("the insights pages are the index plus one page per published post", () => {
@@ -144,7 +143,7 @@ test("posts: the body is Prose on bone, then the contextual closing prompt, link
     const expected = expectedClosing(fm);
     assert.equal(text(links[0].inner), expected.label, `${id}: contextual CTA label`);
     assert.equal(links[0].attrs.href, expected.href, `${id}: contextual CTA link`);
-    assert.equal(text(elements(prompt.inner, (t) => t.name === "p")[0].inner), expected.prompt);
+    assert.equal(text(elements(prompt.inner, (t) => t.name === "p")[0].inner), "Start with one workflow.");
     // Industry chips render only for a post that names industries.
     assert.equal(elementsWith(body.inner, "data-chip-row").length, (fm.industries ?? []).length > 0 ? 1 : 0);
   }

@@ -269,8 +269,8 @@ export const PAGES: PageEntry[] = [
 export const EXEMPT_PATHS = ["/", "/404"];
 
 export const CTAS: Record<"talk" | "demo", Cta> = {
-  talk: { label: "Talk to us", href: "/contact/", fallbackHref: `mailto:${SITE.email}` },
-  demo: { label: "See a demo", href: "/demos/", fallbackHref: "/#demo" },
+  talk: { label: "Start with one workflow", href: "/contact/", fallbackHref: `mailto:${SITE.email}` },
+  demo: { label: "See an example", href: "/demos/", fallbackHref: "/#demo" },
 };
 
 /** TECHSIDER_NAV_PREVIEW=1 at build time renders planned pages too (tests only). */
@@ -330,4 +330,28 @@ export function legalLinks(preview: boolean): Link[] {
 export function resolveCta(cta: Cta, preview: boolean): Link {
   const target = PAGES.find((p) => p.path === cta.href);
   return { label: cta.label, href: target && isShown(target, preview) ? cta.href : cta.fallbackHref };
+}
+
+/** Buyer-facing navigation is separate from permanent route identities. */
+export const SOLUTION_LABELS: Record<string, string> = {
+  "/solutions/document-registers/": "Document workflows",
+  "/solutions/draft-for-approval/": "Inbox and request workflows",
+  "/solutions/knowledge-assistant/": "Operational knowledge",
+  "/solutions/ai-switch-on/": "AI in your existing software",
+  "/solutions/ai-evaluation/": "Independent AI evaluation",
+};
+export function primaryGroups(preview: boolean): VisibleGroup[] {
+  const groups: NavGroup[] = [
+    { id: "solutions", label: "Solutions", hub: SOLUTIONS_HUB, allLabel: "All solutions", layout: "rows", items: [SOLUTIONS[0], SOLUTIONS[2], SOLUTIONS[1], SOLUTIONS[4], SOLUTIONS[3]].map(p => ({ ...p, shortName: SOLUTION_LABELS[p.path] })), anchors: [{ label: "All industries", href: "/industries/" }] },
+    { id: "services", label: "How we work", hub: SERVICES_HUB, allLabel: "How we work", layout: "rows", items: [EVALUATION_PARTNER], anchors: [{ label: "Assess and prove", href: "/services/#prove" }, { label: "Implement", href: "/services/#build" }, { label: "Support and improve", href: "/services/#run" }] },
+    { id: "resources", label: "Examples", hub: DEMOS, allLabel: "All examples", layout: "rows", items: DEMO_PAGES, anchors: [] },
+    { id: "about", label: "About", hub: ABOUT, allLabel: "About Techsider", layout: "rows", items: [TRUST, RESOURCES_HUB, INSIGHTS, CONTACT], anchors: [] },
+  ];
+  return groups.map(g => ({ id: g.id, label: g.label, hubHref: isShown(g.hub, preview) ? g.hub.path : null, allLabel: g.allLabel, layout: g.layout, items: g.items.filter(p => isShown(p, preview)), anchors: g.anchors })).filter(g => g.hubHref !== null || g.items.length > 0);
+}
+export function primaryFooterColumns(preview: boolean): FooterColumn[] {
+  return [
+    { title: "Explore", links: linksFor([SOLUTIONS_HUB, SERVICES_HUB, DEMOS, INDUSTRIES_HUB], preview, p => p.path === "/services/" ? "How we work" : p.path === "/demos/" ? "Examples" : p.shortName) },
+    { title: "Techsider", links: linksFor([RESOURCES_HUB, ABOUT, TRUST, CONTACT], preview) },
+  ];
 }

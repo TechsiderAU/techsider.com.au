@@ -8,16 +8,18 @@ interface Props {
   label: string;
   href: string;
   title?: string;
+  body?: string;
 }
 
-const { command, args, label, href, title } = Astro.props;
+const { label, href, title = "Start with one workflow.", body } = Astro.props;
 ---
 <div class="prompt-block bg-carbon scanlines" data-prompt-block>
-  {title ? <p class="closing-title">{title}</p> : <p class="prompt-line" aria-hidden="true"><span class="prompt-caret">&gt;</span> {command}{args && <span class="prompt-args"> {args}</span>}</p>}
+  <div><p class="closing-title">{title}</p>{body && <p class="closing-body">{body}</p>}</div>
   <a href={href} class="btn btn-primary">{label}</a>
 </div>
 
 <style>
+  .closing-body { max-width: 52ch; margin: .75rem 0 0; color: var(--color-muted); line-height: 1.6; }
   .closing-title { margin: 0; max-width: 24ch; font-size: clamp(1.5rem, 1rem + 1vw, 2rem); font-weight: 600; line-height: 1.15; letter-spacing: -.025em; }
   .prompt-block {
     display: flex;
@@ -26,7 +28,7 @@ const { command, args, label, href, title } = Astro.props;
     justify-content: space-between;
     gap: 1rem 1.5rem;
     width: 100%;
-    max-width: 48rem;
+    max-width: 80rem;
     margin-inline: auto;
     padding: 1.5rem;
     color: var(--color-bone);

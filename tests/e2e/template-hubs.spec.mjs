@@ -51,6 +51,7 @@ for (const vp of [WIDE, NARROW]) {
     const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: vp });
     const page = await ctx.newPage();
     await page.goto(SOLUTIONS);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
     await expect(page.getByRole("tablist")).toHaveCount(0);
     for (const [i, id] of VIEWS.entries()) {
       const view = page.locator(`section#${id}[data-tab-panel]`);
@@ -68,6 +69,7 @@ for (const vp of [WIDE, NARROW]) {
     for (const hash of ["by-buyer", "matrix-fixture-government"]) {
       const page = await ctx.newPage();
       await page.goto(`${SOLUTIONS}#${hash}`);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
       await expect(page.locator(`#${hash}`)).toBeInViewport();
       await page.close();
     }
@@ -87,6 +89,7 @@ test("the no-JavaScript Solutions hub has no axe violations", async ({ page }) =
   for (const vp of [WIDE, NARROW]) {
     await page.setViewportSize(vp);
     await page.goto(SOLUTIONS);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
     await expect(page.locator("html")).toHaveClass(/\bno-js\b/);
     await expect(page.getByRole("tablist")).toHaveCount(0);
     expect((await axe(page).analyze()).violations).toEqual([]);
@@ -98,6 +101,7 @@ test.describe("768px and up: the switcher is a tablist", () => {
 
   test("By job is selected first; a click selects a view and the hash follows", async ({ page }) => {
     await page.goto(SOLUTIONS);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
     await expect(switcher(page).getByRole("tablist", { name: "Browse solutions", exact: true })).toHaveCount(1);
     await expect(tabs(page)).toHaveText(LABELS);
     await expect(tabs(page).first()).toHaveAttribute("aria-selected", "true");
@@ -115,6 +119,7 @@ test.describe("768px and up: the switcher is a tablist", () => {
 
   test("the arrow keys move between views; Enter selects; Tab then reaches the view", async ({ page, browserName }) => {
     await page.goto(SOLUTIONS);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
     await tabs(page).first().focus();
     await page.keyboard.press("ArrowRight");
     await expect(tabs(page).nth(1)).toBeFocused();
@@ -127,6 +132,7 @@ test.describe("768px and up: the switcher is a tablist", () => {
 
   test("a hash naming a matrix row selects By industry and shows the row", async ({ page }) => {
     await page.goto(`${SOLUTIONS}#matrix-fixture-government`);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
     await expect(tabs(page).nth(1)).toHaveAttribute("aria-selected", "true");
     await expectOnlyVisible(page, "by-industry");
     await expect(page.locator("#matrix-fixture-government")).toBeVisible();
@@ -134,6 +140,7 @@ test.describe("768px and up: the switcher is a tablist", () => {
 
   test("the matrix is a table: each row's cells sit side by side", async ({ page }) => {
     await page.goto(INDUSTRIES);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
     const rows = matrixRows(page, "#matrix");
     await expect(rows).toHaveCount(INDUSTRY_ROWS);
     const tops = await rows.first().locator(":scope > th, :scope > td").evaluateAll((cells) => cells.map((c) => Math.round(c.getBoundingClientRect().top)));
@@ -146,6 +153,7 @@ test.describe("below 768px: the switcher is an accordion and the matrix is cards
 
   test("By job starts open; opening By industry shows the matrix as stacked cards", async ({ page }) => {
     await page.goto(SOLUTIONS);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
     await expect(toggles(page)).toHaveText(LABELS);
     await expect(toggles(page)).toHaveCount(3);
     await expect(toggles(page).nth(0)).toHaveAttribute("aria-expanded", "true");
@@ -159,6 +167,7 @@ test.describe("below 768px: the switcher is an accordion and the matrix is cards
 
   test("the Industries hub matrix is stacked cards too", async ({ page }) => {
     await page.goto(INDUSTRIES);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
     await expectStackedCards(page, "#matrix", NARROW.width);
     expect(await overflow(page)).toBeLessThanOrEqual(0);
   });
@@ -166,6 +175,7 @@ test.describe("below 768px: the switcher is an accordion and the matrix is cards
 
 test("the Industries hub shows nine cards; the unshown industry's card has no link", async ({ page }) => {
   await page.goto(INDUSTRIES);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
   const cards = page.locator("[data-industry-card]");
   await expect(cards).toHaveCount(INDUSTRY_ROWS);
   for (const card of await cards.all()) {
@@ -187,6 +197,7 @@ for (const vp of [WIDE, NARROW]) {
     await page.setViewportSize(vp);
     for (const id of ["fixture-industry", "fixture-government"]) {
       await page.goto(INDUSTRIES);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
       await page.locator(`[data-industry-card="${id}"] summary`).click();
       const chip = page.locator(`[data-industry-card="${id}"] a[data-bracket-chip]`).first();
       const href = await chip.getAttribute("href");
@@ -203,6 +214,7 @@ for (const url of [SOLUTIONS, INDUSTRIES]) {
   test(`${url} has no horizontal scroll at 320px`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto(url);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
     expect(await overflow(page)).toBeLessThanOrEqual(0);
   });
 
@@ -210,6 +222,7 @@ for (const url of [SOLUTIONS, INDUSTRIES]) {
     test(`${url} has no axe violations at ${vp.width}px`, async ({ page }) => {
       await page.setViewportSize(vp);
       await page.goto(url);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
       expect((await axe(page).analyze()).violations).toEqual([]);
     });
   }

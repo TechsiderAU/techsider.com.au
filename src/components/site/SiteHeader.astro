@@ -1,9 +1,9 @@
 ---
-import { visibleGroups, noJsLinks, resolveCta, CTAS, isPreview } from "../../data/nav";
+import { primaryGroups, resolveCta, CTAS, isPreview } from "../../data/nav";
 
 const preview = isPreview();
-const groups = visibleGroups(preview);
-const basic = noJsLinks(preview);
+const groups = primaryGroups(preview);
+const basic = groups.flatMap(g => g.hubHref ? [{ label: g.label, href: g.hubHref }] : []);
 const demo = resolveCta(CTAS.demo, preview);
 const talk = resolveCta(CTAS.talk, preview);
 const path = Astro.url.pathname;
@@ -53,9 +53,8 @@ const isCurrent = (href: string) => (href === current ? "page" : undefined);
     </nav>
 
     <div class="ml-auto flex items-center gap-2">
-      <a href={demo.href} class="btn btn-secondary hidden lg:inline-flex">{demo.label}</a>
       <!-- Below 360px the bar drops this CTA (it stays in the menu) so 320px reflows without horizontal scroll. -->
-      <a href={talk.href} class="btn btn-primary hidden min-[360px]:inline-flex">{talk.label}</a>
+      <a href={talk.href} class="btn btn-primary hidden sm:inline-flex">{talk.label}</a>
       <button type="button" class="menu-toggle lg:hidden" aria-controls="site-menu" aria-expanded="false" hidden data-menu-open>Menu</button>
     </div>
   </div>

@@ -17,8 +17,8 @@ const descriptions = {
 ---
 <figure class="business-artwork" data-business-artwork={kind}>
   <div class="artwork-media" data-workflow-artwork={kind === "hero" ? "" : undefined} data-workflow-phase={kind === "hero" ? "review" : undefined}>
-  <img src={`/images/automation/${kind}-1280.webp`} srcset={`/images/automation/${kind}-640.webp 640w, /images/automation/${kind}-1280.webp 1280w`} sizes="(min-width: 1280px) 680px, (min-width: 768px) 52vw, 100vw" width="1536" height="1024" alt={descriptions[kind]} loading={priority ? "eager" : "lazy"} fetchpriority={priority ? "high" : "auto"} decoding="async" />
-  {kind === "hero" && <WorkflowArtwork />}
+  {kind !== "hero" && <img src={`/images/automation/${kind}-1280.webp`} srcset={`/images/automation/${kind}-640.webp 640w, /images/automation/${kind}-1280.webp 1280w`} sizes="(min-width: 1280px) 680px, (min-width: 768px) 52vw, 100vw" width="1536" height="1024" alt={descriptions[kind]} loading={priority ? "eager" : "lazy"} fetchpriority={priority ? "high" : "auto"} decoding="async" />}
+  {kind === "hero" && <WorkflowArtwork /><div class="workflow-mobile-summary"><h2>Document intake</h2><p>Illustrative review workspace</p><ol>{["Receive document", "Extract details", "Check details", "Human review", "Prepare handoff"].map((label, i) => <li data-mobile-step={i} data-state={i < 3 ? "complete" : i === 3 ? "waiting" : "pending"}>{label}<span data-mobile-status>{i < 3 ? "Complete" : i === 3 ? "Awaiting review" : "Pending"}</span></li>)}</ol></div>}
   </div>
   {kind === "hero" ? <div class="artwork-footer">
     {caption && <figcaption>Illustrative application concept</figcaption>}
@@ -30,6 +30,16 @@ const descriptions = {
   document.querySelectorAll<HTMLElement>("[data-business-artwork='hero']").forEach(initWorkflowArtwork);
 </script>
 <style>
+  .workflow-mobile-summary { display: none; }
+  .workflow-mobile-summary h2 { font-size: 1.125rem; margin: 0; }
+  .workflow-mobile-summary p { font-size: .8125rem; margin: .4rem 0 1rem; }
+  .workflow-mobile-summary ol { display: grid; gap: .5rem; list-style: none; padding: 0; margin: 0; }
+  .workflow-mobile-summary li { display: flex; justify-content: space-between; gap: .75rem; padding: .5rem .7rem; border: 1px solid #d4d9d5; border-radius: 5px; font-size: .875rem; }
+  .workflow-mobile-summary span { font-size: .75rem; color: #47524b; }
+  .workflow-mobile-summary [data-state="complete"] { background: #f5faf5; border-color: #a3c49f; }
+  .workflow-mobile-summary [data-state="waiting"] { background: #fffbeb; border-color: #dcbd62; }
+  .workflow-mobile-summary [data-state="active"] { background: #e9f5e8; border-color: #548852; }
+  @media (max-width: 39.99rem) { .workflow-mobile-summary { display: block; margin: 0; padding: 1rem; font-size: 1rem; line-height: 1.8; border: 1px solid var(--color-bone-line); border-radius: 8px; background: white; } .artwork-media :global(.workflow-overlay) { display: none; } }
   .business-artwork { margin: 0; min-width: 0; }
   .artwork-media { position: relative; }
   img { display: block; width: 100%; height: auto; border: 1px solid var(--color-bone-line); border-radius: 10px; background: white; }

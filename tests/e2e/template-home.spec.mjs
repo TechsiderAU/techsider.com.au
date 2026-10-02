@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { focusKeys } from "../support/keys.mjs";
+import { fixtureSite } from "../../src/fixtures/index.ts";
 
 // The Home template (spec §8.1) on the preview gallery, built from every fixture set.
 // /preview/templates/home/ is built at FIXTURE_NOW (latest insights as cards);
@@ -65,29 +66,27 @@ for (const path of [HOME, STALE]) {
 
 test("the business headline uses sentence case beside a labelled application concept",async({page})=>{
   await page.goto(HOME);
-  await expect(page.getByRole("heading",{level:1})).toHaveAccessibleName("AI automation. Built for your business.");
+  await expect(page.getByRole("heading",{level:1})).toHaveAccessibleName("Less admin. Faster operations. AI you can control.");
   expect(await page.locator("h1").evaluate(el=>getComputedStyle(el).textTransform)).toBe("none");
   const hero=page.locator("[data-page-hero]");
-  await expect(hero.locator("img")).toBeVisible();
+  await expect(hero.locator("svg[role=img]")).toBeVisible();
   await expect(hero.getByText("Illustrative application concept")).toBeVisible();
 });
 test("keyboard reaches the hero animation pause control before the first capability",async({page,browserName})=>{
   await page.goto(HOME);
-  await page.locator("[data-page-hero]").getByRole("link",{name:"Explore solutions"}).focus();
+  await page.locator("[data-page-hero]").getByRole("link",{name:"See an example"}).focus();
   await page.keyboard.press(focusKeys(browserName).next);
   await expect(page.locator("[data-workflow-toggle]").first()).toBeFocused();
   await page.keyboard.press(focusKeys(browserName).next);
   await expect(page.locator("#services [data-capability] a").first()).toBeFocused();
 });
 
-test("the latest insights show 3 cards while recent, and only the All insights link once stale", async ({ page }) => {
-  await page.goto(HOME);
-  await expect(page.locator('#insights [data-latest-insights="cards"] [data-insight-card]')).toHaveCount(3);
-  await expect(page.locator("#insights").getByRole("link", { name: "All insights" })).toHaveAttribute("href", "/insights/");
-  await page.goto(STALE);
-  await expect(page.locator('#insights [data-latest-insights="link"]')).toBeVisible();
-  await expect(page.locator("#insights [data-insight-card]")).toHaveCount(0);
-  await expect(page.locator("#insights").getByRole("link", { name: "All insights" })).toBeVisible();
+test("both homepage variants link to resources without adding an article grid", async ({ page }) => {
+  for (const path of [HOME, STALE]) {
+    await page.goto(path);
+    await expect(page.locator("[data-insight-card]")).toHaveCount(0);
+    await expect(page.locator("#insights")).toHaveAttribute("href", fixtureSite.page("resources").href ?? "#services");
+  }
 });
 
 test("homepage calls to action are at least 44px high on mobile",async({page})=>{

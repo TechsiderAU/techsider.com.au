@@ -12,37 +12,13 @@
 //   names ("sprint" only inside "Feasibility Sprint").
 // ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 import type { HomeData } from "../content/page-schemas.ts";
-import { HOME_TRUST_QUESTION } from "../lib/fixed-copy.ts";
-import { SERVICES } from "./services.ts";
 
 export const HOME: HomeData = {
   heroTrace: "home-hero",
   faq: [
-    // ⚑ owner: "our evaluation method is published" holds only while /resources/evaluation-method/ is live at launch (research index B10)
-    {
-      q: HOME_TRUST_QUESTION,
-      a: `Check our published evaluation method and illustrative demos. ${SERVICES.independence[0]} Managed systems include an exit pack: code, data, configuration and runbook.`,
-    },
-    {
-      q: "Where does our data go?",
-      a: "What we build or run for you is deployed in an Australian region, in your own Microsoft or AWS account or managed by us, and each launch package's onshore note records where model inference actually runs. Inside a platform you already license, the vendor sets where processing happens: we show you its published processing location, with the source, or tell you it isn't published.",
-    },
-    {
-      q: "How do we start?",
-      a: "Start with a 30-minute Fit Call on one manual process. We identify a suitable audit, trial or evaluation before a build.",
-    },
-    {
-      q: "What if our software's AI already does the job?",
-      a: "Then we'll say so, and you won't need us for it. AI Switch-On configures the AI features you already own, and we don't resell licences.",
-    },
-    {
-      q: "Who owns what you build?",
-      a: "You do. Your code, prompts, evaluation tests and index live in your own repository, whether your team runs the system or we do.",
-    },
-    {
-      q: "Are your demos live AI models?",
-      a: "The replays run in your browser using public or synthetic documents. They do not call a model. Scores and timings are illustrative; document sources and licences are listed with each example.",
-    },
+    { q: "What if our existing software already meets the need?", a: "We check that first. If a suitable feature already exists, we can help configure it and show your team how to use it." },
+    { q: "How do we know the workflow works?", a: "We agree acceptance criteria and test on examples your team knows. You see the results before deciding whether to continue." },
+    { q: "What happens after launch?", a: "Support and improvement can be included in the proposal. We agree the coverage, responsibilities and review process for your workflow." },
   ],
   trustPageLine: "Our Trust page sets out how we handle your data, with plain answers to common security questions.",
 };

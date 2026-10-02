@@ -23,7 +23,7 @@ import DataTable from "../components/ui/DataTable.astro";
 import FaqList from "../components/ui/FaqList.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
 import type { ServicesData } from "../content/page-schemas";
-import { DELIVERY_LETTER, SERVICES_H1 } from "../lib/fixed-copy";
+import { DELIVERY_LETTER } from "../lib/fixed-copy";
 import type { PageKey, SiteContext } from "../lib/site";
 
 interface Props {
@@ -50,7 +50,7 @@ const serviceHref = (id: string): string | null => {
 };
 
 // Spec §10.1: the Fit Call CTA preselects "Not sure yet"; the method link shows only once its page does.
-const fitCall = { label: "Talk to us about a Fit Call", href: site.contact({ interest: "not-sure" }) };
+const fitCall = { label: "Start with one workflow", href: site.contact({ interest: "not-sure" }) };
 const methodHref = site.page("evaluationMethod").href;
 const ctas = {
   primary: fitCall,
@@ -67,20 +67,23 @@ const choices = services.deliveryChoices
   .sort((x, y) => x.letter.localeCompare(y.letter));
 ---
 <div class="template" data-template="services">
-  <PageHero title={SERVICES_H1} display={false} art="workflow" eyebrow="Design · Build · Support" sub="We turn manual processes into AI workflows, connect your systems and support your team from the first test to everyday use." ctas={ctas} />
+  <PageHero title="Start small. Prove it. Build from there." display={false} art="workflow" eyebrow="Design · Build · Support" sub="We turn manual processes into AI workflows, connect your systems and support your team from the first test to everyday use." ctas={ctas} />
 
-  <PageSection id="method" title="Prove → Build → Run">
+  <PageSection id="method" title="Assess, implement and support">
     <ProcessSteps phases={services.phases} />
   </PageSection>
 
-  <PageSection id="services-list" title="Services">
+  <PageSection id="services-list" title="Specialist support">
+    <p>Use AI in software you already own, or independently test a system built elsewhere.</p>
+    <div class="services-cards"><LinkCard title="AI in your existing software" body="Assess suitable features, configure the workflow and help staff use it." href="/solutions/ai-switch-on/" /><LinkCard title="Independent AI evaluation" body="Test vendor or externally built AI against agreed criteria." href="/solutions/ai-evaluation/" /></div>
+    <details class="services-details"><summary>View assessment, training and delivery options</summary>
     <ul class="services-cards">
       {services.services.map((s) => (
         <li class="services-card" data-service={s.id} data-entry={s.entry}>
           <LinkCard title={s.name} href={serviceHref(s.id)} eyebrow={ENTRY_LABEL[s.entry] ?? undefined} body={s.what} meta={`For: ${s.forWhom}`} />
         </li>
       ))}
-    </ul>
+    </ul></details>
   </PageSection>
 
   <PageSection id="entry" title="Where to start">

@@ -15,6 +15,10 @@ type SolutionData = z.infer<ReturnType<typeof makeSolutionSchema>>;
 type IndustryData = z.infer<ReturnType<typeof makeIndustrySchema>>;
 
 export interface HomeView {
+  trustHref: string | null;
+  industriesHref: string | null;
+  resourcesHref: string | null;
+  documentDemoHref: string | null;
   hero: {
     prompt: typeof HOME_PROMPT;
     /** SITE.slogan, "AI that ships.": display caps come from CSS, so the H1's text stays sentence case. */
@@ -23,7 +27,7 @@ export interface HomeView {
     /** SITE.proofLine: the slogan never appears without it (spec §6.3). */
     proofLine: string;
     subPromise: string;
-    /** Talk to us → the contact page, or mailto while it isn't shown; See a demo → the Demos hub, or the #demo band. */
+    /** Start with one workflow → the contact page, or mailto while it isn't shown; See an example → the Demos hub, or the #demo band. */
     ctas: { primary: Link; secondary: Link };
     trace: TraceData;
   };
@@ -43,7 +47,7 @@ export interface HomeView {
   insights: { mode: "cards" | "link"; cards: InsightCardView[]; allHref: string | null };
   /** home.faq in order. The trust answer ends with home.trustPageLine only while /trust/ is shown (spec §8.1.10). */
   faq: { q: string; a: string }[];
-  closing: { command: "talk_to_us"; args: "--about=<industry>"; label: "Talk to us"; href: string };
+  closing: { command: "talk_to_us"; args: "--about=<industry>"; label: "Start with one workflow"; href: string };
 }
 
 function dataFor<T>(records: Record<string, T>, id: string, kind: string): T {
@@ -75,6 +79,10 @@ export function homeView(input: {
   const trustShown = site.page("trust").href !== null;
 
   return {
+    trustHref: site.page("trust").href,
+    industriesHref: site.page("industries").href,
+    resourcesHref: site.page("resources").href,
+    documentDemoHref: site.demo(site.solutions.find(s => s.number === "①")?.id ?? "document-registers"),
     hero: {
       prompt: HOME_PROMPT,
       slogan: SITE.slogan,
@@ -112,6 +120,6 @@ export function homeView(input: {
     })),
     insights: { mode: cards.length > 0 ? "cards" : "link", cards, allHref: site.page("insights").href },
     faq: home.faq.map((f) => (f.q === HOME_TRUST_QUESTION && trustShown ? { q: f.q, a: `${f.a} ${home.trustPageLine}` } : f)),
-    closing: { command: HOME_CLOSING.command, args: HOME_CLOSING.args, label: "Talk to us", href: site.contact() },
+    closing: { command: HOME_CLOSING.command, args: HOME_CLOSING.args, label: "Start with one workflow", href: site.contact() },
   };
 }

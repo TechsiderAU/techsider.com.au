@@ -100,7 +100,7 @@ function mountFake() {
   const cite = h("a", { href: "#assistant-cite-src-1" }, "[1]");
   const transcript = h("div", { "data-demo-transcript": "" }, h("div", { "data-assistant-transcript": "" }, cite));
   const frame = h("figure", { "data-demo-frame": "" }, h("div", { "data-demo-engine": "" }, root), transcript);
-  const elsewhere = h("a", { href: "/contact/" }, "Talk to us");
+  const elsewhere = h("a", { href: "/contact/" }, "Start with one workflow");
   const body = h("body", {}, frame, elsewhere);
   installDocument(body);
   return { root, transcript, cite, elsewhere, body };

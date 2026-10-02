@@ -6,7 +6,8 @@
 // Package markup is CI check 10's contract: the generic package is the first full block, launch
 // packages are tabs whose panel ids are the package ids (so #<package-id> selects one), on-request
 // packages are one-line entries, and internal packages never reach the view.
-import { solutionArtwork, SOLUTION_GUIDES } from "../lib/marketing";
+import { SOLUTION_LABELS } from "../data/nav";
+import { SOLUTION_GUIDES } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import ChipRow from "../components/page/ChipRow.astro";
@@ -28,10 +29,9 @@ const { view } = Astro.props;
 // A page without an example renders no disclosure. Examples retain their full transcripts.
 const hasDemo = Astro.slots.has("demo");
 const hero = {
-  title: view.fullName,
-  art: solutionArtwork(view.number),
+  title: SOLUTION_LABELS[`/solutions/${view.id}/`] ?? view.fullName,
   display: false,
-  eyebrow: `solution ${view.number}`,
+  eyebrow: view.fullName,
   sub: view.oneLiner,
   breadcrumb: view.breadcrumb,
   ctas: view.ctas,
@@ -46,7 +46,7 @@ const hero = {
     </details>
   </PageSection>}
 
-  <PageSection id="job" title="The job" width="prose">
+  <PageSection id="job" title="What the workflow does" width="prose">
     <div class="solution-flow">
       <p class="solution-lead">{view.job}</p>
       <h3 class="solution-subhead">What you receive</h3>
@@ -54,7 +54,7 @@ const hero = {
     </div>
   </PageSection>
 
-  <PageSection id="who" title="Who it's for">
+  <PageSection id="who" title="Where it can help">
     <div class="solution-flow solution-flow-loose">
       <ul class="need-profiles">
         {view.needProfiles.map((need) => (
@@ -66,7 +66,7 @@ const hero = {
   </PageSection>
 
   <PageSection id="packages" title={view.packagesHeading}>
-    <div class="solution-packages">
+    <details class="solution-example"><summary>View deliverables and package scope</summary><div class="solution-packages">
       <PackageBlock pkg={view.generic} standardInclusions={view.standardInclusions} />
       {view.launch.length > 0 && (
         <Tabs id={`${view.id}-packages`} label={`${view.shortName} ${view.packagesHeading.toLowerCase()}`}>
@@ -86,7 +86,7 @@ const hero = {
           ))}
         </ul>
       )}
-    </div>
+    </div></details>
   </PageSection>
 
   {view.program && (
@@ -110,9 +110,9 @@ const hero = {
         <p class="solution-text" data-acceptance-label><BracketChip label={ACCEPTANCE_TEST_LABEL} /></p>
       )}
       <p class="solution-text">{view.howWeTest.summary}</p>
-      <ul class="solution-list">
+      <details class="solution-example"><summary>View testing checks</summary><ul class="solution-list">
         {view.howWeTest.bullets.map((item) => <li>{item}</li>)}
-      </ul>
+      </ul></details>
       {view.howWeTest.methodHref && (
         <p class="solution-text"><a href={view.howWeTest.methodHref} class="solution-link">Read the evaluation method</a></p>
       )}
@@ -121,19 +121,19 @@ const hero = {
 
   <PageSection id="where-it-runs" title="Where it runs">
     <div class="solution-flow">
-      <ol class="delivery-choices">
+      <details class="solution-example"><summary>View deployment choices</summary><ol class="delivery-choices">
         {view.whereItRuns.choices.map((choice) => (
           <li class="delivery-choice" data-delivery-choice={choice.id}>
             <h3 class="solution-subhead"><span class="delivery-letter">({choice.letter})</span> {choice.title}</h3>
             <p class="solution-text">{choice.body}</p>
           </li>
         ))}
-      </ol>
+      </ol></details>
       <p class="solution-text">{view.whereItRuns.note}</p>
-      <h3 class="solution-subhead">The onshore note</h3>
+      <details class="solution-example"><summary>Read the data-location checklist</summary><h3 class="solution-subhead">The onshore note</h3>
       <ul class="solution-list">
         {view.whereItRuns.onshoreNote.map((item) => <li>{item}</li>)}
-      </ul>
+      </ul></details>
     </div>
   </PageSection>
 
@@ -173,7 +173,7 @@ const hero = {
 
   <section id="contact" class="solution-closing">
     <div class="solution-closing-inner">
-      <PromptBlock title="Let’s put AI to work." command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
+      <PromptBlock title="Start with one workflow." command={view.closing.command} args={view.closing.args} label={view.closing.label} href={view.closing.href} />
     </div>
   </section>
 </div>

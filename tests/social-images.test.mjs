@@ -117,7 +117,7 @@ test("socialImageSpec(): every card carries the §6.3 lock-up from SITE, section
 
 test("dist: the homepage leads with automation while social cards retain the brand slogan", () => {
   const html=readText(join(BUILDS.dist,"index.html"));
-  assert.match(html, /<h1[^>]*>AI automation\. Built for your business\.<\/h1>/);
+  assert.match(html, /<h1[^>]*>Less admin\. Faster operations\. AI you can control\.<\/h1>/);
   assert.equal(SLOGAN_HIGHLIGHT,"ships");
 });
 

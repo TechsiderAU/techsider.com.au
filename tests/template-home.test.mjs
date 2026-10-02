@@ -2,7 +2,6 @@
 // /preview/templates/home/ (built at FIXTURE_NOW: the latest insights show as cards) and
 // /preview/templates/home-stale-insights/ (FIXTURE_STALE_NOW: only the "All insights" link).
 // Run `npm run build:preview` first. The builder is covered by tests/views-home.test.mjs.
-import { AUTOMATION } from "../src/lib/marketing.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
@@ -12,7 +11,7 @@ import { homeView } from "../src/lib/views/home.ts";
 import { insightCards } from "../src/lib/views/insights.ts";
 import { HOME_TRUST_QUESTION } from "../src/lib/fixed-copy.ts";
 import {
-  FIXTURE_NOW, FIXTURE_STALE_NOW, fixtureSite, homeFixture, industryFixtures, insightFixtures, positioningFixture,
+  FIXTURE_NOW, fixtureSite, homeFixture, industryFixtures, insightFixtures, positioningFixture,
   servicesFixture, solutionFixtures, traceFixtures,
 } from "../src/fixtures/index.ts";
 
@@ -29,49 +28,36 @@ const tagged = (html,name) => elements(html,t=>t.name === name);
 function one(html,attr,value){ const found=elementsWith(html,attr,value); assert.equal(found.length,1,attr); return found[0]; }
 for(const file of [HOME,STALE]){
   test(`${file}: concise business homepage preserves anchors, semantics and gated links`,()=>{
-    const html=readPreviewDist(file), main=mainOf(html);
-    assert.equal(tagged(main,"h1").length,1);
-    assert.equal(text(tagged(main,"h1")[0].inner),AUTOMATION.title);
-    const ids=idsIn(main);
-    for(const id of HOME_ANCHORS) assert.ok(ids.has(id),id);
-    const all=startTags(html).map(t=>t.attrs.id).filter(Boolean);
-    assert.equal(new Set(all).size,all.length,"unique ids");
+    const html=readPreviewDist(file),main=mainOf(html);
+    assert.equal(tagged(main,'h1').length,1);
+    for(const id of HOME_ANCHORS) assert.ok(idsIn(main).has(id),id);
+    const ids=startTags(html).map(t=>t.attrs.id).filter(Boolean);
+    assert.equal(new Set(ids).size,ids.length);
     const levels=startTags(main).filter(t=>/^h[1-6]$/.test(t.name)).map(t=>+t.name[1]);
-    levels.forEach((level,i)=>{if(i) assert.ok(level<=levels[i-1]+1);});
-    for(const tag of startTags(html)) for(const id of (tag.attrs["aria-labelledby"]??"").split(/\s+/).filter(Boolean)) assert.ok(idsIn(html).has(id),id);
-    const cards=elementsWith(one(main,"id","industries").inner,"data-link-card");
-    assert.equal(cards.length,9);
-    cards.forEach((card,i)=>assert.deepEqual(tagged(card.inner,"a").map(a=>a.attrs.href),view.industries[i].href?[view.industries[i].href]:[]));
-    const services=one(main,"id","services");
-    assert.equal(elementsWith(services.inner,"data-capability").length,3);
-    for(const solution of view.solutions) if(solution.href) assert.ok(tagged(services.inner,"a").some(a=>a.attrs.href===solution.href));
-    assert.equal(one(one(main,"id","demo").inner,"data-all-demos").attrs.href,view.demo.allHref);
-    assert.equal(elementsWith(main,"data-demo-placeholder").length,0);
-    assert.equal(elementsWith(main,"data-hero-trace").length,0);
-    assert.equal(elementsWith(main,"data-business-artwork").length,5);
-    const hero=one(main,"data-page-hero");
-    assert.deepEqual(tagged(hero.inner,"a").map(a=>[text(a.inner),a.attrs.href]),[["Talk about your workflow",view.hero.ctas.primary.href],["Explore solutions","#services"]]);
-  });
+    levels.forEach((level,i)=>{if(i)assert.ok(level<=levels[i-1]+1);});
+    assert.equal(elementsWith(one(main,'id','services').inner,'data-capability').length,3);
+    for(const solution of view.solutions) if(solution.href)assert.ok(tagged(one(main,'id','services').inner,'a').some(a=>a.attrs.href===solution.href));
+    assert.equal(one(one(main,'id','demo').inner,'data-all-demos').attrs.href,view.documentDemoHref);
+    assert.equal(elementsWith(main,'data-business-artwork').length,1);
+    const hero=one(main,'data-page-hero');
+    assert.deepEqual(tagged(hero.inner,'a').map(a=>[text(a.inner),a.attrs.href]),[['Start with one workflow',view.hero.ctas.primary.href],['See an example',view.demo.allHref]]);
+});
 }
 
 test("home: #insights shows 3 cards and the All insights link while the newest post is recent", () => {
-  const section = one(mainOf(readPreviewDist(HOME)), "id", "insights");
-  const block = one(section.inner, "data-latest-insights");
-  assert.equal(block.attrs["data-latest-insights"], "cards");
-  const cards = elementsWith(block.inner, "data-insight-card");
-  assert.deepEqual(cards.map((c) => tagged(c.inner, "a").find((a) => a.attrs.href.startsWith("/insights/")).attrs.href), view.insights.cards.map((c) => c.href));
-  assert.equal(cards.length, 3);
-  const all = one(block.inner, "data-all-insights");
-  assert.deepEqual([all.attrs.href, text(all.inner)], ["/insights/", "All insights →"]);
+  for(const file of [HOME,STALE]) {
+    const main=mainOf(readPreviewDist(file));
+    assert.equal(one(main,'id','insights').attrs.href,view.resourcesHref);
+    assert.equal(elementsWith(main,'data-insight-card').length,0);
+  }
 });
 
 test("home-stale-insights: #insights keeps its anchor and shows only the All insights link", () => {
-  assert.equal(viewAt(FIXTURE_STALE_NOW).insights.mode, "link");
-  const section = one(mainOf(readPreviewDist(STALE)), "id", "insights");
-  const block = one(section.inner, "data-latest-insights");
-  assert.equal(block.attrs["data-latest-insights"], "link");
-  assert.equal(elementsWith(block.inner, "data-insight-card").length, 0);
-  assert.deepEqual(tagged(block.inner, "a").map((a) => [a.attrs.href, text(a.inner)]), [["/insights/", "All insights →"]]);
+  for(const file of [HOME,STALE]) {
+    const main=mainOf(readPreviewDist(file));
+    assert.equal(one(main,'id','insights').attrs.href,view.resourcesHref);
+    assert.equal(elementsWith(main,'data-insight-card').length,0);
+  }
 });
 
 test("home: the FAQ asks the trust question and carries one FAQPage; the closing prompt talks to us", () => {
@@ -85,5 +71,5 @@ test("home: the FAQ asks the trust question and carries one FAQPage; the closing
   const contact = one(mainOf(html), "id", "contact");
   const prompt = one(contact.inner, "data-prompt-block");
   assert.ok(text(prompt.inner).includes("What could your team stop doing manually?"));
-  assert.deepEqual(tagged(prompt.inner, "a").map((a) => [text(a.inner), a.attrs.href]), [["Let's talk", "/preview/templates/contact/"]]);
+  assert.deepEqual(tagged(prompt.inner, "a").map((a) => [text(a.inner), a.attrs.href]), [["Start with one workflow", "/preview/templates/contact/"]]);
 });

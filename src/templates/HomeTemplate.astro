@@ -1,67 +1,42 @@
 ---
-// Concise business introduction. Detailed demonstrations and delivery evidence live on their own pages.
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
-import BusinessArtwork from "../components/page/BusinessArtwork.astro";
 import LinkCard from "../components/page/LinkCard.astro";
-import InsightCard from "../components/page/InsightCard.astro";
 import FaqList from "../components/ui/FaqList.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
 import { AUTOMATION } from "../lib/marketing";
 import type { HomeView } from "../lib/views/home";
 interface Props { view: HomeView; }
 const { view } = Astro.props;
-const capabilities = AUTOMATION.capabilities.map(c => ({...c, solution: view.solutions.find(s => s.number === c.number)}));
-const supporting = view.solutions.filter(s => s.number === "④" || s.number === "⑤");
+const capabilities = AUTOMATION.capabilities.map(c => ({ ...c, solution: view.solutions.find(s => s.number === c.number) }));
+
 ---
 <div class="template" data-template="home">
-  <PageHero title={AUTOMATION.title} display={false} eyebrow="AI automation for Australian organisations" sub={AUTOMATION.sub} art="hero" ctas={{primary: {label: "Talk about your workflow", href: view.hero.ctas.primary.href}, secondary: {label: "Explore solutions", href: "#services"}}} />
-
-  <div class="home-principles surface-bone" aria-label="How we build">
-    <div><span>Connected systems</span><span>Human approvals</span><span>Ongoing support</span></div>
-  </div>
-
-  <PageSection id="services" title="Make everyday work flow." lede="Practical AI automation, built around your team and the tools you use.">
-    <ul class="home-capabilities">
-      {capabilities.map(c => <li class="capability" data-capability={c.art}>
-        <BusinessArtwork kind={c.art} />
-        <LinkCard title={c.title} body={c.body} href={c.solution?.href ?? null} />
-      </li>)}
-    </ul>
-    <div class="home-supporting"><p>Already using AI? We can help you test it or put it to work.</p><div>{supporting.map(s => s.href ? <a href={s.href}>{s.shortName} <span aria-hidden="true">↗</span></a> : <span>{s.shortName}</span>)}</div></div>
+  <PageHero title={AUTOMATION.title} display={false} eyebrow="AI automation for Australian businesses" sub={AUTOMATION.sub} art="hero" ctas={{ primary: { label: "Start with one workflow", href: view.hero.ctas.primary.href }, secondary: { label: "See an example", href: view.demo.allHref ?? "#demo" } }} />
+  <PageSection id="services" title="Put repetitive work on a clearer path.">
+    <ul class="home-capabilities">{capabilities.map(c => <li class="capability" data-capability={c.art}><LinkCard title={c.title} body={c.body} href={c.solution?.href ?? null} /></li>)}</ul>
+    <div class="home-supporting"><p>Already using AI? We can help you put existing tools to work or evaluate a system built elsewhere.</p><div><a href={view.solutions.find(s => s.number === "⑤")?.href ?? view.closing.href}>AI in your existing software</a><a href={view.solutions.find(s => s.number === "④")?.href ?? view.closing.href}>Independent AI evaluation</a></div></div>
   </PageSection>
-
-  <PageSection id="approach" title="From one workflow to everyday impact.">
-    <ol class="home-process">
-      {AUTOMATION.process.map((step, i) => <li><span class="step-number">0{i + 1}</span><h3>{step.title}</h3><p>{step.body}</p></li>)}
-    </ol>
+  <PageSection id="approach" title="Start small. Prove it. Build from there.">
+    <ol class="home-process">{AUTOMATION.process.map((step, i) => <li><span class="step-number">0{i + 1}</span><h3>{step.title}</h3><p>{step.body}</p></li>)}</ol>
     {view.servicesHref && <a class="home-link" href={view.servicesHref}>How we work <span aria-hidden="true">→</span></a>}
   </PageSection>
-
-  <PageSection id="demo" title="See the possibilities." surface="carbon">
-    <div class="home-example">
-      <div><p class="example-label">Illustrative examples</p><h3>Less manual handling. Clearer decisions.</h3><p>Explore document extraction, answers with sources, and drafts that wait for approval.</p>{view.demo.allHref && <a class="btn btn-primary" href={view.demo.allHref} data-all-demos>Explore the demos <span aria-hidden="true">→</span></a>}</div>
-      <BusinessArtwork kind="workflow" />
-    </div>
+  <PageSection id="demo" title="A document arrives. Your team gets work ready for review." surface="carbon">
+    <div class="home-example"><div><p class="example-label">Illustrative workflow</p><p>An illustrative workflow reads a document, extracts agreed details and flags missing information. A person checks the result before the next step.</p><a class="btn btn-primary" href={view.documentDemoHref ?? view.demo.allHref ?? "#services"} data-all-demos>See the document example</a></div><ol class="example-flow" aria-label="Document workflow"><li>Receive</li><li>Extract</li><li>Check</li><li>Review</li><li>Prepare handoff</li></ol></div>
   </PageSection>
-
-  <PageSection id="industries" title="Built around your industry." lede="Workflows shaped by your systems, documents and operating requirements.">
-    <ul class="home-industries">
-      {view.industries.map(industry => <li><LinkCard title={industry.shortName} href={industry.href} body={AUTOMATION.industries[industry.shortName] ?? "AI workflows for your team."} /></li>)}
-    </ul>
+  <PageSection id="faq" title="Practical automation, with clear responsibility.">
+    <ul class="home-process"><li><h3>Tested on your work</h3><p>Agree what a useful result looks like, then check it against known examples.</p></li><li><h3>People stay in control</h3><p>Make review, approvals and exception handling part of the workflow.</p></li><li><h3>A clear handover</h3><p>Document how to operate the system and who is responsible for each step.</p></li></ul>
+    <p><a class="home-link" href="/resources/evaluation-method/">Read our evaluation method</a></p>
+    {view.trustHref && <a class="home-link" href={view.trustHref}>Trust and data handling</a>}
+    <FaqList items={view.faq} />
+    <p><a id="industries" class="home-link" href={view.industriesHref ?? "#services"}>Explore your industry</a> · <a id="insights" class="home-link" href={view.resourcesHref ?? "#services"}>Resources and insights</a></p>
   </PageSection>
-
-  <PageSection id="insights" title="Ideas for putting AI to work.">
-    <div data-latest-insights={view.insights.mode}>
-      {view.insights.mode === "cards" && <ul class="home-insights">{view.insights.cards.map(card => <li><InsightCard card={card} level={3} /></li>)}</ul>}
-      {view.insights.allHref && <a class="home-link" href={view.insights.allHref} data-all-insights>All insights <span aria-hidden="true">→</span></a>}
-    </div>
-  </PageSection>
-
-  <PageSection id="faq" title="A few practical questions." width="prose"><FaqList items={view.faq} /></PageSection>
-  <div id="contact" class="template-closing"><PromptBlock title="What could your team stop doing manually?" command={view.closing.command} args={view.closing.args} label="Let's talk" href={view.closing.href} /></div>
+  <div id="contact" class="template-closing"><PromptBlock title="What could your team stop doing manually?" body="Tell us about one process that takes too much handling. We’ll discuss whether your existing tools or a scoped automation could help." command={view.closing.command} label="Start with one workflow" href={view.closing.href} /></div>
 </div>
 <style>
+  .example-flow { margin: 0; padding: 0; list-style: none; display: grid; gap: .5rem; }
+  .example-flow li { padding: .8rem 1rem; border: 1px solid var(--color-graphite); border-radius: 6px; }
+  .example-flow li:nth-child(4) { border-color: var(--color-acid); color: var(--color-acid); }
   .home-principles { border-bottom: 1px solid var(--color-bone-line); }
   .home-principles > div { max-width: 80rem; margin: auto; display: flex; flex-wrap: wrap; gap: 1rem 2.5rem; padding: 1.25rem 1.5rem; font-size: .875rem; font-weight: 500; }
   .home-principles span::before { content: "✓"; margin-right: .6rem; color: var(--color-acid-deep); }

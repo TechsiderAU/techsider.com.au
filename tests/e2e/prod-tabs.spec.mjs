@@ -37,6 +37,7 @@ test("tabs parsed after the fallback deadline stay readable while their module i
     const group = page.locator("#ai-evaluation-packages");
     await expect(group).toHaveAttribute("data-tabs-static", "");
     expect(await group.getAttribute("data-tabs-mode")).toBeNull();
+    await page.locator("#packages details > summary").first().click();
     const panels = group.locator(":scope > [data-tab-panel]");
     expect(await panels.count()).toBeGreaterThan(1);
     for (const panel of await panels.all()) await expect(panel).toBeVisible();
@@ -54,8 +55,13 @@ for (const path of PAGES) {
   for (const width of WIDTHS) {
     test(`${path} at ${width}px: nothing moves when tabs.ts runs (BR-4)`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
-      const { before, after } = await tabsBeforeAndAfter(page, path);
+      const { before, after } = await tabsBeforeAndAfter(page, path, async () => {
+        for (const detail of await page.locator("#packages > div details, #browse > div details").all()) {
+          if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click();
+        }
+      });
       expect(before.length, `${path} has no tab group`).toBeGreaterThan(0);
+      for (const group of before) expect(group.height, group.id).toBeGreaterThan(0);
       expect(before.filter((g) => g.enhanced).map((g) => g.id), "tabs.ts ran before its chunk was held").toEqual([]);
       expect(moved(before, after)).toEqual([]);
     });
@@ -65,6 +71,7 @@ for (const path of PAGES) {
 test("/solutions/ai-evaluation/ at 768px: the tabs wrap onto more than one row, the case the first-paint tablist must match", async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 900 });
   await page.goto("/solutions/ai-evaluation/");
+  await page.locator("#packages details > summary").first().click();
   const list = page.locator("#ai-evaluation-packages [role=tablist]");
   await expect(list).toBeVisible();
   // One row of tabs is 44px.

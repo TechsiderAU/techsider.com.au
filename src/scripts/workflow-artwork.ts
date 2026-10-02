@@ -1,11 +1,11 @@
 // A fictional sample run; no network requests, real approvals or customer data.
 const phases = [
-  { key: "received", ms: 1400, current: 0, status: "Receiving request", step: "Receive request", description: "A sample invoice arrives.", last: "Source: shared inbox." },
-  { key: "extract", ms: 1800, current: 1, status: "Extracting details", step: "Extract details", description: "Invoice fields are extracted.", last: "Preparing them for review." },
+  { key: "received", ms: 1400, current: 0, status: "Receiving request", step: "Receive request", description: "A sample document arrives.", last: "Source: shared inbox." },
+  { key: "extract", ms: 1800, current: 1, status: "Extracting details", step: "Extract details", description: "Agreed fields are extracted.", last: "Preparing them for review." },
   { key: "check", ms: 1800, current: 2, status: "Checking rules", step: "Check business rules", description: "Fields are checked and matched.", last: "Approval is still required." },
   { key: "review", ms: 4200, current: 3, status: "Awaiting review", step: "Human approval", description: "Operations reviews the details.", last: "Updates wait for approval." },
   { key: "approved", ms: 1800, current: 3, status: "Approved", step: "Sample approval", description: "The example reviewer approves.", last: "The workflow can now continue." },
-  { key: "update", ms: 1800, current: 4, status: "Updating systems", step: "Update systems", description: "Approved fields update the ERP.", last: "The action is recorded." },
+  { key: "update", ms: 1800, current: 4, status: "Preparing handoff", step: "Prepare handoff", description: "Approved details enter a review queue.", last: "The action is recorded." },
   { key: "complete", ms: 3200, current: 5, status: "Completed", step: "Run complete", description: "The sample workflow is complete.", last: "Every action has an audit trail." },
 ];
 const cycle = phases.reduce((total, phase) => total + phase.ms, 0);
@@ -35,6 +35,13 @@ export function initWorkflowArtwork(figure: HTMLElement): void {
       const sub = node.querySelector("[data-node-sub]");
       if (i === 3 && sub) sub.textContent = done ? "Approved by reviewer" : "Awaiting review";
     });
+    artwork.querySelectorAll<HTMLElement>("[data-mobile-step]").forEach((node, i) => {
+      const done = i < phase.current || (i === 3 && phase.key === "approved");
+      const state = done ? "complete" : i === phase.current ? (i === 3 ? "waiting" : "active") : "pending";
+      node.dataset.state = state;
+      const status = node.querySelector("[data-mobile-status]");
+      if (status) status.textContent = state === "complete" ? "Complete" : state === "waiting" ? "Awaiting review" : state === "active" ? "In progress" : "Pending";
+    });
     artwork.querySelectorAll<SVGGElement>("[data-workflow-connector]").forEach((line, i) => {
       line.toggleAttribute("data-connector-active", i === phase.current - 1 && phase.key !== "review" && phase.key !== "approved");
     });
@@ -44,7 +51,7 @@ export function initWorkflowArtwork(figure: HTMLElement): void {
     write("[data-run-description-last]", phase.last);
     const statuses = [phase.current > 0 ? "Received" : "Receiving", phase.current > 1 ? "Processed" : "Pending", phase.current > 3 || phase.key === "approved" ? "Approved" : phase.current === 3 ? "Awaiting review" : "Pending"];
     artwork.querySelectorAll("[data-activity-status]").forEach((el, i) => { el.textContent = statuses[i]; });
-    const details = [phase.current > 0 ? "Request received from shared inbox" : "Receiving a sample invoice", phase.current > 1 ? "Document analysed, key details extracted" : "Waiting for document extraction", statuses[2] === "Approved" ? "Example reviewer approved the details" : statuses[2] === "Pending" ? "Waiting for the preceding checks" : "Pending review by operations team"];
+    const details = [phase.current > 0 ? "Request received from shared inbox" : "Receiving a sample document", phase.current > 1 ? "Document analysed, key details extracted" : "Waiting for document extraction", statuses[2] === "Approved" ? "Example reviewer approved the details" : statuses[2] === "Pending" ? "Waiting for the preceding checks" : "Pending review by operations team"];
     artwork.querySelectorAll("[data-activity-description]").forEach((el, i) => { el.textContent = details[i]; });
     artwork.querySelectorAll<SVGGElement>("[data-workflow-activity]").forEach((el, i) => {
       el.dataset.state = statuses[i] === "Pending" ? "pending" : statuses[i] === "Awaiting review" ? "waiting" : "complete";

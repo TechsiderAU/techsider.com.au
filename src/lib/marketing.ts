@@ -1,16 +1,16 @@
 // Business-facing introductions; detailed evidence and scope remain on the solution pages.
 export const AUTOMATION = {
-  title: "AI automation. Built for your business.",
-  sub: "We design, build and support AI workflows that connect your systems and keep people in control.",
+  title: "Less admin. Faster operations. AI you can control.",
+  sub: "We help Australian businesses automate repetitive document and inbox work. We connect the systems you already use, test the workflow on your examples, and support it after launch.",
   capabilities: [
-    {number: "③", title: "Workflow automation", body: "Connect tasks across your tools, with people approving the actions that matter.", art: "workflow" as const},
-    {number: "①", title: "Document intelligence", body: "Turn documents into structured information your team can check and use.", art: "documents" as const},
-    {number: "②", title: "Knowledge assistants", body: "Find answers in your organisation’s knowledge, with sources you can verify.", art: "knowledge" as const},
+    {number: "①", title: "Document workflows", body: "Turn incoming documents into structured information, source links and a review queue your team can check.", art: "documents" as const},
+    {number: "③", title: "Inbox and request workflows", body: "Sort incoming work, prepare drafts and route exceptions to the right person, with approval before anything is sent or changed.", art: "workflow" as const},
+    {number: "②", title: "Operational knowledge", body: "Help staff find the right procedure or answer, with sources they can verify and access controls respected.", art: "knowledge" as const},
   ],
   process: [
-    {title: "Map the workflow", body: "Find the manual work worth automating and check what your existing software can do."},
-    {title: "Build and test", body: "Connect the systems, define approval steps and test against your own examples."},
-    {title: "Run and improve", body: "Support your team, monitor changes and keep the workflow useful as your business evolves."},
+    {title: "Assess and prove", body: "Choose one repeated task, check your existing software, and test an approach on examples your team knows."},
+    {title: "Implement", body: "Build the agreed workflow, define review and approval steps, and check it against the acceptance criteria."},
+    {title: "Support and improve", body: "Help your team operate it, respond to changes, and review whether it continues to deliver value."},
   ],
   industries: {
     "Government": "Evaluate AI and streamline policy-led workflows.",

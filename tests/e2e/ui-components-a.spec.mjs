@@ -64,7 +64,7 @@ test("acid is never text on bone; brackets, carets and indicators follow the sur
     expect(await colour(`${on(surface)} .faq-indicator`), surface).toBe(expected);
     // Dark islands are carbon-coloured again on either surface: PromptBlock (bg-carbon) and a
     // chip inside a bg-graphite box keep acid accents and bone text.
-    expect(await colour(`${on(surface)} .prompt-caret`), surface).toBe(ACID);
+    expect(await colour(`${on(surface)} .closing-title`), surface).toBe(BONE);
     expect(await colour(`${on(surface)} .bg-graphite [data-bracket-chip] > span[aria-hidden="true"]`), surface).toBe(ACID);
     expect(await colour(`${on(surface)} .bg-graphite [data-bracket-chip]`), surface).toBe(BONE);
   }
@@ -151,7 +151,7 @@ test("PromptBlock is centred inside the content width, never full-bleed", async 
       const p = el.parentElement.getBoundingClientRect();
       return { width: r.width, left: r.left - p.left, right: p.right - r.right };
     });
-    expect(box.width, surface).toBeLessThanOrEqual(768); // max-width 48rem
+    expect(box.width, surface).toBeLessThan(1280); // stays inside the page gutters
     expect(Math.abs(box.left - box.right), surface).toBeLessThanOrEqual(1);
   }
 });

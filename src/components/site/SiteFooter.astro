@@ -1,8 +1,8 @@
 ---
-import { footerColumns, legalLinks, resolveCta, CTAS, SITE, isPreview } from "../../data/nav";
+import { primaryFooterColumns, legalLinks, resolveCta, CTAS, SITE, isPreview } from "../../data/nav";
 
 const preview = isPreview();
-const columns = footerColumns(preview);
+const columns = primaryFooterColumns(preview);
 const legal = legalLinks(preview);
 const talk = resolveCta(CTAS.talk, preview);
 const year = new Date().getFullYear();
@@ -14,7 +14,7 @@ const current = path.endsWith("/") ? path : `${path}/`;
     {/* One landmark for all the columns (spec §7.3); each column is an h2-headed list inside it. */}
     {columns.length > 0 && (
       <nav aria-label="Footer">
-        <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+        <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-2">
           {columns.map((col) => (
             <div>
               <h2 class="font-mono text-xs text-muted"><span aria-hidden="true">[</span>{col.title.toLowerCase()}<span aria-hidden="true">]</span></h2>
@@ -32,7 +32,7 @@ const current = path.endsWith("/") ? path : `${path}/`;
     <div class="mt-12 flex flex-col gap-6 border-t border-graphite pt-8 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <img src="/logo.svg" alt="Techsider" width="160" height="25" class="h-6 w-auto" />
-        <p class="mt-4 font-mono text-sm text-bone">{SITE.slogan} <span class="text-muted">{SITE.proofLine}</span></p>
+        <p class="mt-4 font-mono text-sm text-bone">AI automation for Australian businesses.</p>
       </div>
       <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
         <p class="flex text-sm"><a href={`mailto:${SITE.email}`} class="footer-link">{SITE.email}</a></p>

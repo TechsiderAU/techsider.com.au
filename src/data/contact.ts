@@ -55,11 +55,10 @@ export const CONTACT: ContactData = {
     },
   ],
   whatNext: [
-    "A 30-minute Fit Call about what you want to fix. If your platform's AI already does the job, you hear that on the call.",
-    "An NDA before you share anything confidential, if you want one.",
-    "A written proposal: the scope, what you get, your time, the timeline and the go/no-go gate.",
+    "Discuss the workflow and where it slows down.",
+    "Check whether your existing tools or a scoped automation could help.",
+    "Agree the scope, responsibilities and next steps in a proposal.",
   ],
-  // ⚑ owner: a security contact address for security.txt (spec §12 item 7); every request goes to the one mailbox until then
   deflection: [
     { title: "Security, privacy and media", body: "For security reports, privacy requests or media enquiries, email us with the details.", email: SITE.email },
   ],

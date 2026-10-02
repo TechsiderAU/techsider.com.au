@@ -1,3 +1,4 @@
+import { SOLUTION_LABELS } from "../src/data/nav.ts";
 // The live Solutions pages in the production build (Phase C Task 3; spec §8.2, §8.3): the hub at
 // /solutions/ and the five solution pages, rendered from src/content/solutions/*.yaml. Expected
 // values come from the same view builders the routes call, fed the parsed content, the shared
@@ -58,12 +59,12 @@ test("each solution page: one h1 (the full name), the one-liner, and a primary C
     const main = mainOf(page(id));
     const h1 = elements(main, (t) => t.name === "h1");
     assert.equal(h1.length, 1, id);
-    assert.equal(text(h1[0].inner), VIEWS[id].fullName, id);
+    assert.equal(text(h1[0].inner), SOLUTION_LABELS[`/solutions/${id}/`] ?? VIEWS[id].fullName, id);
     assert.ok(text(main).includes(VIEWS[id].oneLiner), `${id}: no one-liner`);
     const [hero] = elementsWith(main, "data-page-hero");
     const cta = elements(hero.outer, (t) => t.name === "a" && t.attrs.href === VIEWS[id].ctas.primary.href);
     assert.equal(cta.length, 1, `${id}: no primary CTA to ${VIEWS[id].ctas.primary.href}`);
-    assert.equal(text(cta[0].inner), `Talk to us about ${VIEWS[id].shortName}`);
+    assert.equal(text(cta[0].inner), "Start with one workflow");
     // Phase D Task 7: the demo sits in the hero, with "Try the demo" below it
     // (tests/demos-pages.test.mjs pins what the slot holds).
     assert.deepEqual(VIEWS[id].ctas.secondary, { label: "Try the demo", href: `/demos/${id}/` }, `${id}: the demo link`);
@@ -157,7 +158,7 @@ test("the hub: five job cards linking to the live pages, a matrix row per indust
   const main = mainOf(readDist("solutions/index.html"));
   const h1 = elements(main, (t) => t.name === "h1");
   assert.equal(h1.length, 1);
-  assert.equal(text(h1[0].inner), "AI solutions for the work that matters.");
+  assert.equal(text(h1[0].inner), "AI workflows for everyday operations.");
   const byJob = elements(main, (t) => t.attrs.id === "by-job")[0].outer;
   assert.deepEqual(hrefsIn(byJob), IDS.map((id) => `/solutions/${id}/`));
   assert.equal(elementsWith(main, "data-matrix-row").length, SITE.industries.length);

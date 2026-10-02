@@ -142,7 +142,7 @@ export function industryView(input: {
   const { id, data, rows, solutions, traces, insights, site } = input;
   const link = industryLink(site, id);
   const lower = link.shortName.toLowerCase();
-  const talk = { label: `Talk to us about AI for ${lower}`, href: site.contact({ industry: id }) };
+  const talk = { label: "Start with one workflow", href: site.contact({ industry: id }) };
 
   // Stage ids are page anchors: each stage is a TabPanel whose id is the stage id (its heading is
   // `${stage}-heading`). The schema doesn't make them unique, so a repeated stage id, or one that

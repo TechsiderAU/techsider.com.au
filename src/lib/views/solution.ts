@@ -20,7 +20,7 @@ export interface SolutionView {
   oneLiner: string;
   /** crumbs(site, ["solutions", { label: shortName, path }]) */
   breadcrumb: Link[];
-  /** `Talk to us about ${shortName}` → site.contact({ interest: id }); "Try the demo" → site.demo(id), or no secondary. */
+  /** `Start with one workflow about ${shortName}` → site.contact({ interest: id }); "Try the demo" → site.demo(id), or no secondary. */
   ctas: { primary: Link; secondary: Link | null };
   job: string;
   artefact: string;
@@ -63,7 +63,7 @@ export function solutionView(input: { id: string; data: SolutionData; shared: Sh
       return { id: choice, letter: DELIVERY_LETTER[choice], title: copy.title, body: copy.body };
     });
 
-  const talk = { label: `Talk to us about ${link.shortName}`, href: site.contact({ interest: id }) };
+  const talk = { label: "Start with one workflow", href: site.contact({ interest: id }) };
   const demo = site.demo(id);
 
   return {

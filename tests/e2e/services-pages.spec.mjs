@@ -10,7 +10,7 @@ const PAGES = ["/services/", "/services/evaluation-partner/"];
 const WCAG = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
 const WIDE = { width: 1280, height: 800 };
 const NARROW = { width: 390, height: 844 };
-const PHASES = [["Prove", "prove"], ["Build", "build"], ["Run", "run"]];
+const PHASES = [["Assess and prove", "prove"], ["Implement", "build"], ["Support and improve", "run"]];
 
 // Every test opens its page through open(), so a page that isn't built fails at once, not on a timeout.
 async function open(page, url) {
@@ -36,10 +36,10 @@ for (const path of PAGES) {
 }
 
 for (const [label, id] of PHASES) {
-  test(`the Services menu's ${label} link lands on the ${label} phase, clear of the sticky header`, async ({ page }) => {
+  test(`the How we work menu's ${label} link lands on the ${label} phase, clear of the sticky header`, async ({ page }) => {
     await page.setViewportSize(WIDE);
     await open(page, "/services/evaluation-partner/");
-    await page.getByRole("button", { name: "Services menu" }).click();
+    await page.getByRole("button", { name: "How we work menu" }).click();
     const panel = page.locator("#nav-panel-services");
     await expect(panel).toBeVisible();
     await panel.getByRole("link", { name: label, exact: true }).click();

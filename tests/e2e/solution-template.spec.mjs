@@ -23,6 +23,7 @@ const axe = (page) => new AxeBuilder({ page }).include("main").withTags(["wcag2a
 
 async function open(page, path) {
   const response = await page.goto(path);
+    for (const detail of await page.locator("#browse > div details, #packages > div details").all()) { if ((await detail.getAttribute("open")) === null) await detail.locator(":scope > summary").click(); }
   expect(response.status(), path).toBe(200);
 }
 

@@ -153,22 +153,22 @@ test("breadcrumbs: the hubs sit under Home, the resource pages under Resources, 
 
 test("every page closes with one terminal prompt that opens the right contact query", () => {
   const closing = {
-    "resources-hub": ["contact", "talk_to_us", "Talk to us", fixtureSite.contact()],
-    "safe-use-kits": ["contact", `talk_to_us --about=${switchOn.id}`, `Talk to us about ${switchOn.shortName}`, fixtureSite.contact({ interest: switchOn.id })],
-    "pay-for": ["contact", `talk_to_us --about=${switchOn.id}`, `Talk to us about ${switchOn.shortName}`, fixtureSite.contact({ interest: switchOn.id })],
-    "evaluation-method": ["contact", `talk_to_us --about=${evaluation.id}`, `Talk to us about ${evaluation.shortName}`, fixtureSite.contact({ interest: evaluation.id })],
-    "demos-hub": ["contact", "talk_to_us", "Talk to us", fixtureSite.contact()],
-    demo: ["next", "talk_to_us --about=fixture-solution", "Talk to us about Fixture Solution One", fixtureSite.contact({ interest: "fixture-solution" })],
-    "demo-report": ["next", `talk_to_us --about=${evaluation.id}`, `Talk to us about ${evaluation.shortName}`, fixtureSite.contact({ interest: evaluation.id })],
+    "resources-hub": ["contact", "talk_to_us", "Start with one workflow", fixtureSite.contact()],
+    "safe-use-kits": ["contact", `talk_to_us --about=${switchOn.id}`, "Start with one workflow", fixtureSite.contact({ interest: switchOn.id })],
+    "pay-for": ["contact", `talk_to_us --about=${switchOn.id}`, "Start with one workflow", fixtureSite.contact({ interest: switchOn.id })],
+    "evaluation-method": ["contact", `talk_to_us --about=${evaluation.id}`, "Start with one workflow", fixtureSite.contact({ interest: evaluation.id })],
+    "demos-hub": ["contact", "talk_to_us", "Start with one workflow", fixtureSite.contact()],
+    demo: ["next", "talk_to_us --about=fixture-solution", "Start with one workflow", fixtureSite.contact({ interest: "fixture-solution" })],
+    "demo-report": ["next", `talk_to_us --about=${evaluation.id}`, "Start with one workflow", fixtureSite.contact({ interest: evaluation.id })],
   };
   for (const kind of KINDS) {
     const t = template(kind);
-    const [where, prompt, label, href] = closing[kind];
+    const [where, , label, href] = closing[kind];
     assert.equal(byAttr(t, "data-prompt-block").length, 1, `${kind}: expected one PromptBlock`);
     const [block] = byAttr(sectionOf(t, where), "data-prompt-block");
     assert.ok(block, `${kind}: the PromptBlock is not in #${where}`);
     const line = elements(block.inner, (tag) => tag.name === "p" && tag.attrs["aria-hidden"] === "true")[0];
-    assert.equal(text(line.inner), `> ${prompt}`, kind);
+    assert.equal(line, undefined, `${kind}: terminal prompt is absent`);
     assert.deepEqual(anchors(block.inner).map((a) => [a.text, a.href]), [[label, href]], kind);
   }
 });

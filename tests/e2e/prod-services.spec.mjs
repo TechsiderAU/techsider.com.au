@@ -26,7 +26,7 @@ for (const vp of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
 test("/services/: the Fit Call CTA and closing prompt follow the production site context, and the method link waits for its page", async ({ page }) => {
   await page.goto("/services/");
   const hero = page.locator("[data-page-hero]");
-  await expect(hero.getByRole("link", { name: "Talk to us about a Fit Call" })).toHaveAttribute("href", site.contact({ interest: "not-sure" }));
+  await expect(hero.getByRole("link", { name: "Start with one workflow" })).toHaveAttribute("href", site.contact({ interest: "not-sure" }));
   await expect(hero.getByRole("link", { name: "Read the evaluation method" })).toHaveCount(site.page("evaluationMethod").href === null ? 0 : 1);
   await expect(page.locator("#contact").getByRole("link")).toHaveAttribute("href", site.contact({ interest: "not-sure" }));
 });
@@ -39,6 +39,7 @@ test("/services/evaluation-partner/: the workstream CTA follows the production s
   await expect(crumbs.getByRole("link")).toHaveText(["Home", "Services"]);
   await crumbs.getByRole("link", { name: "Services" }).click();
   await expect(page).toHaveURL(/\/services\/$/);
+  await page.locator("#services-list details > summary").click();
   await page.locator('[data-service="evaluation-partner"]').getByRole("link", { name: "Evaluation Partner" }).click();
   await expect(page).toHaveURL(/\/services\/evaluation-partner\/$/);
   await expect(page.locator("main h1")).toHaveText(SERVICES.evaluationPartner.promise);

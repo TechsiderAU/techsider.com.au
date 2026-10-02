@@ -14,7 +14,7 @@ export const SERVICES: ServicesData = {
   phases: [
     {
       id: "prove",
-      name: "Prove",
+      name: "Assess and prove",
       duration: "1–3 weeks",
       summary: "Test one job on your own files, or on public or synthetic data, against an error rate agreed before work starts.",
       deliverables: [
@@ -29,7 +29,7 @@ export const SERVICES: ServicesData = {
     },
     {
       id: "build",
-      name: "Build",
+      name: "Implement",
       duration: "4–6 weeks",
       summary: "Build one package where you chose to run it, then test it on your own examples before anyone relies on it.",
       deliverables: [
@@ -44,7 +44,7 @@ export const SERVICES: ServicesData = {
     },
     {
       id: "run",
-      name: "Run",
+      name: "Support and improve",
       duration: "Ongoing, with the exit built in",
       summary: "Keep the system running: managed by us in an Australian region, or supported in your own account.",
       deliverables: [
@@ -110,7 +110,7 @@ export const SERVICES: ServicesData = {
     },
     {
       id: "run",
-      name: "Run",
+      name: "Support and improve",
       what: "Managed in an Australian region, cancellable on 30 days' notice with an exit pack, or supported in your own account. Both re-test when the AI model or a vendor API changes.",
       forWhom: "Teams whose system we build",
       entry: "not-entry",
@@ -255,8 +255,8 @@ export const SERVICES: ServicesData = {
       steps: [
         { name: "Admin Hours Audit", body: "One week to map where staff hours go and what your existing software could take over." },
         { name: "Two-Week Trial", body: "Your own files, a measured error rate, then your go/no-go decision." },
-        { name: "Build", body: "One package, built in 4–6 weeks and acceptance-tested on your examples." },
-        { name: "Run", body: "Managed in an Australian region or supported in your account, with the exit built in." },
+        { name: "Implement", body: "One package, built in 4–6 weeks and acceptance-tested on your examples." },
+        { name: "Support and improve", body: "Managed in an Australian region or supported in your account, with the exit built in." },
       ],
     },
     enterprise: {

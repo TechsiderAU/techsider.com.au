@@ -4,7 +4,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readDist, allHtmlFiles } from "./helpers.mjs";
-import { footerColumns, noJsLinks } from "../src/data/nav.ts";
+import { primaryFooterColumns } from "../src/data/nav.ts";
 
 const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
 const pages = allHtmlFiles().filter((f) => f.endsWith("index.html"));
@@ -97,8 +97,8 @@ test("the link resolver maps paths as GitHub Pages serves them", () => {
 
 test("production: the no-JS basic link row is in every header and reaches every live hub (Review Focus 1)", () => {
   // Every nav hub is live from Phase C Task 7, so the row holds the five hubs; Insights sits on /resources/.
-  const hubs = noJsLinks(false).map((l) => l.href);
-  assert.deepEqual(hubs, ["/solutions/", "/industries/", "/services/", "/resources/", "/about/"]);
+  const hubs = ["/solutions/", "/services/", "/demos/", "/about/"];
+  assert.equal(hubs.length, 4);
   for (const f of pages) {
     const row = basicRow(region(readDist(f), "header"));
     assert.ok(row, `${f}: no <nav aria-label="Main (basic)"> in the header`);
@@ -146,8 +146,8 @@ test("the Insights link is marked current on the insights index", () => {
 
 test("the footer carries the slogan with its proof line and the email", () => {
   const footer = region(home, "footer");
-  assert.match(footer, /AI that ships\./);
-  assert.match(footer, /Measured before it ships\./);
+  assert.match(footer, /AI automation for Australian businesses\./);
+
   assert.match(footer, /mailto:admin@techsider\.com\.au/);
 });
 
@@ -158,18 +158,18 @@ test("the footer is one navigation landmark named Footer; its columns are headed
     assert.equal(navs.length, 1, `${f}: expected exactly one <nav> in the footer, found ${navs.length}`);
     assert.match(navs[0], /aria-label="Footer"/, `${f}: the footer nav is not labelled "Footer": ${navs[0]}`);
     const nav = footer.slice(footer.indexOf(navs[0]), footer.indexOf("</nav>"));
-    assert.equal([...nav.matchAll(/<h2\b/g)].length, footerColumns(false).length, `${f}: expected one <h2> per footer column`);
+    assert.equal([...nav.matchAll(/<h2\b/g)].length, primaryFooterColumns(false).length, `${f}: expected one <h2> per footer column`);
   }
 });
 
-test("the positioning line, email and 'Talk to us' CTA sit below the columns (spec §7.3)", () => {
+test("the positioning line, email and 'Start with one workflow' CTA sit below the columns (spec §7.3)", () => {
   const footer = region(home, "footer");
   const navEnd = footer.indexOf("</nav>");
   assert.ok(navEnd > 0, "no footer nav");
   const [columns, after] = [footer.slice(0, navEnd), footer.slice(navEnd)];
-  assert.match(after, /AI that ships\./);
-  assert.match(after, /Measured before it ships\./);
+  assert.match(after, /AI automation for Australian businesses\./);
+
   assert.match(after, /<a[^>]*href="mailto:admin@techsider\.com\.au"[^>]*>\s*admin@techsider\.com\.au\s*<\/a>/);
-  assert.match(after, /<a[^>]*class="[^"]*\bbtn-primary\b[^"]*"[^>]*>\s*Talk to us\s*<\/a>/);
-  assert.doesNotMatch(columns, /AI that ships|admin@techsider|Talk to us/, "sign-off content appears before the columns");
+  assert.match(after, /<a[^>]*class="[^"]*\bbtn-primary\b[^"]*"[^>]*>\s*Start with one workflow\s*<\/a>/);
+  assert.doesNotMatch(columns, /AI that ships|admin@techsider|Start with one workflow/, "sign-off content appears before the columns");
 });

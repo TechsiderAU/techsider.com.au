@@ -44,5 +44,5 @@ test("demo is described as a canned replay, not a recording", () => {
   assert.doesNotMatch(home, /Recorded illustrative demo|recorded walkthrough/i);
   assert.match(home, /Canned replay · synthetic or public data/);
   // The legacy band's lede went with it (Phase D Task 8); the Home FAQ says what the demo is.
-  assert.match(visibleText(readDist("index.html")), /They do not call a model\./);
+  assert.match(visibleText(readDist("index.html")), /Illustrative workflow/);
 });

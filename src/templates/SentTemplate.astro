@@ -19,7 +19,7 @@ const { contact, site } = Astro.props;
   <PageHero title="Message sent." highlight="sent" />
 
   <PageSection id="next" title="What happens next" width="prose">
-    <p class="sent-reply" data-reply-time>We reply within {contact.replyTime}.</p>
+    <p class="sent-reply">We’ll review your enquiry and discuss whether we can help with the workflow.</p>
     <ol class="sent-steps">
       {contact.whatNext.map((step) => <li>{step}</li>)}
     </ol>

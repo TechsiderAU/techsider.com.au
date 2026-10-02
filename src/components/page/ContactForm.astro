@@ -79,7 +79,7 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
 <form method="post" action={endpoint} class="contact-form" data-contact-form data-sent={sent} data-submit-mode={contact.submitMode ?? "ajax"}>
   {hidden.map(([name, value]) => <input type="hidden" name={name} value={value} />)}
   <div class="contact-intro">
-    <p class="contact-form-note">All fields are required.</p>
+    <p class="contact-form-note">Fields marked optional can be left blank.</p>
     <div
       class="contact-summary"
       data-form-summary
@@ -107,9 +107,9 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
     </div>
     {selects.map((select) => (
       <div class="contact-field">
-        <label for={select.id} class="contact-label">{select.label}</label>
+        <label for={select.id} class="contact-label">{select.label} (optional)</label>
         <span class="contact-select">
-          <select id={select.id} name={select.name} required class="contact-control">
+          <select id={select.id} name={select.name} class="contact-control">
             <option value="">Choose one</option>
             {select.options.map((option) => <option value={option.value}>{option.label}</option>)}
           </select>
@@ -118,7 +118,7 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
       </div>
     ))}
     <div class="contact-field contact-field-wide">
-      <label for="contact-message" class="contact-label">Message</label>
+      <label for="contact-message" class="contact-label">What would you like to improve?</label>
       <textarea
         id="contact-message"
         name="message"

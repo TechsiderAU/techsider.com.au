@@ -80,7 +80,7 @@ function scriptErrors(page) {
 
 /** The frames that hold an engine-backed demo, in page order: exactly as many as the build put on the page. */
 async function demoFrames(page, count) {
-  const disclosure = page.locator(".solution-example:not([open]) > summary");
+  const disclosure = page.locator("#demo .solution-example:not([open]) > summary");
   if (await disclosure.count()) await disclosure.click();
   const frames = page.locator("[data-demo-frame]:has([data-demo-root])");
   await expect(frames, "engine-backed demo frames on the page").toHaveCount(count);

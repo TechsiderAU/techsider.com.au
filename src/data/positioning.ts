@@ -11,8 +11,8 @@ import type { PositioningData } from "../content/page-schemas.ts";
 export const POSITIONING: PositioningData = {
   // ⚑ owner: confirm the sub-promise wording (spec §12 item 12)
   subPromise:
-    "We design, build and run AI solutions for Australian organisations, from 40-person practices to federal agencies. In your environment, with your data onshore by default.",
-  originLine: "AI pilots are easy to start and hard to ship. We build the kind that survive scrutiny.",
+    "We design, implement and support AI workflows for Australian businesses, starting with one repeated process and the tools you already use.",
+  originLine: "A useful workflow begins with a clear task, a checkable result and someone responsible for the next step.",
   pillars: [
     {
       id: "cited",
@@ -28,14 +28,14 @@ export const POSITIONING: PositioningData = {
     },
     {
       id: "onshore",
-      title: "Your data stays onshore.",
+      title: "Clear data locations.",
       mechanism: "The systems we build or run for you are deployed in an Australian region, in your own account or managed by us. Every launch package carries an onshore note on where processing runs, including inside a platform you already license.",
-      midMarket: "What we build keeps your data in Australia.",
+      midMarket: "Check where each part of the workflow processes your data.",
     },
     {
       id: "ownership",
       title: "You own what we build.",
-      mechanism: "Your code, prompts, evaluation tests and retrieval index live in your own repository.",
+      mechanism: "Custom code, prompts, evaluation tests and retrieval indexes we deliver are yours under the agreed engagement terms. Third-party software and services remain subject to their vendors’ terms.",
       midMarket: "Yours to keep, or ours to run, with the exit built in.",
     },
   ],

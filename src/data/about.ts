@@ -8,10 +8,10 @@ import type { AboutData } from "../content/page-schemas.ts";
 import { POSITIONING } from "./positioning.ts";
 
 export const ABOUT: AboutData = {
-  mission: "Ship AI that is measured on your own work before anyone relies on it.",
+  mission: "We help Australian businesses turn repetitive work into workflows their teams can check and operate.",
   // ⚑ owner: confirm the "40-person practices to federal agencies" range reads as who the offer is for, not as clients (spec §1 criterion 6, §12 item 12)
   whoWeServe:
-    "Built for Australian organisations in nine industries, from 40-person practices to federal agencies: mid-market firms with no AI team of their own, and enterprise and government teams that need independent evidence about the AI they run.",
+    "For Australian businesses with repeated document, inbox and knowledge tasks. We start with one process and check your existing tools before recommending a build.",
   whyControl:
     "AI that reads your documents or drafts your letters handles client data and records that people rely on. So you keep control: answers cite their source or say they don't know, a person approves anything sent or changed, and the tests stay yours to re-run.",
   principles: [
@@ -37,7 +37,7 @@ export const ABOUT: AboutData = {
     },
     {
       title: "Keep it, or have it run for you.",
-      body: "Your code, prompts, tests and index sit in your repository. If Techsider runs the system, it's re-tested when the model changes, and the exit pack hands everything back.",
+      body: "Custom deliverables are handed over with the agreed documentation and tests. Third-party software stays under the vendor’s terms. Support coverage and any managed-service exit arrangements are agreed in the proposal.",
     },
   ],
   // Newest first. Each entry is evidenced by the commits BUILD_LOG_EVIDENCE names in

@@ -22,7 +22,7 @@
 // can run it on a free port.
 import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
-import { ENQUIRY_FIELDS, MESSAGE_MAX } from "../../src/lib/contact-form.ts";
+import { REQUIRED_ENQUIRY_FIELDS, MESSAGE_MAX } from "../../src/lib/contact-form.ts";
 
 export const SITE_ORIGIN = "https://techsider.com.au";
 export const REDIRECT_FIELD = "_redirect";
@@ -35,7 +35,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** Why a provider would reject `fields` (an object of strings): `[{ field, message }]`, empty when complete. */
 export function problems(fields) {
   const found = [];
-  for (const field of ENQUIRY_FIELDS) {
+  for (const field of REQUIRED_ENQUIRY_FIELDS) {
     if ((fields[field] ?? "").trim() === "") found.push({ field, message: "Fixture provider: this field is required" });
   }
   if (fields.email && !EMAIL.test(fields.email)) found.push({ field: "email", message: "Fixture provider: not an email address" });

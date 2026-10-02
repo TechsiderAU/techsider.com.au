@@ -38,8 +38,8 @@ test("homeView: the hero is the slogan lock-up, the sub-promise, both CTAs and t
   assert.equal(view.hero.proofLine, "Measured before it ships.");
   assert.equal(view.hero.subPromise, positioningFixture.subPromise);
   assert.deepEqual(view.hero.ctas, {
-    primary: { label: "Talk to us", href: "/preview/templates/contact/" },
-    secondary: { label: "See a demo", href: "/preview/templates/demos-hub/" },
+    primary: { label: "Start with one workflow", href: "/preview/templates/contact/" },
+    secondary: { label: "See an example", href: "/preview/templates/demos-hub/" },
   });
   assert.equal(view.hero.trace, traceFixtures[homeFixture.heroTrace]);
   assert.equal(homeFixture.heroTrace, "fixture-hero-trace");
@@ -117,15 +117,15 @@ test("homeView: the 45-day boundary, decided at the build time it is given", () 
   assert.equal(homeView(input({ insights: drafts })).insights.mode, "link");
 });
 
-test("homeView: in a production build, See a demo and Talk to us reach their live pages, and planned pages are plain text", () => {
+test("homeView: in a production build, See an example and Start with one workflow reach their live pages, and planned pages are plain text", () => {
   // Re-key the fixture sets onto the real nav ids: siteContext(false) shows only the live pages.
   const prod = siteContext(false);
   const solutions = Object.fromEntries(prod.solutions.map((s, i) => [s.id, Object.values(solutionFixtures)[i]]));
   const industries = Object.fromEntries(prod.industries.map((s, i) => [s.id, Object.values(industryFixtures)[i]]));
   const live = homeView(input({ solutions, industries, site: prod }));
   assert.deepEqual(live.hero.ctas, {
-    primary: { label: "Talk to us", href: "/contact/" },
-    secondary: { label: "See a demo", href: "/demos/" },
+    primary: { label: "Start with one workflow", href: "/contact/" },
+    secondary: { label: "See an example", href: "/demos/" },
   });
   assert.equal(live.closing.href, "/contact/");
   // The Demos hub is live from Phase D Task 7, so the demo band links to it.

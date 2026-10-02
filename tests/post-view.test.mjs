@@ -1,6 +1,6 @@
 // The insight post view (spec §8.9): the breadcrumb, the §10.1 contextual closing CTA, the
 // illustrative label (§9.3) and the BlogPosting JSON-LD (§11.3). The CTA follows the post's
-// references: the first solution, else the first industry, else plain "Talk to us". Links come from
+// references: the first solution, else the first industry, else plain "Start with one workflow". Links come from
 // the SiteContext; /contact/ is live (Phase C Task 7), so both builds send the CTA to /contact/ with
 // the query string.
 import { test } from "node:test";
@@ -41,24 +41,24 @@ test("postView: the card, page title, breadcrumb and dates of a published post",
   assert.equal(view({ updatedDate: updated }).updated, updated);
 });
 
-test("postView: a post with no references closes with plain 'Talk to us', linked to /contact/", () => {
-  assert.deepEqual(view().closing, { command: "talk_to_us", label: "Talk to us", href: "/contact/" });
-  assert.deepEqual(view({}, true).closing, { command: "talk_to_us", label: "Talk to us", href: "/contact/" });
+test("postView: a post with no references closes with plain 'Start with one workflow', linked to /contact/", () => {
+  assert.deepEqual(view().closing, { command: "talk_to_us", label: "Start with one workflow", href: "/contact/" });
+  assert.deepEqual(view({}, true).closing, { command: "talk_to_us", label: "Start with one workflow", href: "/contact/" });
 });
 
 test("postView: the first solution reference wins, then the first industry (spec §10.1)", () => {
   const both = { solutions: ["knowledge-assistant", "document-registers"], industries: ["government"] };
   assert.deepEqual(view(both, true).closing, {
     command: "talk_to_us", args: "--about=knowledge-assistant",
-    label: "Talk to us about Knowledge Assistant", href: "/contact/?interest=knowledge-assistant",
+    label: "Start with one workflow", href: "/contact/?interest=knowledge-assistant",
   });
   const industries = { industries: ["financial-services", "government"] };
   assert.deepEqual(view(industries, true).closing, {
     command: "talk_to_us", args: "--about=financial-services",
-    label: "Talk to us about AI for financial services", href: "/contact/?industry=financial-services",
+    label: "Start with one workflow", href: "/contact/?industry=financial-services",
   });
   // Production: the label stays contextual, and the link carries the same query as the preview's.
-  assert.equal(view(both).closing.label, "Talk to us about Knowledge Assistant");
+  assert.equal(view(both).closing.label, "Start with one workflow");
   assert.equal(view(both).closing.href, "/contact/?interest=knowledge-assistant");
   assert.equal(view(industries).closing.href, "/contact/?industry=financial-services");
   // Astro's reference() gives { id, collection }; refId reads both shapes.

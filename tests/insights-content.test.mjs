@@ -140,7 +140,7 @@ test("every industry is the subject of at least one published post, and every po
   const covered = new Set(PUBLISHED.flatMap((p) => p.fm.industries ?? []));
   assert.deepEqual(industries.filter((id) => !covered.has(id)), [], "an industry with no post (spec §8.5 block 9)");
   for (const p of PUBLISHED) {
-    assert.ok((p.fm.industries ?? []).length + (p.fm.solutions ?? []).length > 0, `${p.id}: no refs, so its prompt is a plain "Talk to us"`);
+    assert.ok((p.fm.industries ?? []).length + (p.fm.solutions ?? []).length > 0, `${p.id}: no refs, so its prompt is a plain "Start with one workflow"`);
   }
 });
 
@@ -261,13 +261,13 @@ test("every post ends with the §10.1 contextual prompt: its first solution's in
     const [solution] = fm.solutions ?? [];
     const [industry] = fm.industries ?? [];
     const want = solution
-      ? { href: site.contact({ interest: solution }), label: `Talk to us about ${site.solutions.find((s) => s.id === solution).shortName}`, line: `> talk_to_us --about=${solution}` }
+      ? { href: site.contact({ interest: solution }), label: "Start with one workflow", line: `> talk_to_us --about=${solution}` }
       : industry
-        ? { href: site.contact({ industry }), label: `Talk to us about AI for ${site.industries.find((i) => i.id === industry).shortName.toLowerCase()}`, line: `> talk_to_us --about=${industry}` }
-        : { href: site.contact(), label: "Talk to us", line: "> talk_to_us" };
+        ? { href: site.contact({ industry }), label: "Start with one workflow", line: `> talk_to_us --about=${industry}` }
+        : { href: site.contact(), label: "Start with one workflow", line: "> talk_to_us" };
     assert.equal(links[0].attrs.href, want.href, `${id}: prompt link`);
     assert.equal(text(links[0].inner), want.label, `${id}: prompt label`);
-    assert.equal(text(elements(prompt.inner, (t) => t.name === "p")[0].inner), want.line, `${id}: prompt line`);
+    assert.equal(text(elements(prompt.inner, (t) => t.name === "p")[0].inner), "Start with one workflow.", `${id}: business invitation`);
   }
 });
 

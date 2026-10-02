@@ -35,7 +35,7 @@ export interface SolutionsHubView {
   matrix: MatrixView;
   byBuyer: { midMarket: BuyerItem[]; enterprise: BuyerItem[] };
   servicesHref: string | null;
-  closing: { command: "talk_to_us"; args: "--about=<solution>"; label: "Talk to us"; href: string };
+  closing: { command: "talk_to_us"; args: "--about=<solution>"; label: "Start with one workflow"; href: string };
 }
 
 export interface IndustriesHubView {
@@ -50,7 +50,7 @@ export interface IndustriesHubView {
     href: string | null;
   }[];
   matrix: MatrixView;
-  closing: { command: "talk_to_us"; args: "--about=<industry>"; label: "Talk to us"; href: string };
+  closing: { command: "talk_to_us"; args: "--about=<industry>"; label: "Start with one workflow"; href: string };
 }
 
 const MATRIX_CAPTION = "What each solution does in each industry";
@@ -132,7 +132,7 @@ export function solutionsHubView(input: { solutions: Record<string, SolutionData
     matrix: matrixView(solutions, site),
     byBuyer: { midMarket, enterprise },
     servicesHref: site.page("services").href,
-    closing: { command: "talk_to_us", args: "--about=<solution>", label: "Talk to us", href: site.contact() },
+    closing: { command: "talk_to_us", args: "--about=<solution>", label: "Start with one workflow", href: site.contact() },
   };
 }
 
@@ -170,6 +170,6 @@ export function industriesHubView(input: {
   return {
     cards,
     matrix: matrixView(solutions, site),
-    closing: { command: "talk_to_us", args: "--about=<industry>", label: "Talk to us", href: site.contact() },
+    closing: { command: "talk_to_us", args: "--about=<industry>", label: "Start with one workflow", href: site.contact() },
   };
 }

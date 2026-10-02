@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { CTAS, footerColumns, noJsLinks, resolveCta, visibleGroups } from "../../src/data/nav.ts";
+import { CTAS, primaryFooterColumns as footerColumns, resolveCta, primaryGroups as visibleGroups } from "../../src/data/nav.ts";
 
 // The production build: dist/ on port 4323, run by the prod-chromium project only. Phase C puts
 // pages live task by task, so every expectation here is read from nav.ts as a production build
@@ -8,7 +8,7 @@ import { CTAS, footerColumns, noJsLinks, resolveCta, visibleGroups } from "../..
 // which pages and anchors each panel lists, the footer columns, the no-JS row and the header CTAs.
 // The preview projects can't see this configuration: TECHSIDER_NAV_PREVIEW=1 shows every page.
 const GROUPS = visibleGroups(false);
-const BASIC = noJsLinks(false);
+const BASIC = GROUPS.flatMap(g => g.hubHref ? [{ label: g.label, href: g.hubHref }] : []);
 const COLUMNS = footerColumns(false);
 const DEMO = resolveCta(CTAS.demo, false);
 const TALK = resolveCta(CTAS.talk, false);
@@ -24,14 +24,14 @@ test("Phase C Task 3: the Solutions hub leads the production nav", () => {
   expect(GROUPS[0].hubHref).toBe("/solutions/");
 });
 
-test("Phase C Task 7: every hub is live, and Talk to us leads to the live /contact/", async ({ page }) => {
-  expect(GROUPS.map((g) => g.hubHref)).toEqual(["/solutions/", "/industries/", "/services/", "/resources/", "/about/"]);
+test("Phase C Task 7: every hub is live, and Start with one workflow leads to the live /contact/", async ({ page }) => {
+  expect(GROUPS.map((g) => g.hubHref)).toEqual(["/solutions/", "/services/", "/demos/", "/about/"]);
   expect(TALK.href).toBe("/contact/");
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/");
   await page.locator("body > header").getByRole("link", { name: TALK.label }).click();
   await expect(page).toHaveURL(/\/contact\/$/);
-  await expect(page.locator("h1")).toHaveText("Tell us what you're trying to fix.");
+  await expect(page.locator("h1")).toHaveText("Start with one workflow.");
 });
 
 test.describe("desktop", () => {
@@ -64,15 +64,15 @@ test.describe("desktop", () => {
     for (const path of PAGES) {
       await page.goto(path);
       const header = page.locator("body > header");
-      await expect(header.getByRole("link", { name: DEMO.label }), path).toHaveAttribute("href", DEMO.href);
+      await expect(header.getByRole("link", { name: "Examples", exact: true }), path).toHaveAttribute("href", DEMO.href);
       await expect(header.getByRole("link", { name: TALK.label }), path).toHaveAttribute("href", TALK.href);
     }
   });
 
-  test("'See a demo' leads to the live Demos hub (Phase D Task 7)", async ({ page }) => {
+  test("'See an example' leads to the live Demos hub (Phase D Task 7)", async ({ page }) => {
     expect(DEMO.href).toBe("/demos/");
     await page.goto("/insights/");
-    await page.locator("body > header").getByRole("link", { name: "See a demo" }).click();
+    await page.locator("body > header").getByRole("link", { name: "Examples", exact: true }).click();
     await expect(page).toHaveURL(/\/demos\/$/);
     await expect(page.locator("h1")).toHaveText("Demos.");
   });

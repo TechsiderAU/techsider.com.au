@@ -16,8 +16,8 @@ import { fixtureSite, servicesFixture } from "../src/fixtures/index.ts";
 const SERVICES = "preview/templates/services/index.html";
 const PARTNER = "preview/templates/evaluation-partner/index.html";
 const SERVICES_SECTIONS = [
-  ["method", "Prove → Build → Run"],
-  ["services-list", "Services"],
+  ["method", "Assess, implement and support"],
+  ["services-list", "Specialist support"],
   ["entry", "Where to start"],
   ["team", "Who you work with"],
   ["where-it-runs", "Where it runs"],
@@ -82,7 +82,7 @@ function expectSections(file, name, expected) {
 function expectPrompt(t, args, label, href) {
   const [prompt] = elementsWith(byId(t, "contact").outer, "data-prompt-block");
   assert.ok(prompt, "#contact holds no PromptBlock");
-  assert.equal(text(prompt.inner.match(/<p\b[\s\S]*?<\/p>/)[0]), args === "--about=fit-call" ? "Bring us one manual process." : `> talk_to_us ${args}`);
+  assert.equal(text(prompt.inner.match(/<p\b[\s\S]*?<\/p>/)[0]), args === "--about=fit-call" ? "Bring us one manual process." : "Start with one workflow.");
   assert.deepEqual(links(prompt.inner), [[label, href]]);
 }
 function expectUniqueIdsAndLabelTargets(file) {
@@ -123,7 +123,7 @@ test("services: the hero leads to a Fit Call, then to the evaluation method", ()
   const [hero] = elementsWith(template(SERVICES, "services"), "data-page-hero");
   assert.ok(hero, "no [data-page-hero]");
   assert.deepEqual(links(hero.inner), [
-    ["Talk to us about a Fit Call", fixtureSite.contact({ interest: "not-sure" })],
+    ["Start with one workflow", fixtureSite.contact({ interest: "not-sure" })],
     ["Read the evaluation method", fixtureSite.page("evaluationMethod").href],
   ]);
   assert.equal(fixtureSite.contact({ interest: "not-sure" }), "/preview/templates/contact/?interest=not-sure");
@@ -281,7 +281,7 @@ test("services: the independence policy, the de-risk items and the FAQ come from
 });
 
 test("services: the closing prompt is talk_to_us --about=fit-call, to a Fit Call", () => {
-  expectPrompt(template(SERVICES, "services"), "--about=fit-call", "Talk to us about a Fit Call", fixtureSite.contact({ interest: "not-sure" }));
+  expectPrompt(template(SERVICES, "services"), "--about=fit-call", "Start with one workflow", fixtureSite.contact({ interest: "not-sure" }));
 });
 
 test("evaluation partner: one h1, the promise, and no skipped heading level", () => {

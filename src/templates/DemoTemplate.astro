@@ -68,7 +68,7 @@ const hasTranscript = Astro.slots.has("transcript");
     <PromptBlock
       command="talk_to_us"
       args={`--about=${solution.id}`}
-      label={`Talk to us about ${solution.shortName}`}
+      label="Start with one workflow"
       href={site.contact({ interest: solution.id })}
     />
     <div class="demo-solution">
@@ -81,7 +81,7 @@ const hasTranscript = Astro.slots.has("transcript");
   .demo-solution {
     display: grid;
   }
-  /* "Talk to us about {solution}" is longer than .btn's one line allows at 320px (global.css
+  /* "Start with one workflow about {solution}" is longer than .btn's one line allows at 320px (global.css
      sets white-space: nowrap): let it wrap. */
   [data-template="demo"] :global(.btn) {
     padding-block: 0.5rem;

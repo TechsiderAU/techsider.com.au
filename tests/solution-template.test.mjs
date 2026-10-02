@@ -23,8 +23,8 @@ const PAGES = {
 const IDS = Object.keys(PAGES);
 const SECTIONS = ["job", "who", "packages", "program", "testing", "where-it-runs", "independence", "limits", "faq", "contact"];
 const TITLES = {
-  job: "The job",
-  who: "Who it's for",
+  job: "What the workflow does",
+  who: "Where it can help",
   program: "The program",
   testing: "How we test it",
   "where-it-runs": "Where it runs",
@@ -102,7 +102,7 @@ test("the hero: breadcrumb, eyebrow, H1 and one-liner, then the demo slot, then 
     assert.equal(nav.length, 1, `${PAGES[id]}: the hero has no breadcrumb`);
     const current = elements(nav[0].inner, (tag) => tag.attrs["aria-current"] === "page");
     assert.equal(text(current[0].inner), link.shortName);
-    assert.match(text(h), new RegExp(`solution ${link.number}`));
+    assert.ok(text(h).includes(link.fullName));
     assert.ok(text(h).includes(link.oneLiner), `${PAGES[id]}: no one-liner in the hero`);
     const primary = linkTo(h, fixtureSite.contact({ interest: id }));
     assert.ok(primary, `${PAGES[id]}: no primary CTA`);
@@ -312,10 +312,10 @@ test("the closing prompt asks about this solution and links to the contact page 
     const s = sectionOf(template(id), "contact");
     assert.ok(s, `${PAGES[id]}: no #contact`);
     const [prompt] = elementsWith(s.inner, "data-prompt-block");
-    assert.ok(text(prompt.inner).includes("Let’s put AI to work."));
+    assert.ok(text(prompt.inner).includes("Start with one workflow."));
     const [a] = elements(prompt.inner, (t) => t.name === "a");
     assert.equal(a.attrs.href, fixtureSite.contact({ interest: id }));
-    assert.equal(text(a.inner), `Talk to us about ${solutionLink(fixtureSite, id).shortName}`);
+    assert.equal(text(a.inner), "Start with one workflow");
   }
 });
 

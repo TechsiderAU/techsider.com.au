@@ -303,7 +303,7 @@ test("/contact/: the enquiry form, email fallback, reply time and next steps are
   assert.equal(tagged(main, "form").length, 1);
   assert.equal(one(main, "data-contact-form").attrs.action, CONTACT.formEndpoint);
   assert.equal(text(one(main, "data-email").inner), SITE.email);
-  assert.equal(text(one(main, "data-reply-time").inner), `We reply within ${CONTACT.replyTime}.`);
+  assert.equal(elementsWith(main, "data-reply-time").length, 0);
   assert.deepEqual(tagged(tagged(one(main, "id", "next").inner, "ol")[0].inner, "li").map((li) => text(li.inner)), CONTACT.whatNext);
   assert.deepEqual(tagged(one(main, "id", "elsewhere").inner, "a").map((a) => a.attrs.href), CONTACT.deflection.map((d) => `mailto:${d.email}`));
 });
@@ -315,7 +315,7 @@ test("the reply time is written once and shared by the contact and confirmation 
   // Home. No other page states a reply time (spec §8.11).
   assert.deepEqual(writing, ["src/data/contact.ts"]);
   const stating = allHtmlFiles().filter((f) => /\bwe reply within\b/i.test(visibleText(readDist(f)))).sort();
-  assert.deepEqual(stating, ["contact/index.html", "contact/sent/index.html"]);
+  assert.deepEqual(stating, []);
   for (const f of stating) assert.ok(visibleText(readDist(f)).includes(`We reply within ${CONTACT.replyTime}.`), f);
 });
 

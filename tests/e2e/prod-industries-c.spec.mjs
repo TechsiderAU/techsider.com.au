@@ -86,7 +86,8 @@ test("a hub matrix cell opens its solution page", async ({ page }) => {
 test("the production nav's Industries link opens the hub, and a hub card opens its industry page", async ({ page }) => {
   await page.setViewportSize(WIDE);
   await page.goto("/");
-  await page.locator("body > header").getByRole("link", { name: "Industries", exact: true }).click();
+  await page.getByRole("button", { name: "Solutions menu", exact: true }).click();
+  await page.locator("#nav-panel-solutions").getByRole("link", { name: "All industries", exact: true }).click();
   await expect(page).toHaveURL(/\/industries\/$/);
   await expect(page.locator("[data-industry-card]")).toHaveCount(9);
   await page.locator('[data-industry-card="healthcare"] h3 a').click();

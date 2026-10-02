@@ -37,7 +37,7 @@ const allInsightsHref = site.page("insights").href;
 
   <div id="origin" class="about-origin bg-carbon scanlines" data-origin>
     <div class="about-origin-inner">
-      <p class="about-origin-line"><span class="about-origin-caret" aria-hidden="true">&gt;</span> {positioning.originLine}</p>
+      <p class="about-origin-line">{positioning.originLine}</p>
     </div>
   </div>
 
@@ -63,15 +63,15 @@ const allInsightsHref = site.page("insights").href;
     </ol>
   </PageSection>
 
-  <PageSection id="build-log" title="Build log" width="prose">
-    <ol class="about-log">
+  <PageSection id="build-log" title="Our development log" width="prose">
+    <details class="about-development"><summary>Read how this website was built</summary><p>This is our own website development record. Our illustrative examples use public or synthetic data.</p><ol class="about-log">
       {buildLog.map((entry) => (
         <li class="about-log-entry">
           <time datetime={isoDate(entry.date)} class="about-log-date">{formatDate(entry.date)}</time>
           <span class="about-log-event">{entry.event}</span>
         </li>
       ))}
-    </ol>
+    </ol></details>
   </PageSection>
 
   {cards.length > 0 && (
@@ -93,6 +93,8 @@ const allInsightsHref = site.page("insights").href;
 </div>
 
 <style>
+  .about-development summary { cursor: pointer; min-height: 44px; }
+  .about-development p { margin: 1rem 0; line-height: 1.6; }
   .about-lead,
   .about-text,
   .about-item-body,

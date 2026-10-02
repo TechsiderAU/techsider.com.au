@@ -1,6 +1,5 @@
 import { z } from "astro/zod";
 import { deliveryChoice, faqItem, slug } from "./schemas.ts";
-import { HOME_TRUST_QUESTION } from "../lib/fixed-copy.ts";
 import { ENQUIRY_FIELDS, OPTIONAL_ENQUIRY_FIELDS } from "../lib/contact-form.ts";
 // Typed page data for the singleton pages (Services, Evaluation Partner, Contact, Trust, About,
 // Home) and the positioning copy they share. Phase C writes the data in src/data/*.ts; long
@@ -140,10 +139,7 @@ export const aboutData = z.strictObject({
 
 // `trustPageLine` ends the trust answer, and only while /trust/ is shown: homeView() appends it
 // then, so the answer never names a page the build doesn't have (spec §8.1.10).
-export const homeData = z.strictObject({ heroTrace: slug, faq: z.array(faqItem).min(4), trustPageLine: z.string().min(20) })
-  .refine((h) => h.faq.filter((f) => f.q === HOME_TRUST_QUESTION).length === 1, {
-    message: `the Home FAQ asks "${HOME_TRUST_QUESTION}" exactly once (spec §8.1.10)`, path: ["faq"],
-  });
+export const homeData = z.strictObject({ heroTrace: slug, faq: z.array(faqItem).min(3), trustPageLine: z.string().min(20) });
 
 /** Frontmatter of a src/content/documents/*.md entry: the legal documents and the evaluation method. */
 export const documentSchema = z.strictObject({

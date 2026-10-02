@@ -23,7 +23,7 @@ test("a post's closing prompt names its first solution and leads to /contact/, a
   await page.goto(POST);
   const cta = page.locator("[data-post-closing]").getByRole("link");
   await expect(cta).toHaveCount(1);
-  await expect(cta).toHaveAccessibleName("Talk to us about AI Evaluation");
+  await expect(cta).toHaveAccessibleName("Start with one workflow");
   await expect(cta).toHaveAttribute("href", "/contact/?interest=ai-evaluation");
   const crumbs = page.getByRole("navigation", { name: "Breadcrumb" });
   await expect(crumbs.getByRole("link")).toHaveText(["Home", "Insights"]);

@@ -135,7 +135,7 @@ test("hero, CTAs, breadcrumb, lead solutions, demo and closing come from the sit
   const data = industryFixtures[INDUSTRY];
   const link = industryLink(fixtureSite, INDUSTRY);
   const lower = link.shortName.toLowerCase();
-  const talk = { label: `Talk to us about AI for ${lower}`, href: fixtureSite.contact({ industry: INDUSTRY }) };
+  const talk = { label: "Start with one workflow", href: fixtureSite.contact({ industry: INDUSTRY }) };
   const v = industryView(input(INDUSTRY));
   assert.deepEqual([v.id, v.shortName, v.fullName, v.promise, v.constraintSet], [INDUSTRY, link.shortName, link.fullName, data.promise, data.constraintSet]);
   assert.deepEqual(v.breadcrumb, crumbs(fixtureSite, ["industries", { label: link.shortName, path: link.path }]));

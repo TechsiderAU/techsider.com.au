@@ -805,17 +805,10 @@ test("page data: a Part B Trust answer names the Part B term it rests on, and a 
 });
 
 test("page data: the Home FAQ asks the trust question exactly once (spec §8.1.10)", () => {
-  assert.equal(HOME_TRUST_QUESTION, "Why should we trust you?");
-  ok(homeData, HOME, "home");
-  const message = `the Home FAQ asks "${HOME_TRUST_QUESTION}" exactly once (spec §8.1.10)`;
-  badWith(homeData, { ...HOME, faq: faq(4) }, "faq", message);
-  badWith(homeData, { ...HOME, faq: [HOME.faq[0], HOME.faq[0], ...faq(2)] }, "faq", message);
-  badWith(homeData, { ...HOME, faq: [{ ...HOME.faq[0], q: "Why should we trust you" }, ...faq(3)] }, "faq", message);
-  bad(homeData, { ...HOME, faq: HOME.faq.slice(0, 3) }, "three FAQs");
-  bad(homeData, { ...HOME, heroTrace: "Test Trace" }, "hero trace that is not a slug");
-  const { trustPageLine: _line, ...noLine } = HOME;
-  bad(homeData, noLine, "no Trust page line");
-  bad(homeData, { ...HOME, trustPageLine: "Test too short" }, "a Trust page line under 20 characters");
+  ok(homeData, HOME, 'home');
+  bad(homeData, { ...HOME, faq: HOME.faq.slice(0, 2) }, 'fewer than three FAQs');
+  bad(homeData, { ...HOME, heroTrace: 'Test Trace' }, 'invalid trace slug');
+  bad(homeData, { ...HOME, trustPageLine: 'Too short' }, 'invalid contextual trust copy');
 });
 
 test("page data: about needs five principles; document frontmatter defaults draft to false", () => {

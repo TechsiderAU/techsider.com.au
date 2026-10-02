@@ -37,7 +37,7 @@ async function groupLayout() {
  * @param {import("@playwright/test").Page} page
  * @param {string} path
  */
-export async function tabsBeforeAndAfter(page, path) {
+export async function tabsBeforeAndAfter(page, path, prepare = async () => {}) {
   let release = () => {};
   const held = new Promise((resolve) => {
     release = resolve;
@@ -51,6 +51,7 @@ export async function tabsBeforeAndAfter(page, path) {
   await page.waitForFunction(
     () => document.readyState !== "loading" && [...document.querySelectorAll('link[rel="stylesheet"]')].every((link) => link.sheet),
   );
+  await prepare();
   const before = await page.evaluate(groupLayout);
   release();
   await page.waitForFunction(() => [...document.querySelectorAll("[data-tabs]")].every((group) => group.hasAttribute("data-tabs-mode")));

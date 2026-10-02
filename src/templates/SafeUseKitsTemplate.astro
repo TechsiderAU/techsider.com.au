@@ -97,7 +97,7 @@ const views = kits.map(({ id, data }) => {
     <PromptBlock
       command="talk_to_us"
       args={`--about=${switchOn.id}`}
-      label={`Talk to us about ${switchOn.shortName}`}
+      label="Start with one workflow"
       href={site.contact({ interest: switchOn.id })}
     />
   </section>
@@ -177,7 +177,7 @@ const views = kits.map(({ id, data }) => {
       padding-block: 6rem;
     }
   }
-  /* "Talk to us about {solution}" is longer than .btn's one line allows at 320px (global.css
+  /* "Start with one workflow about {solution}" is longer than .btn's one line allows at 320px (global.css
      sets white-space: nowrap): let it wrap. */
   [data-template="safe-use-kits"] :global(.btn) {
     padding-block: 0.5rem;

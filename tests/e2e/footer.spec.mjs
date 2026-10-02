@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 
 // Spec §7.3 and Phase A carry-over B6: one "Footer" navigation landmark holds the five
-// h2-headed columns; the positioning line, email and "Talk to us" CTA sit below them.
-const COLUMNS = ["solutions", "industries", "services", "resources", "company"];
+// h2-headed columns; the positioning line, email and "Start with one workflow" CTA sit below them.
+const COLUMNS = ["explore", "techsider"];
 
 for (const vp of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
   test(`the footer is one Footer landmark with the sign-off below its columns at ${vp.width}px`, async ({ page }) => {
@@ -17,9 +17,9 @@ for (const vp of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
     for (let i = 0; i < COLUMNS.length; i++) await expect(headings.nth(i)).toHaveAccessibleName(COLUMNS[i]);
     const navBox = await nav.boundingBox();
     const signOff = [
-      footer.getByText("AI that ships."),
+      footer.getByText("AI automation for Australian businesses."),
       footer.getByRole("link", { name: "admin@techsider.com.au" }),
-      footer.getByRole("link", { name: "Talk to us" }),
+      footer.getByRole("link", { name: "Start with one workflow" }),
     ];
     for (const item of signOff) {
       await expect(item).toBeVisible();
