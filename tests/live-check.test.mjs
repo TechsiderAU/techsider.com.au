@@ -14,6 +14,7 @@ import { htmlFiles, relPath } from "../scripts/ci/lib.mjs";
 import {
   Blocked,
   DEFAULT_BASE,
+  ALLOW_EMAIL_OBFUSCATION,
   EDGE_SIGNATURES,
   MISSING_PATH,
   POLL_BUDGET_MS,
@@ -123,7 +124,7 @@ function fakeClock() {
 async function run(site, options = {}) {
   const clock = fakeClock();
   const logged = [];
-  const result = await liveCheck({ ...TARGETS, sha: SHA, runId: "42", fetch: site.fetch, sleep: clock.sleep, now: clock.now, log: (line) => logged.push(line), ...options });
+  const result = await liveCheck({ ...TARGETS, sha: SHA, runId: "42", fetch: site.fetch, sleep: clock.sleep, now: clock.now, log: (line) => logged.push(line), allowEmailObfuscation: false, ...options });
   return { ...result, sleeps: clock.sleeps, logged };
 }
 
@@ -286,6 +287,21 @@ test("Email Address Obfuscation on the live site fails every page, and names wha
 test("Rocket Loader on the live site fails every page", async () => {
   const { problems } = await run(fakeSite({ edit: (html) => rocketLoad(html) }));
   for (const path of [...listedPaths(), MISSING_PATH]) assert.ok(problems.includes(`${path}: rocket-loader.min.js: Rocket Loader added its loader script`), path);
+});
+
+test("the owner's retained email protection accepts only matching contact links and still rejects Rocket Loader", async () => {
+  assert.equal(ALLOW_EMAIL_OBFUSCATION, true);
+  const encode = address => '1c' + [...Buffer.from(address)].map(byte => (byte ^ 0x1c).toString(16).padStart(2, '0')).join('');
+  const protectedLink = address => `<a href="/cdn-cgi/l/email-protection#${encode(address)}"><span data-cfemail="${encode(address)}">[email protected]</span></a><script src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>`;
+  const options = { allowEmailObfuscation: true };
+  assert.deepEqual(emailProblems({ path: '/', body: protectedLink(EMAIL) }, EMAIL, options), []);
+  for (const body of [protectedLink('wrong@example.com'), protectedLink(EMAIL).replace(/<script.*<\/script>/, ''), `<head>${protectedLink(EMAIL)}</head>`, `<!--${protectedLink(EMAIL)}-->`, protectedLink(EMAIL).replace('href=', 'data-href=')]) {
+    assert.equal(emailProblems({ path: '/', body }, EMAIL, options).length, 1);
+  }
+  const preserved = html => html.replace(/<body\b[^>]*>[\s\S]*<\/body>/i, `<body>${protectedLink(EMAIL)}</body>`);
+  assert.deepEqual((await run(fakeSite({ edit: preserved }), options)).problems, []);
+  const rocket = await run(fakeSite({ edit: html => rocketLoad(preserved(html)) }), options);
+  assert.ok(rocket.problems.some(problem => problem.includes('Rocket Loader')));
 });
 
 test("a Cloudflare challenge stops the run as a CDN block, not a site defect", async () => {

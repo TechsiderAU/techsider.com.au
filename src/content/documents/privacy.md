@@ -1,7 +1,7 @@
 ---
 title: Privacy policy
 summary: How Techsider collects, uses, stores and discloses the personal information you send us, and how to ask about it or have it corrected.
-lastUpdated: 2026-10-01
+lastUpdated: 2026-10-02
 draft: true
 ---
 
@@ -12,8 +12,10 @@ This policy explains how Techsider handles personal information. It covers this 
 
 ## What we collect
 
-- **When you email us or submit an enquiry:** your name, your email address, your organisation, and whatever you write. The enquiry form also asks for your industry, organisation size, interest and agreement to handling the enquiry.
+- **When you email us or submit an enquiry:** your name, your email address, your organisation, and whatever you write. The enquiry form also asks for your industry, organisation size, interest and agreement to handling the enquiry, and optionally how you found us.
 - **When you visit this website:** nothing, from the site itself. It sets no cookies and loads no analytics or tracking scripts. The services that host it, listed below, handle each request under their own terms.
+
+Cloudflare adds a script to display our email address while protecting it from automated harvesting. The address needs JavaScript to display; the contact form can submit without JavaScript. This email-decoding script is not an analytics tool.
 
 We don't ask for sensitive information, and we'd ask you not to send it.
 
