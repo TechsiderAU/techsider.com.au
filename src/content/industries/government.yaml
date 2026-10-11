@@ -148,7 +148,7 @@ firstEngagement:
   exitRamp: Once the test set and thresholds are agreed, and before testing starts, you decide whether to continue. If you stop, the test set and any results so far are yours.
 faq:
   # ⚑ owner: "we publish the method" holds only if the evaluation method ships at launch (research index B10)
-  - q: You have no clients yet. Why trust your evaluation?
+  - q: How can we check your evaluation when you have no clients yet?
     a: "Don't take it on trust. We have no clients yet, in government or anywhere else, so we publish the method instead: sample size, ground truth and thresholds. You get the test set and a replay script, so your team can check our work."
   - q: Will your report tell us the system is safe to deploy?
     a: No. You get findings, not an assurance opinion, and it isn't an ASAE 3000 engagement. Each finding is rated to your risk matrix, and your accountable official decides whether to deploy.

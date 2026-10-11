@@ -137,7 +137,7 @@ firstEngagement:
     - The question set and a replay script for the next model change.
   exitRamp: Once the questions and thresholds are agreed, you decide whether to continue. The question set is yours either way.
 faq:
-  - q: You have no clients yet. Why trust your evaluation?
+  - q: How can we check your evaluation when you have no clients yet?
     a: "Don't take it on trust: we have no clients yet. Your lawyers write and grade the questions, and you can re-run the test without us."
   - q: Does testing mean our client files leave the firm?
     a: Only to the tools under test. Tests run in tool accounts your firm controls, on cleared matters or de-identified copies, and a data note first records each vendor's published storage and processing locations, with their dates. Whether a client must consent is your call.

@@ -120,7 +120,7 @@ firstEngagement:
   exitRamp: Once thresholds are agreed, you decide whether to continue. The test set is yours either way.
 faq:
   # ⚑ owner: "the method is published" holds only if the evaluation method ships at launch (research index B10)
-  - q: You have no clients yet. Why rely on your findings?
+  - q: How can we check your findings when you have no clients yet?
     a: Don't rely on our name; we have no clients yet. The method is published, and every finding comes with the test set, labels and a replay script, so your second line can re-perform it.
   - q: Can we give your report to the board or APRA as a formal opinion?
     a: No. It's findings, not an assurance opinion, and it isn't an ASAE 3000 or ASRE engagement. What you table, and how, is your decision.
