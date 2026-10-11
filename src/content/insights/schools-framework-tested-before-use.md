@@ -1,5 +1,6 @@
 ---
 title: "Test school AI before staff use it."
+seoTitle: "Testing AI under the schools AI framework"
 description: "The Australian Framework for Generative AI in Schools expects AI tools to be tested before use and monitored after. What that asks of a staff policy assistant."
 publishDate: 2026-09-29
 type: article

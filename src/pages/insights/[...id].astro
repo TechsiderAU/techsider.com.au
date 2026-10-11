@@ -1,6 +1,7 @@
 ---
 // One insight post. The route stays thin: it renders the markdown, builds the PostView from the
-// entry and this build's SiteContext (a planned page has no link), and hands both to PostLayout.
+// entry, every published post (for its related posts) and this build's SiteContext (a planned page
+// has no link), and hands both to PostLayout.
 import { getCollection, render } from "astro:content";
 import PostLayout from "../../layouts/PostLayout.astro";
 import { isPreview } from "../../data/nav";
@@ -9,12 +10,12 @@ import { postView } from "../../lib/views/post";
 
 export async function getStaticPaths() {
   const posts = await getCollection("insights", ({ data }) => data.draft !== true);
-  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+  return posts.map((post) => ({ params: { id: post.id }, props: { post, posts } }));
 }
 
-const { post } = Astro.props;
+const { post, posts } = Astro.props;
 const { Content } = await render(post);
-const view = postView({ post, site: siteContext(isPreview()), siteUrl: Astro.site ?? Astro.url });
+const view = postView({ post, posts, site: siteContext(isPreview()), siteUrl: Astro.site ?? Astro.url });
 ---
 <PostLayout view={view}>
   <Content />

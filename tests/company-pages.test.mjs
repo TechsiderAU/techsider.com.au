@@ -324,6 +324,8 @@ test("/about/: the mission, who it's for, the origin line, the principles, how w
   const root = one(main, "data-template", "about");
   const copy = text(root.inner);
   for (const s of [ABOUT.mission, ABOUT.whoWeServe, ABOUT.whyControl, POSITIONING.originLine]) assert.ok(copy.includes(s), s);
+  // The one sentence that says what Techsider is, as the Organization's JSON-LD and /llms.txt say it.
+  assert.equal(text(one(main, "data-summary").inner), SITE.summary);
   assert.deepEqual(tagged(one(main, "id", "principles").inner, "h3").map((h) => text(h.inner)), ABOUT.principles.map((p) => p.title));
   assert.deepEqual(tagged(one(main, "id", "how-we-work").inner, "h3").map((h) => text(h.inner)), ABOUT.howWeWork.map((s) => s.title));
   const log = one(main, "id", "build-log");

@@ -334,7 +334,8 @@ export const makeDemoSchema = (ref: RefFactory) => z.discriminatedUnion("kind", 
 ]).refine((d) => d.provenance !== "measured" || !!d.run, { message: "measured demos need a run path" });
 
 export const makeInsightSchema = (ref: RefFactory) => z.strictObject({
-  title: z.string(), description: z.string(), publishDate: z.coerce.date(), updatedDate: z.coerce.date().optional(),
+  // seoTitle: the <title> before " | Techsider" when the H1 isn't the words people search with.
+  title: z.string(), seoTitle: z.string().optional(), description: z.string(), publishDate: z.coerce.date(), updatedDate: z.coerce.date().optional(),
   type: z.enum(["article", "reference-scenario", "platform-guide"]),
   industries: z.array(ref("industries")).default([]), solutions: z.array(ref("solutions")).default([]),
   illustrative: z.boolean().default(false), draft: z.boolean().default(false),

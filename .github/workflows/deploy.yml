@@ -86,3 +86,32 @@ jobs:
         env:
           # A deploy run first waits until the live site serves this commit; the daily watch checks what is live.
           EXPECT_SHA: ${{ needs.deploy.result == 'success' && github.sha || '' }}
+
+      - name: Check AI crawlers aren't refused at the edge
+        # Exit 3 is a refusal: the step passes with a ::warning:: per refused request, since only
+        # the Cloudflare dashboard can fix it (scripts/ci/crawler-check.mjs).
+        run: node scripts/ci/crawler-check.mjs || test $? -eq 3
+
+  indexnow:
+    # IndexNow: once the live check has seen this commit live, tell Bing and the other IndexNow
+    # engines which URLs to recrawl (scripts/ci/indexnow.mjs reads them from the live sitemap). A
+    # push to main only: the weekly rebuild and the daily watch change no URL. A failed submission
+    # is reported, never a failed deploy.
+    needs: live-check
+    if: ${{ !cancelled() && github.event_name == 'push' && needs.live-check.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22.18"
+
+      - name: Submit the live sitemap's URLs to IndexNow
+        run: node scripts/ci/indexnow.mjs

@@ -29,6 +29,8 @@ test("postView: the card, page title, breadcrumb and dates of a published post",
     typeLabel: "Article", date: PUBLISHED, minutes: 2, industries: [],
   });
   assert.equal(v.metaTitle, "Test post title | Techsider");
+  assert.equal(view({ title: "Test post title." }).metaTitle, "Test post title | Techsider", "the H1's closing full stop stays out of the <title>");
+  assert.equal(view({ title: "Test post title.", seoTitle: "Searchable test title" }).metaTitle, "Searchable test title | Techsider");
   assert.equal(v.updated, null);
   assert.equal(v.illustrativeLabel, null);
   // Insights is live, so the production trail keeps it: Home › Insights › the post.
@@ -87,6 +89,7 @@ test("postView: the BlogPosting node, authored and published by the Organization
     "@id": "https://techsider.com.au/insights/test-post/#article",
     headline: "Test post title",
     description: "Test post description.",
+    image: "https://techsider.com.au/og/insight.png",
     datePublished: "2026-06-09T00:00:00.000Z",
     dateModified: "2026-07-01T00:00:00.000Z",
     inLanguage: "en-AU",
@@ -99,4 +102,23 @@ test("postView: the BlogPosting node, authored and published by the Organization
   assert.equal("dateModified" in plain, false, "no dateModified without an updatedDate");
   assert.doesNotMatch(jsonLd(plain), /"Person"|"founder"|"employee"/);
   assert.deepEqual(JSON.parse(jsonLd(plain)), plain);
+});
+
+test("postView: Keep reading links the post's shown solutions and the three most alike other posts, never itself or a draft", () => {
+  const me = post({ solutions: ["ai-evaluation"], industries: ["healthcare"] });
+  const day = (d) => new Date(`2026-09-${d}T00:00:00Z`);
+  const posts = [
+    me,
+    post({ solutions: ["ai-evaluation"], industries: ["healthcare"], publishDate: day("01") }, "twin"),
+    post({ solutions: ["ai-evaluation", "knowledge-assistant", "ai-switch-on"], industries: ["healthcare"], publishDate: day("20") }, "broad"),
+    post({ solutions: ["ai-evaluation"], industries: ["government"], publishDate: day("02") }, "same-solution"),
+    post({ solutions: [], industries: [], publishDate: day("28") }, "newest-unrelated"),
+    post({ solutions: ["ai-evaluation"], industries: ["healthcare"], draft: true }, "draft-twin"),
+  ];
+  const v = postView({ post: me, posts, site: siteContext(false), siteUrl: SITE_URL });
+  assert.deepEqual(v.solutions, [{ label: "Independent AI Evaluation", href: "/solutions/ai-evaluation/" }]);
+  // Shared refs over all refs, a solution counting double: twin 3/3, same-solution 2/4, broad 3/7
+  // (naming three solutions makes it less alike, though it shares as much and is newer).
+  assert.deepEqual(v.related.map((c) => c.id), ["twin", "same-solution", "broad"]);
+  assert.deepEqual(postView({ post: me, site: siteContext(false), siteUrl: SITE_URL }).related, [], "no posts given, no related posts");
 });

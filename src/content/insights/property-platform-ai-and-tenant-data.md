@@ -1,5 +1,6 @@
 ---
 title: "Check where property AI sends tenant data."
+seoTitle: "PropertyMe and Rex AI: where tenant data goes"
 description: "What PropertyMe's AiMe features and Rex AI do, what each vendor publishes about where its AI runs, and the renter-data rules to check before you switch them on."
 publishDate: 2026-09-29
 type: platform-guide

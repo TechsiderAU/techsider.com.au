@@ -9,7 +9,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { allHtmlFiles, readDist, visibleText } from "./helpers.mjs";
-import { elements, elementsWith, readFrontmatter, startTags } from "../scripts/ci/lib.mjs";
+import { decodeEntities, elements, elementsWith, readFrontmatter, startTags } from "../scripts/ci/lib.mjs";
 import { INSIGHT_TYPE_LABEL } from "../src/content/schemas.ts";
 import { PAGES } from "../src/data/nav.ts";
 
@@ -61,7 +61,7 @@ test("the insights pages are the index plus one page per published post", () => 
 
 test("index: pageTitle, a carbon hero with the [resources] eyebrow, the H1 'Insights.' and the nav one-liner", () => {
   const html = readDist("insights/index.html");
-  assert.match(html, /<title>Insights \| Techsider<\/title>/);
+  assert.match(html, /<title>AI Guides and Field Notes for Australian Teams \| Techsider<\/title>/);
   const hero = one(main(html), "data-page-hero", "index");
   assert.equal(hero.name, "header");
   assert.ok(classesOf(hero).includes("bg-carbon") && classesOf(hero).includes("scanlines"), "the hero is carbon with scan lines");
@@ -104,7 +104,9 @@ test("posts: a carbon hero with the breadcrumb, the type eyebrow, the title as t
     "the eyebrow expectation reads each type's label, not its id");
   for (const { id, fm } of POSTS) {
     const html = readDist(`insights/${id}/index.html`);
-    assert.match(html, new RegExp(`<title>${fm.title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\| Techsider</title>`), id);
+    const metaTitle = `${fm.seoTitle ?? fm.title.replace(/\.$/, "")} | Techsider`;
+    assert.equal(decodeEntities(html.match(/<title>([^<]*)<\/title>/)[1]), metaTitle, `${id}: <title>`);
+    assert.ok(metaTitle.length <= 60, `${id}: "${metaTitle}" is ${metaTitle.length} characters (spec §11.3: 60 or fewer)`);
     const hero = one(main(html), "data-page-hero", id);
     assert.ok(classesOf(hero).includes("bg-carbon"), `${id}: the hero is not carbon`);
     const crumbs = elements(hero.inner, (t) => t.name === "nav" && t.attrs["aria-label"] === "Breadcrumb");
@@ -146,7 +148,28 @@ test("posts: the body is Prose on bone, then the contextual closing prompt, link
     assert.equal(links[0].attrs.href, expected.href, `${id}: contextual CTA link`);
     assert.equal(text(elements(prompt.inner, (t) => t.name === "p")[0].inner), expected.prompt);
     // Industry chips render only for a post that names industries.
-    assert.equal(elementsWith(body.inner, "data-chip-row").length, (fm.industries ?? []).length > 0 ? 1 : 0);
+    assert.equal(elementsWith(body.inner, "id", "post-industries").length, (fm.industries ?? []).length > 0 ? 1 : 0);
+  }
+});
+
+test("posts: Keep reading links each post to its solutions and three other posts, between the body and the closing prompt", () => {
+  const ids = new Set(POSTS.map(({ id }) => id));
+  for (const { id, fm } of POSTS) {
+    const html = main(readDist(`insights/${id}/index.html`));
+    const related = one(html, "data-post-related", id);
+    assert.ok(html.indexOf(one(html, "data-prose", id).outer) < html.indexOf(related.outer), `${id}: Keep reading precedes the body`);
+    assert.ok(html.indexOf(related.outer) < html.indexOf(one(html, "data-post-closing", id).outer), `${id}: Keep reading follows the closing prompt`);
+    const solutions = elementsWith(related.inner, "id", "post-solutions");
+    const named = (fm.solutions ?? []).map((s) => `/solutions/${s}/`);
+    assert.deepEqual(solutions.length === 0 ? [] : elements(solutions[0].inner, (t) => t.name === "a").map((a) => a.attrs.href), named, `${id}: solution links`);
+    const cards = elementsWith(related.inner, "data-insight-card");
+    assert.equal(cards.length, 3, `${id}: related posts`);
+    for (const card of cards) {
+      const href = elements(card.inner, (t) => t.name === "a" && classesOf(t).includes("insight-card-link"))[0].attrs.href;
+      assert.notEqual(href, `/insights/${id}/`, `${id}: lists itself`);
+      const target = href.match(/^\/insights\/([^/]+)\/$/)?.[1];
+      assert.ok(ids.has(target), `${id}: ${href} isn't a post`);
+    }
   }
 });
 
@@ -169,6 +192,7 @@ test("posts: BlogPosting JSON-LD in the page's @graph, authored and published by
     assert.equal(post.datePublished, new Date(fm.publishDate).toISOString());
     assert.equal("dateModified" in post, fm.updatedDate !== undefined);
     assert.equal(post.mainEntityOfPage, canonical);
+    assert.equal(post.image, html.match(/<meta property="og:image" content="([^"]+)"/)[1], `${id}: the image isn't the page's social card`);
     assert.equal(post.url, `https://techsider.com.au/insights/${id}/`);
     assert.deepEqual(post.author, organization);
     assert.deepEqual(post.publisher, organization);

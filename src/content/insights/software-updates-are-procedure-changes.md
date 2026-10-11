@@ -1,5 +1,6 @@
 ---
 title: "Re-test SOP answers before each model update."
+seoTitle: "Re-test an SOP assistant after model updates"
 description: "Safe Work Australia's AI guidance says vendor-pushed updates may change WHS risks. How to test an SOP assistant in each language, before and after each update."
 publishDate: 2026-09-29
 type: article
