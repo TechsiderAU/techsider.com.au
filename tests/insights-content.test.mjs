@@ -46,8 +46,6 @@ const MID_MARKET = ["ai-inside-your-practice-software", "schools-framework-teste
 // Blueprint ruling 1 (held rows), the research index's keep-off list, spec §3.4 and D4. None of these
 // may appear in a new post. A post has no CTA of its own either: PostLayout adds the §10.1 prompt.
 const KEEP_OFF = [
-  [/\bAPP 1\.[789]\b/, "APP 1.7–1.9 is held until the OAIC guidance is re-read"],
-  [/\bGPN-AI\b/, "the Federal Court GPN-AI row is held until the live page is checked"],
   [/NSW Health AI Framework/i, "the NSW Health AI Framework row is held"],
   [/\bEPBC\b/, "the EPBC row is held until after 1 Dec 2026"],
   [/Digital Work Systems/i, "the NSW Digital Work Systems Act hasn't commenced"],

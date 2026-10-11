@@ -1,8 +1,9 @@
 ---
 title: "Courts want a person to verify AI output."
-seoTitle: "Court AI practice notes: NSW and Victoria"
-description: "NSW SC Gen 23, Victoria's SC Gen 25 and the County Court's note put verification on a person. What to test in a legal AI tool before it touches court work."
+seoTitle: "AI practice notes: NSW, Victoria, Federal Court"
+description: "NSW SC Gen 23, Victoria's SC Gen 25, the County Court's note and the Federal Court's GPN-AI put verification on a person. What to test in a legal AI tool first."
 publishDate: 2026-09-29
+updatedDate: 2026-10-11
 type: article
 industries: [legal-and-professional]
 solutions: [ai-evaluation, ai-switch-on]
@@ -12,7 +13,7 @@ draft: false
 
 Many lawyers already use general-purpose AI. In the Victorian Legal Services Board + Commissioner's [report on its 2025 lawyer census](https://lsbc.vic.gov.au/research-centre/what-we-do/publications/generative-ai-use-legal-profession-findings-2025-victorian), 65% of the 638 respondents who used AI named general-purpose tools such as ChatGPT, Claude, Gemini, Perplexity or personal Copilot plans. The census covers Victorian lawyers only, and its 6.4% response rate was weighted after collection.
 
-Courts have set out what they expect when AI touches court documents. Three practice notes put the check on a person. This article covers what they say, and what that means for testing a legal AI tool before you rely on it.
+Courts have set out what they expect when AI touches court documents. Four practice notes put the check on a person. This article covers what they say, and what that means for testing a legal AI tool before you rely on it.
 
 ## NSW Supreme Court: SC Gen 23
 
@@ -32,6 +33,14 @@ Courts have set out what they expect when AI touches court documents. Three prac
 - Court users must be prepared to identify the specific portions of court documents that were produced using AI, and to explain how the output was verified (¶7.6).
 
 The County Court's [Practice Note PNCCV 1-2026](https://www.countycourt.vic.gov.au/sites/default/files/documents/2026-06/use-artificial-intelligence-court-users-practice-note.docx), version 1.0 dated 5 June 2026, sets out the same verification requirement in the same words.
+
+## Federal Court: GPN-AI
+
+The Federal Court's [Use of Generative Artificial Intelligence Practice Note (GPN-AI)](https://www.fedcourt.gov.au/law-and-practice/practice-documents/practice-notes/gpn-ai), a General Practice Note dated 16 April 2026, applies to everyone who appears before or files documents with the Court, including litigants without lawyers, witnesses and third parties producing documents under subpoena (¶3.1).
+
+- Where Gen AI helped prepare a document, the responsible person is expected to have confirmed that cited authorities exist and support the proposition stated, that cited evidence exists, and that chronologies are accurate (¶4.5). The note warns that Gen AI may confirm information is accurate when asked, even when it isn't (¶4.3(d)).
+- Use must be disclosed where Gen AI summarised or analysed information a witness relies on, or might reasonably affect the admissibility of evidence (¶4.10), at the start of the document, saying where and how it was used (¶4.11).
+- Everyone is expected to be able to tell the Court what Gen AI was used, how and for what purpose (¶2.3).
 
 ## The regulators' joint statement
 

@@ -153,9 +153,11 @@ const KEEP_OFF = [
 ];
 
 // Not in production until re-checked (research index "Hold until re-checked"; rulings 1, 6, 7, 9).
+// Released on 2026-10-11 at the owner's direction, each after its primary source was read: APP 1.7–1.9
+// against the OAIC's September 2026 fact sheet, and GPN-AI against the Federal Court's own page (its
+// 14 August 2026 web-archive capture: fedcourt.gov.au refuses automated requests). Their regulatory-map
+// rows (HELD_ROWS) stay out until a row is written and checked like the others.
 const HELD = [
-  rule("APP 1.7–1.9", /\bAPPs?\s?1\.[789]\b|\bAustralian Privacy Principles?\s1\.[789]\b/g, "held until the OAIC's ADM guidance is re-read (ruling 1)"),
-  rule("GPN-AI", /\bGPN[\s-]?AI\b/gi, "held until the Federal Court's page is re-checked (rulings 1 and 7)"),
   rule("the NSW Health AI Framework", /\bNSW Health(?:'s)?\b[^.]{0,40}?\bAI Framework\b/gi, "held until its page is re-checked (rulings 1 and 6)"),
   rule("the TPB record-keeping row", /\bcorrectly record the tax agent services\b/gi, "held until ss 30 and 40 are re-read (ruling 1)"),
   rule("the PropertyMe Connector", /\bPropertyMe(?:'s)?\s+(?:MCP\s+)?Connector\b/gi, "held (ruling 9)"),
@@ -292,7 +294,7 @@ test("the matchers catch what they're for, and pass the wording the research all
   }
   assert.deepEqual(sample(KEEP_OFF, "Strict isolation / IRAP-heavy", "/insights/sovereign-llm-hosting-decision-matrix/"), []);
   assert.equal(sample(KEEP_OFF, "Strict isolation / IRAP-heavy", "/insights/another-post/").length, 1, "IRAP-heavy is allowed off its post");
-  for (const text of ["APP 1.7 applies from 10 December 2026.", "APPs 1.8 and 1.9", "Australian Privacy Principle 1.7", "Federal Court GPN-AI", "the PropertyMe Connector", "s 505BD"]) {
+  for (const text of ["the PropertyMe Connector", "s 505BD"]) {
     assert.equal(sample(HELD, text).length, 1, `"${text}" isn't held`);
   }
   for (const text of [

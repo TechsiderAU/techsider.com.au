@@ -46,7 +46,9 @@ const HELD_ROWS = ["app-1-7-automated-decisions", "nsw-health-ai-framework", "ep
 const KEEP_OFF = {
   healthcare: ["NSW Health", "APP 1.7", "10 Dec 2026", "Heidi", "Lyrebird", "Bp Premier", "scribe panel", "38.7", "Practitioner Information Exchange", "Queensland Health"],
   "resources-and-energy": ["134(1A)", "control system", "SCADA", "Glean", "Rio Tinto", "Mind the Bridge", "decision time"],
-  "legal-and-professional": ["GPN-AI", "Federal Court", "Trust Deed", "AU-hosted", "Queensland", "per fee earner"],
+  // GPN-AI was released on 2026-10-11 once the Federal Court's page was read (content-language.test.mjs),
+  // so the court-notes insight's card may name it here; its regulatory row (fca-gpn-ai) stays held.
+  "legal-and-professional": ["Trust Deed", "AU-hosted", "Queensland", "per fee earner"],
 };
 
 test("Task 6 content validates: three industry entries, their regulatory maps and illustrative scenario traces", () => {

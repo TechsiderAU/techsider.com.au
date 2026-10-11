@@ -6,8 +6,8 @@ publishDate: 2026-10-11
 type: article
 industries: [financial-services, real-estate, healthcare, accounting]
 solutions: [ai-switch-on, draft-for-approval]
-draft: true
-# ⚑ owner: re-read this draft against the OAIC's APP 1.7–1.9 fact sheet and the updated APP 1 Guidelines (the held APP 1.7–1.9 row), set publishDate to the day it goes live, then set draft: false
+draft: false
+# ⚑ owner: every commitment in this post must be in the standard engagement terms (spec §12 item 2)
 ---
 
 From 10 December 2026, an organisation covered by the Privacy Act that uses a computer program to make a decision about a person, or to do something substantially and directly related to making it, has to say so in its privacy policy when the decision could significantly affect that person's rights or interests and the program uses their personal information. The Office of the Australian Information Commissioner (OAIC) published its guidance on 30 September 2026. Its definition of a computer program covers rule-based processes, AI and generative AI, and human review doesn't automatically take a decision out of scope. So the first job is an inventory: where does software, including the software you already license, inform decisions about people?
