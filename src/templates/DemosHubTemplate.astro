@@ -34,6 +34,14 @@ const cards = demos.map((d) => {
   <PageHero title="Demos." highlight="Demos" sub={site.page("demos").oneLiner} breadcrumb={crumbs(site, ["demos"])} />
 
   <PageSection id="demos" title="The demos">
+    <p class="demos-intro" data-demos-intro>
+      Each demo answers a question to settle before anything is built. Can it pull the fields out of
+      our documents and show the page each came from? Will it answer from our own policies, cite the
+      passage, and say so when they're silent? Can it draft the reply and wait for a person to approve
+      it? What does an evaluation report contain? Does software we already pay for include
+      the AI? The replays run in your browser on public or synthetic documents and call no model, so
+      their scores and timings are illustrative.
+    </p>
     <ul class="demos-grid">
       {cards.map((card) => (
         <li data-demo-kind={card.kind}>
@@ -49,6 +57,11 @@ const cards = demos.map((d) => {
 </div>
 
 <style>
+  .demos-intro {
+    max-width: 48rem;
+    margin: 0 0 1.5rem;
+    line-height: 1.6;
+  }
   .demos-grid {
     display: grid;
     gap: 1rem;

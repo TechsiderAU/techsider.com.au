@@ -6,11 +6,11 @@ publishDate: 2026-10-11
 type: article
 industries: [financial-services, real-estate, healthcare, accounting]
 solutions: [ai-switch-on, draft-for-approval]
-draft: true
-# ⚑ owner: re-read this draft against the OAIC's APP 1.7–1.9 fact sheet and the updated APP 1 Guidelines (the held APP 1.7–1.9 row), set publishDate to the day it goes live, then set draft: false
+draft: false
+# ⚑ owner: every commitment in this post must be in the standard engagement terms (spec §12 item 2)
 ---
 
-From 10 December 2026, an organisation covered by the Privacy Act that uses a computer program to make a decision about a person, or to do something substantially and directly related to making it, has to say so in its privacy policy when the decision could significantly affect that person's rights or interests and the program uses their personal information. The Office of the Australian Information Commissioner (OAIC) published its guidance on 30 September 2026. Its definition of a computer program covers rule-based processes, AI and generative AI, and human review doesn't automatically take a decision out of scope. So the first job is an inventory: where does software, including the software you already license, inform decisions about people?
+From 10 December 2026, an organisation covered by the Privacy Act that uses a computer program to make a decision about a person, or to do something substantially and directly related to making it, has to say so in its privacy policy when the decision could significantly affect that person's rights or interests and the program uses their personal information. The Office of the Australian Information Commissioner (OAIC) [published its guidance](https://www.oaic.gov.au/news/media-centre/new-resources-on-transparency-for-use-of-ai-and-automated-decision-making) on 30 September 2026, with an update to its [APP 1 Guidelines](https://www.oaic.gov.au/privacy/australian-privacy-principles/australian-privacy-principles-guidelines/chapter-1-app-1-open-and-transparent-management-of-personal-information). Its definition of a computer program covers rule-based processes, AI and generative AI, and human review doesn't automatically take a decision out of scope. So the first job is an inventory: where does software, including the software you already license, inform decisions about people?
 
 This article sets out what the OAIC's [APP 1.7–1.9 transparency obligation fact sheet](https://www.oaic.gov.au/__data/assets/pdf_file/0021/269013/APP-1.7-1.9-Transparency-Obligation-Fact-Sheet.PDF) says, and how to build that inventory before December. It isn't legal advice: your privacy lawyer decides what your policy says.
 
@@ -50,7 +50,7 @@ Under APP 1.8, the policy names three things:
 - the kinds of decisions made solely by them;
 - the kinds of decisions where a program does something substantially and directly related to making them.
 
-The fact sheet allows grouping, provided the detail is meaningful to a reasonable person, and asks that more sensitive information, such as health information or biometric templates, be clearly identified. Commercial-in-confidence information about a program, such as how it weights its inputs, doesn't have to be disclosed. The fact that personal information is used for a purpose such as fraud detection does.
+The OAIC's [flowchart](https://www.oaic.gov.au/__data/assets/pdf_file/0019/269011/OAIC-APP-1.7-1.9-Transparency-Obligation-Flowchart_v4.pdf) walks through the same tests. The fact sheet allows grouping, provided the detail is meaningful to a reasonable person, and asks that more sensitive information, such as health information or biometric templates, be clearly identified. Commercial-in-confidence information about a program, such as how it weights its inputs, doesn't have to be disclosed. The fact that personal information is used for a purpose such as fraud detection does.
 
 The obligation generally stays with the organisation making the decision, not the vendor whose software it uses. The OAIC says software providers should give clear, high-level information about how their software can be used to make decisions, so their customers can write their policies.
 

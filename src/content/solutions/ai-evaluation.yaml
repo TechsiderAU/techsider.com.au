@@ -321,7 +321,7 @@ matrix:
   resources-and-energy: "Pre-contract tests; SOCI evidence on request"
   legal-and-professional: "Legal AI tested on your matters"
 faq:
-  - q: You have no clients. Why should we trust your evaluation?
+  - q: How can we check your evaluation when you have no clients?
     a: >-
       You shouldn't take it on trust. We have no clients yet, so you judge the method instead: how
       the sample size is chosen, how ground truth is built, how often raters agree, and thresholds
