@@ -213,6 +213,41 @@ test("each researched post cites four primary sources and its internal links res
   }
 });
 
+// The October 2026 search and AI-answer posts: each answers a question buyers search for, and keeps
+// the Phase C posts' copy rules. A sentence title, a search title that fits, a 150–160-character
+// description, the keep-off list, 800–1,400 words, and three or more primary sources.
+const OCTOBER_POSTS = {
+  "automated-decisions-privacy-policy": { type: "article" },
+};
+
+test("the October posts keep the Phase C copy rules: titles, description, keep-off list, length and primary sources", () => {
+  for (const [id, want] of Object.entries(OCTOBER_POSTS)) {
+    const { fm, body } = post(id);
+    assert.equal(fm.draft, false, `${id}: a draft has no page`);
+    assert.equal(fm.type, want.type, `${id}: type`);
+    assert.match(fm.title, /^[A-Z].*\.$/, `${id}: "${fm.title}" isn't a sentence ending in a period (spec §3.3)`);
+    for (const t of [fm.title, fm.seoTitle].filter(Boolean)) {
+      assert.ok(`${t} | ${SITE.name}`.length <= 60, `${id}: "${t} | ${SITE.name}" is over 60 characters (spec §11.3)`);
+    }
+    assert.ok(fm.description.length >= 150 && fm.description.length <= 160, `${id}: the description is ${fm.description.length} characters`);
+    const all = `${fm.title}\n${fm.seoTitle ?? ""}\n${fm.description}\n${body}`.replace(/[‘’]/g, "'");
+    for (const [re, why] of KEEP_OFF) {
+      const hit = all.match(re);
+      assert.equal(hit, null, `${id}: "${hit?.[0]}" (${why})`);
+    }
+    const n = words(proseOf(id).inner);
+    assert.ok(n >= 800 && n <= 1400, `${id}: ${n} words`);
+    const hrefs = elements(proseOf(id).inner, (t) => t.name === "a").map((a) => a.attrs.href);
+    for (const href of hrefs.filter((h) => h.startsWith("/"))) {
+      const local = href.split(/[?#]/)[0];
+      assert.ok(existsSync(join(DIST, local, local.endsWith("/") ? "index.html" : "")), `${id}: ${href} is missing`);
+    }
+    const sources = hrefs.filter((h) => !h.startsWith("/"));
+    for (const href of sources) assert.ok(primary(new URL(href).host), `${id}: ${new URL(href).host} is not a primary-source host`);
+    assert.ok(new Set(sources).size >= 3, `${id}: ${new Set(sources).size} distinct sources`);
+  }
+});
+
 test("the reference scenario says it's fictional first, and renders the illustrative label", () => {
   for (const [id] of Object.entries(NEW_POSTS).filter(([, p]) => p.type === "reference-scenario")) {
     const html = readDist(`insights/${id}/index.html`);
