@@ -77,6 +77,8 @@ test("organization(): minimal off Home; in full on Home, with the fixed summary,
     name: "Techsider",
     url: `${ORIGIN}/`,
     legalName: "Techsider Pty Ltd",
+    identifier: { "@type": "PropertyValue", propertyID: "ABN", value: "12 636 205 868" },
+    sameAs: ["https://abr.business.gov.au/ABN/View?abn=12636205868"],
     description: SITE.summary,
     email: SITE.email,
     logo: `${ORIGIN}/icon-512.png`,
@@ -89,9 +91,10 @@ test("organization(): minimal off Home; in full on Home, with the fixed summary,
   for (const topic of KNOWS_ABOUT) assert.doesNotMatch(topic, /\bagent/i, `knowsAbout names agents: "${topic}"`);
 });
 
-test("legalName: carries the owner-supplied company name; the ABN remains held open by a ⚑ (spec §12 item 5)", () => {
+test("legalName and ABN: the owner-supplied company name and its owner-confirmed ABN (spec §12 item 5)", () => {
   assert.equal(SITE.legalName, "Techsider Pty Ltd");
   assert.equal(organization(ORIGIN, true).legalName, SITE.legalName);
+  assert.equal(SITE.abn, "12 636 205 868");
   const saved = SITE.legalName;
   try {
     SITE.legalName = SITE.name;
@@ -101,17 +104,15 @@ test("legalName: carries the owner-supplied company name; the ABN remains held o
     SITE.legalName = saved;
   }
   const nav = readFileSync(join(SRC, "data/nav.ts"), "utf8");
-  assert.ok(
-    nav.includes("  // ⚑ owner: confirm the ABN for Techsider Pty Ltd (spec §12 item 5)"),
-    "nav.ts has no ABN verification marker",
-  );
+  assert.doesNotMatch(nav, /⚑ owner: confirm the ABN/, "nav.ts still holds the ABN open");
 });
 
-test("abn: none until the owner confirms it; then an identifier and the ABN Lookup record in sameAs, on the full Organization only", () => {
-  assert.equal(SITE.abn, null, "SITE.abn is set: confirm the owner marker is closed and update this test");
-  assert.equal("identifier" in organization(ORIGIN, true), false);
+test("abn: an identifier and the ABN Lookup record in sameAs, on the full Organization only; none while SITE.abn is null", () => {
   const saved = SITE.abn;
   try {
+    SITE.abn = null;
+    assert.equal("identifier" in organization(ORIGIN, true), false);
+    assert.equal("sameAs" in organization(ORIGIN, true), false);
     SITE.abn = "12 345 678 901";
     const full = organization(ORIGIN, true);
     assert.deepEqual(full.identifier, { "@type": "PropertyValue", propertyID: "ABN", value: "12 345 678 901" });

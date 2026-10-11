@@ -74,7 +74,7 @@ export function organizationRef(site: SiteUrl): IdRef {
  * give the one organisation a different description on every page). It names no person.
  * legalName appears only once SITE.legalName differs from the name: Google's docs describe it as the
  * registered name, "if applicable and different from the name property", and nav.ts holds the name
- * there, under an owner marker, until the owner confirms the registered entity (spec §12 item 5). The logo is the carbon square:
+ * there; the owner confirmed the registered entity and its ABN (spec §12 item 5). The logo is the carbon square:
  * logo.svg's bone letters would vanish on the white Google shows a logo on.
  */
 export function organization(site: SiteUrl, full: boolean): JsonLdNode {
