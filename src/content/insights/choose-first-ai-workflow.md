@@ -1,5 +1,6 @@
 ---
 title: "Choose your first AI workflow."
+seoTitle: "How to choose your first AI automation project"
 description: "Choose a useful first AI automation project: one recurring task, accessible inputs, a reviewer and a measurable baseline, with a synthetic control walkthrough."
 publishDate: 2026-10-02
 type: article

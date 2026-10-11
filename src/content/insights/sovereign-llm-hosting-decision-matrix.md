@@ -1,5 +1,6 @@
 ---
 title: "AI hosting in Australia: check the data path."
+seoTitle: "Australian AI hosting: Bedrock vs Azure OpenAI"
 description: "Compare self-hosted models, Amazon Bedrock and Azure OpenAI. Check routing, storage, access and model availability before choosing an Australian deployment."
 publishDate: 2026-06-14
 updatedDate: 2026-10-02

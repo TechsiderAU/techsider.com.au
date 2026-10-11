@@ -40,7 +40,17 @@ export interface JsonLdGraph {
  * what Techsider builds on mid-market and government pages, and the Organization is on every page,
  * so no topic names agents (the Phase C review's WB-3).
  */
-export const KNOWS_ABOUT = ["AI Workflow Automation", "AI Document Processing", "Internal Knowledge Assistants", "AI Implementation", "AI Evaluation"];
+export const KNOWS_ABOUT = [
+  "AI Workflow Automation",
+  "AI Document Processing",
+  "Intelligent Document Processing",
+  "Internal Knowledge Assistants",
+  "Retrieval-Augmented Generation",
+  "AI Implementation",
+  "Microsoft 365 Copilot Adoption",
+  "AI Evaluation",
+  "LLM Evaluation",
+];
 
 const AUSTRALIA = { "@type": "Country", name: "Australia" };
 const homeUrl = (site: SiteUrl): string => new URL("/", site).href;
@@ -59,8 +69,9 @@ export function organizationRef(site: SiteUrl): IdRef {
 
 /**
  * The Organization. `full` on Home only: Google recommends placing it on the home page and says it
- * needn't be on every page. It carries no description (a page's meta description describes the
- * page, and would give the one organisation a different description on every page) and no person.
+ * needn't be on every page. Its description is SITE.summary, the one fixed sentence the site uses
+ * to say what Techsider is, never a page's meta description (which describes the page, and would
+ * give the one organisation a different description on every page). It names no person.
  * legalName appears only once SITE.legalName differs from the name: Google's docs describe it as the
  * registered name, "if applicable and different from the name property", and nav.ts holds the name
  * there, under an owner marker, until the owner confirms the registered entity (spec §12 item 5). The logo is the carbon square:
@@ -72,12 +83,29 @@ export function organization(site: SiteUrl, full: boolean): JsonLdNode {
   return {
     ...node,
     ...(SITE.legalName === SITE.name ? {} : { legalName: SITE.legalName }),
+    ...abnProperties(SITE.abn),
+    description: SITE.summary,
     email: SITE.email,
     logo: new URL("/icon-512.png", site).href,
     slogan: `${SITE.slogan} ${SITE.proofLine}`,
     areaServed: AUSTRALIA,
     knowsAbout: KNOWS_ABOUT,
   };
+}
+
+/** The ABN Lookup page for an ABN ("12 345 678 901" → …?abn=12345678901). */
+export function abnLookupUrl(abn: string): string {
+  return `https://abr.business.gov.au/ABN/View?abn=${abn.replace(/\s/g, "")}`;
+}
+
+/**
+ * The full Organization's ABN, once SITE.abn is set: an identifier (schema.org PropertyValue) and
+ * the public ABN Lookup record in sameAs. Throws on anything but 11 digits, so a typo fails the build.
+ */
+export function abnProperties(abn: string | null): { identifier?: { "@type": "PropertyValue"; propertyID: "ABN"; value: string }; sameAs?: string[] } {
+  if (abn === null) return {};
+  if (!/^\d{2} \d{3} \d{3} \d{3}$/.test(abn)) throw new Error(`SITE.abn "${abn}" isn't an ABN as the ABR prints it ("12 345 678 901")`);
+  return { identifier: { "@type": "PropertyValue", propertyID: "ABN", value: abn }, sameAs: [abnLookupUrl(abn)] };
 }
 
 /**
@@ -115,13 +143,14 @@ export function service(site: SiteUrl, input: { path: string; key: string; name:
 }
 
 /**
- * An insight post (Google's Article docs require nothing, and recommend the headline, the dates and
- * the author). The author and publisher are the Organization, never a person (spec §11.3). The
- * dates are the post's calendar dates, parsed as UTC midnight, as ISO timestamps.
+ * An insight post (Google's Article docs require nothing, and recommend the headline, the image, the
+ * dates and the author). The author and publisher are the Organization, never a person (spec
+ * §11.3). The dates are the post's calendar dates, parsed as UTC midnight, as ISO timestamps. The
+ * image is the post's social card (src/lib/social-image.ts), root-relative, made absolute here.
  */
 export function blogPosting(
   site: SiteUrl,
-  input: { path: string; headline: string; description: string; published: Date; modified: Date | null },
+  input: { path: string; headline: string; description: string; image: string; published: Date; modified: Date | null },
 ): JsonLdNode {
   const url = new URL(input.path, site).href;
   return {
@@ -129,6 +158,7 @@ export function blogPosting(
     "@id": `${url}#article`,
     headline: input.headline,
     description: input.description,
+    image: new URL(input.image, site).href,
     datePublished: input.published.toISOString(),
     ...(input.modified ? { dateModified: input.modified.toISOString() } : {}),
     inLanguage: "en-AU",

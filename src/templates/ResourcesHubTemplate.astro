@@ -22,7 +22,12 @@ if (shown.length === 0) {
 }
 ---
 <div class="template" data-template="resources-hub">
-  <PageHero title="Resources." highlight="Resources" breadcrumb={crumbs(site, ["resources"])} />
+  <PageHero
+    title="Resources."
+    highlight="Resources"
+    sub="Guides, demos and tools for Australian teams deciding where AI fits: what the software you already pay for includes, how to test an AI system before anyone relies on it, and field notes on retrieval, evaluation and hosting."
+    breadcrumb={crumbs(site, ["resources"])}
+  />
 
   <PageSection id="resources" title="Free resources">
     <ul class="resources-grid">

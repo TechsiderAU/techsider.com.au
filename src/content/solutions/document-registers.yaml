@@ -238,6 +238,12 @@ faq:
       engagement. That's why every register starts with a Two-Week Trial on 30–50 documents your
       seniors already know: you see the error rate for each field, and every miss, before you decide
       whether to continue.
+  - q: Is this intelligent document processing?
+    a: >-
+      Yes. Intelligent document processing (IDP) reads documents, sorts them by type and extracts
+      named fields, where OCR alone only turns a page image into text. Here every extracted value
+      lands in a register with a link to the page it came from, and anything missing, unsigned,
+      expired or conflicting goes to a person to decide.
   - q: Will it change anything in our systems?
     a: >-
       No. The register reads your documents read-only and adds no new login. It's delivered as a

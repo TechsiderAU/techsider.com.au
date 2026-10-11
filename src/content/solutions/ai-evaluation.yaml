@@ -327,6 +327,12 @@ faq:
       the sample size is chosen, how ground truth is built, how often raters agree, and thresholds
       agreed before testing. Every engagement hands over the test set and a replay script that runs
       in your subscription, so your team can re-run it and check our work.
+  - q: Do you test systems built on large language models?
+    a: >-
+      Yes. Assistants, copilots, AI scribes and document tools built on large language models are
+      tested on your own questions in your own environment. Thresholds are agreed before testing,
+      results come with confidence intervals, and every failure is listed, as our published
+      evaluation method sets out.
   - q: Will your report tell us the system is safe to deploy?
     a: >-
       No. You get findings, not an assurance opinion, and it isn't an ASAE 3000 engagement. Each

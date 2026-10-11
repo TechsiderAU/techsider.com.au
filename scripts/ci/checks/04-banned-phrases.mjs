@@ -1,5 +1,6 @@
 // Spec §11.5 check 4: the §3.5 banned phrases, over src/ and the visible text of
-// every built page and built XML file (the RSS feed's channel and item copy, the sitemaps).
+// every built page and built XML file (the RSS feed's channel and item copy, the sitemaps), and
+// the text files at the build's root (llms.txt, robots.txt).
 // FAIL phrases are errors; WARN phrases are printed as warnings.
 // Matching is case-insensitive, whole phrase (\b at both ends), hyphen ≡ space.
 import { join, resolve } from "node:path";
@@ -126,6 +127,11 @@ export function xmlText(xml) {
   return visibleText(xml.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")).replace(/\bhttps?:\/\/\S+/g, " ");
 }
 
+/** The copy in a root text file (llms.txt): its URLs dropped, since an address is not copy. */
+export function rootText(text) {
+  return text.replace(/\bhttps?:\/\/[^\s)]+/g, " ");
+}
+
 /**
  * Adds one finding per phrase occurrence in `text` that no exception covers.
  * `file` is "src/…" or "dist/…"; `lines` adds ":<line>" (source files).
@@ -154,5 +160,7 @@ export async function run({ root, dist }) {
   if (pages.length === 0) r.add("error", `${dist}: no built HTML found (run the build first)`);
   for (const file of pages) both(visibleText(readText(file)), `dist/${relPath(out, file)}`, false);
   for (const file of listFiles(out, (rel) => rel.endsWith(".xml"))) both(xmlText(readText(file)), `dist/${relPath(out, file)}`, false);
+  // Root text files only: public/downloads/ holds source data, not copy. URLs are addresses, as in XML.
+  for (const file of listFiles(out, (rel) => /^[^/]+\.txt$/.test(rel))) both(rootText(readText(file)), `dist/${relPath(out, file)}`, false);
   return { name: NAME, errors: r.errors, warnings: r.warnings };
 }

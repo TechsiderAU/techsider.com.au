@@ -21,7 +21,7 @@ import { fileURLToPath } from "node:url";
 import { htmlFiles, pageUrl, readText, visibleText } from "../scripts/ci/lib.mjs";
 import { PAGES, SITE } from "../src/data/nav.ts";
 import { SERVICES } from "../src/data/services.ts";
-import { KNOWS_ABOUT, jsonLd, organization, organizationId, pageGraph, service, website } from "../src/lib/json-ld.ts";
+import { KNOWS_ABOUT, abnLookupUrl, jsonLd, organization, organizationId, pageGraph, service, website } from "../src/lib/json-ld.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const SRC = join(ROOT, "src");
@@ -69,7 +69,7 @@ test("every ld+json script in src/ is serialised by jsonLd()", () => {
   for (const [rel, tag] of scripts) assert.match(tag, /\sset:html=\{jsonLd\([^)]*\)\}/, `${rel}: ${tag}`);
 });
 
-test("organization(): minimal off Home; in full on Home, with the logo, the slogan and proof line, Australia, and knowsAbout naming no agents (spec §3.4)", () => {
+test("organization(): minimal off Home; in full on Home, with the fixed summary, the logo, the slogan and proof line, Australia, and knowsAbout naming no agents (spec §3.4)", () => {
   assert.deepEqual(organization(ORIGIN, false), { "@type": "Organization", "@id": ORG_ID, name: "Techsider", url: `${ORIGIN}/` });
   assert.deepEqual(organization(ORIGIN, true), {
     "@type": "Organization",
@@ -77,6 +77,7 @@ test("organization(): minimal off Home; in full on Home, with the logo, the slog
     name: "Techsider",
     url: `${ORIGIN}/`,
     legalName: "Techsider Pty Ltd",
+    description: SITE.summary,
     email: SITE.email,
     logo: `${ORIGIN}/icon-512.png`,
     slogan: "AI that ships. Measured before it ships.",
@@ -104,6 +105,24 @@ test("legalName: carries the owner-supplied company name; the ABN remains held o
     nav.includes("  // ⚑ owner: confirm the ABN for Techsider Pty Ltd (spec §12 item 5)"),
     "nav.ts has no ABN verification marker",
   );
+});
+
+test("abn: none until the owner confirms it; then an identifier and the ABN Lookup record in sameAs, on the full Organization only", () => {
+  assert.equal(SITE.abn, null, "SITE.abn is set: confirm the owner marker is closed and update this test");
+  assert.equal("identifier" in organization(ORIGIN, true), false);
+  const saved = SITE.abn;
+  try {
+    SITE.abn = "12 345 678 901";
+    const full = organization(ORIGIN, true);
+    assert.deepEqual(full.identifier, { "@type": "PropertyValue", propertyID: "ABN", value: "12 345 678 901" });
+    assert.deepEqual(full.sameAs, ["https://abr.business.gov.au/ABN/View?abn=12345678901"]);
+    assert.equal(abnLookupUrl("12 345 678 901"), "https://abr.business.gov.au/ABN/View?abn=12345678901");
+    assert.equal("identifier" in organization(ORIGIN, false), false, "the minimal node grew an identifier");
+    SITE.abn = "12345678901";
+    assert.throws(() => organization(ORIGIN, true), /isn't an ABN as the ABR prints it/);
+  } finally {
+    SITE.abn = saved;
+  }
 });
 
 test("service() and pageGraph(): a Service in its page's words, provided by the Organization in Australia; Home's graph holds the full Organization and the WebSite, any other page's the minimal one, then its own nodes", () => {
@@ -164,6 +183,7 @@ const REQUIRED = {
   Question: ["name", "acceptedAnswer"],
   Answer: ["text"],
   Country: ["name"],
+  PropertyValue: ["propertyID", "value"],
 };
 /**
  * Every property each type may carry: what src/lib/json-ld.ts, Breadcrumb and FaqList emit (with
@@ -172,10 +192,11 @@ const REQUIRED = {
  * without a row fails an independent table assertion, even if REQUIRED already has its row.
  */
 const ALLOWED = {
-  Organization: ["@type", "@id", "name", "url", "legalName", "email", "logo", "slogan", "areaServed", "knowsAbout"],
+  Organization: ["@type", "@id", "name", "url", "legalName", "identifier", "sameAs", "description", "email", "logo", "slogan", "areaServed", "knowsAbout"],
+  PropertyValue: ["@type", "propertyID", "value"],
   WebSite: ["@type", "@id", "name", "url", "inLanguage", "publisher"],
   Service: ["@type", "@id", "name", "description", "url", "provider", "areaServed"],
-  BlogPosting: ["@type", "@id", "headline", "description", "datePublished", "dateModified", "inLanguage", "url", "mainEntityOfPage", "author", "publisher"],
+  BlogPosting: ["@type", "@id", "headline", "description", "image", "datePublished", "dateModified", "inLanguage", "url", "mainEntityOfPage", "author", "publisher"],
   BreadcrumbList: ["@context", "@type", "itemListElement"],
   ListItem: ["@type", "position", "name", "item"],
   FAQPage: ["@context", "@type", "mainEntity"],

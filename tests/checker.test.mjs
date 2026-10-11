@@ -158,7 +158,7 @@ test("nav: the checker's page is live, with its own title, its description and i
   const entry = PAGES.find((p) => p.path === PATH);
   assert.equal(entry.status, "live");
   const html = readDist(PAGE);
-  assert.equal(pageTitle(entry), "What you already pay for | Techsider");
+  assert.equal(pageTitle(entry), "What AI Features Does Your Software Include? | Techsider");
   assert.ok(html.includes(`<title>${pageTitle(entry)}</title>`), "the page's <title>");
   assert.ok(html.includes(`<meta name="description" content="${pageDescription(entry)}">`));
   assert.ok(html.includes(`<link rel="canonical" href="https://techsider.com.au${PATH}">`));

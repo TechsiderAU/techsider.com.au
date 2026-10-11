@@ -160,7 +160,7 @@ test("the deploy workflow rebuilds weekly, so Home's 45-day insights rule and se
   const deploy = workflow("deploy.yml");
   assert.deepEqual(Object.keys(deploy.on).sort(), ["push", "schedule", "workflow_dispatch"]);
   assert.deepEqual(deploy.on.schedule, [{ cron: WEEKLY_REBUILD }, { cron: DAILY_WATCH }]);
-  assert.deepEqual(Object.keys(deploy.jobs), ["build", "deploy", "live-check"]);
+  assert.deepEqual(Object.keys(deploy.jobs), ["build", "deploy", "live-check", "indexnow"]);
   // The weekly run builds the same way as a push: one build job, gated, then the deploy. Only the
   // daily live watch skips them, and the deploy follows the build.
   assert.equal(deploy.jobs.build.if, `github.event.schedule != '${DAILY_WATCH}'`, "the build job must skip only the daily live watch");
@@ -184,7 +184,13 @@ test("live-check checks the live domain after every deploy and daily, on main on
   assert.equal(job["timeout-minutes"], 25, "15 minutes of freshness polling, then the checks");
   // Exit 3 is warnings alone (security.txt's Content-Type, while STRICT_TXT_TYPE is false): the step
   // passes, and the script's ::warning:: line annotates the run (controller ruling 4).
-  assert.deepEqual(job.steps.map((s) => s.uses ?? s.run), ["actions/checkout@v5", "actions/setup-node@v5", "node scripts/ci/live-check.mjs || test $? -eq 3"]);
+  // The crawler check follows: a refusal (exit 3) warns, since only the Cloudflare dashboard fixes it.
+  assert.deepEqual(job.steps.map((s) => s.uses ?? s.run), [
+    "actions/checkout@v5",
+    "actions/setup-node@v5",
+    "node scripts/ci/live-check.mjs || test $? -eq 3",
+    "node scripts/ci/crawler-check.mjs || test $? -eq 3",
+  ]);
   assert.equal(job.steps[1].with["node-version"], "22.18", "the engines floor, as in ci.yml");
   assert.equal(job.steps.some((s) => /npm (ci|install)/.test(s.run ?? "")), false, "the check has no dependencies to install");
   assert.deepEqual(job.steps[2].env, { EXPECT_SHA: "${{ needs.deploy.result == 'success' && github.sha || '' }}" });

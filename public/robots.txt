@@ -1,4 +1,42 @@
+# techsider.com.au welcomes search engines and AI assistants. Every page is public, so every
+# crawler may read all of it. AI search and assistant crawlers are named so the intent is explicit;
+# a named group replaces the * group for that crawler, so each one repeats "Allow: /".
+# A summary for language models: https://techsider.com.au/llms.txt
+# Content-Signal (contentsignals.org): search, AI answers and AI training may all use these pages.
+# To opt out of training later, set ai-train=no and disallow the training group below; never the
+# search groups, which decide whether an engine can cite the site.
+
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+# Search engines
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: Applebot
+User-agent: DuckDuckBot
+Allow: /
+
+# AI search and assistants, fetching pages to answer and cite
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: DuckAssistBot
+User-agent: MistralAI-User
+User-agent: Meta-WebIndexer
+Allow: /
+
+# AI model training and grounding
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: CCBot
+User-agent: Meta-ExternalAgent
+User-agent: Amazonbot
 Allow: /
 
 Sitemap: https://techsider.com.au/sitemap-index.xml

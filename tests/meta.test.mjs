@@ -41,14 +41,17 @@ function metaContent(html, attr, value) {
   return m ? decodeEntities(m[1]) : undefined;
 }
 
-test("pageTitle: Home, industry pages and every other page follow spec §11.3", () => {
+test("pageTitle: Home, search titles, industry pages and every other page follow spec §11.3", () => {
   assert.equal(pageTitle(at("/")), "AI Automation Solutions in Australia | Techsider");
-  assert.equal(pageTitle(at("/industries/government/")), "AI for Government in Australia | Techsider");
-  assert.equal(pageTitle(at("/industries/legal-and-professional/")), "AI for Legal and Professional Services | Techsider");
-  assert.equal(pageTitle(at("/industries/")), "Industries | Techsider");
-  assert.equal(pageTitle(at("/solutions/document-registers/")), "AI Document Processing in Australia | Techsider");
+  assert.equal(pageTitle(at("/industries/government/")), "AI Evaluation for Australian Government Agencies | Techsider");
+  assert.equal(pageTitle(at("/industries/education/")), "AI for Education in Australia | Techsider");
+  assert.equal(pageTitle(at("/industries/real-estate/")), "AI for Real Estate in Australia | Techsider", "industry short names are Title Case in a <title>");
+  assert.equal(pageTitle(at("/industries/legal-and-professional/")), "AI for Law Firms and Professional Services | Techsider");
+  assert.equal(pageTitle(at("/industries/")), "AI Solutions by Industry in Australia | Techsider");
+  assert.equal(pageTitle(at("/solutions/document-registers/")), "Intelligent Document Processing in Australia | Techsider");
   assert.equal(pageTitle(at("/demos/ai-evaluation/")), "Independent AI Evaluation demo | Techsider");
-  assert.equal(pageTitle(at("/insights/")), "Insights | Techsider");
+  assert.equal(pageTitle(at("/insights/")), "AI Guides and Field Notes for Australian Teams | Techsider");
+  assert.equal(pageTitle(at("/about/")), "About Techsider | Australian AI Automation Company");
   assert.equal(pageTitle(at("/legal/privacy/")), "Privacy policy | Techsider");
   assert.equal(pageTitle(at("/404")), "Not found | Techsider");
 });

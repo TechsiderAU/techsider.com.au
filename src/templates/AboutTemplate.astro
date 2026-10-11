@@ -1,7 +1,8 @@
 ---
 // The About page (spec §8.10), body only: a Phase C route loads the about and positioning data
-// and the insight cards, and wraps this in BaseLayout. The mission (the hero sub); who we serve
-// and why control matters; the origin line in large type; the principles; how we work; a dated
+// and the insight cards, and wraps this in BaseLayout. The mission (the hero sub); SITE.summary,
+// the sentence that says what Techsider is (the Organization's JSON-LD and /llms.txt use it too);
+// who we serve and why control matters; the origin line in large type; the principles; how we work; a dated
 // build log of real events, newest first; up to three insight cards; the closing prompt.
 // No names and no headcount: the data carries none, and nothing here adds any.
 import PageHero from "../components/page/PageHero.astro";
@@ -13,7 +14,7 @@ import { formatDate, isoDate } from "../lib/dates";
 import type { SiteContext } from "../lib/site";
 import type { InsightCardView } from "../lib/views/insights";
 import { HOME_CLOSING } from "../lib/fixed-copy";
-import { CTAS } from "../data/nav";
+import { CTAS, SITE } from "../data/nav";
 
 interface Props {
   about: AboutData;
@@ -28,10 +29,11 @@ const cards = insights.slice(0, 3);
 const allInsightsHref = site.page("insights").href;
 ---
 <div class="template" data-template="about">
-  <PageHero title="About." highlight="About" sub={about.mission} />
+  <PageHero title={`About ${SITE.name}.`} highlight={SITE.name} sub={about.mission} />
 
   <PageSection id="who" title="Who we serve" width="prose">
-    <p class="about-lead">{about.whoWeServe}</p>
+    <p class="about-lead" data-summary>{SITE.summary}</p>
+    <p class="about-text">{about.whoWeServe}</p>
     <p class="about-text">{about.whyControl}</p>
   </PageSection>
 

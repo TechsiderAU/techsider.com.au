@@ -1,5 +1,6 @@
 ---
 title: "Re-test vendor AI whenever the model may change."
+seoTitle: "APRA AI letter: re-test AI after model changes"
 description: "APRA found few of the large entities it reviewed validating AI continuously. How a test set from your own cases shows your second line what a model change did."
 publishDate: 2026-09-29
 type: article

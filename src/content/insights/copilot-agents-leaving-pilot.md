@@ -1,5 +1,6 @@
 ---
 title: "Test a Copilot agent before it leaves pilot."
+seoTitle: "DTA AI impact assessment for a Copilot agent"
 description: "What the DTA policy, NSW's AI circular and Queensland's FAIRA ask of a Copilot agent leaving pilot, and what an independent test adds to Copilot Studio's own."
 publishDate: 2026-09-29
 updatedDate: 2026-10-02

@@ -199,8 +199,8 @@ test("both pages are live, and both builds render them with their own title and 
       assert.doesNotMatch(head, /name="robots"/, `${name} ${path}: the page is noindex`);
     }
   }
-  assert.equal(pageTitle(pageAt(SERVICES_PATH)), "Services | Techsider");
-  assert.equal(pageTitle(pageAt(PARTNER_PATH)), "Evaluation Partner | Techsider");
+  assert.equal(pageTitle(pageAt(SERVICES_PATH)), "AI Consulting Services in Australia | Techsider");
+  assert.equal(pageTitle(pageAt(PARTNER_PATH)), "AI Evaluation Partner for Primes and Advisers | Techsider");
 });
 
 for (const { name, read, site } of BUILDS) {

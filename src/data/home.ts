@@ -14,10 +14,21 @@
 import type { HomeData } from "../content/page-schemas.ts";
 import { HOME_TRUST_QUESTION } from "../lib/fixed-copy.ts";
 import { SERVICES } from "./services.ts";
+import { SITE } from "./nav.ts";
 
 export const HOME: HomeData = {
   heroTrace: "home-hero",
   faq: [
+    // The first two answers say what Techsider is and who it builds for in plain, quotable sentences:
+    // SITE.summary is the wording the Organization's JSON-LD, /llms.txt and About use too.
+    {
+      q: "What does Techsider do?",
+      a: `${SITE.summary} Work starts with one manual process, tested on your own examples before anything is built.`,
+    },
+    {
+      q: "Which industries do you build for?",
+      a: "Nine: government, financial services, accounting, education, manufacturing, real estate, healthcare, resources and energy, and legal and professional services. Each industry page sets out the rules that industry works under, the systems it already runs and where a first engagement starts.",
+    },
     // ⚑ owner: "our evaluation method is published" holds only while /resources/evaluation-method/ is live at launch (research index B10)
     {
       q: HOME_TRUST_QUESTION,

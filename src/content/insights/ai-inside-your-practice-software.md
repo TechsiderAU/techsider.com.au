@@ -1,5 +1,6 @@
 ---
 title: "Your practice software already runs AI."
+seoTitle: "What AI is in Xero, MYOB, Dext and Karbon?"
 description: "What JAX, MYOB AI BAS, Dext and Karbon AI do, whether each vendor says where its AI runs, and what the TPB asks before client information goes into any AI tool."
 publishDate: 2026-09-29
 updatedDate: 2026-10-02

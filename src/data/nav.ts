@@ -94,7 +94,22 @@ export const SITE = {
    */
   // ⚑ owner: confirm the ABN for Techsider Pty Ltd (spec §12 item 5); company name supplied by the owner on 2026-10-01
   legalName: "Techsider Pty Ltd",
+  /**
+   * The company's ABN, 11 digits with spaces as the ABR prints it ("12 345 678 901"), or null until
+   * the owner confirms it (the owner marker above). Once set, the footer shows it beside the legal name and
+   * the full Organization's JSON-LD carries it as an identifier, with the ABN Lookup record in
+   * sameAs: a public register entry is how search engines and AI assistants tell this Techsider
+   * from the other organisations that share the name.
+   */
+  abn: null as string | null,
   email: "admin@techsider.com.au",
+  /**
+   * The one sentence that says what Techsider is, worded the same wherever it appears: the full
+   * Organization's JSON-LD description, /llms.txt's summary and the About page's opening. Search
+   * engines and AI assistants describe an organisation from statements that agree across sources.
+   */
+  summary:
+    "Techsider is an Australian AI automation company. It designs, builds and supports AI workflow automation, document processing and internal knowledge assistants that keep people in control, and independently evaluates AI bought or built elsewhere.",
   slogan: "AI that ships.",
   proofLine: "Measured before it ships.",
   /**

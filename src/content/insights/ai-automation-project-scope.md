@@ -1,5 +1,6 @@
 ---
 title: "Define the scope of an AI automation project."
+seoTitle: "AI automation project scope: what's involved"
 description: "Understand the work behind an AI automation project: discovery, access, document preparation, approval controls, testing, handover and ongoing responsibilities."
 publishDate: 2026-10-02
 type: article

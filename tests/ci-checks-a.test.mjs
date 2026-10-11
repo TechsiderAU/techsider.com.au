@@ -465,6 +465,14 @@ test("04: .js, .mjs, .jsx, .mdx and .yml sources, and the text of built XML (RSS
   ]); // URLs (<link>, <loc>) are addresses, not copy: "case-study" and "our-clients" there pass
 });
 
+test("04: root text files (llms.txt) are scanned, their URLs and public/downloads/ text are not", async () => {
+  const res = await check(banned, {
+    "dist/llms.txt": "# Fixture\n\n> A world-class fixture.\n\n- [Fixture](https://example.com/our-clients/): fixture page\n",
+    "dist/downloads/fixture-source.txt": "Trusted by fixture banks\n",
+  });
+  assertErrors(res, [/dist\/llms\.txt: "world-class"/]);
+});
+
 test("04: WARN phrases are reported as warnings, not errors", async () => {
   const res = await check(banned, { "src/components/Hero.astro": "<p>Onshore, not sovereign; assurance is a warning word.</p>" });
   assertErrors(res, []);

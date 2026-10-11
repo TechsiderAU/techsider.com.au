@@ -1,5 +1,6 @@
 ---
 title: "Courts want a person to verify AI output."
+seoTitle: "Court AI practice notes: NSW and Victoria"
 description: "NSW SC Gen 23, Victoria's SC Gen 25 and the County Court's note put verification on a person. What to test in a legal AI tool before it touches court work."
 publishDate: 2026-09-29
 type: article

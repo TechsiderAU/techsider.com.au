@@ -21,7 +21,7 @@ import { renderAstro } from "./support/render-astro.mjs";
 import { MOCK_FORM } from "../src/preview/mock-form.ts";
 
 const PAGES = {
-  about: { template: "about", h1: "About.", highlight: "About" },
+  about: { template: "about", h1: "About Techsider.", highlight: "Techsider" },
   trust: { template: "trust", h1: "Trust.", highlight: "Trust" },
   "trust-no-terms": { template: "trust", h1: "Trust.", highlight: "Trust" },
   "legal-hub": { template: "legal-hub", h1: "Legal.", highlight: "Legal" },

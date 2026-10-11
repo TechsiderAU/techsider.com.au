@@ -1,5 +1,6 @@
 ---
 title: "Measure what an AI scribe leaves out."
+seoTitle: "How to test an AI scribe before rollout"
 description: "The TGA, ACSQHC and Ahpra ask for AI scribes to be checked before use and reviewed after updates. How to test one on scripted consultations in your specialties."
 publishDate: 2026-09-29
 type: article
