@@ -79,7 +79,7 @@ const KEEP_OFF = [
 // court or legislature page, or the vendor's own page for a vendor fact. No news, blog or law firm.
 const PRIMARY_HOSTS = new Set([
   "apesb.org.au", "picscheme.org", "www.aitsl.edu.au",
-  "learn.microsoft.com", "edu.google.com", "knowledge.workspace.google.com",
+  "learn.microsoft.com", "www.microsoft.com", "edu.google.com", "knowledge.workspace.google.com",
   "www.xero.com", "www.myob.com", "dext.com", "karbonhq.com", "mitti.com",
   "www.propertyme.com.au", "www.rexsoftware.com",
   "www.thomsonreuters.com.au", "developers.harvey.ai", "www.leaplegalsoftware.com", "www.lexisnexis.com",
@@ -218,6 +218,10 @@ test("each researched post cites four primary sources and its internal links res
 // description, the keep-off list, 800–1,400 words, and three or more primary sources.
 const OCTOBER_POSTS = {
   "automated-decisions-privacy-policy": { type: "article" },
+  "ai-vendor-due-diligence-questions": { type: "article" },
+  "nsw-ai-operational-policy-suppliers": { type: "article" },
+  "copilot-confidential-client-information": { type: "platform-guide" },
+  "copilot-rollout-measure-before-after": { type: "article" },
 };
 
 test("the October posts keep the Phase C copy rules: titles, description, keep-off list, length and primary sources", () => {
