@@ -20,8 +20,6 @@ export const INSIGHTS_DIR = "src/content/insights";
 /** A built industry page, relative to the build root (the hub is industries/index.html). */
 export const INDUSTRY_PAGE = /^industries\/[a-z0-9-]+\/index\.html$/;
 
-const STRUCTURE_RULE_LIVE = false; // Part 4A deletes this flag
-
 const DAY_MS = 86_400_000;
 const ISO_DAY = /^(\d{4})-(\d{2})-(\d{2})$/;
 /** The hooks rule 1 holds inside the Australia band. */
@@ -155,13 +153,11 @@ export async function run({ root, dist, now = new Date() }) {
   const out = resolve(dist);
   const pages = htmlFiles(out);
   if (pages.length === 0) r.add("error", `${dist}: no built HTML found (run the build first)`);
-  if (STRUCTURE_RULE_LIVE) {
-    for (const file of pages) {
-      const rel = relPath(out, file);
-      const html = readText(file);
-      for (const msg of regionFindings(html, `dist/${rel}`)) r.add("error", msg);
-      if (INDUSTRY_PAGE.test(rel)) for (const msg of industryFindings(html, `dist/${rel}`)) r.add("error", msg);
-    }
+  for (const file of pages) {
+    const rel = relPath(out, file);
+    const html = readText(file);
+    for (const msg of regionFindings(html, `dist/${rel}`)) r.add("error", msg);
+    if (INDUSTRY_PAGE.test(rel)) for (const msg of industryFindings(html, `dist/${rel}`)) r.add("error", msg);
   }
   for (const { rel, label, value } of reviewDates(root, r)) {
     if (parseDay(value) === null) {

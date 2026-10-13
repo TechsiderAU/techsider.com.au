@@ -229,3 +229,80 @@ test("13: a reviewBy that isn't a real YYYY-MM-DD date fails; READMEs, nested an
     `${INSIGHTS_DIR}/fixture-timestamp.md: post reviewBy "2027-01-12T00:00:00Z" ${notADate}`,
   ]);
 });
+
+// ---------- Part 4A: rule 1 is live in run() (go-global §10.2) ----------
+// run() over synthetic built trees: every [data-regulatory-row] and [data-jurisdiction-section]
+// outside a [data-region="au"] element is an error on any page, and an industry page needs
+// #rules-that-travel before #australia, which carries data-region="au". Expected findings come
+// from regionFindings() and industryFindings(), so these tests pin that run() applies them to
+// every built page (and industryFindings() to industry pages only), not their wording.
+
+const STRUCTURE_NOW = new Date("2026-10-13T00:00:00Z");
+const BAND_OK = '<main><section id="rules-that-travel"><h2>Rules</h2></section><section id="australia" data-region="au"><table><tr id="reg-a" data-regulatory-row><td>a</td></tr></table></section></main>';
+const PAGES_BROKEN = {
+  // A row outside the band (rule 1a), on an industry page.
+  "industries/row-outside/index.html": '<main><section id="rules-that-travel"></section><section id="australia" data-region="au"></section><table><tr id="reg-b" data-regulatory-row><td>b</td></tr></table></main>',
+  // A jurisdiction section with no band at all, and no Rules block (rules 1a and 1b).
+  "industries/no-band/index.html": '<main><section id="state" data-jurisdiction-section="state"><table><tr id="reg-state-c" data-regulatory-row><td>c</td></tr></table></section></main>',
+  // The band without data-region (1a and 1b).
+  "industries/unmarked/index.html": '<main><section id="rules-that-travel"></section><section id="australia"><table><tr id="reg-d" data-regulatory-row><td>d</td></tr></table></section></main>',
+  // Rules that travel after the band (1b).
+  "industries/rules-last/index.html": '<main><section id="australia" data-region="au"><table><tr id="reg-e" data-regulatory-row><td>e</td></tr></table></section><section id="rules-that-travel"></section></main>',
+  // Not an industry page: a stray row still fails 1a, but no Rules block is needed.
+  "solutions/stray/index.html": '<main><table><tr id="reg-f" data-regulatory-row><td>f</td></tr></table></main>',
+};
+
+/** A synthetic root with empty anchor and insight folders and `pages` built under dist/. */
+function structureTree(pages) {
+  const root = mkdtempSync(join(tmpdir(), "check13-structure-"));
+  mkdirSync(join(root, ANCHORS_DIR), { recursive: true });
+  mkdirSync(join(root, INSIGHTS_DIR), { recursive: true });
+  for (const [rel, html] of Object.entries(pages)) {
+    const file = join(root, "dist", rel);
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, html);
+  }
+  return root;
+}
+/** What rule 1 should report for `pages`: 1a on every page, 1b on industry pages only. */
+const structureExpected = (pages) => Object.entries(pages).flatMap(([rel, html]) => [
+  ...regionFindings(html, `dist/${rel}`),
+  ...(INDUSTRY_PAGE.test(rel) ? industryFindings(html, `dist/${rel}`) : []),
+]).sort();
+
+test("check 13 run(): rule 1 is live, so a well-formed industry page and a page with no rows pass in every mode (go-global §10.2)", async () => {
+  const pages = { "industries/good/index.html": BAND_OK, "about/index.html": "<main><p>No rows here.</p></main>" };
+  const root = structureTree(pages);
+  try {
+    for (const mode of ["report", "gate"]) {
+      const r = await run({ root, dist: join(root, "dist"), mode, now: STRUCTURE_NOW });
+      assert.deepEqual([r.errors, r.warnings], [[], []], mode);
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("check 13 run(): every structure finding on every built page is an error, in report and gate mode alike (go-global §10.2)", async () => {
+  const root = structureTree(PAGES_BROKEN);
+  try {
+    const expected = structureExpected(PAGES_BROKEN);
+    for (const [rel, html] of Object.entries(PAGES_BROKEN)) {
+      const own = structureExpected({ [rel]: html });
+      assert.ok(own.length > 0, `${rel}: the fixture page breaks no rule`);
+    }
+    assert.equal(structureExpected({ "solutions/stray/index.html": PAGES_BROKEN["solutions/stray/index.html"] }).length, 1, "a non-industry page needs no Rules block");
+    for (const mode of ["report", "gate"]) {
+      const r = await run({ root, dist: join(root, "dist"), mode, now: STRUCTURE_NOW });
+      assert.deepEqual([...r.errors].sort(), expected, mode);
+      assert.deepEqual(r.warnings, [], mode);
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("check 13 no longer stages rule 1: the STRUCTURE_RULE_LIVE flag is gone (Part 4A)", () => {
+  const source = readFileSync(new URL("../scripts/ci/checks/13-anchors-and-regions.mjs", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /STRUCTURE_RULE_LIVE/);
+});
