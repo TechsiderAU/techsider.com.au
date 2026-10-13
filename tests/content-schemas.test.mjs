@@ -9,6 +9,7 @@ import {
   citedSource, corpusRef, assistantTurn, assistantData, registerCell, syntheticDoc, registerData,
   inboxMessage, inboxData, checkerData, platformAiEntry, platformAiFile, CHECKER_PROVENANCE,
   auRegion, faqItem, industryFaqItem,
+  anchor, anchorFile, anchorKind, anchorStatus, checkLevel, REVIEW_BY_STATUSES, REVIEW_BY_NAME, DATED_STATUSES, FEATURABLE_LEVELS,
 } from "../src/content/schemas.ts";
 import {
   positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema,
@@ -91,6 +92,15 @@ const INDUSTRY = {
 const ROW = {
   id: "test-row-1", obligation: "Test obligation", meaning: "Test meaning", design: "Test design", evidence: "Test evidence",
   source: "https://example.com/regulation", asAt: "2026-09-01", lastReviewed: "2026-09-15",
+};
+
+// A "Rules that travel" anchor (go-global §5.3): a published standard read at its primary source.
+const ANCHOR = {
+  id: "test-anchor", name: "Test standard", issuer: "Test body", kind: "international-standard",
+  binding: "Test binding: voluntary", status: "published", statusDate: "2023-12-18",
+  asks: "Test asks: roles and controls", evidence: "Test evidence: a register",
+  source: "https://example.com/standard", asAt: "2026-10-01", lastReviewed: "2026-10-12",
+  solutions: ["test-solution"], featured: true, checkLevel: "P",
 };
 
 const KIT = {
@@ -260,6 +270,8 @@ test("every content schema rejects unknown keys, at the top level and nested", (
     [kitSchema, { ...KIT, lawyerReviewed: "2026-09-01" }, "kit"],
     [regulatoryFile, { rows: [{ ...ROW, lastReview: "2026-09-01" }] }, "regulatory row"],
     [regulatoryFile, { rows: [ROW], note: "Test" }, "regulatory file"],
+    [anchor, { ...ANCHOR, sources: [] }, "anchor"],
+    [anchorFile, { anchors: [ANCHOR], note: "Test" }, "anchor file"],
     [traceFile, { ...TRACE, provenace: "measured" }, "trace"],
     [traceFile, { ...TRACE, lines: [{ t: "00:00:01", op: "Test", detail: "Test", metrc: { value: 1 } }] }, "trace line"],
     [traceFile, { ...TRACE, lines: [{ t: "00:00:01", op: "Test", detail: "Test", metric: { value: 1, units: "ms" } }] }, "trace metric"],
@@ -458,13 +470,14 @@ test("URL fields use z.url(), not the deprecated z.string().url() (a ts6385 hint
   const src = readFileSync(new URL("../src/content/schemas.ts", import.meta.url), "utf8");
   assert.doesNotMatch(src, /z\.string\(\)\.url\(/);
   assert.equal(
-    src.match(/\bz\.url\(\)/g)?.length, 6,
-    "sourceRef.url, mockPanel citation href, regulatoryRow.source, citedSource.href, corpusRef.url and platformAiEntry.source",
+    src.match(/\bz\.url\(\)/g)?.length, 7,
+    "sourceRef.url, mockPanel citation href, regulatoryRow.source, anchor.source, citedSource.href, corpusRef.url and platformAiEntry.source",
   );
   for (const [schema, value, label] of [
     [sourceRef, { ...SOURCE, url: "not a url" }, "source ref"],
     [mockPanel, { ...MOCK_PANEL, citations: [{ source: "Test", clause: "Test", href: "example.com/clause" }] }, "citation href"],
     [regulatoryFile, { rows: [{ ...ROW, source: "not a url" }] }, "regulatory source"],
+    [anchor, { ...ANCHOR, source: "not a url" }, "anchor source"],
     [citedSource, { ...SOURCES[0], href: "example.com/source" }, "cited source href"],
     [corpusRef, { ...CORPUS, url: "not a url" }, "corpus url"],
     [platformAiEntry, { ...ENTRY, source: "example.com/pricing" }, "platform AI source"],
@@ -489,6 +502,71 @@ test("regulatory rows need a URL source, both dates and non-empty jurisdictions 
   bad(regulatoryFile, { rows: [unreviewed] }, "row without lastReviewed");
   bad(regulatoryFile, { rows: [{ ...ROW, jurisdictions: [] }] }, "empty jurisdictions");
   bad(regulatoryFile, { rows: [{ ...ROW, id: "Test Row" }] }, "row id that is not a slug");
+});
+
+test("anchors: a complete anchor parses with its dates, and kind, status and check level are closed lists (go-global §5.3)", () => {
+  const data = ok(anchor, ANCHOR, "anchor");
+  for (const key of ["statusDate", "asAt", "lastReviewed"]) assert.ok(data[key] instanceof Date, key);
+  assert.deepEqual(anchorKind.options, ["law", "treaty", "international-standard", "supervisory-principles", "guidance", "professional-ethics"]);
+  assert.deepEqual(anchorStatus.options, ["in-force", "applies-from", "published", "draft", "not-in-force"]);
+  assert.deepEqual(checkLevel.options, ["P", "P*", "S", "UNVERIFIED"]);
+  assert.deepEqual([REVIEW_BY_STATUSES, DATED_STATUSES, FEATURABLE_LEVELS], [["applies-from", "draft", "not-in-force"], ["applies-from", "published"], ["P", "P*"]]);
+  bad(anchor, { ...ANCHOR, kind: "regulation" }, "unknown kind");
+  bad(anchor, { ...ANCHOR, status: "repealed" }, "unknown status");
+  bad(anchor, { ...ANCHOR, checkLevel: "p" }, "unknown check level");
+  bad(anchor, { ...ANCHOR, id: "Test Anchor" }, "anchor id that is not a slug");
+  bad(anchor, { ...ANCHOR, solutions: ["Test Solution"] }, "solution display name");
+  bad(anchor, { ...ANCHOR, asks: "Too short" }, "asks under 10 characters");
+  bad(anchor, { ...ANCHOR, evidence: "Too short" }, "evidence under 10 characters");
+  for (const key of ["name", "issuer", "kind", "binding", "status", "asks", "evidence", "source", "asAt", "lastReviewed", "solutions", "featured", "checkLevel"]) {
+    const { [key]: _, ...missing } = ANCHOR;
+    bad(anchor, missing, `anchor without ${key}`);
+  }
+});
+
+test("anchors: reviewBy where a date may move, statusDate where the chip prints one, and only P or P* featured (go-global §5.2, §5.3)", () => {
+  const RB = "2027-01-12";
+  for (const status of REVIEW_BY_STATUSES) {
+    const value = { ...ANCHOR, status, statusDate: "2027-12-02" };
+    badWith(anchor, value, "reviewBy", `anchor "test-anchor" needs a reviewBy: its status is ${status} (go-global §5.3)`);
+    assert.ok(ok(anchor, { ...value, reviewBy: RB }, `${status} with a reviewBy`).reviewBy instanceof Date);
+  }
+  for (const name of ["Test EU AI Act anchor", "Test GDPR Art 22"]) {
+    assert.match(name, REVIEW_BY_NAME);
+    badWith(anchor, { ...ANCHOR, name, status: "in-force" }, "reviewBy", 'anchor "test-anchor" needs a reviewBy: it names the EU AI Act or GDPR (go-global §5.3)');
+    ok(anchor, { ...ANCHOR, name, status: "in-force", reviewBy: RB }, `${name} with a reviewBy`);
+  }
+  for (const near of ["Test EUROPEAN AI Act", "Test GDPRS", "Test EU AI Actually"]) assert.doesNotMatch(near, REVIEW_BY_NAME);
+  ok(anchor, { ...ANCHOR, status: "in-force" }, "an in-force anchor with no reviewBy");
+  for (const status of DATED_STATUSES) {
+    const { statusDate, ...undated } = { ...ANCHOR, status, reviewBy: RB };
+    badWith(anchor, undated, "statusDate", `anchor "test-anchor" is ${status}, so it needs the statusDate its chip prints (go-global §5.2)`);
+  }
+  const { statusDate, ...inForce } = { ...ANCHOR, status: "in-force" };
+  ok(anchor, inForce, "an in-force anchor with no statusDate");
+  for (const level of ["S", "UNVERIFIED"]) {
+    badWith(anchor, { ...ANCHOR, checkLevel: level }, "featured", `anchor "test-anchor" is checkLevel ${level}: only P or P* anchors may be featured (go-global §5.3)`);
+    ok(anchor, { ...ANCHOR, checkLevel: level, featured: false }, `an unfeatured ${level} anchor`);
+  }
+  ok(anchor, { ...ANCHOR, checkLevel: "P*" }, "a featured P* anchor");
+});
+
+test("anchor files: one or more anchors, an optional shared row of four or five ids, and no id twice (go-global §5.2)", () => {
+  const second = { ...ANCHOR, id: "test-anchor-2" };
+  const SHARED = ["x1", "x4", "x6", "x7"];
+  assert.equal(ok(anchorFile, { anchors: [ANCHOR, second] }, "the shared file: no shared key").shared, undefined);
+  assert.deepEqual(ok(anchorFile, { shared: SHARED, anchors: [ANCHOR] }, "an industry file, four shared ids").shared, SHARED);
+  ok(anchorFile, { shared: [...SHARED, "x8"], anchors: [ANCHOR] }, "an industry file, five shared ids");
+  bad(anchorFile, { shared: SHARED.slice(0, 3), anchors: [ANCHOR] }, "three shared ids");
+  bad(anchorFile, { shared: [...SHARED, "x8", "x9"], anchors: [ANCHOR] }, "six shared ids");
+  bad(anchorFile, { shared: ["X1", "x4", "x6", "x7"], anchors: [ANCHOR] }, "a shared id that is not a slug");
+  bad(anchorFile, { anchors: [] }, "no anchors");
+  badWith(anchorFile, { anchors: [ANCHOR, ANCHOR] }, "anchors", 'anchor id "test-anchor" repeats');
+  badWith(anchorFile, { shared: ["x1", "x4", "x6", "x4"], anchors: [ANCHOR] }, "shared", 'shared id "x4" repeats');
+  badWith(
+    anchorFile, { shared: ["x1", "x4", "x6", "test-anchor"], anchors: [ANCHOR] }, "anchors",
+    '"test-anchor" is both a shared id and an anchor of this file: a chip shows once per page (go-global §5.2)',
+  );
 });
 
 test("kits need a source, dates and a /downloads/ pdf or docx path; lawyerReviewedAt may be null", () => {
