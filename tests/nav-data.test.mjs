@@ -170,6 +170,13 @@ test("production nav shows only live pages; preview shows every group", () => {
   assert.equal(pre[2].anchors.length, 3);
 });
 
+test("SITE names the headquarters without a street address, the site language and the owner-gated profiles (go-global §9.1)", () => {
+  assert.deepEqual(SITE.hq, { locality: "Sydney", region: "NSW", country: "AU" });
+  assert.equal(SITE.lang, "en");
+  // Owner-gated (go-global §2.3, O7): empty until the owner supplies a profile URL.
+  assert.deepEqual(SITE.profiles, []);
+});
+
 test("CTAs reach their live pages in both builds: Talk to us /contact/, See a demo /demos/ (Phase D Task 7)", () => {
   for (const preview of [false, true]) {
     assert.deepEqual(resolveCta(CTAS.talk, preview), { label: "Talk to us", href: "/contact/" });

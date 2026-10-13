@@ -119,6 +119,12 @@ export const SITE = {
    */
   // The owner confirmed one shared mailbox for security, privacy and media enquiries.
   securityContact: "admin@techsider.com.au" as string | null,
+  /** Where Techsider is headquartered (go-global §9.1): the [data-hq] line and the Organization's address. No street address. */
+  hq: { locality: "Sydney", region: "NSW", country: "AU" } as const,
+  /** The site language: <html lang>, JSON-LD inLanguage/knowsLanguage, the RSS <language> (go-global §3.4). */
+  lang: "en" as const,
+  /** Directory and social profiles (go-global §9.1, O7); owner-gated: only entries with a non-empty url render. */
+  profiles: [] as { name: string; url: string }[],
 };
 
 export function slugify(name: string): string {
