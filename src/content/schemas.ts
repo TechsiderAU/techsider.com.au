@@ -127,7 +127,7 @@ export const makeIndustrySchema = (ref: RefFactory) => z.strictObject({
   platformFirst: z.string().optional(),
   dontDo: z.array(z.string()).min(1),
   // go-global §5.2: the "Rules that travel" paragraph, 140 words or fewer with its travel sentence.
-  rulesThatTravel: z.string().min(1).optional(),
+  rulesThatTravel: z.string().min(1),
   problem: z.strictObject({ from: z.string(), to: z.string(), source: sourceRef }),
   workflow: z.array(z.strictObject({ id: slug, stage: z.string(), useCases: z.array(useCase(ref)).min(1) })).length(4),
   mockPanel,

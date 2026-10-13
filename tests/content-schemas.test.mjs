@@ -371,10 +371,10 @@ function badWith(schema, value, path, message) {
   assert.ok(issues.some((i) => i.path.join(".") === path && i.message === message), `expected "${message}" at ${path}: ${JSON.stringify(issues)}`);
 }
 
-test("industry: rulesThatTravel holds the Rules that travel paragraph, and stays optional until every industry has one (go-global §5.2)", () => {
+test("industry: rulesThatTravel holds the Rules that travel paragraph, and is required (go-global §5.2)", () => {
   assert.equal(ok(industrySchema, INDUSTRY, "industry").rulesThatTravel, INDUSTRY.rulesThatTravel);
   const { rulesThatTravel, ...without } = INDUSTRY;
-  assert.equal(ok(industrySchema, without, "industry without rulesThatTravel").rulesThatTravel, undefined);
+  bad(industrySchema, without, "industry without rulesThatTravel");
   bad(industrySchema, { ...INDUSTRY, rulesThatTravel: "" }, "an empty rulesThatTravel");
 });
 
