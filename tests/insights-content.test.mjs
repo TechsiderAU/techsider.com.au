@@ -288,6 +288,10 @@ const GLOBAL_POSTS = {
     title: "Offshore AI suppliers and data in your region.", type: "article", industries: [], solutions: ["ai-evaluation", "knowledge-assistant"],
     reviewBy: "2027-01-12",
   },
+  "eu-ai-act-new-dates-for-non-eu-suppliers": {
+    title: "The EU AI Act's new dates for non-EU suppliers.", type: "article",
+    industries: ["government", "financial-services", "education", "healthcare"], solutions: ["ai-evaluation", "ai-switch-on"], reviewBy: "2027-01-12",
+  },
 };
 /** Spec §1 S1: the strings no page may show outside an allowed context. A post with no region is never one. */
 const S1_STRINGS = /australian organisations|for australian|in australia \||australia's leading|australian ai|australian teams|australian-owned|most australian/i;
