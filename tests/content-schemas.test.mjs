@@ -8,6 +8,7 @@ import {
   deliveryChoice, buyer, interval, JURISDICTION_SECTION, SECTION_TITLE, SECTION_ORDER,
   citedSource, corpusRef, assistantTurn, assistantData, registerCell, syntheticDoc, registerData,
   inboxMessage, inboxData, checkerData, platformAiEntry, platformAiFile, CHECKER_PROVENANCE,
+  auRegion,
 } from "../src/content/schemas.ts";
 import {
   positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema,
@@ -211,6 +212,34 @@ test("a reference scenario must be marked illustrative (spec §9.3)", () => {
   // The review's probe: a typo used to parse as illustrative: false and pass.
   bad(insightSchema, { ...scenario, illustative: true }, "reference scenario with a misspelt illustrative");
   ok(insightSchema, { ...scenario, illustrative: true }, "reference scenario marked illustrative");
+});
+
+test("go-global region: packages, kits, traces, demos and posts take an optional region \"au\" and no other value (go-global §3.3, §6.1, §6.3)", () => {
+  assert.equal(auRegion.value, "au");
+  for (const [schema, value, label] of [
+    [launchPackage, LAUNCH, "launch package"],
+    [solutionPackage, ON_REQUEST, "on-request package"],
+    [solutionPackage, INTERNAL, "internal package"],
+    [kitSchema, KIT, "kit"],
+    [traceFile, TRACE, "trace"],
+    [demoSchema, DEMO, "demo"],
+    [insightSchema, INSIGHT, "insight"],
+  ]) {
+    assert.equal(ok(schema, value, label).region, undefined, `${label}: region is optional`);
+    assert.equal(ok(schema, { ...value, region: "au" }, `${label} tagged au`).region, "au");
+    for (const region of ["AU", "nz", ""]) bad(schema, { ...value, region }, `${label} tagged ${JSON.stringify(region)}`);
+  }
+  // The checker is Australian by construction (its component root carries data-region="au"), so
+  // its demo entry takes no region.
+  bad(demoSchema, { ...DEMO, kind: "checker", provenance: CHECKER_PROVENANCE, data: CHECKER, region: "au" }, "checker demo tagged au");
+});
+
+test("insight frontmatter: an optional reviewBy date, for a post whose claims rest on dates that may move (go-global §6.5)", () => {
+  assert.equal(ok(insightSchema, INSIGHT, "post").reviewBy, undefined);
+  const data = ok(insightSchema, { ...INSIGHT, reviewBy: "2027-01-12" }, "post with a reviewBy");
+  assert.ok(data.reviewBy instanceof Date);
+  assert.equal(data.reviewBy.toISOString(), "2027-01-12T00:00:00.000Z");
+  bad(insightSchema, { ...INSIGHT, reviewBy: "next quarter" }, "reviewBy that is not a date");
 });
 
 test("every content schema rejects unknown keys, at the top level and nested", () => {

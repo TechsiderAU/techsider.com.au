@@ -8,6 +8,8 @@ export const plainRef: RefFactory = () => z.string().regex(/^[a-z0-9-]+$/);
 export const slug = z.string().regex(/^[a-z0-9-]+$/);
 export const jurisdiction = z.enum(["cth", "nsw", "vic", "qld", "local"]);
 export const faqItem = z.strictObject({ q: z.string().min(5), a: z.string().min(20) });
+/** go-global §3.3, §5.6, §6.1: marks Australia-only data. */
+export const auRegion = z.literal("au");
 export const sourceRef = z.strictObject({ label: z.string().min(3), url: z.url(), asAt: z.coerce.date() });
 export const metric = z.strictObject({ value: z.number(), unit: z.string().optional() });
 export const provenance = z.enum(["measured", "illustrative"]);
@@ -32,10 +34,13 @@ export const launchPackage = z.strictObject({
   // false where the package holds no test on your own examples (④'s Agentic AI Control Evaluation
   // is a configuration review): its block leaves out the standard inclusion that promises one.
   testInclusion: z.literal(false).optional(),
+  // go-global §3.3: "au" on a package offered only in Australia, which renders an "Australia" label.
+  region: auRegion.optional(),
 });
 export const listedPackage = z.strictObject({
   id: slug, name: z.string(), status: z.enum(["on-request", "internal"]), oneLiner: z.string(),
   precondition: z.string().optional(),
+  region: auRegion.optional(), // go-global §3.3, as on a launch package
 });
 export const solutionPackage = z.discriminatedUnion("status", [launchPackage, listedPackage]);
 
@@ -137,10 +142,12 @@ export const regulatoryFile = z.strictObject({ rows: z.array(regulatoryRow).min(
 export const makeKitSchema = (ref: RefFactory) => z.strictObject({
   industry: ref("industries"), title: z.string(), summary: z.string(), contents: z.array(z.string()).min(1),
   source: sourceRef, asAt: z.coerce.date(), lawyerReviewedAt: z.coerce.date().nullable(), download: z.string().regex(/^\/downloads\/[a-z0-9-]+\.(pdf|docx)$/),
+  region: auRegion.optional(), // go-global §3.3: an Australia-only Safe-Use Kit
 });
 
 export const traceLine = z.strictObject({ t: z.string().regex(/^\d{2}:\d{2}:\d{2}$/), op: z.string(), detail: z.string(), metric: metric.optional() });
-export const traceFile = z.strictObject({ title: z.string(), provenance, run: z.string().optional(), lines: z.array(traceLine).min(1) })
+// region "au": a trace built on Australian sources, labelled "Australian example" (go-global §6.3).
+export const traceFile = z.strictObject({ title: z.string(), provenance, run: z.string().optional(), lines: z.array(traceLine).min(1), region: auRegion.optional() })
   .refine((t) => t.provenance !== "measured" || !!t.run, { message: "measured traces need a run path" });
 
 // Demo data (spec §9.1, §9.3): one data schema per demo kind; makeDemoSchema, after sampleReport
@@ -313,6 +320,7 @@ export type DemoKind = z.infer<typeof demoKind>;
 /** One replayed or reported demo kind's entry: the fields every such demo shares, and that kind's data. */
 const demoEntry = <K extends DemoKind, D extends z.ZodType>(ref: RefFactory, kind: K, data: D) => z.strictObject({
   solution: ref("solutions"), title: z.string(), kind: z.literal(kind), provenance, run: z.string().optional(), data,
+  region: auRegion.optional(), // go-global §6.3: a demo built on Australian sources ("Australian example")
 });
 /**
  * The ⑤ checker's provenance (controller ruling 6). Its data is real, dated vendor facts, each with
@@ -339,6 +347,9 @@ export const makeInsightSchema = (ref: RefFactory) => z.strictObject({
   type: z.enum(["article", "reference-scenario", "platform-guide"]),
   industries: z.array(ref("industries")).default([]), solutions: z.array(ref("solutions")).default([]),
   illustrative: z.boolean().default(false), draft: z.boolean().default(false),
+  // go-global §6.1, §6.5: region "au" labels a post whose subject is Australian; reviewBy dates a
+  // post whose claims rest on dates that may move.
+  region: auRegion.optional(), reviewBy: z.coerce.date().optional(),
 }).refine((i) => i.type !== "reference-scenario" || i.illustrative, {
   message: "reference scenarios must set illustrative: true", path: ["illustrative"],
 });
