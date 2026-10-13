@@ -15,7 +15,7 @@ import { decodeEntities, elements, elementsWith, hrefsIn } from "../scripts/ci/l
 import { NAV_GROUPS, PAGES } from "../src/data/nav.ts";
 import { POSITIONING } from "../src/data/positioning.ts";
 import { SERVICES } from "../src/data/services.ts";
-import { ONSHORE_PILLAR, PROCESSING_NOTE, SERVICES_H1 } from "../src/lib/fixed-copy.ts";
+import { DELIVERY_MODEL, ONSHORE_PILLAR, PROCESSING_NOTE, SERVICES_H1 } from "../src/lib/fixed-copy.ts";
 import { pageDescription, pageTitle } from "../src/lib/meta.ts";
 import { pageAt } from "../src/lib/pages.ts";
 import { siteContext } from "../src/lib/site.ts";
@@ -211,7 +211,7 @@ test("services data: the independence policy states spec §4.4's five points, ad
 
 test("services data: Run is managed or supported, with the exit pack and no escrow, and the FAQ denies nothing on request (spec §4.1, §4.2, O4)", () => {
   const run = SERVICES.services.find((s) => s.id === "run");
-  assert.match(run.what, /Managed in an Australian region, cancellable on 30 days' notice with an exit pack, or supported in your own account/);
+  assert.equal(run.what, "Managed in an Australian region, cancellable on 30 days' notice with an exit pack, or supported in your own account, in the cloud region you choose. Both re-test when the AI model or a vendor API changes.");
   assert.deepEqual(SERVICES.phases.map((p) => p.id), ["prove", "build", "run"]);
   const exit = SERVICES.phases[2].deliverables.join(" ");
   assert.match(exit, /exit pack: code, data, configuration and runbook/);
@@ -225,6 +225,37 @@ test("services data: Run is managed or supported, with the exit pack and no escr
 test("services data: every launch package names its delivery choice in its region note, and no line says 'onshore note' (go-global §4.2, D5)", () => {
   assert.ok(SERVICES.standardInclusions.includes("The delivery choice that fits the package, named in its region note."));
   for (const s of strings(SERVICES)) assert.doesNotMatch(s, /\bonshore note\b/i, s);
+});
+
+test("services data: the delivery choices and Run lines put your own account in the region you choose and managed systems in an Australian region, with the remote access (go-global §4.2–§4.3, D3, D4)", () => {
+  assert.deepEqual(SERVICES.deliveryChoices, [
+    {
+      id: "your-account",
+      title: "In your own Microsoft or AWS account",
+      body: "Runs in your own Microsoft or AWS account, in the cloud region you choose. Our team reaches it remotely from Sydney, under the data-transfer terms in your contract.",
+    },
+    {
+      id: "managed",
+      title: "Managed for you in an Australian region",
+      body: "We run it for you in an Australian region, with an exit pack of code, data, configuration and runbook. If you're outside Australia, your data is transferred to Australia under the terms in your contract.",
+    },
+    {
+      id: "platform-you-license",
+      title: "Inside a platform you already license",
+      body: "Runs inside software you already pay for, such as Microsoft Copilot, Xero or Dext, where the vendor sets the processing location. Where we build part of it, such as a retrieval index, that part runs in your own account in the region you choose, or in ours in an Australian region. Our team reaches it remotely from Sydney.",
+    },
+  ]);
+  // Spec §4.3: the shared body names no Australia-only product; PropertyMe and Karbon stay in the
+  // Australian industry content.
+  assert.doesNotMatch(SERVICES.deliveryChoices.map((c) => c.body).join(" "), /\bPropertyMe\b|\bKarbon\b/);
+  const run = SERVICES.phases.find((p) => p.id === "run");
+  assert.equal(run.summary, "Keep the system running: managed by us in an Australian region, or supported in your own account, in the cloud region you choose.");
+  assert.equal(run.deliverables[1], "Maintenance, whether we manage the system in an Australian region or support it in your own account, in the cloud region you choose");
+  assert.deepEqual(SERVICES.routes.midMarket.steps.find((s) => s.name === "Run"), {
+    name: "Run",
+    body: "Managed in an Australian region, or supported in your own account in the region you choose, with the exit built in.",
+  });
+  assert.equal(SERVICES.onshoreNote[2], "What happens when the newest model isn't available in your chosen region.");
 });
 
 // ---------- the two routes ----------
@@ -350,5 +381,15 @@ test("/services/: where it runs heads the shared list \"The region note\" in bot
     const where = byId(mainOf(read(fileOf(SERVICES_PATH))), "where-it-runs");
     const heads = elements(where.inner, (t) => t.name === "h3").map((h) => text(h.inner));
     assert.ok(heads.includes("The region note") && !heads.includes("The onshore note"), `${name}: ${heads.join(" | ")}`);
+  }
+});
+
+test("/services/: where it runs opens with the delivery model, outside the disclosure, in both builds (go-global D6, §4.5)", () => {
+  for (const { name, read } of BUILDS) {
+    const where = byId(mainOf(read(fileOf(SERVICES_PATH))), "where-it-runs");
+    const ledes = elements(where.inner, (t) => (t.attrs.class ?? "").split(/\s+/).includes("section-lede"));
+    assert.deepEqual(ledes.map((p) => text(p.inner)), [DELIVERY_MODEL], name);
+    const [details] = elements(where.inner, (t) => t.name === "details");
+    assert.ok(!text(details.inner).includes(DELIVERY_MODEL), `${name}: the delivery model sits inside the disclosure`);
   }
 });

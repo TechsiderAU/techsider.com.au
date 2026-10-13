@@ -46,10 +46,10 @@ export const SERVICES: ServicesData = {
       id: "run",
       name: "Run",
       duration: "Ongoing, with the exit built in",
-      summary: "Keep the system running: managed by us in an Australian region, or supported in your own account.",
+      summary: "Keep the system running: managed by us in an Australian region, or supported in your own account, in the cloud region you choose.",
       deliverables: [
         "A re-test when the AI model or a vendor API changes",
-        "Maintenance, whether we manage the system in an Australian region or support it in your own account",
+        "Maintenance, whether we manage the system in an Australian region or support it in your own account, in the cloud region you choose",
         "The exit pack: code, data, configuration and runbook",
       ],
       exitCriteria: [
@@ -111,7 +111,7 @@ export const SERVICES: ServicesData = {
     {
       id: "run",
       name: "Run",
-      what: "Managed in an Australian region, cancellable on 30 days' notice with an exit pack, or supported in your own account. Both re-test when the AI model or a vendor API changes.",
+      what: "Managed in an Australian region, cancellable on 30 days' notice with an exit pack, or supported in your own account, in the cloud region you choose. Both re-test when the AI model or a vendor API changes.",
       forWhom: "Teams whose system we build",
       entry: "not-entry",
     },
@@ -206,23 +206,23 @@ export const SERVICES: ServicesData = {
     {
       id: "your-account",
       title: "In your own Microsoft or AWS account",
-      body: "Runs in your own Microsoft or AWS account, in an Australian region such as Azure Australia East or AWS Sydney.",
+      body: "Runs in your own Microsoft or AWS account, in the cloud region you choose. Our team reaches it remotely from Sydney, under the data-transfer terms in your contract.",
     },
     {
       id: "managed",
       title: "Managed for you in an Australian region",
-      body: "We run it for you in an Australian region, with an exit pack of code, data, configuration and runbook.",
+      body: "We run it for you in an Australian region, with an exit pack of code, data, configuration and runbook. If you're outside Australia, your data is transferred to Australia under the terms in your contract.",
     },
     {
       id: "platform-you-license",
       title: "Inside a platform you already license",
-      body: "Runs inside software you already pay for, such as Microsoft Copilot, PropertyMe, Karbon, Xero or Dext, where the vendor sets the processing location. Where we build part of it, such as a retrieval index, that part runs in your own account or ours, in an Australian region.",
+      body: "Runs inside software you already pay for, such as Microsoft Copilot, Xero or Dext, where the vendor sets the processing location. Where we build part of it, such as a retrieval index, that part runs in your own account in the region you choose, or in ours in an Australian region. Our team reaches it remotely from Sydney.",
     },
   ],
   onshoreNote: [
     "Where inference actually runs, which can differ from where the platform is hosted.",
     "The provider's retention, abuse-monitoring and human-review settings.",
-    "What happens when the newest model isn't available in an Australian region.",
+    "What happens when the newest model isn't available in your chosen region.",
     "For a platform you already license: the vendor's published processing location, or \"not published\", with its source and an as-at date, re-checked quarterly.",
   ],
   // ⚑ owner: sign off the independence policy wording (spec §12 item 3)
@@ -256,7 +256,7 @@ export const SERVICES: ServicesData = {
         { name: "Admin Hours Audit", body: "One week to map where staff hours go and what your existing software could take over." },
         { name: "Two-Week Trial", body: "Your own files, a measured error rate, then your go/no-go decision." },
         { name: "Build", body: "One package, built in 4–6 weeks and acceptance-tested on your examples." },
-        { name: "Run", body: "Managed in an Australian region or supported in your account, with the exit built in." },
+        { name: "Run", body: "Managed in an Australian region, or supported in your own account in the region you choose, with the exit built in." },
       ],
     },
     enterprise: {
