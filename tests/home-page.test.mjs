@@ -60,7 +60,7 @@ for (const [build, { read, dir, site }] of Object.entries(BUILDS)) {
       assert.equal(one(template.inner, "id", id).attrs["aria-labelledby"], `${id}-heading`);
     }
     assert.deepEqual((await checkAnchors({dist:dir})).errors, []);
-    assert.equal(pageTitle(HOME_PAGE), "AI Automation Solutions in Australia | Techsider");
+    assert.equal(pageTitle(HOME_PAGE), "AI Automation Solutions | Techsider");
     assert.ok(HOME_PAGE.description.includes("AI automation"));
     const hero = one(main, "data-page-hero");
     assert.ok(text(hero.inner).includes(AUTOMATION.sub));

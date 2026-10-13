@@ -1,6 +1,6 @@
-// Page titles and meta descriptions (spec §11.3). Titles: `{fullName} | Techsider`, or `AI for
-// {shortName} in Australia | Techsider` on industry pages, unique across the site and 60 characters
-// or fewer. Descriptions: unique, 150–160 characters, written in nav.ts beside the page's names
+// Page titles and meta descriptions (spec §11.3; go-global §3.4). Titles: `{fullName} | Techsider`,
+// or `AI for {shortName} | Techsider` on industry pages, unique across the site, 60 characters or
+// fewer, and naming no country. Descriptions: unique, 150–160 characters, written in nav.ts beside the page's names
 // through describe(), and required of every live page; BaseLayout takes no default, so a route
 // can't leave one out. Their words are held to the §3.5 banned phrases (FAIL and WARN lists), the
 // §3.4 terms no audience may use and currency figures, and every nav page either build renders
@@ -41,19 +41,67 @@ function metaContent(html, attr, value) {
   return m ? decodeEntities(m[1]) : undefined;
 }
 
-test("pageTitle: Home, search titles, industry pages and every other page follow spec §11.3", () => {
-  assert.equal(pageTitle(at("/")), "AI Automation Solutions in Australia | Techsider");
-  assert.equal(pageTitle(at("/industries/government/")), "AI Evaluation for Australian Government Agencies | Techsider");
-  assert.equal(pageTitle(at("/industries/education/")), "AI for Education in Australia | Techsider");
-  assert.equal(pageTitle(at("/industries/real-estate/")), "AI for Real Estate in Australia | Techsider", "industry short names are Title Case in a <title>");
+test("pageTitle: Home, search titles, industry pages and every other page follow spec §11.3 and go-global §3.4", () => {
+  assert.equal(pageTitle(at("/")), "AI Automation Solutions | Techsider");
+  assert.equal(pageTitle(at("/industries/government/")), "AI Evaluation for Government Agencies | Techsider");
+  assert.equal(pageTitle(at("/industries/education/")), "AI for Education | Techsider");
+  assert.equal(pageTitle(at("/industries/real-estate/")), "AI for Real Estate | Techsider", "industry short names are Title Case in a <title>");
   assert.equal(pageTitle(at("/industries/legal-and-professional/")), "AI for Law Firms and Professional Services | Techsider");
-  assert.equal(pageTitle(at("/industries/")), "AI Solutions by Industry in Australia | Techsider");
-  assert.equal(pageTitle(at("/solutions/document-registers/")), "Intelligent Document Processing in Australia | Techsider");
+  assert.equal(pageTitle(at("/industries/")), "AI Solutions by Industry | Techsider");
+  assert.equal(pageTitle(at("/solutions/document-registers/")), "Intelligent Document Processing | Techsider");
   assert.equal(pageTitle(at("/demos/ai-evaluation/")), "Independent AI Evaluation demo | Techsider");
-  assert.equal(pageTitle(at("/insights/")), "AI Guides and Field Notes for Australian Teams | Techsider");
-  assert.equal(pageTitle(at("/about/")), "About Techsider | Australian AI Automation Company");
+  assert.equal(pageTitle(at("/insights/")), "AI Guides and Field Notes | Techsider");
+  assert.equal(pageTitle(at("/about/")), "About Techsider | AI Automation Company, Sydney");
   assert.equal(pageTitle(at("/legal/privacy/")), "Privacy policy | Techsider");
   assert.equal(pageTitle(at("/404")), "Not found | Techsider");
+});
+
+/** Go-global §3.4: every title the spec rewrites, word for word. */
+const GLOBAL_TITLES = {
+  "/": "AI Automation Solutions | Techsider",
+  "/solutions/": "AI Solutions for Organisations | Techsider",
+  "/solutions/document-registers/": "Intelligent Document Processing | Techsider",
+  "/solutions/draft-for-approval/": "AI Workflow Automation | Techsider",
+  "/solutions/ai-evaluation/": "Independent AI and LLM Evaluation | Techsider",
+  "/solutions/ai-switch-on/": "Copilot & AI Implementation Consulting | Techsider",
+  "/industries/": "AI Solutions by Industry | Techsider",
+  "/industries/government/": "AI Evaluation for Government Agencies | Techsider",
+  "/industries/financial-services/": "AI Validation for Regulated Financial Firms | Techsider",
+  "/industries/healthcare/": "AI Scribe Evaluation for Healthcare | Techsider",
+  "/industries/manufacturing/": "AI for Manufacturing | Techsider",
+  "/industries/resources-and-energy/": "AI for Resources & Energy | Techsider",
+  "/services/": "AI Consulting Services | Techsider",
+  "/insights/": "AI Guides and Field Notes | Techsider",
+  "/about/": "About Techsider | AI Automation Company, Sydney",
+};
+/** Go-global §3.4: the 16 descriptions rewritten location-free, word for word. */
+const GLOBAL_DESCRIPTIONS = {
+  "/": "AI automation for organisations in nine industries. We design, build and support workflows that connect systems, process documents and keep people in control.",
+  "/solutions/": "Five AI solutions for organisations of any size: document registers, cited assistants, draft-for-approval automation, independent evaluation and AI switch-on.",
+  "/solutions/document-registers/": "AI document processing for your teams. Extract deeds, agreements and other documents into a register, with source links and exceptions for human review.",
+  "/solutions/draft-for-approval/": "AI workflow automation for your business. Connect repeated tasks across systems, prepare drafts and route exceptions, with people approving each action.",
+  "/solutions/ai-switch-on/": "AI implementation and adoption for your organisation. Assess tools you already license, configure suitable features, train staff and measure the change.",
+  "/industries/government/": "Independent evaluation of AI in government: measured tests on your own questions, with each finding mapped to the AI policy and frameworks your agency follows.",
+  "/industries/financial-services/": "Independent validation of vendor AI for regulated financial institutions: your own test set, re-run when the model may change, every failure listed for review.",
+  "/industries/accounting/": "AI automation for accounting firms. Review documents, organise trust deed registers and assess your existing software, with people checking the results.",
+  "/industries/education/": "AI for schools and universities: a staff policy assistant that cites its source, and an independent evaluation of the AI tools you've already deployed.",
+  "/industries/manufacturing/": "AI for manufacturers: SOP answers in your crews' languages, citing the page, each language tested first, designed around workplace safety, food and GMP rules.",
+  "/industries/real-estate/": "AI for property managers: a management agreement register where every field links to its page, read-only on your trust ledger, with platform AI tried first.",
+  "/industries/healthcare/": "Test AI scribes on your own scripted consultations before rollout and after each vendor update, counting omissions and additions. For health services.",
+  "/industries/resources-and-energy/": "Turn approval conditions into a register you can check, answer crews from current procedures, and map AI use to critical-infrastructure rules in your sector.",
+  "/industries/legal-and-professional/": "AI for law firms and professional services. Evaluate vendor tools, organise internal knowledge and assess existing software, with clear review controls.",
+  "/resources/": "Free resources from Techsider for teams putting AI to work in regulated industries: demos, tools and field notes on retrieval, evaluation and model hosting.",
+  "/insights/": "Field notes and guides on shipping AI in regulated work: retrieval that cites its sources, evaluation before launch, and choosing where models are hosted.",
+};
+
+test("go-global §3.4: the rewritten titles and the 16 descriptions, word for word, and no title or description names Australia", () => {
+  for (const [path, title] of Object.entries(GLOBAL_TITLES)) assert.equal(pageTitle(at(path)), title, path);
+  assert.equal(Object.keys(GLOBAL_DESCRIPTIONS).length, 16);
+  for (const [path, description] of Object.entries(GLOBAL_DESCRIPTIONS)) assert.equal(at(path).description, description, path);
+  for (const p of PAGES) {
+    assert.doesNotMatch(pageTitle(p), /\bAustralia/, `${p.path}: the title names Australia`);
+    if (p.description !== undefined) assert.doesNotMatch(p.description, /\bAustralia/, `${p.path}: the description names Australia`);
+  }
 });
 
 test("pageTitle: every nav page's title is unique and 60 characters or fewer", () => {

@@ -61,7 +61,7 @@ test("the insights pages are the index plus one page per published post", () => 
 
 test("index: pageTitle, a carbon hero with the [resources] eyebrow, the H1 'Insights.' and the nav one-liner", () => {
   const html = readDist("insights/index.html");
-  assert.match(html, /<title>AI Guides and Field Notes for Australian Teams \| Techsider<\/title>/);
+  assert.match(html, /<title>AI Guides and Field Notes \| Techsider<\/title>/);
   const hero = one(main(html), "data-page-hero", "index");
   assert.equal(hero.name, "header");
   assert.ok(classesOf(hero).includes("bg-carbon") && classesOf(hero).includes("scanlines"), "the hero is carbon with scan lines");
