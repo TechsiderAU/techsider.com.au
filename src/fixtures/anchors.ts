@@ -8,7 +8,12 @@
 // - gdprAnchorFixture: a Draft-for-Approval page, five shared chips (fixture-x8 last) and three
 //   featured sector anchors, the most a page shows.
 // - governmentAnchorFixture: four shared chips and two featured sector anchors.
-// Between them the anchors use every kind and every status, so the gallery shows every chip label.
+// Between them the anchors use every kind and every status, but the gallery renders only two of these
+// files: anchorFixture (fixture-industry) and governmentAnchorFixture (fixture-government). So it
+// shows the in force, applies from and published labels. gdprAnchorFixture (fixture-industry-3: the
+// five-chip shared row with fixture-x8, three sector chips and the not-in-force treaty) never renders,
+// and fixture-sector-draft isn't featured. tests/anchors.test.mjs covers every chip label, draft and
+// not in force included, and tests/industry-view.test.mjs builds fixture-industry-3's eight-chip view.
 // src/fixtures/sets.ts maps each fixture industry to its file (anchorFixtures).
 import type { AnchorData, AnchorFileData } from "../content/schemas.ts";
 
