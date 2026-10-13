@@ -25,7 +25,7 @@ export const NAME = "11-pricing";
 export const CURRENCY = {
   label: "currency figure",
   category: "currency figure (D4)",
-  re: /(?<!\bfrom\s+(?:AU?|US|NZ|S)?)(?:(?:\bAU?)?\$|[€£])\s?\d|(?<!\bfrom\s+)\b(?:USD|EUR|GBP)\s\d|\b(?:USD|EUR|GBP)\d|\bAUD\s?\d|(?<![\d,.]|[$€£]\s?)\d(?:[\d,.]*\d)?\s?(?:USD|EUR|GBP|AUD)\b(?![-‐‑]\w)/gi,
+  re: /(?<!\bfrom\s+(?:AU?|US|NZ|S)?)(?:(?:\bAU?)?\$|[€£])\s?\d|(?<!\bfrom\s+)\b(?:USD|EUR|GBP)\s\d|\b(?:USD|EUR|GBP)\d|\bAUD\s?\d|(?<![\d,.]|[$€£]\s?)\d(?:[\d,.]*\d)?\s?(?:USD|EUR|GBP|AUD)\b(?![-\u2010\u2011]\w)/gi,
 };
 export const OFFER_RULES = [...PRICING, CURRENCY];
 export const OFFER_DIRS = ["src/content/solutions", "src/content/kits", "src/data/demos"];
