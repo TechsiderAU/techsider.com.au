@@ -24,15 +24,13 @@ It can. [Article 2](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-2
 
 Regulation (EU) 2026/1744 amended the AI Act, [Regulation (EU) 2024/1689](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32024R1689), which came into force on 1 August 2024. As amended, the main dates are:
 
-| From | What applies |
-|---|---|
-| 2 February 2025 | The prohibited practices in Article 5, and the AI literacy duty in Article 4 |
-| 2 August 2025 | Obligations for general-purpose AI models |
-| 2 August 2026 | The Act's general date of application, including Article 50's transparency duties |
-| 2 December 2026 | Further prohibited practices added to Article 5 in July 2026, and the end of a grace period for marking AI-generated content on systems placed on the market before 2 August 2026 |
-| 2 December 2027 | High-risk obligations for the uses listed in Annex III |
-| 2 August 2028 | High-risk obligations for AI in products covered by Annex I |
-| 2 August 2030 | High-risk systems intended for use by public authorities that were already on the market |
+- **2 February 2025:** The prohibited practices in Article 5, and the AI literacy duty in Article 4.
+- **2 August 2025:** Obligations for general-purpose AI models.
+- **2 August 2026:** The Act's general date of application, including Article 50's transparency duties.
+- **2 December 2026:** Further prohibited practices added to Article 5 in July 2026, and the end of a grace period for marking AI-generated content on systems placed on the market before 2 August 2026.
+- **2 December 2027:** High-risk obligations for the uses listed in Annex III.
+- **2 August 2028:** High-risk obligations for AI in products covered by Annex I.
+- **2 August 2030:** High-risk systems intended for use by public authorities that were already on the market.
 
 Articles [111](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-111) and [113](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-113) of the consolidated text set these dates.
 

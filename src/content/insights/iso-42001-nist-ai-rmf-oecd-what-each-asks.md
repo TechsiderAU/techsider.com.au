@@ -17,11 +17,9 @@ A single AI project can produce evidence that maps to all three without claiming
 
 ## What is each one?
 
-| Instrument | What it is | Status as at October 2026 |
-|---|---|---|
-| ISO/IEC 42001:2023 | A certifiable international standard for an AI management system, from ISO and IEC | Edition 1, published 18 December 2023, with no amendment listed |
-| NIST AI RMF 1.0 | A voluntary framework from the US National Institute of Standards and Technology | Released 26 January 2023; NIST says it is being revised |
-| OECD AI Principles | An intergovernmental recommendation from the OECD | Adopted May 2019, updated May 2024; 47 adherents |
+- **ISO/IEC 42001:2023:** A certifiable international standard for an AI management system, from ISO and IEC. As at October 2026: edition 1, published 18 December 2023, with no amendment listed.
+- **NIST AI RMF 1.0:** A voluntary framework from the US National Institute of Standards and Technology. As at October 2026: released 26 January 2023; NIST says it is being revised.
+- **OECD AI Principles:** An intergovernmental recommendation from the OECD. As at October 2026: adopted May 2019, updated May 2024; 47 adherents.
 
 ## What does ISO/IEC 42001 ask?
 

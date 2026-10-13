@@ -65,7 +65,7 @@ dontDo:
   - "We don't do identity checks or AML/CTF due diligence."
 rulesThatTravel: "What travels in property is the discipline: know what every management agreement says, keep a person approving every message and payment, and delete renters' data once you no longer need it. Where software helps decide about people, such as rental applications, the EU's GDPR limits decisions made by software alone, and it can reach businesses outside the EU that offer services to people there. The FATF standards ask businesses that act for clients in buying or selling property to identify those clients and keep records; leasing and property management are outside them. Property rules are set locally, and we only claim to know Australia's. Outside Australia, we'd map your local rules with your compliance lead first."
 problem:
-  from: "In Australia, 330,256 new rental bonds were lodged in NSW in 2024–25, and 321,876 refunded. Senior property managers read agreements one PDF at a time."
+  from: "In New South Wales, Australia, 330,256 new rental bonds were lodged in 2024–25, and 321,876 refunded. Senior property managers read agreements one PDF at a time."
   to: "A register where every field links to its page, with the error rate measured on your own files first."
   source:
     label: "NSW Rental Bond Board, Annual Information Statement 2024–25"

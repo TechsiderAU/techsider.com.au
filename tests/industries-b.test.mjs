@@ -316,7 +316,8 @@ test("go-global §3.3, §5.5: Education, Manufacturing and Real estate say where
   assert.equal(mfg.problem.from, "In Australia, 9% of manufacturing businesses reported using AI in 2024–25, against 12% of all businesses. On the floor, answers come from binders and whoever has been on the line longest.");
   assert.equal(mfg.firstEngagement.needFromYou[2], "5–10 floor staff, including a health and safety representative, writing test questions for about 1 hour each");
   assert.equal(mfg.faq.find((f) => f.q === "Is it a GMP-validated system?").a, "No. On a GMP-regulated site (in Australia, that includes medicine, API and sunscreen sites), your quality team decides whether the assistant is part of a GMP activity and how to validate it. We supply the test evidence.");
-  assert.equal(industry("real-estate").problem.from, "In Australia, 330,256 new rental bonds were lodged in NSW in 2024–25, and 321,876 refunded. Senior property managers read agreements one PDF at a time.");
-  for (const id of IDS) assert.match(industry(id).problem.from, /^In Australia, /, `${id}: the problem's Australian figure isn't labelled (spec §3.3)`);
+  assert.equal(industry("real-estate").problem.from, "In New South Wales, Australia, 330,256 new rental bonds were lodged in 2024–25, and 321,876 refunded. Senior property managers read agreements one PDF at a time.");
+  // Real estate's figure covers New South Wales only, so it opens with its state and is pinned exactly above.
+  for (const id of IDS.filter((id) => id !== "real-estate")) assert.match(industry(id).problem.from, /^In Australia, /, `${id}: the problem's Australian figure isn't labelled (spec §3.3)`);
   assert.doesNotMatch(allStrings(mfg.firstEngagement).join(" "), /\bHSR\b/, "manufacturing: the Australian WHS acronym (spec §3.3)");
 });
