@@ -157,9 +157,37 @@ test("workflow stages keep their ids; each use case carries its solution, its on
   assert.deepEqual(v.workflow, data.workflow.map((stage) => ({
     id: stage.id,
     stage: stage.stage,
-    useCases: stage.useCases.map((u) => ({ name: u.name, solution: chipOf(fixtureSite, u.solution), onRequest: u.status === "on-request", note: u.note ?? null })),
+    useCases: stage.useCases.map((u) => ({ name: u.name, solution: chipOf(fixtureSite, u.solution), onRequest: u.status === "on-request", note: u.note ?? null, region: null })),
   })));
   assert.ok(v.workflow.some((s) => s.useCases.some((u) => u.onRequest)), "the fixture has an on-request use case");
+});
+
+test("a workflow use case that names an Australia-only package carries region \"au\"; any other name, null (go-global §3.3)", () => {
+  const data = structuredClone(industryFixtures[INDUSTRY]);
+  data.workflow[0].useCases[0] = { name: "Fixture Launch Package", solution: "fixture-solution", status: "launch" };
+  data.workflow[1].useCases[0] = { name: "Fixture Generic Package", solution: "fixture-solution", status: "launch" };
+  const v = industryView(input(INDUSTRY, { data }));
+  assert.deepEqual(v.workflow.map((s) => s.useCases.map((u) => [u.name, u.region])), [
+    [["Fixture Launch Package", "au"]],
+    [["Fixture Generic Package", null]],
+    [["Fixture use case C", null]],
+    [["Fixture use case D", null]],
+  ]);
+  const { "fixture-solution": _dropped, ...rest } = solutionFixtures;
+  const elsewhere = { ...data, packages: [{ solution: "fixture-solution-2", package: "fixture-assistant-generic" }] };
+  assert.throws(() => industryView(input(INDUSTRY, { data: elsewhere, solutions: rest })), /use case "Fixture Launch Package" names solution "fixture-solution", which isn't in solutions/);
+});
+
+test("recommended packages carry their package's region: the Australia-only ones \"au\", the rest null", () => {
+  const packages = industryView(input(INDUSTRY)).single.packages;
+  assert.deepEqual(packages.map((p) => [p.id, p.region]), [
+    ["fixture-generic-package", null],
+    ["fixture-launch-package", "au"],
+    ["fixture-on-request-package", "au"],
+  ]);
+  const local = industryView(input(GOVERNMENT)).sections.find((s) => s.id === "local").packages;
+  assert.equal(local.find((p) => p.id === "fixture-on-request-package").region, "au");
+  assert.equal(local.find((p) => p.id === "fixture-generic-package").region, null);
 });
 
 test("the scenario resolves its trace; problem, mock panel, limits, first engagement and FAQ pass through", () => {

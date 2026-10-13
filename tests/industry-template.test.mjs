@@ -17,6 +17,7 @@ import { SECTION_TITLE } from "../src/content/schemas.ts";
 import {
   AU_BAND_HEADING, AU_BAND_INTRO, NOT_LEGAL_ADVICE, RULES_CLOSING, RULES_HEADING, RULES_SHARED_LABEL, SCENARIO_LABEL,
 } from "../src/lib/fixed-copy.ts";
+import { REGION_LABEL } from "../src/lib/fixed-copy.ts";
 import { industryFixtures } from "../src/fixtures/index.ts";
 import { fixtureIndustryView } from "../src/preview/specimens/industry-view.ts";
 
@@ -247,6 +248,20 @@ test("the workflow: one tab group of the stages, each use case tagged with its s
   assert.ok(single.workflow.some((s) => s.useCases.some((u) => u.onRequest)), "the fixture has an on-request use case");
   assert.ok(workflow.inner.indexOf("data-mock-panel") > workflow.inner.lastIndexOf("data-tab-panel"), "the MockPanel follows the tabs");
   assert.equal(elementsWith(read("industry"), "data-mock-panel").length, 1, "one MockPanel per page");
+});
+
+test("go-global §3.3: an Australia-only package's card opens with the Australia label, and no other card has one", () => {
+  for (const [kind, view] of PAGES) {
+    const html = mainOf(read(kind));
+    const cards = elements(html, (t) => t.name === "article" && (t.attrs.class ?? "").split(/\s+/).includes("ind-card"));
+    const packages = view.single ? view.single.packages : view.sections.flatMap((s) => s.packages);
+    assert.equal(cards.length, packages.length, kind);
+    packages.forEach((p, i) => {
+      assert.equal(cards[i].attrs["data-region"], p.region ?? undefined, `${kind}: ${p.id} data-region`);
+      assert.deepEqual(elementsWith(cards[i].inner, "data-region-label").map((l) => text(l.inner)), p.region ? [REGION_LABEL] : [], `${kind}: ${p.id} label`);
+    });
+    assert.ok(packages.some((p) => p.region === "au") && packages.some((p) => p.region === null), `${kind}: the fixtures label some cards and not others`);
+  }
 });
 
 test("the scenario: a carbon section marked illustrative, opening with the fixed label, then the steps and a TracePanel", () => {

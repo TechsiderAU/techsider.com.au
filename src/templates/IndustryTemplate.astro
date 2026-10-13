@@ -33,6 +33,7 @@ import DataTable from "../components/ui/DataTable.astro";
 import FaqList from "../components/ui/FaqList.astro";
 import MockPanel from "../components/ui/MockPanel.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
+import RegionLabel from "../components/ui/RegionLabel.astro";
 import SectionHeader from "../components/ui/SectionHeader.astro";
 import TabPanel from "../components/ui/TabPanel.astro";
 import Tabs from "../components/ui/Tabs.astro";
@@ -105,8 +106,8 @@ const mapRows = (b: RegulatoryBlockView) =>
         <TabPanel id={stage.id} label={stage.stage}>
           <ul class="ind-usecases">
             {stage.useCases.map((u) => (
-              <li class="ind-usecase">
-                <p class="ind-usecase-name">{u.name}</p>
+              <li class="ind-usecase" data-region={u.region ?? undefined}>
+                <p class="ind-usecase-name">{u.name}{u.region && <Fragment> <RegionLabel /></Fragment>}</p>
                 <p class="ind-meta">
                   <BracketChip label={solutionLabel(u.solution)} href={u.solution.href ?? undefined} />
                   {u.onRequest && <span class="ind-tag">On request</span>}
@@ -130,7 +131,7 @@ const mapRows = (b: RegulatoryBlockView) =>
         <ul class="ind-cards">
           {view.single.packages.map((p) => (
             <li>
-              <article class="ind-card" data-package-status={p.status}>
+              <article class="ind-card" data-package-status={p.status} data-region={p.region ?? undefined}>{p.region && <RegionLabel />}
                 <h3 class="ind-card-title">{p.href ? <a href={p.href}>{p.name}</a> : p.name}</h3>
                 <p class="ind-meta">
                   <BracketChip label={solutionLabel(p.solution)} href={p.solution.href ?? undefined} />
@@ -238,7 +239,7 @@ const mapRows = (b: RegulatoryBlockView) =>
           <ul class="ind-cards">
             {s.packages.map((p) => (
               <li>
-                <article class="ind-card" data-package-status={p.status}>
+                <article class="ind-card" data-package-status={p.status} data-region={p.region ?? undefined}>{p.region && <RegionLabel />}
                   <h5 class="ind-card-title">{p.href ? <a href={p.href}>{p.name}</a> : p.name}</h5>
                   <p class="ind-meta">
                     <BracketChip label={solutionLabel(p.solution)} href={p.solution.href ?? undefined} />
@@ -398,6 +399,10 @@ const mapRows = (b: RegulatoryBlockView) =>
     padding: 1.25rem;
     border: 1px solid var(--color-bone-line);
     border-radius: 8px;
+  }
+  /* go-global §3.3: the "Australia" label keeps its own width in the card grid. */
+  .ind-card > :global(.region-label) {
+    justify-self: start;
   }
   .ind-card-title {
     margin: 0;

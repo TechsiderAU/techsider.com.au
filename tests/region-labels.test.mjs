@@ -166,3 +166,37 @@ test("solution pages: an Australia-only package's block or on-request entry open
     });
   }
 });
+
+/** The Australia-only packages' names: a use case that names one exactly is labelled (contract §5 rule 5). */
+const AU_NAMES = new Set(Object.entries(AU_PACKAGES).flatMap(([sid, ids]) => solutionYaml(sid).packages.filter((p) => ids.includes(p.id)).map((p) => p.name)));
+
+test("industry pages: a package card or workflow use case that names an Australia-only package carries the Australia label; no other one does", () => {
+  const seen = {};
+  for (const id of INDUSTRY_IDS) {
+    const main = mainHtml(readDist(`industries/${id}/index.html`));
+    for (const card of elements(main, (t) => t.name === "article" && classList(t).includes("ind-card"))) {
+      const name = plainText(elements(card.inner, (t) => /^h[3-5]$/.test(t.name))[0].inner);
+      const au = AU_NAMES.has(name);
+      assert.equal(card.attrs["data-region"], au ? "au" : undefined, `${id}: card ${name}`);
+      assert.deepEqual(labelsIn(card.inner), au ? AU_LABEL : [], `${id}: card ${name} label`);
+      if (au) (seen[id] ??= []).push(`card ${name}`);
+    }
+    for (const li of elements(main, (t) => t.name === "li" && classList(t).includes("ind-usecase"))) {
+      const [nameEl] = elements(li.inner, (t) => classList(t).includes("ind-usecase-name"));
+      const [label] = elementsWith(nameEl.inner, "data-region-label");
+      const name = plainText(label ? nameEl.inner.replace(label.outer, "") : nameEl.inner);
+      const au = AU_NAMES.has(name);
+      assert.equal(li.attrs["data-region"], au ? "au" : undefined, `${id}: use case ${name}`);
+      assert.deepEqual(labelsIn(li.inner), au ? AU_LABEL : [], `${id}: use case ${name} label`);
+      if (au) (seen[id] ??= []).push(`use case ${name}`);
+    }
+  }
+  assert.deepEqual(seen, {
+    accounting: ["card ATO Letter Sorter", "use case ATO Letter Sorter"],
+    "real-estate": [
+      "card Management Agreement & Rent Roll Register", "card Bond Claim Evidence Pack",
+      "use case Management Agreement & Rent Roll Register", "use case Bond Claim Evidence Pack", "use case Trust Audit Prep Pack",
+    ],
+    "resources-and-energy": ["card SOCI AI Risk Evidence", "use case SOCI AI Risk Evidence"],
+  });
+});

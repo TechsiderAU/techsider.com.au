@@ -31,6 +31,7 @@ import { AUTOMATION } from "../marketing.ts";
 import type { Link, SiteContext } from "../site.ts";
 import { crumbs, industryLink, refId, solutionLink } from "../site.ts";
 import type { InsightCardView } from "./insights.ts";
+import { packageRegion } from "./offer.ts";
 
 type IndustryData = z.infer<ReturnType<typeof makeIndustrySchema>>;
 type SolutionData = z.infer<ReturnType<typeof makeSolutionSchema>>;
@@ -43,6 +44,8 @@ export interface RecommendedPackageView {
   id: string; name: string; status: "launch" | "on-request"; summary: string;
   solution: { number: string; shortName: string; href: string | null };
   href: string | null;
+  /** "au" for an Australia-only package (go-global §3.3): its card is labelled "Australia". */
+  region: "au" | null;
 }
 export interface RegRowView {
   anchor: string; obligation: string; meaning: string; design: string; evidence: string;
@@ -71,7 +74,7 @@ export interface IndustryView {
   single: RegulatoryBlockView | null; sections: JurisdictionSectionView[];
   rules: RulesBlockView;
   problem: { from: string; to: string; source: { label: string; url: string; asAt: Date } };
-  workflow: { id: string; stage: string; useCases: { name: string; solution: { number: string; shortName: string; href: string | null }; onRequest: boolean; note: string | null }[] }[];
+  workflow: { id: string; stage: string; useCases: { name: string; solution: { number: string; shortName: string; href: string | null }; onRequest: boolean; note: string | null; region: "au" | null }[] }[];
   mockPanel: MockPanelData;
   leadSolutions: { number: string; shortName: string; href: string | null }[];
   demoHref: string | null;
@@ -120,9 +123,20 @@ function recommendedPackage(industryId: string, ref: PackageRef, solutions: Reco
   if (found.status === "launch") {
     // The solution page gives every launch package this id: the generic package's block, or the
     // tab panel of a tabbed one.
-    return { id: found.id, name: found.name, status: "launch", summary: found.scope, solution, href: solution.href === null ? null : `${solution.href}#${found.id}` };
+    return { id: found.id, name: found.name, status: "launch", summary: found.scope, solution, href: solution.href === null ? null : `${solution.href}#${found.id}`, region: found.region ?? null };
   }
-  return { id: found.id, name: found.name, status: "on-request", summary: found.oneLiner, solution, href: site.contact({ interest: solutionId }) };
+  return { id: found.id, name: found.name, status: "on-request", summary: found.oneLiner, solution, href: site.contact({ interest: solutionId }), region: found.region ?? null };
+}
+
+/**
+ * A workflow use case's region (go-global §3.3; the contract's rule 5): the region of the package
+ * of its solution that it names exactly, or null. Its solution must be in `solutions`.
+ */
+function useCaseRegion(industryId: string, useCase: { name: string; solution: Ref }, solutions: Record<string, SolutionData>): "au" | null {
+  const solutionId = refId(useCase.solution);
+  const data = solutions[solutionId];
+  if (!data) throw new Error(`industryView(${industryId}): use case "${useCase.name}" names solution "${solutionId}", which isn't in solutions`);
+  return packageRegion(data, useCase.name);
 }
 
 function rowView(row: RegulatoryRow, section: SectionId | null): RegRowView {
@@ -276,7 +290,7 @@ export function industryView(input: {
     workflow: data.workflow.map((stage) => ({
       id: stage.id,
       stage: stage.stage,
-      useCases: stage.useCases.map((u) => ({ name: u.name, solution: solutionChip(site, u.solution), onRequest: u.status === "on-request", note: u.note ?? null })),
+      useCases: stage.useCases.map((u) => ({ name: u.name, solution: solutionChip(site, u.solution), onRequest: u.status === "on-request", note: u.note ?? null, region: useCaseRegion(id, u, solutions) })),
     })),
     mockPanel: data.mockPanel,
     leadSolutions: data.leadSolutions.map((ref) => solutionChip(site, ref)),
