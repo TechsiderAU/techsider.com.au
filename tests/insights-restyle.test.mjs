@@ -12,6 +12,7 @@ import { allHtmlFiles, readDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, readFrontmatter, startTags } from "../scripts/ci/lib.mjs";
 import { INSIGHT_TYPE_LABEL } from "../src/content/schemas.ts";
 import { PAGES } from "../src/data/nav.ts";
+import { REGION_LABEL } from "../src/lib/fixed-copy.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const INSIGHTS = PAGES.find((p) => p.path === "/insights/");
@@ -95,7 +96,9 @@ test("index: a bone 'All posts' section lists every published post as an Insight
     const time = elements(card.inner, (t) => t.name === "time")[0];
     assert.equal(time.attrs.datetime, new Date(fm.publishDate).toISOString().slice(0, 10), `card ${i}: date`);
     assert.match(text(time.inner), DATE);
-    assert.match(text(card.inner), /^\[ \w[\w ]* \] · \d{1,2} [A-Z][a-z]+ \d{4} · \d+ min read /, `card ${i}: type tag, date, reading time`);
+    // An Australian post's card opens with its "Australia" label, then the type tag (go-global §6.1).
+    const lead = fm.region === "au" ? `${REGION_LABEL} ` : "";
+    assert.match(text(card.inner), new RegExp(`^${lead}\\[ \\w[\\w ]* \\] · \\d{1,2} [A-Z][a-z]+ \\d{4} · \\d+ min read `), `card ${i}: label, type tag, date, reading time`);
   });
 });
 

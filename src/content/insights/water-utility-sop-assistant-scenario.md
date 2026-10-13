@@ -7,6 +7,7 @@ type: reference-scenario
 illustrative: true
 industries: [resources-and-energy]
 solutions: [knowledge-assistant, ai-evaluation]
+region: au
 draft: false
 # ⚑ owner: every commitment in this post must be in the standard engagement terms (spec §12 item 2)
 ---

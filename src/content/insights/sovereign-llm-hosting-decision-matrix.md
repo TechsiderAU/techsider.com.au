@@ -7,6 +7,7 @@ updatedDate: 2026-10-02
 type: article
 industries: [government, financial-services]
 solutions: [knowledge-assistant, ai-evaluation]
+region: au
 draft: false
 ---
 

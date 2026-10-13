@@ -6,6 +6,7 @@ publishDate: 2026-06-12
 type: article
 industries: [financial-services]
 solutions: [knowledge-assistant, ai-evaluation]
+region: au
 draft: false
 ---
 

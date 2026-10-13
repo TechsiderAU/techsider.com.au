@@ -6,6 +6,7 @@ publishDate: 2026-10-11
 type: article
 industries: [financial-services, real-estate, healthcare, accounting]
 solutions: [ai-switch-on, draft-for-approval]
+region: au
 draft: false
 # ⚑ owner: every commitment in this post must be in the standard engagement terms (spec §12 item 2)
 ---

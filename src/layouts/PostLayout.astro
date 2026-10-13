@@ -8,12 +8,15 @@
 // is markup over it. JSON-LD: the view's BlogPosting, authored and published by the Organization
 // (§11.3), goes into BaseLayout's @graph beside the Organization it points to.
 // An illustrative post carries data-provenance="illustrative" and its label (§9.3, CI check 06).
+// An Australian post (region "au", go-global §6.1) shows the "Australia" label in its header, below
+// the meta line, and its body wrapper (.post-body) carries data-region="au".
 import BaseLayout from "./BaseLayout.astro";
 import PageHero from "../components/page/PageHero.astro";
 import ChipRow from "../components/page/ChipRow.astro";
 import Prose from "../components/page/Prose.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
 import InsightCard from "../components/page/InsightCard.astro";
+import RegionLabel from "../components/ui/RegionLabel.astro";
 import { formatDate, isoDate } from "../lib/dates";
 import type { PostView } from "../lib/views/post";
 
@@ -28,9 +31,10 @@ const { card, closing } = view;
   <article class="post" data-post data-provenance={view.illustrativeLabel ? "illustrative" : undefined}>
     <PageHero title={card.title} display={false} eyebrow={card.typeLabel.toLowerCase()} breadcrumb={view.breadcrumb}>
       <p class="post-meta" data-post-meta><time datetime={isoDate(card.date)}>{formatDate(card.date)}</time>{view.updated && <Fragment> · Updated <time datetime={isoDate(view.updated)}>{formatDate(view.updated)}</time></Fragment>} · {card.minutes} min read</p>
+      {card.region && <p class="post-region" data-post-region><RegionLabel /></p>}
       {view.illustrativeLabel && <p class="post-illustrative" data-illustrative-label data-provenance-label>{view.illustrativeLabel}</p>}
     </PageHero>
-    <div class="post-body surface-bone" data-surface="bone">
+    <div class="post-body surface-bone" data-surface="bone" data-region={card.region ?? undefined}>
       <div class="post-column">
         {card.industries.length > 0 && <ChipRow id="post-industries" label="Industries" chips={card.industries} />}
         <Prose><slot /></Prose>
@@ -64,6 +68,9 @@ const { card, closing } = view;
   }
   .post-illustrative {
     color: var(--color-bone);
+  }
+  .post-region {
+    margin: 0;
   }
   .post-body {
     padding-block: 3rem 4rem;

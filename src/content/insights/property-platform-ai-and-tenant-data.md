@@ -6,6 +6,7 @@ publishDate: 2026-09-29
 type: platform-guide
 industries: [real-estate]
 solutions: [ai-switch-on, document-registers]
+region: au
 draft: false
 # ⚑ owner: every commitment in this post must be in the standard engagement terms (spec §12 item 2)
 ---

@@ -7,6 +7,7 @@ updatedDate: 2026-10-02
 type: platform-guide
 industries: [accounting]
 solutions: [ai-switch-on]
+region: au
 draft: false
 # ⚑ owner: every commitment in this post must be in the standard engagement terms (spec §12 item 2)
 ---

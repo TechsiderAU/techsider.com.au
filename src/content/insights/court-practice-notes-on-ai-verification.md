@@ -7,6 +7,7 @@ updatedDate: 2026-10-11
 type: article
 industries: [legal-and-professional]
 solutions: [ai-evaluation, ai-switch-on]
+region: au
 draft: false
 # ⚑ owner: every commitment in this post must be in the standard engagement terms (spec §12 item 2)
 ---

@@ -6,6 +6,7 @@ publishDate: 2026-10-11
 type: article
 industries: [financial-services, government, legal-and-professional]
 solutions: [ai-evaluation, ai-switch-on]
+region: au
 draft: false
 ---
 
