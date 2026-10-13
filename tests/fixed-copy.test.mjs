@@ -5,6 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import * as copy from "../src/lib/fixed-copy.ts";
+import { anchorKind } from "../src/content/schemas.ts";
 
 test("fixed copy: every constant is pinned word for word: the spec's text, and REPORT_BADGE's ruling copy", () => {
   assert.equal(copy.PACKAGED_OFFER_DISCLAIMER, "This page describes a packaged offer, not a delivered engagement.");
@@ -40,18 +41,46 @@ test("fixed copy: every constant is pinned word for word: the spec's text, and R
   assert.deepEqual(copy.EXTRA_INTERESTS, [{ id: "evaluation-partner", label: "Evaluation Partner" }, { id: "not-sure", label: "Not sure yet" }]);
   assert.deepEqual(copy.WORKS_METHOD_LABEL, { "read-only": "Read-only access", import: "File/CSV import", "draft-for-approval": "Drafts a person actions" });
   assert.deepEqual(copy.DELIVERY_LETTER, { "your-account": "a", managed: "b", "platform-you-license": "c" });
+  // The go-global spec's fixed copy (go-global §3.2, §3.3, §5.2, §5.4, §6.3, §7.3, D6, D18).
+  assert.equal(copy.REGION_LABEL, "Australia");
+  assert.equal(copy.REGION_EXAMPLE_LABEL, "Australian example");
+  assert.equal(copy.PLATFORM_REGION_LABEL, "Australian plans and vendor pages");
+  assert.equal(copy.RULES_HEADING, "Rules that travel");
+  assert.equal(copy.RULES_SHARED_LABEL, "Everywhere");
+  assert.equal(
+    copy.RULES_CLOSING,
+    "Which rules apply to you is your compliance or legal team's call. We map our evidence to them; we don't certify against them.",
+  );
+  assert.deepEqual(copy.ANCHOR_KIND_LABEL, {
+    law: "Law", treaty: "Law", "international-standard": "Standard", "professional-ethics": "Standard",
+    "supervisory-principles": "Guidance", guidance: "Guidance",
+  });
+  assert.equal(copy.AU_BAND_HEADING, "Australia: our detailed map");
+  assert.equal(copy.AU_BAND_INTRO, "Australia is our home market and the one we know best.");
+  assert.equal(copy.INTERNATIONAL_HEADING, "For organisations outside Australia");
+  assert.equal(copy.CONTACT_BASE, "Based in Sydney, delivered remotely.");
+  assert.equal(copy.DELIVERY_MODEL, "Delivered remotely from Sydney; on-site visits by arrangement.");
+  assert.equal(copy.ABN_NOTE, "An ABN is an Australian Business Number; anyone can check ours on the public register at ABN Lookup.");
+  assert.equal(copy.DISAMBIGUATION, "Techsider is not affiliated with other organisations named TechSider.");
 });
 
 test("fixed copy: the module exports exactly the blueprint's constants", () => {
   assert.deepEqual(Object.keys(copy).sort(), [
-    "ACCEPTANCE_TEST_LABEL", "CHECKER_BADGE", "CONTACT_H1", "DELIVERY_LETTER", "DEMO_BADGE", "DEMO_CTA",
-    "EXTRA_INTERESTS", "HOME_CLOSING", "HOME_PROMPT", "HOME_TRUST_QUESTION", "KIT_PENDING_NOTE", "MESSAGE_PLACEHOLDER",
-    "NOT_LEGAL_ADVICE", "ONSHORE_PILLAR", "ORG_SIZES", "PACKAGED_OFFER_DISCLAIMER", "PROCESSING_NOTE",
-    "REPORT_BADGE", "SCENARIO_LABEL", "SERVICES_H1", "WORKS_METHOD_LABEL", "kitReviewedNote",
+    "ABN_NOTE", "ACCEPTANCE_TEST_LABEL", "ANCHOR_KIND_LABEL", "AU_BAND_HEADING", "AU_BAND_INTRO", "CHECKER_BADGE",
+    "CONTACT_BASE", "CONTACT_H1", "DELIVERY_LETTER", "DELIVERY_MODEL", "DEMO_BADGE", "DEMO_CTA", "DISAMBIGUATION",
+    "EXTRA_INTERESTS", "HOME_CLOSING", "HOME_PROMPT", "HOME_TRUST_QUESTION", "INTERNATIONAL_HEADING", "KIT_PENDING_NOTE",
+    "MESSAGE_PLACEHOLDER", "NOT_LEGAL_ADVICE", "ONSHORE_PILLAR", "ORG_SIZES", "PACKAGED_OFFER_DISCLAIMER",
+    "PLATFORM_REGION_LABEL", "PROCESSING_NOTE", "REGION_EXAMPLE_LABEL", "REGION_LABEL", "REPORT_BADGE", "RULES_CLOSING",
+    "RULES_HEADING", "RULES_SHARED_LABEL", "SCENARIO_LABEL", "SERVICES_H1", "WORKS_METHOD_LABEL", "kitReviewedNote",
   ]);
   // The pending note starts with the same disclaimer as the reviewed one; only the review state differs.
   assert.ok(copy.KIT_PENDING_NOTE.startsWith(`${copy.NOT_LEGAL_ADVICE} `));
   assert.ok(copy.kitReviewedNote("x").startsWith(`${copy.NOT_LEGAL_ADVICE} `));
+});
+
+test("fixed copy: the anchor kind map labels every anchor kind as Law, Standard or Guidance (go-global §5.2)", () => {
+  assert.deepEqual(Object.keys(copy.ANCHOR_KIND_LABEL).sort(), [...anchorKind.options].sort());
+  assert.deepEqual([...new Set(Object.values(copy.ANCHOR_KIND_LABEL))].sort(), ["Guidance", "Law", "Standard"]);
 });
 
 test("fixed copy: the header, and the pin's title, name the one constant that is ruling copy, not spec text (final review D7-F4; Phase D ruling R6)", () => {

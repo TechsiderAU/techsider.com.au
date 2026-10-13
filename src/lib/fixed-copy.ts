@@ -6,6 +6,8 @@
 // One constant is ruling copy, not spec text: REPORT_BADGE, the ④ badge (Phase D ledger ruling R4
 // and final review item D7-F2), which spec §8.8 doesn't word. The owner checklist records the §8.8
 // amendment it needs.
+// The go-global constants, appended last, cite "go-global §…": the section of the go-global spec
+// (or its decision id, such as D6) whose text they copy.
 
 export const PACKAGED_OFFER_DISCLAIMER = "This page describes a packaged offer, not a delivered engagement."; // §4.5
 export const NOT_LEGAL_ADVICE = "General information, not legal advice."; // §8.5 block 6, §11.6
@@ -38,3 +40,17 @@ export const ORG_SIZES = ["<20", "20–199", "200–999", "1,000+", "Government"
 export const EXTRA_INTERESTS = [{ id: "evaluation-partner", label: "Evaluation Partner" }, { id: "not-sure", label: "Not sure yet" }] as const; // §10.2
 export const WORKS_METHOD_LABEL = { "read-only": "Read-only access", import: "File/CSV import", "draft-for-approval": "Drafts a person actions" } as const; // §5
 export const DELIVERY_LETTER = { "your-account": "a", managed: "b", "platform-you-license": "c" } as const; // §4.6
+export const REGION_LABEL = "Australia"; // go-global §3.3, §5.1, §6.1
+export const REGION_EXAMPLE_LABEL = "Australian example"; // go-global §6.3
+export const PLATFORM_REGION_LABEL = "Australian plans and vendor pages"; // go-global §6.3
+export const RULES_HEADING = "Rules that travel"; // go-global §5.2
+export const RULES_SHARED_LABEL = "Everywhere"; // go-global §5.2
+export const RULES_CLOSING = "Which rules apply to you is your compliance or legal team's call. We map our evidence to them; we don't certify against them."; // go-global §5.2
+export const ANCHOR_KIND_LABEL = { law: "Law", treaty: "Law", "international-standard": "Standard", "professional-ethics": "Standard", "supervisory-principles": "Guidance", guidance: "Guidance" } as const; // go-global §5.2
+export const AU_BAND_HEADING = "Australia: our detailed map"; // go-global §5.4
+export const AU_BAND_INTRO = "Australia is our home market and the one we know best."; // go-global §5.4
+export const INTERNATIONAL_HEADING = "For organisations outside Australia"; // go-global §7.3 (R1)
+export const CONTACT_BASE = "Based in Sydney, delivered remotely."; // go-global §3.2 (Contact hero sub)
+export const DELIVERY_MODEL = "Delivered remotely from Sydney; on-site visits by arrangement."; // go-global D6, §4.5
+export const ABN_NOTE = "An ABN is an Australian Business Number; anyone can check ours on the public register at ABN Lookup."; // go-global §3.2 (About)
+export const DISAMBIGUATION = "Techsider is not affiliated with other organisations named TechSider."; // go-global D18
