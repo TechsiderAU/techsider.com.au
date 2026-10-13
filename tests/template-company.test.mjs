@@ -10,13 +10,13 @@ import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, idsIn, startTags } from "../scripts/ci/lib.mjs";
-import { CONTACT_BASE, CONTACT_H1, EXTRA_INTERESTS, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../src/lib/fixed-copy.ts";
+import { CONTACT_BASE, CONTACT_H1, EXTRA_INTERESTS, INTERNATIONAL_HEADING, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../src/lib/fixed-copy.ts";
 import { countryOptions } from "../src/data/countries.ts";
 import { replySentence } from "../src/lib/reply-time.ts";
 import { insightCards } from "../src/lib/views/insights.ts";
 import { trustView } from "../src/lib/views/company.ts";
 import {
-  aboutFixture, contactFixture, contactNoEndpointFixture, documentFixtures, fixtureSite, insightFixtures,
+  aboutFixture, contactFixture, contactNoEndpointFixture, documentFixtures, fixtureSite, insightFixtures, internationalFixture,
   positioningFixture, servicesFixture, trustFixture, trustNoTermsFixture,
 } from "../src/fixtures/index.ts";
 import { renderAstro } from "./support/render-astro.mjs";
@@ -152,7 +152,7 @@ test("about: at most three insight cards, newest first, then All insights; the p
 
 test("trust: the blocks in order, and Part A dated with the sub-processor table from the contact data", () => {
   const main = mainOf(page("trust"));
-  assert.deepEqual(blockIds(main), ["part-a", "part-b", "independence", "questions", "ai-transparency", "changes"]);
+  assert.deepEqual(blockIds(main), ["part-a", "part-b", "independence", "outside-australia", "questions", "ai-transparency", "changes"]);
   const partA = one(main, "id", "part-a");
   assert.equal(text(one(partA.inner, "id", "part-a-heading").inner), "Our website and email today");
   const asAt = one(partA.inner, "data-as-at");
@@ -251,6 +251,27 @@ test("trust: a Part B answer resting on an unconfirmed term never renders, on th
   for (const f of hidden) {
     assert.ok(!visibleText(html).includes(f.q), `"${f.q}" renders`);
     assert.ok(!html.includes(f.a), `the answer to "${f.q}" is in the markup`);
+  }
+});
+
+test("trust: For organisations outside Australia follows the independence policy with every confirmed line, delivery included; no unconfirmed line renders (go-global §7.3)", () => {
+  const html = page("trust");
+  const block = one(mainOf(html), "id", "outside-australia");
+  assert.equal(text(one(block.inner, "id", "outside-australia-heading").inner), INTERNATIONAL_HEADING);
+  assert.equal(elementsWith(block.inner, "data-international").length, 1, "no [data-international] list");
+  assert.deepEqual(
+    elementsWith(block.inner, "data-international-line").map((l) => [l.attrs["data-international-line"], text(l.inner)]),
+    internationalFixture.filter((l) => l.confirmed).map((l) => [l.id, l.text]),
+  );
+  for (const l of internationalFixture.filter((x) => !x.confirmed)) assert.ok(!visibleText(html).includes(l.text), `the ${l.id} line renders`);
+});
+
+test("contact-no-endpoint and trust-no-terms: with no line to show, neither the block nor its heading renders (go-global §7.3)", () => {
+  for (const kind of ["contact-no-endpoint", "trust-no-terms"]) {
+    const html = page(kind);
+    assert.equal(elementsWith(html, "id", "outside-australia").length, 0, `${kind}: #outside-australia renders`);
+    assert.equal(elementsWith(html, "data-international-line").length, 0, `${kind}: a line renders`);
+    assert.ok(!visibleText(html).includes(INTERNATIONAL_HEADING), `${kind}: the heading renders with no line under it`);
   }
 });
 
@@ -483,7 +504,7 @@ test("contact: the collection notice names both providers, directly above the Se
 
 test("contact: the email address is plain text with a hidden copy button and a polite status; then what next and the deflection column", () => {
   const main = mainOf(page("contact"));
-  const order = ["form", "email", "next", "elsewhere"].map((id) => main.indexOf(`id="${id}"`));
+  const order = ["form", "email", "next", "outside-australia", "elsewhere"].map((id) => main.indexOf(`id="${id}"`));
   assert.ok(order.every((at, i) => at > 0 && (i === 0 || at > order[i - 1])), `blocks out of order: ${order}`);
   const email = one(main, "id", "email");
   assert.equal(text(one(email.inner, "id", "email-heading").inner), "Email us");
@@ -522,6 +543,24 @@ test("contact: the hero's sub is the delivery line, then the one reply-time sent
     assert.equal(inlineText(one(subs[0].inner, "data-reply-time").inner), REPLY_SENTENCE, kind);
     assert.equal(elementsWith(html, "data-reply-time").length, 1, `${kind}: more than one reply-time statement`);
     assert.equal(withClass(hero.inner, "page-hero-slot").length, 0, `${kind}: the sub slot spilled into the hero's default slot`);
+  }
+});
+
+test("contact: For organisations outside Australia shows the confirmed lines, less the delivery line the hero says; no unconfirmed line renders (go-global §7.3)", () => {
+  const html = page("contact");
+  const block = one(mainOf(html), "id", "outside-australia");
+  assert.equal(block.name, "section");
+  assert.ok("data-international" in block.attrs);
+  assert.equal(block.attrs["aria-labelledby"], "outside-australia-heading");
+  const heading = one(block.inner, "id", "outside-australia-heading");
+  assert.equal(heading.name, "h2");
+  assert.equal(text(heading.inner), INTERNATIONAL_HEADING);
+  assert.deepEqual(
+    elementsWith(block.inner, "data-international-line").map((l) => [l.attrs["data-international-line"], text(l.inner)]),
+    internationalFixture.filter((l) => l.confirmed && l.id !== "delivery").map((l) => [l.id, l.text]),
+  );
+  for (const l of internationalFixture.filter((x) => !x.confirmed || x.id === "delivery")) {
+    assert.ok(!visibleText(html).includes(l.text), `the ${l.id} line renders on the contact page`);
   }
 });
 

@@ -24,15 +24,15 @@ import { documentSchema } from "../src/content/page-schemas.ts";
 import { makeKitSchema, plainRef } from "../src/content/schemas.ts";
 import { PAGES, SITE, hqLine } from "../src/data/nav.ts";
 import { ABOUT } from "../src/data/about.ts";
-import { CONTACT } from "../src/data/contact.ts";
+import { CONTACT, INTERNATIONAL } from "../src/data/contact.ts";
 import { POSITIONING } from "../src/data/positioning.ts";
 import { SERVICES } from "../src/data/services.ts";
 import { TRUST } from "../src/data/trust.ts";
-import { ABN_NOTE, CONTACT_BASE, CONTACT_H1, DELIVERY_MODEL, DISAMBIGUATION } from "../src/lib/fixed-copy.ts";
+import { ABN_NOTE, CONTACT_BASE, CONTACT_H1, DELIVERY_MODEL, DISAMBIGUATION, INTERNATIONAL_HEADING } from "../src/lib/fixed-copy.ts";
 import { pageDescription, pageTitle } from "../src/lib/meta.ts";
 import { replySentence } from "../src/lib/reply-time.ts";
 import { siteContext } from "../src/lib/site.ts";
-import { trustView } from "../src/lib/views/company.ts";
+import { internationalLines, trustView } from "../src/lib/views/company.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const DIST = join(ROOT, "dist");
@@ -357,6 +357,20 @@ test("/contact/ states the reply time once, in the hero after the delivery line,
   assert.doesNotMatch(text(one(mainOf(html), "id", "next").inner), /\bwe reply\b|\bbusiness days?\b/i, "#next still states the reply time");
 });
 
+test("/contact/: For organisations outside Australia shows the entity and certifications lines; the delivery line is the hero's; no unconfirmed line and no phone number (go-global §7.3, §8.2, R1)", () => {
+  const html = readDist("contact/index.html");
+  const main = mainOf(html);
+  const block = one(main, "id", "outside-australia");
+  assert.equal(text(one(block.inner, "id", "outside-australia-heading").inner), INTERNATIONAL_HEADING);
+  const lines = elementsWith(block.inner, "data-international-line").map((l) => [l.attrs["data-international-line"], text(l.inner)]);
+  assert.deepEqual(lines.map(([id]) => id), ["entity", "certifications"]);
+  assert.deepEqual(lines, internationalLines(INTERNATIONAL, "contact").map((l) => [l.id, l.text]));
+  const visible = visibleText(html);
+  assert.ok(!visible.includes(DELIVERY_MODEL), "the delivery line repeats the hero on /contact/");
+  for (const l of INTERNATIONAL.filter((x) => !x.confirmed)) assert.ok(!visible.includes(l.text), `the unconfirmed ${l.id} line renders`);
+  assert.deepEqual(tagged(main, "a").filter((a) => (a.attrs.href ?? "").startsWith("tel:")), [], "/contact/ lists a phone number");
+});
+
 test("/about/: the mission, who it's for, the origin line, the principles, how we work, the build log newest first, and a prompt to /contact/", () => {
   const main = mainOf(readDist("about/index.html"));
   const root = one(main, "data-template", "about");
@@ -415,6 +429,9 @@ test("preview /trust/: the three services in Part A, no Part B, only Part A answ
   assert.deepEqual(faq[0].mainEntity.map((q) => q.name), trustView(TRUST).faq.map((f) => f.q));
   assert.deepEqual(tagged(one(main, "id", "independence").inner, "li").map((li) => text(li.inner)), SERVICES.independence);
   assert.equal(elementsWith(main, "data-ai-system").length, TRUST.transparency.systems.length);
+  // go-global §7.3: the Trust page shows every confirmed line, the delivery line included.
+  const outside = one(main, "id", "outside-australia");
+  assert.deepEqual(elementsWith(outside.inner, "data-international-line").map((l) => l.attrs["data-international-line"]), ["entity", "delivery", "certifications"]);
 });
 
 test("preview /legal/: both drafts listed, each page rendering its body under Home › Legal", () => {
