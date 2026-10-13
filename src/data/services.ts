@@ -132,29 +132,29 @@ export const SERVICES: ServicesData = {
   ],
   entryOffers: [
     {
-      buyer: "State agency (NSW, Vic, Qld)",
+      buyer: "Government agency (state)",
       entry: "Independent Evaluation Report on Copilot Studio agents leaving pilot, a vendor AI upgrade or tender AI claims, ideally as an Evaluation Partner workstream",
       then: "Repeat evaluations",
     },
     {
-      buyer: "Commonwealth agency",
+      buyer: "Government agency (national)",
       entry: "Independent Evaluation, or the Feasibility Sprint on public or synthetic data",
       then: "A Knowledge Assistant or Document Registers pilot",
     },
     {
-      buyer: "Council",
+      buyer: "Local government",
       entry: "Feasibility Sprint on public or synthetic data, or a small evaluation",
       then: "Policy & Procedure Assistant",
     },
     {
-      buyer: "Mid-tier APRA-regulated entity",
+      buyer: "Mid-tier regulated financial institution",
       entry: "Model-Change Regression or a pre-contract Vendor AI Evaluation on one use case, as a workstream under your internal-audit co-source or law firm",
       then: "Harness training for your second-line team",
     },
     // ⚑ owner: the Accounting Safe-Use Kit must be lawyer-reviewed and published before this entry offer names it (spec §12 item 6; research index A1)
     {
       buyer: "Accounting practice (50–300 staff, or a network)",
-      entry: "Accounting Safe-Use Kit, then a Trial of the Trust Deed & Client Structure Register (Nov–early Dec or Apr–May)",
+      entry: "Accounting Safe-Use Kit, then a Trial of the Trust Deed & Client Structure Register (outside your peak tax season)",
       then: "The full register; ATO Letter Sorter (on request); Run",
     },
     {
@@ -322,7 +322,7 @@ export const SERVICES: ServicesData = {
     faq: [
       {
         q: "What kind of report does the client get?",
-        a: "Findings rated to the client's risk matrix, with an explicit list of failures and the evidence behind each one. It is not an assurance opinion, and not an ASAE 3000 or ASRE engagement.",
+        a: "Findings rated to the client's risk matrix, with an explicit list of failures and the evidence behind each one. It is not an assurance opinion, and not an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia).",
       },
       {
         q: "Do you do adversarial testing or red-teaming?",

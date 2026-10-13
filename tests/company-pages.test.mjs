@@ -244,7 +244,8 @@ test("evaluation method: every part of the published method (spec §4.1 ④, blu
   ]);
   for (const line of [
     "findings, not an assurance opinion",
-    "It is not an ASAE 3000 or ASRE engagement.",
+    "It is not an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia).",
+    "mapped to the framework you already use, such as ISO/IEC 42001, the NIST AI RMF or your own model-risk template. In Australia: the DTA's AI use case impact assessment, the NSW AI Assessment Framework or a Queensland FAIRA.",
     "Techsider never does adversarial testing in-house. Where it's needed, it's done by a CREST-accredited tester you engage.",
     "a replay script that runs in your own cloud subscription",
     "Findings are rated to your risk matrix",

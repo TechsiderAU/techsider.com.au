@@ -100,6 +100,12 @@ for (const [build, { read, dir, site }] of Object.entries(BUILDS)) {
   });
 }
 
+test("the hero's illustrative trace speaks to any public-sector reader, not a state agency (go-global §3.5)", () => {
+  const trace = JSON.parse(readFileSync(join(ROOT, "src/data/traces/home-hero.json"), "utf8"));
+  assert.equal(trace.lines[0].detail, "Question received from a fictional public-sector agency officer");
+  assert.doesNotMatch(JSON.stringify(trace), /\bstate agency\b/i);
+});
+
 test("#insights: the newest three posts while the newest is 45 days old or less at build time, otherwise only the All insights link (spec §8.1 block 9)", () => {
   const posts = listFiles(join(ROOT, "src/content/insights"), (rel) => rel.endsWith(".md"))
     .map((file) => ({ id: basename(file, ".md"), fm: readFrontmatter(file) }))

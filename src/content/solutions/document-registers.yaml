@@ -92,8 +92,8 @@ packages:
       A senior for about a day to build an answer key of 30–50 deeds they already know, and about
       half a day to check 50 output rows. Read-only access to where the deeds live.
     timeline: >-
-      5–6 weeks after Week 0. The Two-Week Trial runs in a quieter window: November to early
-      December, or April to May.
+      5–6 weeks after Week 0. The Two-Week Trial runs in a quieter window outside your peak tax season
+      (in Australia, November to early December or April to May).
     outOfScope:
       - "Interpreting a deed, or legal or tax advice: every flag is for the partner to decide"
       - Identity verification and customer due-diligence decisions, which stay with your compliance officer and your due-diligence tool
@@ -164,7 +164,7 @@ packages:
     status: on-request
     oneLiner: >-
       Reads compliance certificates, such as smoke-alarm and pool certificates, into one register of
-      expiry dates. The rules for each state are checked when the package is scoped.
+      expiry dates. The rules for each state or jurisdiction are checked when the package is scoped.
   - id: lease-abstract-critical-dates
     name: Lease Abstract & Critical Dates
     status: on-request
@@ -181,9 +181,10 @@ packages:
     name: Credentialing & Referral Intake Registers
     status: on-request
     oneLiner: >-
-      Reads credentialing documents from outside Ahpra's register, such as college fellowships and
-      scope-of-practice letters, or referrals that arrive as PDFs or faxes, into a register a person
-      checks. Administrative only: a person makes every credentialing or referral decision.
+      Reads credentialing documents from outside the national practitioner register (Ahpra in
+      Australia), such as college fellowships and scope-of-practice letters, or referrals that arrive
+      as PDFs or faxes, into a register a person checks. Administrative only: a person makes every
+      credentialing or referral decision.
   - id: assessor-pre-screening-pack
     name: Pre-screening Pack for Assessors
     status: internal

@@ -124,6 +124,33 @@ test("services data: nothing about money, billing cadence or procurement size (D
   }
 });
 
+test("services data: the entry offers and the Evaluation Partner report answer use go-global §3.3's vocabulary (go-global §3.3, §3.5)", () => {
+  assert.deepEqual(SERVICES.entryOffers.map((o) => o.buyer), [
+    "Government agency (state)",
+    "Government agency (national)",
+    "Local government",
+    "Mid-tier regulated financial institution",
+    "Accounting practice (50–300 staff, or a network)",
+    "Residential property-management group (1,000+ managements)",
+    "Mid-size law firm",
+    "Manufacturer (50–1,000 staff)",
+    "Health service or GP group",
+    "Mid-tier miner, utility or renewables developer",
+    "Independent school or group",
+    "Prime, internal-audit co-source firm, law firm or SI",
+  ]);
+  // §3.5 changes only the seasonal window, and §3.3 may label the kit's name as Australian, so this pins
+  // the name at the start and the whole rewritten tail exactly.
+  const accounting = SERVICES.entryOffers.find((o) => o.buyer.startsWith("Accounting practice")).entry;
+  assert.ok(accounting.startsWith("Accounting Safe-Use Kit"), accounting);
+  assert.ok(accounting.endsWith(", then a Trial of the Trust Deed & Client Structure Register (outside your peak tax season)"), accounting);
+  assert.equal(
+    SERVICES.evaluationPartner.faq.find((f) => f.q === "What kind of report does the client get?").a,
+    "Findings rated to the client's risk matrix, with an explicit list of failures and the evidence behind each one. It is not an assurance opinion, and not an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia).",
+  );
+  for (const s of strings(SERVICES)) assert.doesNotMatch(s, /\bAPRA-regulated\b|\bCommonwealth agency\b|\bState agency\b|\bCouncil\b|\bNov–early Dec\b/, s);
+});
+
 test("services data: the go/no-go gate is a decision you make, and every §4.5 inclusion is listed once", () => {
   for (const s of strings(SERVICES).filter((x) => /go\/no-go|go or no-go/i.test(x))) {
     assert.doesNotMatch(s, /\b(?:balance|release|refund|credit)\b/i, `the gate carries a consequence: "${s}"`);

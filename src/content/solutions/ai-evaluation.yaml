@@ -11,12 +11,12 @@ job: >-
   Independent AI evaluation tests a system supplied or built by another party on your own questions and cases. Agree the use case, thresholds and test method before comparing results.
 artefact: >-
   A findings report with rated failures, test inputs and a replay script. Your accountable decision maker decides whether to proceed; a test by Techsider of a system it built is acceptance testing.
-forLine: Government agencies, APRA-regulated entities, law firms and health services
+forLine: Government agencies, regulated financial institutions, law firms and health services
 needProfiles:
   - title: A pilot is about to scale.
     body: >-
-      Your Copilot agent or vendor tool is leaving pilot, and your accountable official wants evidence
-      before a wider rollout. The report measures its failures on your own cases.
+      Your Copilot agent or vendor tool is leaving pilot, and the official accountable for AI use wants
+      evidence before a wider rollout. The report measures its failures on your own cases.
   - title: The vendor may have changed the model.
     body: >-
       Where your contract gives no audit rights or notice of model changes, a test set on your own
@@ -43,8 +43,8 @@ genericPackage:
   onshore: false
   buyers: [enterprise-government, mid-market]
   forWhom: >-
-    An agency, APRA-regulated entity, law firm or health service with one AI system it bought,
-    licensed or had built elsewhere, and one use case to test before relying on it.
+    An agency, regulated financial institution, law firm or health service with one AI system it
+    bought, licensed or had built elsewhere, and one use case to test before relying on it.
   scope: >-
     One AI system and one use case, tested on your own questions and cases in your own environment,
     with thresholds agreed before testing and the same written method throughout.
@@ -64,10 +64,10 @@ genericPackage:
     3–5 weeks. For government, approvals run in parallel in Week 0 while testing starts on public or
     synthetic data.
   outOfScope:
-    - "Audit opinions: the report is findings, not an assurance opinion, and not an ASAE 3000 or ASRE engagement"
+    - "Audit opinions: the report is findings, not an assurance opinion, and not an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia)"
     - Any system Techsider built, configured or advised on for you
     - Adversarial testing in-house. Where it's needed, it's done by a CREST-accredited tester you engage.
-    - "The decision to deploy: your accountable official makes it"
+    - "The decision to deploy: the official accountable for AI use makes it"
   gate: >-
     Once the test set and thresholds are agreed, and before any testing, you decide whether to
     continue. The test set is yours either way.
@@ -83,8 +83,8 @@ packages:
     onshore: false
     buyers: [enterprise-government]
     forWhom: >-
-      Agencies, APRA-regulated entities and law firms with one AI system to test before it scales,
-      such as a Copilot Studio agent leaving pilot or a contact-centre summary tool.
+      Agencies, regulated financial institutions and law firms with one AI system to test before it
+      scales, such as a Copilot Studio agent leaving pilot or a contact-centre summary tool.
     scope: >-
       One system and one use case, the full method and the evidence bundle, with the harness handed
       over.
@@ -98,7 +98,7 @@ packages:
       your environment. Hours are stated at scoping.
     timeline: 3–5 weeks.
     outOfScope:
-      - "The decision to deploy: your accountable official makes it"
+      - "The decision to deploy: the official accountable for AI use makes it"
       - Any system Techsider built, configured or advised on for you
     gate: >-
       Once the test plan and thresholds are agreed, and before testing starts, you decide whether to
@@ -116,9 +116,10 @@ packages:
       Health services and GP groups choosing, rolling out or already using a digital scribe or other
       clinical AI product.
     scope: >-
-      The health form of the Independent Evaluation Report: selection against the TGA, Ahpra and
-      ACSQHC guidance, local validation on your own specialties, omission audits and a monitoring
-      plan for after go-live. We evaluate these products; we never build them.
+      The health form of the Independent Evaluation Report: selection against the regulator and
+      safety guidance that applies to you (in Australia: TGA, Ahpra and ACSQHC), local validation on
+      your own specialties, omission audits and a monitoring plan for after go-live. We evaluate these
+      products; we never build them.
     inclusions:
       - Tests on scripted consultations from your own specialties, with omissions counted
       - Ground truth from clinicians at your service, with their agreement measured
@@ -177,7 +178,7 @@ packages:
     buyers: [enterprise-government]
     forWhom: >-
       Organisations that rely on vendor AI with no audit rights or notice of model changes in the
-      contract, such as contact-centre AI at an APRA-regulated entity.
+      contract, such as contact-centre AI at a regulated financial institution.
     scope: >-
       A test set on your own cases that your team re-runs whenever the model may have changed, with
       each run compared with the last. We set it up; your team runs it.
@@ -335,9 +336,10 @@ faq:
       evaluation method sets out.
   - q: Will your report tell us the system is safe to deploy?
     a: >-
-      No. You get findings, not an assurance opinion, and it isn't an ASAE 3000 engagement. Each
-      finding is rated to your risk matrix and mapped to the instrument you use. Your accountable
-      official decides whether to deploy, on measured evidence rather than a demo.
+      No. You get findings, not an assurance opinion, and it isn't an ISAE 3000 engagement (ASAE 3000
+      in Australia). Each finding is rated to your risk matrix and mapped to the instrument you use.
+      The official accountable for AI use decides whether to deploy, on measured evidence rather than
+      a demo.
   - q: Do you evaluate systems you built, or take fees from vendors you evaluate?
     a: >-
       Not independently, and no. We never issue an independent evaluation of a system we built,

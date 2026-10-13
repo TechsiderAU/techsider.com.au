@@ -207,6 +207,37 @@ test("the honesty lines and fixed wording the spec and rulings require are prese
   for (const id of IDS) assert.ok(DATA[id].faq.some((f) => /\bno clients yet\b/.test(f.a)), `${id}: no "no clients yet" answer`);
 });
 
+test("go-global §3.3 vocabulary: shared solution copy speaks to any organisation, and names an Australian instrument only as Australia's (go-global §3.3, §3.5)", () => {
+  const pkg = (id, packageId) => DATA[id].packages.find((p) => p.id === packageId);
+  const ae = DATA["ai-evaluation"];
+  assert.equal(ae.forLine, "Government agencies, regulated financial institutions, law firms and health services");
+  assert.equal(ae.needProfiles[0].body, "Your Copilot agent or vendor tool is leaving pilot, and the official accountable for AI use wants evidence before a wider rollout. The report measures its failures on your own cases.");
+  assert.equal(ae.genericPackage.forWhom, "An agency, regulated financial institution, law firm or health service with one AI system it bought, licensed or had built elsewhere, and one use case to test before relying on it.");
+  assert.ok(ae.genericPackage.outOfScope.includes("Audit opinions: the report is findings, not an assurance opinion, and not an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia)"));
+  assert.ok(ae.genericPackage.outOfScope.includes("The decision to deploy: the official accountable for AI use makes it"));
+  const report = pkg("ai-evaluation", "independent-evaluation-report");
+  assert.equal(report.forWhom, "Agencies, regulated financial institutions and law firms with one AI system to test before it scales, such as a Copilot Studio agent leaving pilot or a contact-centre summary tool.");
+  assert.ok(report.outOfScope.includes("The decision to deploy: the official accountable for AI use makes it"));
+  assert.equal(pkg("ai-evaluation", "scribe-clinical-ai-evaluation").scope, "The health form of the Independent Evaluation Report: selection against the regulator and safety guidance that applies to you (in Australia: TGA, Ahpra and ACSQHC), local validation on your own specialties, omission audits and a monitoring plan for after go-live. We evaluate these products; we never build them.");
+  assert.equal(pkg("ai-evaluation", "model-change-regression").forWhom, "Organisations that rely on vendor AI with no audit rights or notice of model changes in the contract, such as contact-centre AI at a regulated financial institution.");
+  assert.equal(
+    ae.faq.find((f) => f.q === "Will your report tell us the system is safe to deploy?").a,
+    "No. You get findings, not an assurance opinion, and it isn't an ISAE 3000 engagement (ASAE 3000 in Australia). Each finding is rated to your risk matrix and mapped to the instrument you use. The official accountable for AI use decides whether to deploy, on measured evidence rather than a demo.",
+  );
+  assert.equal(DATA["knowledge-assistant"].forLine, "Manufacturers, independent schools, non-clinical health teams and local government");
+  assert.equal(pkg("knowledge-assistant", "policy-procedure-assistant").forWhom, "Local government, independent schools, non-clinical health services and financial-services procedure teams whose staff ask questions of a policy and procedure library.");
+  // The hub matrices print this cell (orchestrator decision 2); Government's use case keeps its product name.
+  assert.equal(DATA["knowledge-assistant"].matrix.government, "Local government policy assistant");
+  assert.doesNotMatch(copyOf("knowledge-assistant"), /\bcouncils?\b/i);
+  assert.equal(pkg("document-registers", "trust-deed-register").timeline, "5–6 weeks after Week 0. The Two-Week Trial runs in a quieter window outside your peak tax season (in Australia, November to early December or April to May).");
+  assert.equal(pkg("document-registers", "compliance-certificate-register").oneLiner, "Reads compliance certificates, such as smoke-alarm and pool certificates, into one register of expiry dates. The rules for each state or jurisdiction are checked when the package is scoped.");
+  assert.equal(pkg("document-registers", "credentialing-referral-registers").oneLiner, "Reads credentialing documents from outside the national practitioner register (Ahpra in Australia), such as college fellowships and scope-of-practice letters, or referrals that arrive as PDFs or faxes, into a register a person checks. Administrative only: a person makes every credentialing or referral decision.");
+  // No Australian label stands alone in ④: APRA's and the DTA's terms are gone, and ASAE is only ever Australia's form of ISAE.
+  const copy = copyOf("ai-evaluation");
+  assert.doesNotMatch(copy, /\bAPRA-regulated\b|\baccountable official\b/i);
+  assert.doesNotMatch(copy, /\bASAE 3000\b(?![^.]*\bin Australia\))/);
+});
+
 test("voice: need-profile titles are short declaratives ending in a period, and card copy runs one or two sentences", () => {
   for (const id of IDS) {
     for (const n of DATA[id].needProfiles) {
