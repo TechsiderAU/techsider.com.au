@@ -1,0 +1,30 @@
+---
+// go-global §6.3: wraps an example built on Australian sources (the ④ sample report, wherever it
+// renders) in an element marked data-region="au" that opens with the "Australian example" label.
+// With no region it renders its slot unwrapped.
+import RegionLabel from "../ui/RegionLabel.astro";
+
+interface Props {
+  region: "au" | null;
+}
+
+const { region } = Astro.props;
+---
+{region ? (
+  <div class="region-example" data-region="au">
+    <RegionLabel kind="example" />
+    <slot />
+  </div>
+) : <slot />}
+
+<style>
+  .region-example {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+  }
+  .region-example > :global(.region-label) {
+    align-self: flex-start;
+  }
+</style>

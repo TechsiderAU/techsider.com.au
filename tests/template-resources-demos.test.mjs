@@ -16,7 +16,7 @@ import {
 } from "../src/fixtures/index.ts";
 import { crumbs, industryLink, solutionLink } from "../src/lib/site.ts";
 import { CHECKER_BADGE, DEMO_BADGE, DEMO_CTA, KIT_PENDING_NOTE, REPORT_BADGE, kitReviewedNote } from "../src/lib/fixed-copy.ts";
-import { REGION_LABEL } from "../src/lib/fixed-copy.ts";
+import { REGION_EXAMPLE_LABEL, REGION_LABEL } from "../src/lib/fixed-copy.ts";
 
 const KINDS = ["resources-hub", "safe-use-kits", "pay-for", "evaluation-method", "demos-hub", "demo", "demo-report"];
 const SAMPLE_CAPTION = "Sample report: Techsider testing its own demo system, so not independent.";
@@ -64,10 +64,10 @@ test("each template and DemoFrame takes exactly the props the blueprint names", 
   assert.deepEqual(propKeys(source("templates/ResourcesHubTemplate.astro")), ["site"]);
   assert.deepEqual(propKeys(source("templates/SafeUseKitsTemplate.astro")), ["kits", "site"]);
   assert.deepEqual(propKeys(source("templates/PayForTemplate.astro")), ["site", "asAt"]);
-  assert.deepEqual(propKeys(source("templates/EvaluationMethodTemplate.astro")), ["doc", "report", "harnessUrl", "site"]);
+  assert.deepEqual(propKeys(source("templates/EvaluationMethodTemplate.astro")), ["doc", "report", "harnessUrl", "site", "region"]);
   assert.deepEqual(propKeys(source("templates/DemosHubTemplate.astro")), ["demos", "site"]);
   assert.deepEqual(propKeys(source("templates/DemoTemplate.astro")), ["solution", "demo", "report", "site"]);
-  assert.deepEqual(propKeys(source("components/page/DemoFrame.astro")), ["title", "badge", "provenance"]);
+  assert.deepEqual(propKeys(source("components/page/DemoFrame.astro")), ["title", "badge", "provenance", "region"]);
 });
 
 test("every page: one template, one h1, no skipped heading level, unique ids, and every aria-labelledby target exists", () => {
@@ -337,8 +337,19 @@ test("every demo frame declares its provenance, and an illustrative one shows a 
 });
 
 test("a demo's provenance is required: DemoTemplate and DemoFrame take no demo without one", () => {
-  assert.match(source("templates/DemoTemplate.astro"), /demo: \{ title: string; kind: DemoKind; provenance: DemoData\["provenance"\] \};/, "DemoTemplate's demo.provenance is optional");
+  assert.match(source("templates/DemoTemplate.astro"), /demo: \{ title: string; kind: DemoKind; provenance: DemoData\["provenance"\]; region\?: "au" \| null \};/, "DemoTemplate's demo.provenance is optional");
   assert.match(source("components/page/DemoFrame.astro"), /^\s*provenance: DemoData\["provenance"\];$/m, "DemoFrame's provenance is optional");
+});
+
+test("go-global §6.3: the register demo's frame carries the Australian example label after its badge; the report demo, with no region, has no label", () => {
+  const frameOf = (kind) => byAttr(byAttr(template(kind), "data-page-hero")[0].outer, "data-demo-frame")[0];
+  const frame = frameOf("demo");
+  assert.equal(frame.attrs["data-region"], "au");
+  assert.deepEqual(byAttr(frame.inner, "data-region-label").map((l) => [l.attrs["data-region-label"], text(l.inner)]), [["example", REGION_EXAMPLE_LABEL]]);
+  const tags = startTags(frame.outer);
+  assert.ok(tags.findIndex((t) => "data-region-label" in t.attrs) > tags.findIndex((t) => "data-demo-badge" in t.attrs), "the label comes after the badge");
+  assert.equal(frameOf("demo-report").attrs["data-region"], undefined);
+  assert.deepEqual(byAttr(template("demo-report"), "data-region-label"), []);
 });
 
 test("the ④-like demo carries the sample report with its fixed caption; the register demo has none", () => {

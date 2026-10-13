@@ -41,6 +41,7 @@ test("the demo file is an illustrative register demo for ① that parses with th
   assert.equal(demo.kind, "register");
   assert.equal(demo.provenance, "illustrative");
   assert.equal(demo.run, undefined);
+  assert.equal(demo.region, "au", "go-global §6.3: the synthetic set uses Australian forms, so the demo is labelled an Australian example");
   assert.equal(demo.title, "Every value links to the page it came from.");
   // Each title carries the register's date, which expiry and vesting dates are read against, so an
   // "ok" expiry that a visitor's own date has passed still reads as right.

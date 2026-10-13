@@ -7,11 +7,14 @@
 // - #sample-report: SampleReport, whose fixed caption can't be switched off.
 // - #harness: rendered only once the harness is published (spec §12 item 4). Until then
 //   harnessUrl is null and the page has no harness block and no harness link.
+// - `region` "au" (go-global §6.3): the report is built on Australian sources, so RegionExample
+//   labels it "Australian example".
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import Prose from "../components/page/Prose.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
 import SampleReport from "../components/ui/SampleReport.astro";
+import RegionExample from "../components/demo/RegionExample.astro";
 import type { SampleReportData } from "../content/schemas";
 import type { DocumentData } from "../content/page-schemas";
 import { formatDate, isoDate } from "../lib/dates";
@@ -22,9 +25,10 @@ interface Props {
   report: SampleReportData;
   harnessUrl: string | null;
   site: SiteContext;
+  region?: "au" | null;
 }
 
-const { doc, report, harnessUrl, site } = Astro.props;
+const { doc, report, harnessUrl, site, region = null } = Astro.props;
 const evaluation = site.solutions[3];
 ---
 <div class="template" data-template="evaluation-method">
@@ -43,7 +47,7 @@ const evaluation = site.solutions[3];
   </PageSection>
 
   <PageSection id="sample-report" title="The sample report">
-    <SampleReport report={report} />
+    <RegionExample region={region}><SampleReport report={report} /></RegionExample>
   </PageSection>
 
   {harnessUrl !== null && (

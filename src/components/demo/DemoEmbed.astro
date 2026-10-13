@@ -9,14 +9,18 @@
 // - ⑤: the compact checker frame, badged as a client-side tool: CheckerSummary, which links to the
 //   full tool on /resources/what-you-already-pay-for/. It has no engine, so the page loads no
 //   checker script.
+// go-global §6.3: a demo built on Australian sources (demoRegion() "au") carries the "Australian
+// example" label: in its frame, or, for the ④ report, in RegionExample's wrapper.
 import DemoFrame from "../page/DemoFrame.astro";
 import SampleReport from "../ui/SampleReport.astro";
 import CheckerSummary from "./CheckerSummary.astro";
 import DemoEngineSlot from "./DemoEngineSlot.astro";
 import DemoTranscriptSlot from "./DemoTranscriptSlot.astro";
+import RegionExample from "./RegionExample.astro";
 import type { DemoData } from "../../content/schemas";
 import { CHECKER_BADGE, DEMO_BADGE } from "../../lib/fixed-copy";
 import type { SiteContext } from "../../lib/site";
+import { demoRegion } from "../../lib/views/demos";
 
 interface Props {
   demo: DemoData;
@@ -25,15 +29,16 @@ interface Props {
 }
 
 const { demo, site, level = 2 } = Astro.props;
+const region = demoRegion(demo);
 ---
-{demo.kind === "report" && <SampleReport report={demo.data} />}
+{demo.kind === "report" && <RegionExample region={region}><SampleReport report={demo.data} /></RegionExample>}
 {demo.kind === "checker" && (
   <DemoFrame title={demo.title} badge={CHECKER_BADGE} provenance={demo.provenance}>
     <CheckerSummary slot="transcript" site={site} />
   </DemoFrame>
 )}
 {(demo.kind === "register" || demo.kind === "assistant" || demo.kind === "inbox") && (
-  <DemoFrame title={demo.title} badge={DEMO_BADGE} provenance={demo.provenance}>
+  <DemoFrame title={demo.title} badge={DEMO_BADGE} provenance={demo.provenance} region={region}>
     <DemoEngineSlot slot="engine" demo={demo} site={site} level={level} />
     <DemoTranscriptSlot slot="transcript" demo={demo} site={site} level={level} />
   </DemoFrame>

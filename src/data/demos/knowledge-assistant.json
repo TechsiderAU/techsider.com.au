@@ -3,6 +3,7 @@
   "title": "Staff questions, answered with citations or refused.",
   "kind": "assistant",
   "provenance": "illustrative",
+  "region": "au",
   "data": {
     "scenarios": [
       {

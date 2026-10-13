@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { siteContext } from "../src/lib/site.ts";
-import { demoCards, demoFor } from "../src/lib/views/demos.ts";
+import { demoCards, demoFor, demoRegion } from "../src/lib/views/demos.ts";
 
 const SITE = siteContext(true);
 const KINDS = ["register", "assistant", "inbox", "report", "checker"];
@@ -34,4 +34,12 @@ test("demoFor and demoCards throw when a solution has no demo, or a demo file na
   assert.throws(() => demoFor(crossed, "document-registers"), {
     message: 'src/data/demos/document-registers.json names solution "knowledge-assistant": a demo file is named after its own solution',
   });
+});
+
+test("demoRegion: \"au\" for a demo whose file says region: au; null for any other, and for the checker (go-global §6.3)", () => {
+  const demo = (kind, extra = {}) => ({ solution: "x", title: "Synthetic demo", kind, provenance: "illustrative", data: {}, ...extra });
+  assert.equal(demoRegion(demo("assistant", { region: "au" })), "au");
+  assert.equal(demoRegion(demo("report", { region: "au" })), "au");
+  assert.equal(demoRegion(demo("inbox")), null);
+  assert.equal(demoRegion({ solution: "x", title: "Synthetic checker", kind: "checker", provenance: "sourced", data: { source: "platform-ai" } }), null);
 });

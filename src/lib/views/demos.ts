@@ -32,3 +32,12 @@ export function demoCards(entries: readonly { id: string; data: DemoData }[], si
     return { solutionId: s.id, title: demo.title, kind: demo.kind };
   });
 }
+
+/**
+ * go-global §6.3: "au" when a demo is built on Australian sources (its file says region: au), so its
+ * frame or report carries the "Australian example" label; null otherwise. The ⑤ checker has no
+ * region field: PlatformChecker, PlatformFacts and CheckerSummary always carry their own label.
+ */
+export function demoRegion(demo: DemoData): "au" | null {
+  return demo.kind === "checker" ? null : (demo.region ?? null);
+}

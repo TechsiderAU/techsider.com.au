@@ -288,6 +288,8 @@ export function buildRegisterDemo() {
     title: "Every value links to the page it came from.",
     kind: "register",
     provenance: "illustrative",
+    // go-global §6.3: synthetic Australian forms (management authorities, discretionary trust deeds).
+    region: "au",
     data: {
       documents: [...agreements, ...deeds].map((x) => x.doc),
       registers: [

@@ -3,6 +3,7 @@
   "title": "A sample evaluation report on our own Knowledge Assistant demo.",
   "kind": "report",
   "provenance": "illustrative",
+  "region": "au",
   "data": {
     "system": "Techsider’s Knowledge Assistant demo: cited answers from Victoria’s public-sector generative AI Guideline and Guidance, and from APRA’s CPS 230",
     "n": 120,

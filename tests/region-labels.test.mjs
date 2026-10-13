@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { readDist, readPreviewDist } from "./helpers.mjs";
 import { elements, readFrontmatter } from "../scripts/ci/lib.mjs";
-import { makeIndustrySchema, makeKitSchema, makeSolutionSchema, plainRef, traceFile } from "../src/content/schemas.ts";
+import { makeDemoSchema, makeIndustrySchema, makeKitSchema, makeSolutionSchema, plainRef, traceFile } from "../src/content/schemas.ts";
 import { SOLUTION_GUIDES } from "../src/lib/marketing.ts";
 import { siteContext } from "../src/lib/site.ts";
 
@@ -264,5 +264,36 @@ test("industry scenarios on an Australian trace are marked data-region=au and la
     assert.equal(scenario.attrs["data-region"], au ? "au" : undefined, id);
     assert.deepEqual(labelsIn(scenario.inner), au ? EXAMPLE_LABEL : [], `${id}: label`);
     if (au) assert.match(scenario.inner, /^\s*<p\b[^>]*\bdata-provenance-label\b[^>]*>[^<]*<\/p>\s*<span\b[^>]*\bdata-region-label="example"/, `${id}: the label doesn't follow the provenance label`);
+  }
+});
+
+/** go-global §6.3: the solutions whose demo is built on Australian sources. */
+const AU_DEMOS = ["knowledge-assistant", "document-registers", "ai-evaluation"];
+
+test("data: the knowledge-assistant, document-registers and ai-evaluation demos, and only they, say region: au (go-global §6.3)", () => {
+  for (const s of PROD.solutions) {
+    assert.equal(makeDemoSchema(plainRef).parse(JSON.parse(readRepo(`src/data/demos/${s.id}.json`))).region, AU_DEMOS.includes(s.id) ? "au" : undefined, s.id);
+  }
+});
+
+test("demos on Australian sources: their frames, and the ④ report wherever it shows, carry the Australian example label", () => {
+  for (const id of ["knowledge-assistant", "document-registers", "draft-for-approval"]) {
+    const au = AU_DEMOS.includes(id);
+    for (const page of [`demos/${id}/index.html`, `solutions/${id}/index.html`]) {
+      const [frame] = elementsWith(mainHtml(readDist(page)), "data-demo-frame");
+      assert.equal(frame.attrs["data-region"], au ? "au" : undefined, page);
+      let own = frame.inner;
+      for (const slot of [...elementsWith(frame.inner, "data-demo-engine"), ...elementsWith(frame.inner, "data-demo-transcript")]) own = own.replace(slot.outer, "");
+      assert.deepEqual(labelsIn(own), au ? EXAMPLE_LABEL : [], `${page}: the frame's own label`);
+    }
+  }
+  const [frame] = elementsWith(mainHtml(readDist("demos/ai-evaluation/index.html")), "data-demo-frame");
+  assert.equal(frame.attrs["data-region"], "au", "the ④ demo page's frame");
+  for (const page of ["demos/ai-evaluation/index.html", "solutions/ai-evaluation/index.html", "resources/evaluation-method/index.html"]) {
+    const wrappers = elements(mainHtml(readDist(page)), (t) => classList(t).includes("region-example"));
+    assert.equal(wrappers.length, 1, `${page}: one labelled report`);
+    assert.equal(wrappers[0].attrs["data-region"], "au", page);
+    assert.equal(elementsWith(wrappers[0].inner, "data-sample-report").length, 1, `${page}: the wrapper holds the report`);
+    assert.deepEqual(labelsIn(wrappers[0].inner), EXAMPLE_LABEL, `${page}: the report's label`);
   }
 });
