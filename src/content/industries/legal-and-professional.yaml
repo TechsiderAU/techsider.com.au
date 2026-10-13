@@ -63,7 +63,7 @@ dontDo:
   - Rebuild matter Q&A, legal research or drafting inside Word. Your practice and research tools already do these.
   - Build KYC, ID verification or AML/CTF program software.
   - Draft or tailor legal wording. Your own adviser approves any policy, consent or engagement-letter text.
-rulesThatTravel: "Courts and professional bodies in many countries have reached the same few rules for generative AI. The Council of Bars and Law Societies of Europe published its guide on generative AI for lawyers in 2025. Its 2026 technical guide says lawyers must understand how the tools they use work, and explains hosting options so they can choose tools that protect client confidentiality. Courts and bar associations elsewhere have published guidance along the same lines. The EU AI Act's high-risk list covers AI that helps a court research and interpret facts and law, not a law firm's own tools. We test tools on your own matters and keep a record of every check. Your own court's practice notes and conduct rules always come first."
+rulesThatTravel: "Courts and professional bodies in many countries have reached the same few rules for generative AI. The Council of Bars and Law Societies of Europe published its guide on generative AI for lawyers in 2025. Its 2026 technical guide says lawyers must understand how the tools they use work, and explains hosting options so they can choose tools that protect client confidentiality. Courts and bar associations elsewhere have published guidance along the same lines. The EU AI Act's high-risk category for the courts covers AI that helps a court research and interpret facts and law, not a law firm's own research tools. We test tools on your own matters and keep a record of every check. Your own court's practice notes and conduct rules always come first."
 problem:
   from: In Victoria, Australia, lawyers reach for general-purpose AI and check each answer by hand, often in workplaces with no AI guidelines.
   to: Your firm chooses its AI on a test of your own matters, and keeps a record of every check on court work.
@@ -141,7 +141,7 @@ faq:
   - q: How can we check your evaluation when you have no clients yet?
     a: "Don't take it on trust: we have no clients yet. Your lawyers write and grade the questions, and you can re-run the test without us."
   - q: Does testing mean our client files leave the firm?
-    a: Only to the tools under test. Tests run in tool accounts your firm controls, on cleared matters or de-identified copies, and a data note first records each vendor's published storage and processing locations, with their dates. Whether a client must consent is your call.
+    a: Only to the tools under test; we don't take a copy. Tests run in tool accounts your firm controls, on cleared matters or de-identified copies. Our team reaches those accounts remotely from Sydney, under the data-transfer terms in your contract. A data note first records each vendor's published storage and processing locations, with their dates. Whether a client must consent is your call.
   - q: Are you paid by legal AI vendors?
     a: No. We take no resale margin or referral fees from vendors we evaluate, and disclose any vendor relationship. We never issue an independent evaluation of a system we built, configured or advised on for the same firm.
   - q: Does your verification record meet your court's practice notes?

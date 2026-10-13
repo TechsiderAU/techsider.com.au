@@ -321,3 +321,14 @@ test("go-global §3.3, §5.5: Education, Manufacturing and Real estate say where
   for (const id of IDS.filter((id) => id !== "real-estate")) assert.match(industry(id).problem.from, /^In Australia, /, `${id}: the problem's Australian figure isn't labelled (spec §3.3)`);
   assert.doesNotMatch(allStrings(mfg.firstEngagement).join(" "), /\bHSR\b/, "manufacturing: the Australian WHS acronym (spec §3.3)");
 });
+
+// ---------- the final whole-branch review (go-global, F19) ----------
+
+test("Education: the Rules paragraph's EU AI Act sentence says no more than Annex III point 3, where steering learning counts only as part of grading (final review F19)", () => {
+  const paragraph = industry("education").rulesThatTravel;
+  assert.ok(
+    paragraph.includes("The EU AI Act treats AI that admits students, grades their work (including to steer their learning) or monitors them during tests as high-risk from 2 December 2027 (as amended in July 2026)."),
+    paragraph,
+  );
+  assert.doesNotMatch(paragraph, /\bsteers their learning\b/);
+});

@@ -42,7 +42,7 @@ packages:
   - { solution: document-registers, package: trust-deed-register }
   - { solution: ai-switch-on, package: admin-hours-audit-switch-on }
   - { solution: draft-for-approval, package: ato-letter-sorter }
-platformFirst: Run Karbon? Its email summaries and suggested replies are on by default. On FYI, look at the ATO SmartDocs integration for ATO documents. For one client's due diligence, First AML's AI document reader reads trust deeds inside the case.
+platformFirst: Run Karbon? Its email summaries and suggested replies are on by default. In Australia, on FYI, look at its ATO SmartDocs integration for tax-office documents. For one client's due diligence, First AML's AI document reader reads trust deeds inside the case.
 dontDo:
   - We don't rebuild bookkeeping, reconciliation or GST and VAT return preparation (BAS in Australia).
   - We don't make due-diligence decisions. Your AML/CTF compliance officer does.
@@ -130,5 +130,6 @@ faq:
     a: The register runs in the cloud region you choose, in your own Microsoft or AWS account, or in an Australian region if we manage it for you. Our team reaches it remotely from Sydney, under the data-transfer terms in your contract. For Switch-On, you see each vendor's processing location where it's published.
   - q: Why not just use Karbon's AI, or FYI's ATO SmartDocs integration?
     a: Use them first. Neither reads your trust deeds into a register you can check field by field.
+    region: au
   - q: What happens when the AI model changes?
     a: The test on your answer key is re-run before the new model is used, and you see old and new results side by side.

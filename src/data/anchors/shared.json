@@ -8,7 +8,7 @@
       "binding": "A voluntary international standard, certifiable by a certification body.",
       "status": "published",
       "statusDate": "2023-12-18",
-      "asks": "An AI management system: set roles, assess AI risks and the impact of each AI system, apply controls across the AI life cycle, monitor, and keep improving. It shares its structure with ISO 9001 and ISO 14001, so it can sit inside a management system you already run.",
+      "asks": "Requirements for establishing, implementing, maintaining and continually improving an AI management system in an organisation.",
       "evidence": "Test reports, a register of each AI system's risks and impacts, and change records your management system can file.",
       "source": "https://webstore.iec.ch/en/publication/90574",
       "asAt": "2026-10-12",

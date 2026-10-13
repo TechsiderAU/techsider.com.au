@@ -51,7 +51,7 @@ export const CONTACT: ContactData = {
       entity: "Lark Suite",
       purpose: "Hosts our email, including the enquiries you send us",
       country: "Not yet confirmed with Lark Suite",
-      data: "Emails you send us: your name, your email address and your message",
+      data: "Emails you send us, and the enquiries FormSubmit forwards: the details you enter and, when JavaScript runs, your browser's time zone",
     },
     {
       entity: "FormSubmit",

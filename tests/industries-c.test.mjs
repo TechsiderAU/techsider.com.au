@@ -337,3 +337,22 @@ test("go-global §3.3, §5.6: Healthcare, Resources & energy and Legal & profess
     }
   }
 });
+
+// ---------- the final whole-branch review (go-global, F3 and F5) ----------
+
+test("Legal & professional and Healthcare: each Rules paragraph's EU AI Act sentence says no more than its anchor, and the Annex I chip links the read Annex I text (final review F3, F5)", () => {
+  // F3: the courts carve-out is Annex III point 8(a)'s alone; point 4 (employment) reaches any firm's own AI.
+  const legal = industryData("legal-and-professional").rulesThatTravel;
+  assert.ok(legal.includes("The EU AI Act's high-risk category for the courts covers AI that helps a court research and interpret facts and law, not a law firm's own research tools."), legal);
+  assert.doesNotMatch(legal, /high-risk list/);
+  // F5: Article 6(1) and Annex I points 11 and 12, read on the AI Act Service Desk on 2026-10-14
+  // (the verification note's row A4), with the date from Article 113(c)(ii) (row E2).
+  const health = industryData("healthcare").rulesThatTravel;
+  assert.ok(health.includes("In the EU, AI that is a medical device, or a safety component of one, is high-risk from 2 August 2028 (as amended in July 2026) where the device needs third-party conformity assessment."), health);
+  assert.doesNotMatch(health, /\bAI in a medical device\b/);
+  const annexI = JSON.parse(readRel("src/data/anchors/healthcare.json")).anchors.find((a) => a.id === "eu-ai-act-annex-i-medical-devices");
+  assert.deepEqual(
+    [annexI.featured, annexI.checkLevel, annexI.source, annexI.asAt, annexI.lastReviewed],
+    [true, "P", "https://ai-act-service-desk.ec.europa.eu/en/ai-act/annex-1", "2026-10-14", "2026-10-14"],
+  );
+});

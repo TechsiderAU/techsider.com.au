@@ -237,6 +237,8 @@ test("go-global §5.5: Financial services, Education and Healthcare each say wha
 /** Spec §5.6: the FAQs only about an Australian rule, program or package, by page, in data order. Every other FAQ stays untagged. */
 const AU_TAGGED_FAQS = {
   government: ["We're a council. What do you design around?"],
+  // Final review F24: FYI's ATO SmartDocs integration is for the Australian Taxation Office's documents.
+  accounting: ["Why not just use Karbon's AI, or FYI's ATO SmartDocs integration?"],
   education: ["Will your evaluation report satisfy TEQSA?"],
   manufacturing: ["Should we go to an AI Adopt Centre first?"],
   "real-estate": ["Is this an audit? Will our auditor accept it?", "Does AML/CTF Tranche 2 apply to property management?"],

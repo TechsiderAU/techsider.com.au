@@ -160,7 +160,12 @@ const INDUSTRIES = {
     ],
     dataOnly: [],
     reviewBy: { "eu-ai-act-annex-i-medical-devices": "2027-01-12", "eu-ai-act-annex-iii-5a-5d": "2027-01-12" },
-    pins: [["who-lmm-guidance", "asks", /\bautomation bias\b/]],
+    pins: [
+      ["who-lmm-guidance", "asks", /\bautomation bias\b/],
+      // Final review F5: the chip links the Annex I text read on the AI Act Service Desk (row A4), which
+      // lists the EU medical device rules, not the Commission's overview, which never names them (row E15).
+      ["eu-ai-act-annex-i-medical-devices", "source", "https://ai-act-service-desk.ec.europa.eu/en/ai-act/annex-1"],
+    ],
   },
   "resources-and-energy": {
     shared: BASE_ROW,
@@ -254,6 +259,9 @@ test("shared.json: x1–x8 in order, no row of its own, x1, x4, x6, x7 and x8 th
   assert.match(sharedById.get("x8").asks, /^Art 3\(2\) applies the GDPR\b/);
   // Correction 10: principle 1.5 is paraphrased until its P9 page is re-read.
   assert.doesNotMatch(sharedById.get("x6").asks, /["“”]/);
+  // Final review F11: X1 says only what the IEC listing's abstract supports, until a person's read of
+  // ISO/IEC 42001 on iso.org (row F3 of the verification note) restores the fuller outline.
+  assert.equal(sharedById.get("x1").asks, "Requirements for establishing, implementing, maintaining and continually improving an AI management system in an organisation.");
 });
 
 test("no UNVERIFIED anchor is written, and only P or P* anchors are featured (spec §5.3 rules 1–3)", () => {

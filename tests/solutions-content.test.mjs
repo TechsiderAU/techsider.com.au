@@ -439,10 +439,13 @@ test("go-global §3.3 and contract §5 rules 4–5: a matrix cell, a Safe-Use Ki
   const switchOn = DATA["ai-switch-on"];
   const adminHours = switchOn.packages.find((p) => p.id === "admin-hours-audit-switch-on");
   assert.equal(switchOn.needProfiles[1].body, "In Australia, where a Safe-Use Kit for your industry is published, Switch-On applies it as is. Your own adviser approves any consent, engagement-letter or policy wording.");
-  assert.equal(switchOn.genericPackage.scope, "Week 1: an Admin Hours Audit. Weeks 2–3: configure the AI features you already own, apply the Australian Safe-Use Kit for your industry where one is published, and train staff. Day 30: an hours-saved report.");
-  assert.equal(switchOn.genericPackage.inclusions[3], "The Australian Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry");
-  assert.equal(adminHours.scope, "The Admin Hours Audit takes 1 week and maps where staff hours go. Switch-On takes 2–3 weeks: it configures features you already own, applies the relevant Australian Safe-Use Kit as published, where one has been published, trains staff and measures the hours saved at day 30.");
-  assert.equal(adminHours.inclusions[3], "The Australian Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry. Otherwise, your own AI policy applies.");
+  // Final review F23: every line that offers a kit limits it to firms in Australia, where the kits' rules apply.
+  assert.equal(switchOn.genericPackage.scope, "Week 1: an Admin Hours Audit. Weeks 2–3: configure the AI features you already own; for firms in Australia, apply the Safe-Use Kit for your industry where one is published; and train staff. Day 30: an hours-saved report.");
+  assert.equal(switchOn.genericPackage.inclusions[3], "For firms in Australia, the Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry");
+  assert.equal(adminHours.scope, "The Admin Hours Audit takes 1 week and maps where staff hours go. Switch-On takes 2–3 weeks: it configures features you already own; for firms in Australia, it applies the relevant Safe-Use Kit as published, where one has been published; and it trains staff and measures the hours saved at day 30.");
+  assert.equal(adminHours.inclusions[3], "For firms in Australia, the Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry. Otherwise, your own AI policy applies.");
+  const kitOffers = strings(switchOn).flatMap((s) => s.split(/(?<=[.?!])\s+/)).filter((s) => /Safe-Use Kit/.test(s) && !s.endsWith("?"));
+  for (const s of kitOffers) assert.match(s, /\bin Australia\b/i, `⑤ offers a kit outside Australia: "${s}"`);
   const offers = SERVICES.entryOffers.flatMap((o) => [o.entry, o.then]);
   for (const s of [
     "Accounting Safe-Use Kit (Australia), then a Trial of the Trust Deed & Client Structure Register",
