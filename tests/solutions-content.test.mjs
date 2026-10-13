@@ -187,6 +187,27 @@ test("region notes: where we run the model, the note says what happens when the 
   for (const [id, note] of Object.entries(notes)) assert.doesNotMatch(note, /isn't (?:offered|available) in an Australian region/, id);
 });
 
+// go-global §4.2–§4.3, D3: managed systems run in an Australian region; everything else runs in the
+// region the client chooses. These are the only phrasings a solution page may use to name an
+// Australian region.
+const MANAGED_AU_REGION = /\bor in an Australian region (?:if we manage|we manage)\b|\bor in ours in an Australian region\b/g;
+
+test("a solution page names an Australian region only for what Techsider manages, and assumes no Australian customer (go-global §4.2, D3)", () => {
+  for (const id of IDS) {
+    for (const s of strings(DATA[id])) {
+      assert.doesNotMatch(s.replace(MANAGED_AU_REGION, ""), /\bAustralian region\b/, `${id}: an Australian region outside the managed option: "${s}"`);
+      assert.doesNotMatch(s, /\boutside Australia\b|\bfor Australian customers\b/, `${id}: "${s}"`);
+    }
+  }
+});
+
+test("each 'Where is our data processed?' answer says who sets the location; ②'s also carries the remote access (go-global §4.4)", () => {
+  const answer = (id) => DATA[id].faq.find((f) => f.q === "Where is our data processed?").a;
+  assert.match(answer("knowledge-assistant"), REMOTE_ACCESS_END);
+  assert.match(answer("knowledge-assistant"), /\bMicrosoft sets where model calls are processed\b/);
+  assert.match(answer("ai-switch-on"), /\bwhere each vendor sets the processing location\b/);
+});
+
 test("per-solution switches: ④ is 'Engagements' with the independence policy; ⑤ has no program", () => {
   for (const id of IDS) {
     const d = DATA[id];

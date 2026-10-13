@@ -221,9 +221,9 @@ howWeTest:
 whereItRuns:
   choices: [your-account, managed]
   note: >-
-    The register runs in your own Microsoft or AWS account in an Australian region, or in an
+    The register runs in your own Microsoft or AWS account, in the cloud region you choose, or in an
     Australian region we manage. It never runs inside a vendor's platform, and every processing step,
-    model inference included, is designed to run in an Australian region.
+    model inference included, is designed to run in the same region as the register.
 independencePolicy: false
 platformFirst: >-
   If your need is due diligence on one client at a time, check what your AML platform already reads:

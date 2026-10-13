@@ -107,8 +107,9 @@ packages:
     name: Private Workspace
     status: on-request
     oneLiner: >-
-      A private AI workspace in an Australian region, in your account or managed by us, for firms whose
-      data rules bar the general AI tools they have and who hold no suitable licence.
+      A private AI workspace in your account in the region you choose, or in ours in an Australian
+      region, for firms whose data rules bar the general AI tools they have and who hold no suitable
+      licence.
   - id: citation-verification-log
     name: Citation Verification & AI-Use Disclosure Log
     status: on-request
@@ -125,8 +126,8 @@ whereItRuns:
   choices: [platform-you-license]
   note: >-
     Switch-On works only inside platforms you already license, so each vendor sets where your data
-    is processed. The Private Workspace, on request, is the option for work that has to stay in an
-    Australian region.
+    is processed. The Private Workspace, on request, is the option for work that has to stay in a
+    particular region.
 independencePolicy: false
 platformFirst: >-
   Check what you already pay for before you buy anything new: many practice, property and office
@@ -150,9 +151,9 @@ faq:
       saved measured at day 30.
   - q: Where is our data processed?
     a: >-
-      Inside the platforms you already license, where each vendor sets the processing location. Many
-      vendors don't publish where AI processing runs for Australian customers. The data note tells
-      you, vendor by vendor, what each publishes and when it was checked.
+      Inside the platforms you already license, where each vendor sets the processing location. The
+      data note tells you, vendor by vendor, what each publishes about that location, or that it
+      publishes none, and when it was checked.
   - q: What is a Safe-Use Kit?
     a: >-
       A starter set for accounting, legal or property teams, such as consent wording, a one-page AI

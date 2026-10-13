@@ -123,7 +123,7 @@ howWeTest:
 whereItRuns:
   choices: [your-account, managed]
   note: >-
-    The automation runs in your own Microsoft or AWS account in an Australian region, or in an
+    The automation runs in your own Microsoft or AWS account, in the cloud region you choose, or in an
     Australian region we manage. It reaches each system through that system's own access, and where
     that access is read-only, the automation stays read-only.
 independencePolicy: false

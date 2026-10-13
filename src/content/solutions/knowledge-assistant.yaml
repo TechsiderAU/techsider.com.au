@@ -181,9 +181,10 @@ howWeTest:
 whereItRuns:
   choices: [your-account, managed, platform-you-license]
   note: >-
-    On the web, the assistant runs in your own Microsoft or AWS account in an Australian region, or
-    in one we manage. Inside Microsoft 365, it works through the Copilot you already license, and the
-    search index we build stays in an Australian region.
+    On the web, the assistant runs in your own Microsoft or AWS account, in the cloud region you
+    choose, or in an Australian region we manage. Inside Microsoft 365, it works through the Copilot
+    you already license. The search index we build runs in your account in the region you choose, or
+    in ours in an Australian region.
 independencePolicy: false
 platformFirst: >-
   If your staff have Microsoft Copilot licences, SharePoint's built-in AI can already answer from a
@@ -222,7 +223,8 @@ faq:
       Either way, you see the error rate before you rely on anything.
   - q: Where is our data processed?
     a: >-
-      It depends on where the assistant lives. On the web, the index and the model run in an
-      Australian region, in your account or ours. Inside Microsoft 365, Microsoft sets where model
-      calls are processed, and we show you what it publishes, including that they may run outside
-      Australia.
+      It depends on where the assistant lives. On the web, the index and the model run in your own
+      account in the cloud region you choose, or in ours in an Australian region. Inside Microsoft
+      365, Microsoft sets where model calls are processed, and we show you what it publishes for your
+      geography, including whether they may run outside it. Our team reaches the assistant remotely
+      from Sydney, under the data-transfer terms in your contract.
