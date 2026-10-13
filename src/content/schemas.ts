@@ -10,6 +10,9 @@ export const jurisdiction = z.enum(["cth", "nsw", "vic", "qld", "local"]);
 export const faqItem = z.strictObject({ q: z.string().min(5), a: z.string().min(20) });
 /** go-global §3.3, §5.6, §6.1: marks Australia-only data. */
 export const auRegion = z.literal("au");
+/** go-global §5.6: an industry FAQ; region "au" moves it into #faq-au. The shared faqItem (above) is unchanged. */
+export const industryFaqItem = z.strictObject({ q: z.string().min(5), a: z.string().min(20), region: auRegion.optional() });
+export type IndustryFaqItem = z.infer<typeof industryFaqItem>;
 export const sourceRef = z.strictObject({ label: z.string().min(3), url: z.url(), asAt: z.coerce.date() });
 export const metric = z.strictObject({ value: z.number(), unit: z.string().optional() });
 export const provenance = z.enum(["measured", "illustrative"]);
@@ -123,14 +126,21 @@ export const makeIndustrySchema = (ref: RefFactory) => z.strictObject({
   packages: z.array(z.strictObject({ solution: ref("solutions"), package: slug, jurisdiction: jurisdiction.optional() })).min(3),
   platformFirst: z.string().optional(),
   dontDo: z.array(z.string()).min(1),
+  // go-global §5.2: the "Rules that travel" paragraph, 140 words or fewer with its travel sentence.
+  rulesThatTravel: z.string().min(1).optional(),
   problem: z.strictObject({ from: z.string(), to: z.string(), source: sourceRef }),
   workflow: z.array(z.strictObject({ id: slug, stage: z.string(), useCases: z.array(useCase(ref)).min(1) })).length(4),
   mockPanel,
   scenario: z.strictObject({ title: z.string(), problem: z.string(), approach: z.string(), measure: z.array(z.string()).min(1), shipsFirst: z.string(), trace: slug }),
   firstEngagement: z.strictObject({ needFromYou: z.array(z.string()).min(1), youGet: z.array(z.string()).min(1), exitRamp: z.string() }),
-  faq: z.array(faqItem).min(5).max(7),
+  faq: z.array(industryFaqItem).min(5).max(7),
   jurisdictions: z.array(jurisdiction).min(1).optional(),
-}).superRefine(industrySections);
+}).superRefine(industrySections).superRefine((d, ctx) => {
+  // go-global §5.6: the page's #faq renders the untagged questions, so it always has one.
+  if (d.faq.every((f) => f.region === "au")) {
+    ctx.addIssue({ code: "custom", path: ["faq"], message: 'every FAQ is tagged region "au": keep at least one untagged FAQ for #faq (go-global §5.6)' });
+  }
+});
 
 export const regulatoryRow = z.strictObject({
   id: slug, obligation: z.string(), meaning: z.string(), design: z.string(), evidence: z.string(),

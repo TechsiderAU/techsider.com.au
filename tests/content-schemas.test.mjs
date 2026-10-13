@@ -8,7 +8,7 @@ import {
   deliveryChoice, buyer, interval, JURISDICTION_SECTION, SECTION_TITLE, SECTION_ORDER,
   citedSource, corpusRef, assistantTurn, assistantData, registerCell, syntheticDoc, registerData,
   inboxMessage, inboxData, checkerData, platformAiEntry, platformAiFile, CHECKER_PROVENANCE,
-  auRegion,
+  auRegion, faqItem, industryFaqItem,
 } from "../src/content/schemas.ts";
 import {
   positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema,
@@ -73,6 +73,7 @@ const USE_CASE = { name: "Test use case", solution: "test-solution", status: "la
 const SOURCE = { label: "Test source", url: "https://example.com/source", asAt: "2026-09-01" };
 const INDUSTRY = {
   promise: "Test promise", constraintSet: "Test constraints", constraintHook: "Test hook",
+  rulesThatTravel: "Test paragraph: the rules that travel to this test industry.",
   flagshipUseCases: [USE_CASE, USE_CASE, { ...USE_CASE, status: "on-request", note: "Test note" }],
   obligationChips: [1, 2, 3, 4].map((n) => ({ label: `Test chip ${n}`, row: `test-row-${n}` })),
   worksAlongside: ["read-only", "import", "draft-for-approval"].map((method, i) => ({ system: `Test system ${i + 1}`, method, verified: "2026-09-01" })),
@@ -356,6 +357,27 @@ function badWith(schema, value, path, message) {
   const issues = bad(schema, value, message);
   assert.ok(issues.some((i) => i.path.join(".") === path && i.message === message), `expected "${message}" at ${path}: ${JSON.stringify(issues)}`);
 }
+
+test("industry: rulesThatTravel holds the Rules that travel paragraph, and stays optional until every industry has one (go-global §5.2)", () => {
+  assert.equal(ok(industrySchema, INDUSTRY, "industry").rulesThatTravel, INDUSTRY.rulesThatTravel);
+  const { rulesThatTravel, ...without } = INDUSTRY;
+  assert.equal(ok(industrySchema, without, "industry without rulesThatTravel").rulesThatTravel, undefined);
+  bad(industrySchema, { ...INDUSTRY, rulesThatTravel: "" }, "an empty rulesThatTravel");
+});
+
+test("industry FAQs: an optional region \"au\" moves a question into the Australia band, and at least one stays untagged (go-global §5.6)", () => {
+  const tagged = (n) => faq(5).map((f, i) => (i < n ? { ...f, region: "au" } : f));
+  const data = ok(industrySchema, { ...INDUSTRY, faq: tagged(4) }, "four of five FAQs tagged au");
+  assert.deepEqual(data.faq.map((f) => f.region ?? null), ["au", "au", "au", "au", null]);
+  badWith(industrySchema, { ...INDUSTRY, faq: tagged(5) }, "faq", 'every FAQ is tagged region "au": keep at least one untagged FAQ for #faq (go-global §5.6)');
+  badWith(industrySchema, { ...GOVERNMENT, faq: tagged(5) }, "faq", 'every FAQ is tagged region "au": keep at least one untagged FAQ for #faq (go-global §5.6)');
+  bad(industrySchema, { ...INDUSTRY, faq: faq(5).map((f, i) => (i === 0 ? { ...f, region: "nz" } : f)) }, "an industry FAQ tagged nz");
+  ok(industryFaqItem, { ...faq(1)[0], region: "au" }, "an industry FAQ tagged au");
+  bad(industryFaqItem, { ...faq(1)[0], regoin: "au" }, "an industry FAQ with a misspelt region");
+  // The shared faqItem (Home, solutions, services, Trust) is unchanged: it takes no region.
+  bad(faqItem, { ...faq(1)[0], region: "au" }, "a shared FAQ tagged au");
+  bad(solutionSchema, { ...SOLUTION, faq: faq(3).map((f, i) => (i === 0 ? { ...f, region: "au" } : f)) }, "a solution FAQ tagged au");
+});
 
 test("industry sections without jurisdictions: 4–6 chips, 3–5 systems, 3–4 packages, none tagged (spec §8.5)", () => {
   const many = (list, n) => Array.from({ length: n }, (_, i) => list[i % list.length]);
