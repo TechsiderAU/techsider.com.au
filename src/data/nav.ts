@@ -261,7 +261,7 @@ const CONTACT = describe(page("contact", "Contact", "/", "/contact/", "live"),
   "Tell Techsider what you're trying to fix with AI. Send an enquiry or email us to discuss your workflow, a Fit Call and next steps for your organisation.");
 
 const PRIVACY = describe(page("legal", "Privacy", "/legal/", "/legal/privacy/", "planned", "Privacy policy"),
-  "How Techsider collects, uses, stores and discloses the personal information you send us, which services handle it, and how to ask about it or have it corrected.");
+  "How Techsider collects, uses, stores and discloses personal information, which privacy laws apply, which services handle it, and how to use your privacy rights.");
 const WEBSITE_TERMS = describe(page("legal", "Website terms", "/legal/", "/legal/website-terms/", "planned"),
   "The terms for using techsider.com.au: general information, not advice; what the canned demos are; who owns the content; and how links to other sites work.");
 // A gated route (spec §10.2): the form provider redirects here, so the page goes live in the same

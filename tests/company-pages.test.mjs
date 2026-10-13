@@ -28,6 +28,7 @@ import { CONTACT, INTERNATIONAL } from "../src/data/contact.ts";
 import { POSITIONING } from "../src/data/positioning.ts";
 import { SERVICES } from "../src/data/services.ts";
 import { TRUST } from "../src/data/trust.ts";
+import { ENQUIRY_FIELDS, OPTIONAL_ENQUIRY_FIELDS } from "../src/lib/contact-form.ts";
 import { ABN_NOTE, CONTACT_BASE, CONTACT_H1, DELIVERY_MODEL, DISAMBIGUATION, INTERNATIONAL_HEADING } from "../src/lib/fixed-copy.ts";
 import { pageDescription, pageTitle } from "../src/lib/meta.ts";
 import { replySentence } from "../src/lib/reply-time.ts";
@@ -218,14 +219,104 @@ test("kits: accounting, legal and property, each pending lawyer review, its down
   assert.doesNotMatch(withoutComments(source("src/content/kits/property.yaml")), /Connector|PropertyMe/, "no connector until index A3 is answered (blueprint ruling 9)");
 });
 
-test("documents: the privacy policy and website terms are drafts naming the entity for review; the evaluation method is published", () => {
+// go-global §7.1: the privacy policy is rewritten for readers inside and outside Australia and stays a
+// draft until a lawyer reviews it (O2). These pins hold its structure, the line each of r3's gaps
+// P1–P15 rests on and every owner marker, so the lawyer's text lands as a reviewed change here.
+const PRIVACY_REVIEW_MARKER = "<!-- ⚑ owner: a lawyer reviews this policy before it publishes and settles every marker below (go-global §7.1, O2). -->";
+const PRIVACY_MARKERS = [
+  PRIVACY_REVIEW_MARKER,
+  "<!-- ⚑ owner: add the registered office address to the paragraph above, or confirm with the lawyer that the email address is enough contact detail for a controller (go-global §7.1 P1). -->",
+  "<!-- ⚑ owner: if an EU or UK representative is appointed, add their name and contact details here (go-global §7.1 P7, O1). -->",
+  "<!-- ⚑ owner: confirm with the lawyer whether Techsider is an APP entity or opts in under s 6EA of the Privacy Act, then keep or reword the next sentence and the OAIC route under Complaints (go-global §7.1 P13, O3). -->",
+  "<!-- ⚑ owner: before any outreach starts, take the O1 advice on e-marketing law and confirm the sources, the first-message notice and the do-not-contact list below (go-global §7.1 P9, O1). -->",
+  "<!-- ⚑ owner: the lawyer chooses one lawful basis for each purpose below from the alternatives given, and deletes the others (go-global §7.1 P3, O2). -->",
+  "<!-- ⚑ owner: add how long GitHub and Cloudflare keep request logs, from their own documentation, or say they don't publish it (go-global §7.1 P12). -->",
+  "<!-- ⚑ owner: confirm each provider's storage country with the provider, not from DNS, in src/data/contact.ts and here, and add the transfer safeguard each one relies on (go-global §7.1 P6, O4). -->",
+  "<!-- ⚑ owner: set the retention period for enquiries and outreach records, for example a number of months after our last contact, and put it in the first sentence below (go-global §7.1 P8, O2). -->",
+  "<!-- ⚑ owner: add the measures that protect our mailbox and devices, such as multi-factor sign-in, or link the Trust page once it is live (go-global §7.1 P15). -->",
+];
+// The APP order (what we collect, how, why, who else, outside Australia, how long, access, complaints)
+// with the GDPR and UK GDPR sections set in.
+const PRIVACY_HEADINGS = [
+  "Who we are", "Which laws apply", "Personal information in client work", "What we collect", "How we collect it",
+  "People we contact first", "Why we use it, and on what basis", "What you need to give us", "Who else handles it",
+  "Disclosure outside Australia", "How long we keep it", "Security", "Access, correction and your other rights",
+  "Complaints", "Changes to this policy",
+];
+// [gap, a line the draft must hold word for word]; P7 and P13 are held by their markers.
+const PRIVACY_LINES = [
+  ["P1", `${SITE.legalName} (ABN ${SITE.abn}) is responsible for the personal information this policy covers.`],
+  ["P1", 'Where the GDPR or the UK GDPR applies, we are its "controller".'],
+  ["P2", "The Privacy Act 1988 (Cth) and its Australian Privacy Principles (APPs) govern how we handle personal information."],
+  ["P2", "If you're in the European Union or the United Kingdom, the GDPR or the UK GDPR may also apply to how we handle your personal information."],
+  ["P3", "- **Reading your enquiry.** Basis: steps you ask us to take before a possible contract, or our legitimate interest in answering business enquiries."],
+  ["P3", "Basis: our legitimate interest in telling organisations about our services, or your consent, where the e-marketing law that applies to you requires it."],
+  ["P3", "Ticking the box on the enquiry form records that you agree to how we handle your enquiry. It isn't consent to receive marketing from us."],
+  ["P4", "- ask us to restrict how we use your personal information;"],
+  ["P4", "- object to how we use it, including, at any time, to its use for direct marketing, which we then stop;"],
+  ["P4", "- ask for a copy of the information you gave us in a common electronic format, or ask us to send it to another organisation;"],
+  ["P4", "- withdraw any consent you gave, at any time, without affecting what we did before you withdrew it."],
+  ["P4", "We respond to each request within one month."],
+  ["P5", `please email ${SITE.email} first, so we can try to put it right. You can also complain to a regulator:`],
+  ["P5", "- **In Australia:** the Office of the Australian Information Commissioner, at [oaic.gov.au](https://www.oaic.gov.au/)."],
+  ["P5", "- **In the European Union:** the data protection supervisory authority in the EU country where you live or work, or where you think the problem happened."],
+  ["P5", "- **In the United Kingdom:** the Information Commissioner's Office, at [ico.org.uk](https://ico.org.uk/)."],
+  ["P6", 'These providers may store or access personal information outside Australia, so they may be what the APPs call "overseas recipients".'],
+  ["P6", `You can ask for a copy of the safeguard we rely on by emailing ${SITE.email}.`],
+  ["P8", "We keep an enquiry, our replies and any outreach messages while we're in touch with you, and delete them once we no longer need them to deal with you."],
+  ["P9", "Sometimes we contact people first, to tell their organisation about our services."],
+  ["P9", "- **Telling you:** our first message says who we are, why we're contacting you and where we found your details, and links to this policy."],
+  ["P9", `- **Opting out:** reply to say you'd rather not hear from us, or email ${SITE.email}, and we stop.`],
+  ["P10", "When we handle personal information for a client during an engagement, the client's own privacy notice and our contract with the client, including any data processing agreement, govern it. This policy doesn't."],
+  ["P11", "The enquiry form needs your name, email address, organisation, country, industry, organisation size, interest, message and agreement, so that we can reply to you."],
+  ["P11", "We don't make decisions about you by automated means alone."],
+  ["P12", "receive your IP address and the details of each request, such as the page asked for and your browser's type, so they can deliver the site and protect it from attack."],
+  ["P12", "- **Delivering this website and protecting it from attack, through the hosting logs described above.** Basis: our legitimate interest in running a secure website."],
+  ["P15", "This website is a set of static files with no database and no accounts, so the site itself stores no personal information."],
+  ["§8.1", "the enquiry form also sends your browser's time zone, so our reply suits your working hours."],
+];
+// go-global §8.1: how "What we collect" names each field the enquiry form posts.
+const FORM_FIELD_WORDS = {
+  name: "your name", email: "your email address", organisation: "your organisation", country: "your country",
+  industry: "your industry", size: "your organisation's size", interest: "what you'd like to talk about",
+  message: "whatever you write", consent: "your agreement to how we handle the enquiry",
+  discovery: "how you found us", timezone: "your browser's time zone",
+};
+// The preview /legal/privacy/ page's meta description (nav.ts), rewritten with the policy so the two agree.
+const PRIVACY_DESCRIPTION = "How Techsider collects, uses, stores and discloses personal information, which privacy laws apply, which services handle it, and how to use your privacy rights.";
+
+test("documents: the privacy policy and website terms are drafts held for a lawyer's review; the evaluation method is published", () => {
   for (const [id, draft] of [["privacy", true], ["website-terms", true], ["evaluation-method", false]]) {
     const data = documentSchema.parse(readFrontmatter(join(ROOT, `src/content/documents/${id}.md`)));
     assert.equal(data.draft, draft, id);
   }
-  for (const id of ["privacy", "website-terms"]) {
-    assert.match(source(`src/content/documents/${id}.md`), /<!-- ⚑ owner: [^>]*TECHSIDER PTY LTD, whose ABN is still to be confirmed \(spec §12 item 5\)\. -->/, id);
-  }
+  // go-global §7.4: the website terms don't change in this release; their governing-law and
+  // business-users points wait in the local lawyer brief, so their entity marker stays as it was.
+  assert.match(source("src/content/documents/website-terms.md"), /<!-- ⚑ owner: [^>]*TECHSIDER PTY LTD, whose ABN is still to be confirmed \(spec §12 item 5\)\. -->/, "website-terms");
+  // The privacy draft names the entity and its ABN itself (P1), so its review marker no longer waits on the ABN.
+  const privacy = source("src/content/documents/privacy.md");
+  assert.ok(privacy.includes(PRIVACY_REVIEW_MARKER), "privacy: the lawyer-review marker is missing");
+  assert.doesNotMatch(privacy, /ABN is still to be confirmed/, "privacy: SITE.abn is confirmed, so no marker may still wait for it");
+});
+
+test("documents: the privacy draft covers go-global §7.1 P1–P15 in the APP order, with an owner marker on each open point", () => {
+  const md = source("src/content/documents/privacy.md");
+  const body = bodyOf(md);
+  assert.deepEqual([...body.matchAll(/^## (.+)$/gm)].map((m) => m[1]), PRIVACY_HEADINGS);
+  for (const [gap, line] of PRIVACY_LINES) assert.ok(body.includes(line), `${gap}: the draft lacks "${line}"`);
+  // Every marker in the file, in order: the review marker, then one per open point (P1, P7, P13, P9, P3, P12, P6, P8, P15).
+  assert.deepEqual(md.split("\n").filter((line) => line.includes("⚑")), PRIVACY_MARKERS);
+  // P14: "outside Australia" in our own words; "overseas" only inside the APPs' own quoted term.
+  assert.equal(md.split('"overseas recipients"').length - 1, 1, 'the APP term "overseas recipients" is quoted once');
+  assert.doesNotMatch(md.replace('"overseas recipients"', ""), /\boverseas\b/i, "P14: say \"outside Australia\" in our own words");
+  // P6: each provider's country reads as the Trust page's table does, so the two can't disagree.
+  for (const s of CONTACT.subProcessors) assert.ok(body.includes(`- **${s.entity}:** ${s.country}.`), `P6: ${s.entity}'s country isn't "${s.country}"`);
+  // go-global §8.1: "What we collect" names every field the enquiry form posts, Country and time zone included.
+  assert.deepEqual(Object.keys(FORM_FIELD_WORDS).sort(), [...ENQUIRY_FIELDS, ...OPTIONAL_ENQUIRY_FIELDS].sort(), "a form field has no wording in the privacy draft");
+  const collected = body.slice(body.indexOf("## What we collect"), body.indexOf("## How we collect it"));
+  for (const [field, words] of Object.entries(FORM_FIELD_WORDS)) assert.ok(collected.includes(words), `"What we collect" doesn't disclose the ${field} field ("${words}")`);
+  // The page's meta description covers what the rewritten policy covers (pageDescription also holds it to 150–160 characters).
+  assert.equal(pageDescription(entryAt("/legal/privacy/")), PRIVACY_DESCRIPTION, "nav.ts: the privacy page's description");
 });
 
 test("evaluation method: every part of the published method (spec §4.1 ④, blueprint Task 7)", () => {
