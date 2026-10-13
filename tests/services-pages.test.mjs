@@ -57,15 +57,24 @@ test("positioning: the sub-promise is go-global §3.2's wording; the origin line
   );
   assert.equal(POSITIONING.originLine, "AI pilots are easy to start and hard to ship. We build the kind that survive scrutiny.");
   assert.deepEqual(POSITIONING.pillars.map((p) => p.title), [
-    "Cited, or it refuses.", "Measured before it ships.", "Your data stays onshore.", "You own what we build.",
+    "Cited, or it refuses.", "Measured before it ships.", "Your data stays in your region.", "You own what we build.",
   ]);
   assert.deepEqual(POSITIONING.pillars.map((p) => p.midMarket), [
     "Shows the page, or says it doesn't know.",
     "Tested the way you'd check a graduate's work.",
-    // Spec §3.2: "Your data stays in Australia." waits for §12 item 1 (the enquiry mailbox's region).
-    "What we build keeps your data in Australia.",
+    // go-global §4.1: the short form states only the region; no page renders midMarket today.
+    "What we build keeps your data in the region you choose.",
     "Yours to keep, or ours to run, with the exit built in.",
   ]);
+});
+
+test("positioning: the onshore pillar is go-global §4.1's: the region as the title, and a mechanism that names where systems run and the remote access", () => {
+  const onshore = POSITIONING.pillars.find((p) => p.id === "onshore");
+  assert.equal(onshore.title, ONSHORE_PILLAR, "the package badge and the pillar title are one line");
+  assert.equal(
+    onshore.mechanism,
+    "Systems we build for you run in your own Microsoft or AWS account, in the cloud region you choose. Systems we manage for you run in an Australian region. Our team reaches them remotely from Sydney, under the data-transfer terms in your contract. Every launch package carries a region note on where processing runs, including inside software you already license.",
+  );
 });
 
 test("owner markers: one commitment marker in each data module, and the sub-promise, team, independence and kit markers on their lines", () => {

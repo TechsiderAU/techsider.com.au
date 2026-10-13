@@ -13,6 +13,7 @@ import { run as regulatoryKits } from "../scripts/ci/checks/08-regulatory-kits.m
 import { run as packageStatus } from "../scripts/ci/checks/10-package-status.mjs";
 import { CURRENCY, run as pricing } from "../scripts/ci/checks/11-pricing.mjs";
 import { CHECKS, formatReport, modeFromEnv, parseChecks, runAll } from "../scripts/ci/run-all.mjs";
+import { ONSHORE_PILLAR } from "../src/lib/fixed-copy.ts";
 import { allHtmlFiles, readDist, visibleText } from "./helpers.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -417,7 +418,7 @@ test("11: an exception without a reason is reported and excuses nothing", async 
 
 // ---------- 10 and 11, hardened in Phase E (WB-10, WB-11) ----------
 
-const PILLAR = '<p data-onshore-pillar data-onshore="true">Your data stays onshore.</p>';
+const PILLAR = `<p data-onshore-pillar data-onshore="true">${ONSHORE_PILLAR}</p>`;
 const NOTE = "<p data-processing-note>We show you where your data is processed.</p>";
 const block = (id, body) => `<section id="${id}" data-package-tab data-package-status="launch" data-package-id="${id}">${body}</section>`;
 const onshoreSolution = {
@@ -458,12 +459,12 @@ test("10: on a solution's page each block shows the onshore pillar exactly when 
 test("10: the pillar's words outside a flagged pillar fail in any package block, the gallery's included (WB-10)", async () => {
   const t = tree({
     "dist/preview/templates/solution/index.html": page(`
-      <section data-package-tab data-package-status="launch"><p>Your data stays onshore.</p>${NOTE}</section>
+      <section data-package-tab data-package-status="launch"><p>${ONSHORE_PILLAR}</p>${NOTE}</section>
       <section data-package-tab data-package-status="launch">${PILLAR}</section>
-      <p>Your data stays onshore.</p>`),
+      <p>${ONSHORE_PILLAR}</p>`),
   });
   assert.deepEqual((await packageStatus({ ...t, mode: "report" })).errors, [
-    'dist/preview/templates/solution/index.html: a package block shows "Your data stays onshore." outside its [data-onshore-pillar] element',
+    `dist/preview/templates/solution/index.html: a package block shows "${ONSHORE_PILLAR}" outside its [data-onshore-pillar] element`,
   ]);
 });
 

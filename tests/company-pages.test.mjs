@@ -505,3 +505,14 @@ test("CI checks out the full history, so the build-log test can read the commits
   const checkout = ci.jobs.test.steps.find((s) => s.uses === "actions/checkout@v5");
   assert.equal(checkout.with?.["fetch-depth"], 0);
 });
+
+// go-global §4.1: About shows the onshore pillar with its mechanism, so the page that carries the
+// short region claim also carries the remote-access sentence.
+test("/about/: the onshore principle shows go-global §4.1's title and mechanism, remote access included", () => {
+  const principles = one(mainOf(readDist("about/index.html")), "id", "principles");
+  const onshore = POSITIONING.pillars.find((p) => p.id === "onshore");
+  const item = tagged(principles.inner, "li").find((li) => text(tagged(li.inner, "h3")[0].inner) === onshore.title);
+  assert.ok(item, `no principle titled "${onshore.title}"`);
+  assert.equal(text(tagged(item.inner, "p")[0].inner), onshore.mechanism);
+  assert.match(onshore.mechanism, /\bOur team reaches them remotely from Sydney, under the data-transfer terms in your contract\./);
+});

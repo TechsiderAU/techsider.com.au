@@ -27,7 +27,7 @@ export const CHECKER_BADGE = "Client-side tool · dated vendor data"; // §8.8 �
 // measured report (spec §9.1) changes it.
 export const REPORT_BADGE = "Illustrative sample report · our own demo system";
 export const DEMO_CTA = "Want this on your documents, in your environment?"; // §8.8
-export const ONSHORE_PILLAR = "Your data stays onshore."; // §3.2
+export const ONSHORE_PILLAR = "Your data stays in your region."; // go-global §4.1 (spec §3.2's pillar)
 export const PROCESSING_NOTE = "We show you where your data is processed."; // §3.2 scope rule
 export const ACCEPTANCE_TEST_LABEL = "Acceptance test (not independent)"; // §4.4
 export const HOME_PROMPT = { command: "applied_ai", args: "--region=yours" } as const; // §8.1.1; go-global D19

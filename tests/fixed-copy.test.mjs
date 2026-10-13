@@ -25,7 +25,7 @@ test("fixed copy: every constant is pinned word for word: the spec's text, and R
   // badge shows alone on the Demos hub's card, so it says it is illustrative itself (final review D7-F2).
   assert.equal(copy.REPORT_BADGE, "Illustrative sample report · our own demo system");
   assert.equal(copy.DEMO_CTA, "Want this on your documents, in your environment?");
-  assert.equal(copy.ONSHORE_PILLAR, "Your data stays onshore.");
+  assert.equal(copy.ONSHORE_PILLAR, "Your data stays in your region.");
   assert.equal(copy.PROCESSING_NOTE, "We show you where your data is processed.");
   assert.equal(copy.ACCEPTANCE_TEST_LABEL, "Acceptance test (not independent)");
   assert.deepEqual(copy.HOME_PROMPT, { command: "applied_ai", args: "--region=yours" }); // go-global D19
