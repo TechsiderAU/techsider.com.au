@@ -1,7 +1,8 @@
 // Spec §11.5 check 4: the §3.5 banned phrases, over src/ and the visible text of
 // every built page and built XML file (the RSS feed's channel and item copy, the sitemaps), and
 // the text files at the build's root (llms.txt, robots.txt).
-// FAIL phrases are errors; WARN phrases are printed as warnings.
+// FAIL phrases are errors; WARN phrases are printed as warnings. go-global §4.6 adds the
+// conformity, residency and readiness claims to OVERCLAIM.
 // Matching is case-insensitive, whole phrase (\b at both ends), hyphen ≡ space.
 import { join, resolve } from "node:path";
 import {
@@ -53,20 +54,40 @@ export const HYPE = group("hype", [
   "frontier",
 ]);
 
+// go-global §4.6 adds the last eight entries. Bare "compliant" moved here from WARN_PHRASES, so it
+// also covers the old "SOC 2 compliant" and "ISO 27001 compliant" entries. Patterns (a)–(d) are
+// §4.6's own: (a) and (d) match its literals "nothing leaves your region", "EU AI Act-ready" and
+// "AI Act ready", so those are their labels rather than separate entries (each would report the
+// same words a second or third time). "conforms to" stays a literal, since it fails with any subject;
+// "Techsider conforms to" is reported by it and by (b). Quoted third-party text goes in
+// banned-phrase-exceptions.json.
 export const OVERCLAIM = group("overclaim", [
   "certified",
   "IRAP-aligned",
   "ISM-aligned",
   "IRAP-assessed",
   "accredited",
-  ["SOC 2 compliant", rx("\\bsoc(?: )?2 compliant\\b")],
-  ["ISO 27001 compliant", rx("\\biso(?: )?27001 compliant\\b")],
   "official partner",
   "preferred partner",
   "integrates with",
   "integration partner",
   "our partner",
   "our partners",
+  "compliant",
+  "ISO 42001-aligned",
+  "ISO/IEC 42001-aligned",
+  "conforms to",
+  // (a) A negated leave or send with a place. Short residency lines say where systems run (go-global §4.1).
+  [
+    "nothing leaves your region",
+    rx("\\b(?:nothing|never|doesn't|does not|don't|do not|won't|will not|isn't|aren't|is not|are not)(?: ever)? (?:leaves?|leaving|sent|transferred|moved)(?: (?:out(?:side)?(?: of)?|from))? (?:your|the) (?:region|jurisdiction|country)\\b"),
+  ],
+  // (b) A compliance or conformity claim with Techsider as the subject. "Providers must comply with" passes.
+  ["we comply with", rx("\\b(?:we|techsider|our(?: \\w+){1,2})(?: (?:are|is|fully|already))* (?:compl(?:y|ies)|conforms?) (?:with|to)\\b")],
+  // (c) "Aligned" with a named standard or framework. "(?: )?" keeps the space optional: rx() reads " ?" as a required gap.
+  ["aligned with ISO 42001", rx("\\baligned (?:with|to) (?:the )?(?:ISO(?:/IEC)?(?: )?(?:42001|27001)|NIST(?: AI RMF)?|SOC(?: )?2)\\b")],
+  // (d) "Act-ready", with any dash: \u2010-\u2014 run from the hyphen to the em dash.
+  ["EU AI Act-ready", rx("\\b(?:EU[\\s\\-\\u2010-\\u2014]+)?AI[\\s\\-\\u2010-\\u2014]+Act(?:[\\s\\-\\u2010\\u2011]+|[\\u2013\\u2014])ready\\b")],
 ]);
 
 /** The D4 pricing list. Check 11 reuses it for offer copy. */
@@ -102,7 +123,6 @@ export const FAIL_PHRASES = [...IMPLIED, ...HYPE, ...OVERCLAIM, ...PRICING];
 export const WARN_PHRASES = group("warn", [
   "assurance",
   "assured",
-  "compliant",
   "ensures compliance",
   "used by",
   "sovereign",

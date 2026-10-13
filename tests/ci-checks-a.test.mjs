@@ -443,6 +443,53 @@ test("04: FAIL phrases in src/ and in built text fail, whatever the case or hyph
   ]);
 });
 
+test("04: the go-global overclaims fail: bare 'compliant', the alignment and conformity literals, and patterns (a)-(d) (go-global §4.6)", async () => {
+  assert.ok(banned.OVERCLAIM.some((p) => p.label === "compliant"), "compliant is a FAIL phrase");
+  assert.ok(!banned.WARN_PHRASES.some((p) => p.label === "compliant"), "compliant is no longer only a warning");
+  const res = await check(banned, {
+    "src/components/Hero.astro": [
+      "<p>A compliant pipeline, SOC 2 compliant.</p>",
+      "<p>Nothing leaves your region. Files are never sent outside the country.</p>",
+      "<p>Data doesn’t leave your jurisdiction; it is not moved from your region.</p>",
+      "<p>We comply with ISO/IEC 42001. Techsider fully complies with the EU AI Act.</p>",
+      "<p>Our evaluation reports conform to the NIST AI RMF. The pipeline conforms to ISO/IEC 42001.</p>",
+      "<p>Built ISO 42001-aligned and ISO/IEC 42001-aligned.</p>",
+      "<p>Aligned with ISO/IEC 42001, aligned to the NIST AI RMF, aligned with SOC 2 and aligned with SOC2.</p>",
+      "<p>EU AI Act-ready, AI Act ready and EU AI Act–ready.</p>",
+      "<p>EU AI Act‑ready, AI‐Act ready and AI Act—ready; aligned to ISO 27001, aligned with NIST and aligned with ISO42001.</p>",
+    ].join("\n"),
+    "dist/solutions/alpha-fixture/index.html": page("<p>Your data never leaves the region.</p>"),
+  });
+  assertErrors(res, [
+    /Hero\.astro:1: "compliant" \(overclaim\)/,
+    /Hero\.astro:1: "compliant" \(overclaim\)/,
+    /Hero\.astro:2: "Nothing leaves your region" \(overclaim\)/,
+    /Hero\.astro:2: "never sent outside the country" \(overclaim\)/,
+    /Hero\.astro:3: "doesn't leave your jurisdiction" \(overclaim\)/,
+    /Hero\.astro:3: "is not moved from your region" \(overclaim\)/,
+    /Hero\.astro:4: "We comply with" \(overclaim\)/,
+    /Hero\.astro:4: "Techsider fully complies with" \(overclaim\)/,
+    /Hero\.astro:5: "Our evaluation reports conform to" \(overclaim\)/,
+    /Hero\.astro:5: "conforms to" \(overclaim\)/,
+    /Hero\.astro:6: "ISO 42001-aligned" \(overclaim\)/,
+    /Hero\.astro:6: "ISO\/IEC 42001-aligned" \(overclaim\)/,
+    /Hero\.astro:7: "Aligned with ISO\/IEC 42001" \(overclaim\)/,
+    /Hero\.astro:7: "aligned to the NIST AI RMF" \(overclaim\)/,
+    /Hero\.astro:7: "aligned with SOC 2" \(overclaim\)/,
+    /Hero\.astro:7: "aligned with SOC2" \(overclaim\)/,
+    /Hero\.astro:8: "EU AI Act-ready" \(overclaim\)/,
+    /Hero\.astro:8: "AI Act ready" \(overclaim\)/,
+    /Hero\.astro:8: "EU AI Act–ready" \(overclaim\)/,
+    /Hero\.astro:9: "EU AI Act‑ready" \(overclaim\)/,
+    /Hero\.astro:9: "AI‐Act ready" \(overclaim\)/,
+    /Hero\.astro:9: "AI Act—ready" \(overclaim\)/,
+    /Hero\.astro:9: "aligned to ISO 27001" \(overclaim\)/,
+    /Hero\.astro:9: "aligned with NIST" \(overclaim\)/,
+    /Hero\.astro:9: "aligned with ISO42001" \(overclaim\)/,
+    /dist\/solutions\/alpha-fixture\/index\.html: "never leaves the region" \(overclaim\)/,
+  ]);
+});
+
 test("04: near misses pass, and src/fixtures/ is not scanned", async () => {
   const res = await check(banned, {
     "src/components/Hero.astro": "<p>A benchmark, working with your documents, uncertified claims avoided, frontiersman.</p>",
@@ -451,6 +498,21 @@ test("04: near misses pass, and src/fixtures/ is not scanned", async () => {
   assertErrors(res, []);
   const hit = await check(banned, { "src/components/Hero.astro": "<p>We look forward to working with Fixture Pty Ltd.</p>" });
   assertErrors(hit, [/"working with" \(implied clients/]);
+});
+
+test("04: go-global near misses pass: third-person duties, other places, 'compliance' and the site's own residency lines (go-global §4.6)", async () => {
+  const res = await check(banned, {
+    "src/components/Hero.astro": [
+      "<p>Providers must comply with the EU AI Act.</p>",
+      "<p>The key never leaves this module.</p>",
+      "<p>These duties don't apply where the holder complies with corresponding Privacy Act obligations (s 505BE).</p>",
+      "<p>Compliance teams decide; non-compliance is theirs to judge. Teams aligned on the goal.</p>",
+      "<p>Our team reaches it remotely from Sydney, under the data-transfer terms in your contract.</p>",
+      "<p>We map our evidence to them; we don't certify against them.</p>",
+    ].join("\n"),
+  });
+  assertErrors(res, []);
+  assert.deepEqual(res.warnings, []);
 });
 
 test("04: .js, .mjs, .jsx, .mdx and .yml sources, and the text of built XML (RSS, sitemaps), are scanned", async () => {
