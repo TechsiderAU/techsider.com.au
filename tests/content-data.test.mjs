@@ -7,8 +7,9 @@ import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { aboutData, contactData, homeData, internationalData, positioningData, servicesData, trustData } from "../src/content/page-schemas.ts";
-import { INTERNATIONAL } from "../src/data/contact.ts";
+import { CONTACT, INTERNATIONAL } from "../src/data/contact.ts";
 import { DELIVERY_MODEL } from "../src/lib/fixed-copy.ts";
+import { replySentence } from "../src/lib/reply-time.ts";
 
 const DATA_DIR = fileURLToPath(new URL("../src/data/", import.meta.url));
 /** src/data/*.ts modules that aren't page data: the page registry (names, paths, statuses, descriptions), with its own tests. */
@@ -55,5 +56,17 @@ test("contact.ts: INTERNATIONAL parses with internationalData, and only the enti
   assert.equal(
     text.dpa,
     "We sign a data processing agreement. Our team reaches your systems from Australia, which counts as a transfer, so for personal data from the EU or UK the agreement includes the EU standard contractual clauses, or the UK IDTA or UK Addendum.",
+  );
+});
+
+test("replySentence builds the one reply-time sentence from CONTACT: the time, then its base (go-global §4.5, D7)", () => {
+  assert.equal(CONTACT.replyTimeBase, "Sydney time (AEST/AEDT)");
+  assert.equal(CONTACT.timeZone, "Australia/Sydney");
+  assert.equal(replySentence(CONTACT), "We reply within two business days, Sydney time (AEST/AEDT).");
+  // /llms.txt states it as a fact about Techsider.
+  assert.equal(replySentence(CONTACT, "Techsider"), "Techsider replies within two business days, Sydney time (AEST/AEDT).");
+  assert.equal(
+    replySentence({ replyTime: "one fixture business day", replyTimeBase: "fixture time (FXT)" }),
+    "We reply within one fixture business day, fixture time (FXT).",
   );
 });
