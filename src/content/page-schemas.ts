@@ -137,6 +137,10 @@ export const trustData = z.strictObject({
   faq: z.array(z.strictObject({
     q: z.string().min(5), a: z.string(), part: z.enum(["A", "B"]), term: slug.optional(), asAt: z.coerce.date(),
   })).min(5),
+  // go-global §7.2 (owner gate O4): the services an engagement uses, each with its country and the
+  // transfer mechanism relied on. Empty until the owner supplies a row; TrustTemplate renders the
+  // table and its change notice only when the list is non-empty.
+  engagementSubProcessors: z.array(z.strictObject({ service: z.string(), purpose: z.string(), country: z.string(), mechanism: z.string() })),
   transparency: z.strictObject({
     statement: z.string(),
     systems: z.array(z.strictObject({ name: z.string(), purpose: z.string(), data: z.string(), human: z.string(), demo: slug.optional() })).min(1),

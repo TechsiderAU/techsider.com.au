@@ -6,6 +6,9 @@
 // - Part B, "Default commitments in every engagement contract": only the items the owner has
 //   confirmed are in the standard terms (spec §12 item 2), each tagged "Contract term". An
 //   unconfirmed item never renders, and with none confirmed the section is left out.
+// - "Services used in an engagement" (go-global §7.2, owner gate O4): the services an engagement
+//   uses, each with its country and transfer mechanism, then the change notice. It renders only
+//   once trust.engagementSubProcessors has a row; an empty list leaves out the section and notice.
 // - The independence policy (the Services data), the questionnaire FAQ (each answer dated and
 //   tagged Part A or Part B in a meta line that stays out of the FAQPage JSON-LD), the AI
 //   transparency statement with one card per system, and the dated log of changes.
@@ -21,7 +24,7 @@ import DataTable from "../components/ui/DataTable.astro";
 import FaqList from "../components/ui/FaqList.astro";
 import type { ContactData, InternationalData, ServicesData, TrustData } from "../content/page-schemas";
 import { formatDate, isoDate } from "../lib/dates";
-import { INTERNATIONAL_HEADING } from "../lib/fixed-copy";
+import { ENGAGEMENT_SUBPROCESSORS_HEADING, ENGAGEMENT_SUBPROCESSORS_NOTICE, INTERNATIONAL_HEADING } from "../lib/fixed-copy";
 import type { SiteContext } from "../lib/site";
 import { internationalLines, trustView } from "../lib/views/company";
 
@@ -46,6 +49,13 @@ const SUB_PROCESSOR_COLUMNS = [
   { key: "data", label: "Data touched" },
 ];
 const subProcessors = contact.subProcessors.map((s) => ({ entity: s.entity, purpose: s.purpose, country: s.country, data: s.data }));
+const ENGAGEMENT_COLUMNS = [
+  { key: "service", label: "Service" },
+  { key: "purpose", label: "Purpose" },
+  { key: "country", label: "Country" },
+  { key: "mechanism", label: "Transfer mechanism" },
+];
+const engagementRows = trust.engagementSubProcessors.map((s) => ({ service: s.service, purpose: s.purpose, country: s.country, mechanism: s.mechanism }));
 ---
 <div class="template" data-template="trust">
   <PageHero title="Trust." highlight="Trust" />
@@ -86,6 +96,13 @@ const subProcessors = contact.subProcessors.map((s) => ({ entity: s.entity, purp
           </li>
         ))}
       </ul>
+    </PageSection>
+  )}
+
+  {engagementRows.length > 0 && (
+    <PageSection id="engagement-sub-processors" title={ENGAGEMENT_SUBPROCESSORS_HEADING}>
+      <DataTable caption="Engagement sub-processors" columns={ENGAGEMENT_COLUMNS} rows={engagementRows} rowHeader="service" />
+      <p class="trust-item-body" data-change-notice>{ENGAGEMENT_SUBPROCESSORS_NOTICE}</p>
     </PageSection>
   )}
 

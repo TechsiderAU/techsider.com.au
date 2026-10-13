@@ -125,6 +125,9 @@ export const TRUST: TrustData = {
       part: "B", term: "incident-notification", asAt,
     },
   ],
+  // go-global §7.2 (owner gate O4): the services an engagement uses, each with its country and the
+  // transfer mechanism relied on. Empty until the owner lists them; the table renders only then.
+  engagementSubProcessors: [],
   transparency: {
     // ⚑ owner: confirm this statement covers all of Techsider's own AI use (spec §8.11)
     statement: "Techsider uses AI in its own work, and this section says where. Each card names the system, what it does, the data it sees and how a person oversees it.",

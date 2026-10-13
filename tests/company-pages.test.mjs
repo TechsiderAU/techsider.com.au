@@ -553,3 +553,12 @@ test("Trust: the residency term and its answers follow go-global §4.1–§4.4 a
   assert.equal(cert.part, "A");
   assert.equal(TRUST.faq.filter((f) => /\bSOC 2\b|\bISO\b/.test(f.q)).length, 1, "one certification question (go-global §7.2 merges them)");
 });
+
+// go-global §7.2, owner gate O4: the engagement table and its change notice wait for the owner's
+// first row; trust.ts holds none yet.
+test("preview /trust/: the engagement services table renders only once the owner lists a service (go-global §7.2, S6)", () => {
+  const main = mainOf(readPreviewDist("trust/index.html"));
+  const listed = TRUST.engagementSubProcessors.length > 0;
+  assert.equal(elementsWith(main, "id", "engagement-sub-processors").length, listed ? 1 : 0);
+  assert.equal(elementsWith(main, "data-change-notice").length, listed ? 1 : 0);
+});

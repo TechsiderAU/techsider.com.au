@@ -54,3 +54,6 @@ export const CONTACT_BASE = "Based in Sydney, delivered remotely."; // go-global
 export const DELIVERY_MODEL = "Delivered remotely from Sydney; on-site visits by arrangement."; // go-global D6, §4.5
 export const ABN_NOTE = "An ABN is an Australian Business Number; anyone can check ours on the public register at ABN Lookup."; // go-global §3.2 (About)
 export const DISAMBIGUATION = "Techsider is not affiliated with other organisations named TechSider."; // go-global D18
+export const ENGAGEMENT_SUBPROCESSORS_HEADING = "Services used in an engagement"; // go-global §7.2
+// ⚑ owner: confirm this notice with the first row you supply (go-global §2.3, O4)
+export const ENGAGEMENT_SUBPROCESSORS_NOTICE = "We tell you before we add or replace a service in this table."; // go-global §7.2

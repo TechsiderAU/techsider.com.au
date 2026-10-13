@@ -10,7 +10,7 @@ import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, idsIn, startTags } from "../scripts/ci/lib.mjs";
-import { CONTACT_BASE, CONTACT_H1, EXTRA_INTERESTS, INTERNATIONAL_HEADING, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../src/lib/fixed-copy.ts";
+import { CONTACT_BASE, CONTACT_H1, ENGAGEMENT_SUBPROCESSORS_HEADING, ENGAGEMENT_SUBPROCESSORS_NOTICE, EXTRA_INTERESTS, INTERNATIONAL_HEADING, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../src/lib/fixed-copy.ts";
 import { countryOptions } from "../src/data/countries.ts";
 import { replySentence } from "../src/lib/reply-time.ts";
 import { insightCards } from "../src/lib/views/insights.ts";
@@ -152,7 +152,7 @@ test("about: at most three insight cards, newest first, then All insights; the p
 
 test("trust: the blocks in order, and Part A dated with the sub-processor table from the contact data", () => {
   const main = mainOf(page("trust"));
-  assert.deepEqual(blockIds(main), ["part-a", "part-b", "independence", "outside-australia", "questions", "ai-transparency", "changes"]);
+  assert.deepEqual(blockIds(main), ["part-a", "part-b", "engagement-sub-processors", "independence", "outside-australia", "questions", "ai-transparency", "changes"]);
   const partA = one(main, "id", "part-a");
   assert.equal(text(one(partA.inner, "id", "part-a-heading").inner), "Our website and email today");
   const asAt = one(partA.inner, "data-as-at");
@@ -273,6 +273,34 @@ test("contact-no-endpoint and trust-no-terms: with no line to show, neither the 
     assert.equal(elementsWith(html, "data-international-line").length, 0, `${kind}: a line renders`);
     assert.ok(!visibleText(html).includes(INTERNATIONAL_HEADING), `${kind}: the heading renders with no line under it`);
   }
+});
+
+test("trust: the engagement sub-processor table lists each service, purpose, country and transfer mechanism, then the change notice (go-global §7.2)", () => {
+  const main = mainOf(page("trust"));
+  const section = one(main, "id", "engagement-sub-processors");
+  assert.equal(text(one(section.inner, "id", "engagement-sub-processors-heading").inner), ENGAGEMENT_SUBPROCESSORS_HEADING);
+  const table = tagged(section.inner, "table");
+  assert.equal(table.length, 1);
+  assert.deepEqual(tagged(tagged(table[0].inner, "thead")[0].inner, "th").map((th) => text(th.inner)), ["Service", "Purpose", "Country", "Transfer mechanism"]);
+  // DataTable repeats each column label inside its cell for the stacked layout; read the value alone.
+  const cellValue = (cell) => {
+    const [label] = withClass(cell.inner, "dt-label");
+    return text(label ? cell.inner.replace(label.outer, "") : cell.inner);
+  };
+  const rows = tagged(tagged(table[0].inner, "tbody")[0].inner, "tr");
+  assert.deepEqual(
+    rows.map((row) => elements(row.inner, (t) => t.name === "th" || t.name === "td").map(cellValue)),
+    trustFixture.engagementSubProcessors.map((s) => [s.service, s.purpose, s.country, s.mechanism]),
+  );
+  assert.equal(text(one(section.inner, "data-change-notice").inner), ENGAGEMENT_SUBPROCESSORS_NOTICE);
+});
+
+test("trust-no-terms: with no engagement service listed, the table and its change notice are absent (go-global §7.2, S6)", () => {
+  assert.deepEqual(trustNoTermsFixture.engagementSubProcessors, []);
+  const main = mainOf(page("trust-no-terms"));
+  assert.equal(elementsWith(main, "id", "engagement-sub-processors").length, 0);
+  assert.equal(elementsWith(main, "data-change-notice").length, 0);
+  assert.ok(!visibleText(main).includes(ENGAGEMENT_SUBPROCESSORS_HEADING), "the table's heading renders with no row");
 });
 
 test("trust-no-terms: with no confirmed term, #part-b and every Part B answer are absent; Part A stays", () => {

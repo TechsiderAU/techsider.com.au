@@ -830,6 +830,7 @@ const TRUST = {
   faq: [1, 2, 3, 4, 5].map((n) => ({
     q: `Test question ${n}?`, a: words(30 + n), part: n % 2 ? "A" : "B", ...(n % 2 ? {} : { term: "test-residency" }), asAt: "2026-09-15",
   })),
+  engagementSubProcessors: [],
   transparency: { statement: "Test statement", systems: [{ name: "Test system", purpose: "Test purpose", data: "Test data", human: "Test human", demo: "test-demo" }] },
   changes: [{ date: "2026-09-15", change: "Test change" }],
 };
@@ -968,6 +969,18 @@ test("page data: a Part B Trust answer names the Part B term it rests on, and a 
   bad(trustData, withFaq(1, { term: "Test residency" }), "a term that is not a slug");
 });
 
+test("page data: Trust lists the services an engagement uses, each with its country and transfer mechanism (go-global §7.2)", () => {
+  const ROW = { service: "Test service", purpose: "Test purpose", country: "Test country", mechanism: "Test mechanism" };
+  assert.deepEqual(ok(trustData, TRUST, "trust with no engagement services").engagementSubProcessors, []);
+  assert.deepEqual(ok(trustData, { ...TRUST, engagementSubProcessors: [ROW] }, "trust with one engagement service").engagementSubProcessors, [ROW]);
+  const { engagementSubProcessors: _list, ...missing } = TRUST;
+  bad(trustData, missing, "trust without engagementSubProcessors");
+  for (const key of Object.keys(ROW)) {
+    const { [key]: _, ...row } = ROW;
+    bad(trustData, { ...TRUST, engagementSubProcessors: [row] }, `an engagement service without ${key}`);
+  }
+});
+
 test("page data: the Home FAQ asks the trust question exactly once (spec §8.1.10)", () => {
   assert.equal(HOME_TRUST_QUESTION, "Why should we trust you?");
   ok(homeData, HOME, "home");
@@ -1010,6 +1023,7 @@ test("every page-data schema rejects unknown keys, at the top level and nested",
     [internationalLine, { ...INTERNATIONAL[0], href: "https://example.com" }, "international line"],
     [trustData, { ...TRUST, certifications: [] }, "trust"],
     [trustData, { ...TRUST, partB: TRUST.partB.map((b) => ({ ...b, confirmedAt: "2026-09-15" })) }, "trust part B"],
+    [trustData, { ...TRUST, engagementSubProcessors: [{ service: "Test", purpose: "Test", country: "Test", mechanism: "Test", data: "Test" }] }, "trust engagement service"],
     [aboutData, { ...ABOUT, team: [] }, "about"],
     [homeData, { ...HOME, hero: "Test" }, "home"],
     [documentSchema, { ...DOCUMENT, author: "Test" }, "document"],

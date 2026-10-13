@@ -68,7 +68,7 @@ test("fixed copy: the module exports exactly the blueprint's constants", () => {
   assert.deepEqual(Object.keys(copy).sort(), [
     "ABN_NOTE", "ACCEPTANCE_TEST_LABEL", "ANCHOR_KIND_LABEL", "AU_BAND_HEADING", "AU_BAND_INTRO", "CHECKER_BADGE",
     "CONTACT_BASE", "CONTACT_H1", "DELIVERY_LETTER", "DELIVERY_MODEL", "DEMO_BADGE", "DEMO_CTA", "DISAMBIGUATION",
-    "EXTRA_INTERESTS", "HOME_CLOSING", "HOME_PROMPT", "HOME_TRUST_QUESTION", "INTERNATIONAL_HEADING", "KIT_PENDING_NOTE",
+    "ENGAGEMENT_SUBPROCESSORS_HEADING", "ENGAGEMENT_SUBPROCESSORS_NOTICE", "EXTRA_INTERESTS", "HOME_CLOSING", "HOME_PROMPT", "HOME_TRUST_QUESTION", "INTERNATIONAL_HEADING", "KIT_PENDING_NOTE",
     "MESSAGE_PLACEHOLDER", "NOT_LEGAL_ADVICE", "ONSHORE_PILLAR", "ORG_SIZES", "PACKAGED_OFFER_DISCLAIMER",
     "PLATFORM_REGION_LABEL", "PROCESSING_NOTE", "REGION_EXAMPLE_LABEL", "REGION_LABEL", "REPORT_BADGE", "RULES_CLOSING",
     "RULES_HEADING", "RULES_SHARED_LABEL", "SCENARIO_LABEL", "SERVICES_H1", "WORKS_METHOD_LABEL", "kitReviewedNote",
@@ -90,4 +90,9 @@ test("fixed copy: the header, and the pin's title, name the one constant that is
   // This file's first test pins every value: its title mustn't call REPORT_BADGE spec text.
   const titles = [...readFileSync(new URL(import.meta.url), "utf8").matchAll(/^test\("([^"]+)"/gm)].map((m) => m[1]);
   assert.match(titles[0], /\bREPORT_BADGE\b.*\bruling\b/, `the pin's title: "${titles[0]}"`);
+});
+
+test("fixed copy: the Trust page's engagement sub-processor heading and change notice (go-global §7.2)", () => {
+  assert.equal(copy.ENGAGEMENT_SUBPROCESSORS_HEADING, "Services used in an engagement");
+  assert.equal(copy.ENGAGEMENT_SUBPROCESSORS_NOTICE, "We tell you before we add or replace a service in this table.");
 });
