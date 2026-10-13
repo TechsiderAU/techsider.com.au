@@ -1,13 +1,17 @@
 // go-global Part 4B (spec §5.2, §5.3, Appendix A; contract §1): the "Rules that travel" anchor data
 // in src/data/anchors/, read the way check 13 and the industry route read it (shared.json plus one
-// file per industry, each parsed with anchorFile). The literals are the approved data: each page's
-// shared row, the Appendix A featured and data-only sets, the r4 §5.5 watch-list review dates, every
-// chip's text, the §5.2 rewrites, and the facts the research keeps off the site (00-brief "Facts
-// still UNVERIFIED", the r4 Verification table, spec §5.3 corrections).
+// file per industry, each parsed with anchorFile), and the chips the production build renders from
+// it. The literals are the approved data: each page's shared row, the Appendix A featured and
+// data-only sets, the r4 §5.5 watch-list review dates, every chip's text, the §5.2 rewrites, and the
+// facts the research keeps off the site (00-brief "Facts still UNVERIFIED", the r4 Verification
+// table, spec §5.3 corrections). The rendered-chip test reads dist/: run `npm run build` first.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
-import { ROOT, listFiles, normalizeQuotes, readJson, relPath, result } from "../scripts/ci/lib.mjs";
+import { readDist } from "./helpers.mjs";
+import {
+  ROOT, elements, elementsWith, listFiles, normalizeQuotes, readJson, readText, relPath, result, visibleText,
+} from "../scripts/ci/lib.mjs";
 import { FAIL_PHRASES, WARN_PHRASES, scan } from "../scripts/ci/checks/04-banned-phrases.mjs";
 import { FEATURABLE_LEVELS, anchorFile } from "../src/content/schemas.ts";
 import { PAGES } from "../src/data/nav.ts";
@@ -232,9 +236,10 @@ const AMENDED_DATES = /\b(?:2 December 2026|2 December 2027|2 August 2028|2 Augu
 const covered = () => [["shared", SHARED], ...Object.keys(INDUSTRIES).map((id) => [id, parsed(id)])];
 const everyAnchor = () => covered().flatMap(([file, f]) => f.anchors.map((a) => ({ file, a })));
 
-test("each industry covered here is an industry page, in nav order", () => {
-  const ids = Object.keys(INDUSTRIES);
-  assert.deepEqual(ids, INDUSTRY_IDS.slice(0, ids.length));
+test("src/data/anchors/ holds shared.json and one file per industry, and every industry page is covered here (contract §1.1)", () => {
+  const files = listFiles(DIR, (rel) => !rel.includes("/") && rel.endsWith(".json")).map((f) => relPath(DIR, f));
+  assert.deepEqual(files, ["shared.json", ...INDUSTRY_IDS.map((id) => `${id}.json`)].sort());
+  assert.deepEqual(Object.keys(INDUSTRIES), INDUSTRY_IDS);
 });
 
 test("shared.json: x1–x8 in order, no row of its own, x1, x4, x6, x7 and x8 the only ones a row may list, and their chips' text (spec §5.2; contract §1.1)", () => {
@@ -364,6 +369,37 @@ test("an id on more than one page names the same instrument with the same data (
       const json = JSON.stringify(a);
       if (!seen.has(a.id)) seen.set(a.id, { file: id, json });
       else assert.equal(json, seen.get(a.id).json, `${a.id}: ${id}.json differs from ${seen.get(a.id).file}.json`);
+    }
+  }
+});
+
+test("the industry route fails the build on a missing anchors file instead of an empty fallback (contract §3)", () => {
+  const route = readText(join(ROOT, "src/pages/industries/[id].astro"));
+  assert.doesNotMatch(route, /\?\?\s*\{\s*anchors:\s*\[\]\s*\}/, "a transitional fallback is left");
+  assert.ok(route.includes("throw new Error(`${path}: src/data/anchors/shared.json does not exist`)"), "no throw for shared.json");
+  assert.ok(route.includes("throw new Error(`${path}: src/data/anchors/${entry.id}.json does not exist`)"), "no throw for the industry's file");
+  assert.doesNotMatch(route, /its rows are empty|makes a missing file a build error/, "the header comment still describes the transitional fallback");
+});
+
+test("each industry page renders its chips from the data: the shared row, then the sector row, each chip linking to its primary source (contract §3)", () => {
+  for (const id of INDUSTRY_IDS) {
+    const [block] = elements(readDist(`industries/${id}/index.html`), (t) => t.attrs.id === "rules-that-travel");
+    assert.ok(block, `${id}: no #rules-that-travel`);
+    const rows = elementsWith(block.inner, "data-anchor-row");
+    assert.deepEqual(rows.map((r) => r.attrs["data-anchor-row"]), ["shared", "sector"], `${id}: rows`);
+    const f = parsed(id);
+    const want = {
+      shared: f.shared.map((s) => sharedById.get(s)),
+      sector: f.anchors.filter((a) => a.featured),
+    };
+    for (const row of rows) {
+      const scope = row.attrs["data-anchor-row"];
+      const got = elementsWith(row.inner, "data-anchor-scope").map((chip) => {
+        const [name] = elementsWith(chip.inner, "data-anchor-name");
+        const [label] = elementsWith(chip.inner, "data-anchor-label");
+        return [chip.name, chip.attrs["data-anchor-scope"], chip.attrs["data-anchor-id"], chip.attrs.href, visibleText(name.inner).trim(), visibleText(label.inner).trim()];
+      });
+      assert.deepEqual(got, want[scope].map((a) => ["a", scope, a.id, a.source, a.name, anchorChipLabel(a)]), `${id}: ${scope} row`);
     }
   }
 });
