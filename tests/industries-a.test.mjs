@@ -334,7 +334,8 @@ test("the report or data note records the vendor's published processing location
 
 test("Accounting: the A1 kit marker covers the Industries hub, which shows the same package name (C6-T6-F3)", () => {
   const lines = readFileSync(join(ROOT, "src/content/industries/accounting.yaml"), "utf8").split("\n");
-  const at = lines.findIndex((l) => l.includes("- name: Admin Hours Audit + Switch-On, with the accounting Safe-Use Kit"));
+  const at = lines.findIndex((l) => l === "  - name: Admin Hours Audit + Switch-On, with the accounting Safe-Use Kit (Australia)");
+  assert.ok(at > 0, 'accounting.yaml has no flagship use case named "Admin Hours Audit + Switch-On, with the accounting Safe-Use Kit (Australia)"');
   assert.equal(lines[at - 1].trim(), "# ⚑ owner: the accounting Safe-Use Kit must be lawyer-reviewed and published before the Accounting page or the Industries hub launches (spec §12 item 6; research index A1)");
 });
 
@@ -348,5 +349,49 @@ test("go-global §5.2: these pages' anchor data carries no keep-off phrase, no '
     for (const phrase of KEEP_OFF) assert.ok(!t.includes(phrase), `${id}: "${phrase}" is in its anchor data`);
     assert.doesNotMatch(t, /\bsprint\b/i, `${id}: "sprint" in its anchor data`);
     if (id === "accounting") assert.doesNotMatch(t, /\bagents?\b/i, "Accounting's anchor data says agent(s)");
+  }
+});
+
+// ---------- go-global (spec §3.3, §4.4, §5.6): copy that reads for any country, with Australian detail labelled ----------
+
+test("go-global §3.3, §4.4, §5.6: Government, Financial services and Accounting say where their facts and terms are Australian", () => {
+  const answer = (id, q) => {
+    const item = industry(id).faq.find((f) => f.q === q);
+    assert.ok(item, `${id}: no FAQ "${q}"`);
+    return item.a;
+  };
+  const gov = industry("government");
+  // Decision 4: the Queensland Audit Office figure covers one state.
+  assert.equal(gov.problem.from, "In Queensland, Australia, AI tools reach daily staff use before a dedicated risk assessment is done or monitoring controls are in place.");
+  // Decision 2: the use case keeps its product name; only its note says "local government".
+  assert.equal(gov.workflow.find((s) => s.id === "leave-pilot").useCases.find((u) => u.solution === "knowledge-assistant").note, "For local government and small bodies.");
+  assert.equal(gov.mockPanel.fields.find((f) => f.redacted).label, "Official accountable for AI use");
+  assert.equal(gov.scenario.problem, "A fictional department has piloted a Copilot Studio agent that answers staff policy questions. Before rollout, the official accountable for AI use wants to know how often it answers wrongly, and whether it declines when the policy is silent.");
+  assert.equal(gov.firstEngagement.needFromYou[0], "A named owner, and the AI assessment framework you report to (in Australia, the DTA tool, the NSW AIAF or a FAIRA)");
+  assert.equal(answer("government", "Will your report tell us the system is safe to deploy?"), "No. You get findings, not an assurance opinion, and it isn't an ISAE 3000 (ASAE 3000 in Australia) engagement. Each finding is rated to your risk matrix, and the official accountable for AI use decides whether to deploy.");
+  // D4, in orchestrator decision 1's pattern: a direct answer first, then the remote-access sentence.
+  assert.equal(answer("government", "Does our test data leave our environment?"), "We don't take a copy. The test and its graders run in your own subscription. Our team reaches your environment remotely from Sydney, under the data-transfer terms in your contract. The system under test handles each question where its vendor runs it, as in normal use, and the report records the vendor's published processing location, with its date. While your privacy and security assessments run, we start on public or synthetic data in a Feasibility Sprint.");
+  assert.equal(industry("financial-services").problem.from, "In Australia, vendor AI is approved on the vendor's presentations and a point-in-time sample check, and the contract says little about model changes.");
+  assert.equal(answer("financial-services", "Can we give your report to the board or our regulator as a formal opinion?"), "No. It's findings, not an assurance opinion, and it isn't an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia). What you table, and how, is your decision.");
+  assert.equal(answer("financial-services", "Does customer data leave our environment?"), "We don't take a copy. The harness and graders run in your own Microsoft or AWS subscription. Our team reaches your environment remotely from Sydney, under the data-transfer terms in your contract. The vendor's system processes each test case where it runs in normal use, and the data note records the vendor's published processing location, with its date. If a grader would need a model outside your region, we tell you before it runs.");
+  assert.equal(answer("financial-services", "Do we need to onboard you as a new supplier?"), "Not necessarily. Through our Evaluation Partner route, the work can run under a firm you've already onboarded, such as your internal-audit co-source. How your outsourcing rules apply (CPS 230 in Australia) is your call.");
+  const acc = industry("accounting");
+  // Decision 3: the hub card names the Australia-only kit, so the name carries Part 5's inline label.
+  assert.equal(acc.flagshipUseCases.find((u) => u.solution === "ai-switch-on").name, "Admin Hours Audit + Switch-On, with the accounting Safe-Use Kit (Australia)");
+  assert.equal(acc.problem.from, "In Australia, more than a million trusts appear in the ATO's 2023–24 trust return statistics. Seniors read each client's deeds by hand, again every year end.");
+  assert.equal(acc.workflow.find((s) => s.id === "new-structures").useCases[0].note, "Only if your practice provides services under AML/CTF rules, such as AUSTRAC-regulated services in Australia.");
+  assert.equal(acc.dontDo[0], "We don't rebuild bookkeeping, reconciliation or GST and VAT return preparation (BAS in Australia).");
+  assert.equal(acc.firstEngagement.needFromYou[2], "A trial window outside your peak tax season (in Australia, November to early December or April to May)");
+  assert.equal(answer("accounting", "Do we need client permission before our deeds go through your system?"), "Possibly, and more likely if we run it for you. It depends on the confidentiality rules you work under: in Australia, the Code item 6 row in the regulatory map sets out what the TPB says. You get a data note naming every processor, and your adviser decides whether your terms cover it.");
+  assert.equal(answer("accounting", "Where is the data processed?"), "The register runs in the cloud region you choose, in your own Microsoft or AWS account, or in an Australian region if we manage it for you. Our team reaches it remotely from Sydney, under the data-transfer terms in your contract. For Switch-On, you see each vendor's processing location where it's published.");
+  assert.equal(rows("accounting").find((r) => r.id === "privacy-app-6-11-ai-products").evidence, "A region note stating where inference runs and what the provider retains");
+  // Outside the band, none of the three pages keeps the old Australia-only wording (§3.3), the "outside Australia" condition (§4.4, §5.6)
+  // or a bare "Not to us." opener that reads as "nothing reaches us" (D4).
+  for (const id of IDS) {
+    const data = industry(id);
+    const copy = stringsOf([data.problem.from, data.dontDo, data.firstEngagement, data.mockPanel, data.scenario, data.faq.filter((f) => f.region !== "au")]);
+    for (const s of copy) {
+      assert.doesNotMatch(s, /\boutside Australia\b|\baccountable official\b|\bASAE 3000(?: or ASRE)? engagement\b|\bboard or APRA\b|\bonshore\b|^Not to us\b/i, `${id}: "${s}"`);
+    }
   }
 });

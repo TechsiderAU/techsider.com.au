@@ -13,7 +13,7 @@ flagshipUseCases:
     solution: document-registers
     status: launch
   # ⚑ owner: the accounting Safe-Use Kit must be lawyer-reviewed and published before the Accounting page or the Industries hub launches (spec §12 item 6; research index A1)
-  - name: Admin Hours Audit + Switch-On, with the accounting Safe-Use Kit
+  - name: Admin Hours Audit + Switch-On, with the accounting Safe-Use Kit (Australia)
     solution: ai-switch-on
     status: launch
   - name: ATO Letter Sorter
@@ -44,12 +44,12 @@ packages:
   - { solution: draft-for-approval, package: ato-letter-sorter }
 platformFirst: Run Karbon? Its email summaries and suggested replies are on by default. On FYI, look at the ATO SmartDocs integration for ATO documents. For one client's due diligence, First AML's AI document reader reads trust deeds inside the case.
 dontDo:
-  - We don't rebuild bookkeeping, reconciliation or BAS preparation.
+  - We don't rebuild bookkeeping, reconciliation or GST and VAT return preparation (BAS in Australia).
   - We don't make due-diligence decisions. Your AML/CTF compliance officer does.
   - We don't give legal or tax advice, or draft engagement-letter wording.
 rulesThatTravel: "The IESBA Code of Ethics for accountants already covers AI. Since December 2024, it has asked accountants to judge whether a tool's output is fit for purpose, including its limits, data quality and bias, and to guard against automation bias. In 2026, IESBA put it plainly: professional responsibility can't be delegated to a machine. The FATF Recommendations put due-diligence and record-keeping duties on accountants for some client work, such as setting up or managing companies and trusts. We build registers and drafts that a person approves, and we never make the due-diligence decision. Your own regulator's rules always come first."
 problem:
-  from: More than a million trusts appear in the ATO's 2023–24 trust return statistics. Seniors read each client's deeds by hand, again every year end.
+  from: In Australia, more than a million trusts appear in the ATO's 2023–24 trust return statistics. Seniors read each client's deeds by hand, again every year end.
   to: One register of every client trust, each field linked to its page and checked against deeds your seniors already know.
   source:
     label: ATO, Trust statistics for Taxation statistics 2023–24
@@ -68,7 +68,7 @@ workflow:
       - name: Trust roles for AML/CTF due diligence
         solution: document-registers
         status: launch
-        note: Only if your practice provides AUSTRAC-regulated services.
+        note: Only if your practice provides services under AML/CTF rules, such as AUSTRAC-regulated services in Australia.
   - id: day-to-day
     stage: Day to day
     useCases:
@@ -115,7 +115,7 @@ firstEngagement:
   needFromYou:
     - 30–50 trust deeds your seniors know, with their answers
     - Read-only access to the deeds, or a secure copy
-    - "A trial window: November to early December, or April to May"
+    - "A trial window outside your peak tax season (in Australia, November to early December or April to May)"
   youGet:
     - A trial report with each field's error rate and every miss
     - Register rows for the trial deeds, linked to their pages
@@ -125,9 +125,9 @@ faq:
   - q: Have you built this for other accounting practices?
     a: No. Techsider has no clients yet, in accounting or anywhere else, so you start with a Two-Week Trial on deeds your seniors know.
   - q: Do we need client permission before our deeds go through your system?
-    a: Possibly, and more likely if we run it for you. The Code item 6 row in the regulatory map sets out what the TPB says. You get a data note naming every processor, and your adviser decides whether your terms cover it.
+    a: "Possibly, and more likely if we run it for you. It depends on the confidentiality rules you work under: in Australia, the Code item 6 row in the regulatory map sets out what the TPB says. You get a data note naming every processor, and your adviser decides whether your terms cover it."
   - q: Where is the data processed?
-    a: The register runs in an Australian region, in your own Microsoft or AWS account or one we manage. For Switch-On, you see each vendor's processing location where it's published.
+    a: The register runs in the cloud region you choose, in your own Microsoft or AWS account, or in an Australian region if we manage it for you. Our team reaches it remotely from Sydney, under the data-transfer terms in your contract. For Switch-On, you see each vendor's processing location where it's published.
   - q: Why not just use Karbon's AI, or FYI's ATO SmartDocs integration?
     a: Use them first. Neither reads your trust deeds into a register you can check field by field.
   - q: What happens when the AI model changes?

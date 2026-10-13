@@ -47,7 +47,7 @@ dontDo:
 # go-global §5.2: this paragraph prints EU AI Act dates; review it with the EU AI Act anchors (reviewBy 2027-01-12).
 rulesThatTravel: "Supervisors use different words, but they ask the same questions about AI. The Basel Committee's principles on operational resilience and third-party risk expect a bank to withstand technology failures, including at its providers, and to check each provider before signing and monitor it after. In the EU, DORA requires banks, insurers and other financial entities to keep a register of their ICT arrangements and to put set terms into those contracts. The EU AI Act treats credit scoring of individuals, and risk assessment and pricing for life and health insurance, as high-risk from 2 December 2027 (as amended in July 2026). We test vendor AI on your own cases, before you sign and whenever the model may have changed."
 problem:
-  from: Vendor AI is approved on the vendor's presentations and a point-in-time sample check, and the contract says little about model changes.
+  from: In Australia, vendor AI is approved on the vendor's presentations and a point-in-time sample check, and the contract says little about model changes.
   to: Your own test set is re-run whenever the model may have changed, and every failure is listed.
   source:
     label: APRA, Letter to industry on artificial intelligence (AI)
@@ -125,11 +125,11 @@ faq:
   # ⚑ owner: "the method is published" holds only if the evaluation method ships at launch (research index B10)
   - q: How can we check your findings when you have no clients yet?
     a: Don't rely on our name; we have no clients yet. The method is published, and every finding comes with the test set, labels and a replay script, so your second line can re-perform it.
-  - q: Can we give your report to the board or APRA as a formal opinion?
-    a: No. It's findings, not an assurance opinion, and it isn't an ASAE 3000 or ASRE engagement. What you table, and how, is your decision.
+  - q: Can we give your report to the board or our regulator as a formal opinion?
+    a: No. It's findings, not an assurance opinion, and it isn't an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia). What you table, and how, is your decision.
   - q: Does customer data leave our environment?
-    a: Not to us. The harness and graders run in your own Microsoft or AWS subscription. The vendor's system processes each test case where it runs in normal use, and the data note records the vendor's published processing location, with its date. If a grader would need a model outside Australia, we tell you before it runs.
+    a: We don't take a copy. The harness and graders run in your own Microsoft or AWS subscription. Our team reaches your environment remotely from Sydney, under the data-transfer terms in your contract. The vendor's system processes each test case where it runs in normal use, and the data note records the vendor's published processing location, with its date. If a grader would need a model outside your region, we tell you before it runs.
   - q: Do we need to onboard you as a new supplier?
-    a: Not necessarily. Through our Evaluation Partner route, the work can run under a firm you've already onboarded, such as your internal-audit co-source. How CPS 230 applies is your call.
+    a: Not necessarily. Through our Evaluation Partner route, the work can run under a firm you've already onboarded, such as your internal-audit co-source. How your outsourcing rules apply (CPS 230 in Australia) is your call.
   - q: Our vendor won't give model-change notice. Can testing make up for that?
     a: It can't replace contract terms, but it gives you your own evidence. Some platforms don't record which model version answered, so a scheduled re-run is one practical way to notice a change.

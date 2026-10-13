@@ -70,7 +70,7 @@ dontDo:
 # go-global §5.2: this paragraph prints EU AI Act dates; review it with the EU AI Act anchors (reviewBy 2027-01-12).
 rulesThatTravel: "Public bodies in many countries are asked the same questions about AI: what it's for, who it affects, how it was tested and who is accountable. The OECD AI Principles ask for traceability and ongoing risk management, and UNESCO's Recommendation on the Ethics of AI, adopted by 193 member states in 2021, sets out shared principles. In the EU, from 2 December 2027 (as amended in July 2026), public bodies must assess the impact on fundamental rights before they first use most high-risk AI systems listed in the AI Act's Annex III. We measure how your AI fails, on your own questions, before it leaves pilot. For government, we only claim to know Australia's rules. Outside Australia, we test unclassified systems on public or synthetic data."
 problem:
-  from: AI tools reach daily staff use before a dedicated risk assessment is done or monitoring controls are in place.
+  from: In Queensland, Australia, AI tools reach daily staff use before a dedicated risk assessment is done or monitoring controls are in place.
   to: Each use case leaves pilot with a measured test on your own questions, its failures listed, and a re-test when the model changes.
   source:
     label: Queensland Audit Office, Managing the ethical risks of artificial intelligence
@@ -95,7 +95,7 @@ workflow:
       - name: Council Policy & Procedure Assistant
         solution: knowledge-assistant
         status: launch
-        note: For councils and small bodies.
+        note: For local government and small bodies.
   - id: run-agents
     stage: Run agents
     useCases:
@@ -115,7 +115,7 @@ mockPanel:
       value: Staff questions on leave and travel
     - label: Ground truth
       value: Answers labelled by two policy officers
-    - label: Accountable official
+    - label: Official accountable for AI use
       value: Named officer
       redacted: true
   chips:
@@ -130,7 +130,7 @@ mockPanel:
       clause: Section 4
 scenario:
   title: A policy agent leaving pilot at a fictional state department
-  problem: A fictional department has piloted a Copilot Studio agent that answers staff policy questions. Before rollout, the accountable official wants to know how often it answers wrongly, and whether it declines when the policy is silent.
+  problem: A fictional department has piloted a Copilot Studio agent that answers staff policy questions. Before rollout, the official accountable for AI use wants to know how often it answers wrongly, and whether it declines when the policy is silent.
   approach: Two policy officers label expected answers independently, and the test runs in the department's own subscription.
   measure:
     - False answers the policy doesn't support
@@ -140,7 +140,7 @@ scenario:
   trace: government-scenario
 firstEngagement:
   needFromYou:
-    - "A named owner, and the instrument you report to: the DTA tool, the NSW AIAF or a FAIRA"
+    - "A named owner, and the AI assessment framework you report to (in Australia, the DTA tool, the NSW AIAF or a FAIRA)"
     - 30–50 questions your staff can answer, or approval to start on public or synthetic data
     - Read-only access to the system, and your risk matrix
   youGet:
@@ -153,13 +153,13 @@ faq:
   - q: How can we check your evaluation when you have no clients yet?
     a: "Don't take it on trust. We have no clients yet, in government or anywhere else, so we publish the method instead: sample size, ground truth and thresholds. You get the test set and a replay script, so your team can check our work."
   - q: Will your report tell us the system is safe to deploy?
-    a: No. You get findings, not an assurance opinion, and it isn't an ASAE 3000 engagement. Each finding is rated to your risk matrix, and your accountable official decides whether to deploy.
+    a: No. You get findings, not an assurance opinion, and it isn't an ISAE 3000 (ASAE 3000 in Australia) engagement. Each finding is rated to your risk matrix, and the official accountable for AI use decides whether to deploy.
   - q: Do you evaluate systems you built, or take money from vendors?
     a: "Not independently, and no. We never independently evaluate a system we built, configured or advised on for the same client: our tests of our own builds are labelled \"acceptance test (not independent)\". We take no resale margin or referral fees from vendors we evaluate."
   - q: Will you red-team or penetration-test our AI agents?
     a: No. The Agentic AI Control Evaluation is a configuration review. Where prompt-injection or tool-misuse testing is needed, a CREST-accredited tester you engage does it, under written rules of engagement.
   - q: Does our test data leave our environment?
-    a: Not to us. The test and its graders run in your own subscription. The system under test handles each question where its vendor runs it, as in normal use, and the report records the vendor's published processing location, with its date. While your privacy and security assessments run, we start on public or synthetic data in a Feasibility Sprint.
+    a: We don't take a copy. The test and its graders run in your own subscription. Our team reaches your environment remotely from Sydney, under the data-transfer terms in your contract. The system under test handles each question where its vendor runs it, as in normal use, and the report records the vendor's published processing location, with its date. While your privacy and security assessments run, we start on public or synthetic data in a Feasibility Sprint.
   - q: We're a council. What do you design around?
     a: "Your state's privacy and records rules, listed with their sources in the Local government section: the PPIP Act and State Records Act in NSW, PROV's recordkeeping policy for Victorian records, and the Information Privacy Act and Public Records Act in Queensland."
     region: au
