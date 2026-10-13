@@ -297,3 +297,26 @@ test("go-global §5.2: these pages' anchor data keeps mid-market language (spec 
   assert.doesNotMatch(textOf("real-estate"), /Connector|\btenants?\b/i, "real estate: the PropertyMe Connector (ruling 9), or 'tenant' where §5.2 says rental applications");
   assert.doesNotMatch(textOf("education"), /\bRTOs?\b|\bASQA\b|ChatGPT Edu/, "education: RTOs or an unverified system (ruling 5)");
 });
+
+// ---------- go-global (spec §3.3, §5.5): copy that reads for any country, with Australian detail labelled ----------
+
+/** Every string in a value, however deep. */
+const allStrings = (v) => (typeof v === "string" ? [v] : Array.isArray(v) ? v.flatMap(allStrings) : v && typeof v === "object" ? Object.values(v).flatMap(allStrings) : []);
+
+test("go-global §3.3, §5.5: Education, Manufacturing and Real estate say where their facts and terms are Australian", () => {
+  const edu = industry("education");
+  assert.equal(edu.problem.from, "In Australia, full-time classroom teachers spent 6–9 hours a week on administrative tasks in 2023. Finding the current procedure means old handbooks, shared drives or emailing someone.");
+  assert.deepEqual(edu.dontDo, [
+    "We don't build student-facing tutors or chat tools.",
+    "We don't build anything that admits, grades or monitors students.",
+    "We don't compete with the AI chat tools education systems provide, such as NSWEduChat, SA's EdChat and cechat in Australia.",
+    "We don't write AI policies or privacy-policy wording.",
+  ]);
+  const mfg = industry("manufacturing");
+  assert.equal(mfg.problem.from, "In Australia, 9% of manufacturing businesses reported using AI in 2024–25, against 12% of all businesses. On the floor, answers come from binders and whoever has been on the line longest.");
+  assert.equal(mfg.firstEngagement.needFromYou[2], "5–10 floor staff, including a health and safety representative, writing test questions for about 1 hour each");
+  assert.equal(mfg.faq.find((f) => f.q === "Is it a GMP-validated system?").a, "No. On a GMP-regulated site (in Australia, that includes medicine, API and sunscreen sites), your quality team decides whether the assistant is part of a GMP activity and how to validate it. We supply the test evidence.");
+  assert.equal(industry("real-estate").problem.from, "In Australia, 330,256 new rental bonds were lodged in NSW in 2024–25, and 321,876 refunded. Senior property managers read agreements one PDF at a time.");
+  for (const id of IDS) assert.match(industry(id).problem.from, /^In Australia, /, `${id}: the problem's Australian figure isn't labelled (spec §3.3)`);
+  assert.doesNotMatch(allStrings(mfg.firstEngagement).join(" "), /\bHSR\b/, "manufacturing: the Australian WHS acronym (spec §3.3)");
+});

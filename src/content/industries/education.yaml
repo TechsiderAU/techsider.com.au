@@ -56,12 +56,12 @@ platformFirst: "If staff have Microsoft Copilot licences, SharePoint's built-in 
 dontDo:
   - "We don't build student-facing tutors or chat tools."
   - "We don't build anything that admits, grades or monitors students."
-  - "We don't compete with NSWEduChat, SA's EdChat or cechat."
+  - "We don't compete with the AI chat tools education systems provide, such as NSWEduChat, SA's EdChat and cechat in Australia."
   - "We don't write AI policies or privacy-policy wording."
 # go-global §5.2: this paragraph prints EU AI Act dates; review it with the EU AI Act anchors (reviewBy 2027-01-12).
 rulesThatTravel: "Schools and universities in many countries work from similar guidance. UNESCO's 2023 guidance on generative AI notes that institutions are largely unprepared to validate AI tools, and asks for data privacy protection and a human-centred, age-appropriate approach to validating tools. The AI Literacy Framework from the European Commission and the OECD, published in June 2026, gives schools a common reference for teaching about AI. The EU AI Act treats AI that admits students, grades their work, steers their learning or monitors them during tests as high-risk from 2 December 2027 (as amended in July 2026). Our work is for staff only. Your own education authority's rules always come first."
 problem:
-  from: "In 2023, full-time classroom teachers spent 6–9 hours a week on administrative tasks. Finding the current procedure means old handbooks, shared drives or emailing someone."
+  from: "In Australia, full-time classroom teachers spent 6–9 hours a week on administrative tasks in 2023. Finding the current procedure means old handbooks, shared drives or emailing someone."
   to: "Staff ask in Teams or on a web page and get the answer with its section and version, or \"not in our documents\"."
   source:
     label: "AITSL, National Trends: Teacher Workforce (June 2025)"
