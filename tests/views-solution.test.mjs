@@ -4,7 +4,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { packageViews } from "../src/lib/views/offer.ts";
-import { solutionView } from "../src/lib/views/solution.ts";
+import { solutionGuides, solutionView } from "../src/lib/views/solution.ts";
+import { SOLUTION_GUIDES } from "../src/lib/marketing.ts";
 import { crumbs, industryLink, siteContext, solutionLink } from "../src/lib/site.ts";
 import { DELIVERY_LETTER } from "../src/lib/fixed-copy.ts";
 import { fixtureSite, servicesFixture, solutionFixtures } from "../src/fixtures/index.ts";
@@ -191,4 +192,34 @@ test("solutionView throws on an unknown solution and on a package id that is als
   const data = solutionFixtures["fixture-solution"];
   const clash = { ...data, genericPackage: { ...data.genericPackage, id: "faq" } };
   assert.throws(() => view("fixture-solution", clash), /package id "faq" is also a section id/);
+});
+
+// go-global §3.5, §6.1: a Practical guides link carries the region of the post it links to.
+const guidePost = (id, region) => ({ id, data: region === undefined ? {} : { region } });
+const GUIDE_POSTS = [
+  guidePost("choose-first-ai-workflow"),
+  guidePost("ai-automation-project-scope"),
+  guidePost("ai-inside-your-practice-software", "au"),
+  guidePost("water-utility-sop-assistant-scenario", "au"),
+  guidePost("sovereign-llm-hosting-decision-matrix", "au"),
+  guidePost("copilot-agents-leaving-pilot", "au"),
+];
+
+test("solutionGuides: SOLUTION_GUIDES in order, each with the region of the post it links to, fragment links included", () => {
+  for (const [id, guides] of Object.entries(SOLUTION_GUIDES)) {
+    const views = solutionGuides(id, GUIDE_POSTS);
+    assert.deepEqual(views.map(({ title, href }) => ({ title, href })), guides, id);
+  }
+  assert.deepEqual(solutionGuides("ai-evaluation", GUIDE_POSTS).map((g) => [g.href, g.region]), [
+    ["/insights/copilot-agents-leaving-pilot/", "au"],
+    ["/insights/choose-first-ai-workflow/#check-the-controls-before-connecting-systems", null],
+  ]);
+  assert.deepEqual(solutionGuides("knowledge-assistant", GUIDE_POSTS).map((g) => g.region), ["au", "au"]);
+  assert.deepEqual(solutionGuides("draft-for-approval", GUIDE_POSTS).map((g) => g.region), [null, null]);
+});
+
+test("solutionGuides: a solution with no guides gets none, and a guide whose post is missing throws", () => {
+  assert.deepEqual(solutionGuides("fixture-solution", GUIDE_POSTS), []);
+  const missing = GUIDE_POSTS.filter((p) => p.id !== "copilot-agents-leaving-pilot");
+  assert.throws(() => solutionGuides("ai-evaluation", missing), /solution "ai-evaluation": the guide "Build an acceptance checklist before a Copilot rollout" links to \/insights\/copilot-agents-leaving-pilot\/, which is no insight post/);
 });

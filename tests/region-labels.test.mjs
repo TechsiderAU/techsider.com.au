@@ -13,6 +13,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readDist } from "./helpers.mjs";
 import { elements, readFrontmatter } from "../scripts/ci/lib.mjs";
+import { SOLUTION_GUIDES } from "../src/lib/marketing.ts";
 import { siteContext } from "../src/lib/site.ts";
 
 const REGION_LABEL_COMPONENT = new URL("../src/components/ui/RegionLabel.astro", import.meta.url);
@@ -101,4 +102,26 @@ test("cards: every insight card opens with the Australia label exactly when its 
   }
   const index = elementsWith(readDist("insights/index.html"), "data-insight-card");
   assert.equal(index.filter((c) => c.attrs["data-region"] === "au").length, AU_POSTS.length, "the index labels every Australian post");
+});
+
+test("Practical guides: a link to an Australian post opens with the Australia label, and no other guide has one (go-global §3.5)", () => {
+  const labelled = [];
+  for (const [id, guides] of Object.entries(SOLUTION_GUIDES)) {
+    const [section] = elements(mainHtml(readDist(`solutions/${id}/index.html`)), (t) => t.attrs.id === "guides");
+    const items = elements(section.inner, (t) => t.name === "li");
+    assert.deepEqual(items.map((li) => elements(li.inner, (t) => t.name === "a")[0].attrs.href), guides.map((g) => g.href), id);
+    guides.forEach((g, i) => {
+      const region = POST_REGION.get(g.href.match(/^\/insights\/([a-z0-9-]+)\//)[1]);
+      assert.equal(items[i].attrs["data-region"], region ?? undefined, `${id}: ${g.href}`);
+      assert.deepEqual(labelsIn(items[i].inner), region ? AU_LABEL : [], `${id}: ${g.href} label`);
+      if (region) labelled.push(`${id} ${g.href}`);
+    });
+  }
+  assert.deepEqual(labelled, [
+    "document-registers /insights/ai-inside-your-practice-software/",
+    "knowledge-assistant /insights/water-utility-sop-assistant-scenario/",
+    "knowledge-assistant /insights/sovereign-llm-hosting-decision-matrix/",
+    "ai-switch-on /insights/ai-inside-your-practice-software/",
+    "ai-evaluation /insights/copilot-agents-leaving-pilot/",
+  ]);
 });

@@ -5,6 +5,7 @@
 import type { z } from "astro/zod";
 import type { makeSolutionSchema } from "../../content/schemas.ts";
 import { DELIVERY_LETTER } from "../fixed-copy.ts";
+import { SOLUTION_GUIDES } from "../marketing.ts";
 import { crumbs, industryLink, refId, solutionLink } from "../site.ts";
 import type { Link, SiteContext } from "../site.ts";
 import { packageViews } from "./offer.ts";
@@ -97,4 +98,30 @@ export function solutionView(input: { id: string; data: SolutionData; shared: Sh
     faq: data.faq.map(({ q, a }) => ({ q, a })),
     closing: { command: "talk_to_us", args: `--about=${id}`, label: talk.label, href: talk.href },
   };
+}
+
+/** One "Practical guides" link on a solution page: SOLUTION_GUIDES' title and href, and the linked post's region. */
+export interface SolutionGuideView {
+  title: string;
+  href: string;
+  /** "au" when the post it links to is tagged region: au (go-global §3.5, §6.1): the link carries the "Australia" label. */
+  region: "au" | null;
+}
+
+/** The post a guide links to: /insights/<id>/, with or without a #fragment. */
+const GUIDE_POST = /^\/insights\/([a-z0-9-]+)\/(?:#[a-z0-9-]+)?$/;
+
+/**
+ * Solution `id`'s "Practical guides" (SOLUTION_GUIDES in src/lib/marketing.ts), in their order, each
+ * with the region of the insight post it links to (go-global §3.5). `posts` is the insights
+ * collection. A guide that doesn't link to a post in it throws, so a renamed or deleted post fails
+ * the build instead of losing its label. A solution with no guides gets [].
+ */
+export function solutionGuides(id: string, posts: readonly { id: string; data: { region?: "au" } }[]): SolutionGuideView[] {
+  return (SOLUTION_GUIDES[id] ?? []).map((guide) => {
+    const postId = GUIDE_POST.exec(guide.href)?.[1];
+    const post = posts.find((p) => p.id === postId);
+    if (post === undefined) throw new Error(`solution "${id}": the guide "${guide.title}" links to ${guide.href}, which is no insight post`);
+    return { title: guide.title, href: guide.href, region: post.data.region ?? null };
+  });
 }

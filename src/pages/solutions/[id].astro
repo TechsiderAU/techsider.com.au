@@ -17,7 +17,7 @@ import { pageDescription, pageTitle } from "../../lib/meta";
 import { pageAt, shownIds } from "../../lib/pages";
 import { siteContext } from "../../lib/site";
 import { demoFor } from "../../lib/views/demos";
-import { solutionView } from "../../lib/views/solution";
+import { solutionGuides, solutionView } from "../../lib/views/solution";
 
 // Every shown solution page needs its content entry and its demo. A missing one fails the build
 // here, as check 01 fails a live nav entry without its YAML file.
@@ -42,11 +42,13 @@ const { data, demo }: Props = Astro.props;
 const entry = pageAt(`/solutions/${id}/`);
 const site = siteContext(isPreview());
 const view = solutionView({ id, data, shared: SERVICES, site });
+// go-global §3.5: each Practical guides link carries the region of the post it links to.
+const guides = solutionGuides(id, await getCollection("insights"));
 // Spec §11.3: the solution as a Service, in the hero's words: its full name (the h1) and its one-liner.
 const graph = [service(Astro.site ?? Astro.url, { path: entry.path, key: "service", name: view.fullName, description: view.oneLiner })];
 ---
 <BaseLayout title={pageTitle(entry)} description={pageDescription(entry)} graph={graph}>
-  <SolutionTemplate view={view}>
+  <SolutionTemplate view={view} guides={guides}>
     <DemoEmbed slot="demo" demo={demo} site={site} level={3} />
   </SolutionTemplate>
 </BaseLayout>

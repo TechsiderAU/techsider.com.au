@@ -6,7 +6,10 @@
 // Package markup is CI check 10's contract: the generic package is the first full block, launch
 // packages are tabs whose panel ids are the package ids (so #<package-id> selects one), on-request
 // packages are one-line entries, and internal packages never reach the view.
-import { solutionArtwork, SOLUTION_GUIDES } from "../lib/marketing";
+// go-global §3.3, §3.5: an Australia-only on-request package's entry, and a Practical guides link to
+// an Australian post, carry data-region="au" and open with the "Australia" label. The route passes
+// `guides` (solutionGuides()); a gallery specimen passes none, and the list is then empty.
+import { solutionArtwork } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import ChipRow from "../components/page/ChipRow.astro";
@@ -17,14 +20,16 @@ import Tabs from "../components/ui/Tabs.astro";
 import TabPanel from "../components/ui/TabPanel.astro";
 import FaqList from "../components/ui/FaqList.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
+import RegionLabel from "../components/ui/RegionLabel.astro";
 import { ACCEPTANCE_TEST_LABEL } from "../lib/fixed-copy.ts";
-import type { SolutionView } from "../lib/views/solution.ts";
+import type { SolutionGuideView, SolutionView } from "../lib/views/solution.ts";
 
 interface Props {
   view: SolutionView;
+  guides?: SolutionGuideView[];
 }
 
-const { view } = Astro.props;
+const { view, guides = [] } = Astro.props;
 // A page without an example renders no disclosure. Examples retain their full transcripts.
 const hasDemo = Astro.slots.has("demo");
 const hero = {
@@ -165,8 +170,8 @@ const hero = {
 
   <PageSection id="guides" title="Practical guides" width="prose">
     <ul class="solution-list">
-      {(SOLUTION_GUIDES[view.id] ?? []).map((guide) => (
-        <li><a href={guide.href} class="solution-link">{guide.title}</a></li>
+      {guides.map((guide) => (
+        <li data-region={guide.region ?? undefined}>{guide.region && <Fragment><RegionLabel /> </Fragment>}<a href={guide.href} class="solution-link">{guide.title}</a></li>
       ))}
     </ul>
   </PageSection>
