@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
+import { renderAstro } from "./support/render-astro.mjs";
 
 // The static components A (BracketChip, SectionHeader, PromptBlock, Breadcrumb, FaqList) as the
 // preview build renders them on /preview/components/: once on carbon, once inside .surface-bone.
@@ -156,4 +157,24 @@ test("FaqList: one <details> per item with a hidden +/− indicator, and a FAQPa
       questions.map((q, i) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: answers[i] } })),
     );
   }
+});
+
+// go-global §5.6: an industry page renders its Australia-only questions in #faq-au without a second
+// FAQPage, and its #faq marks up the full list while showing only the untagged questions.
+const FAQ_LIST = new URL("../src/components/ui/FaqList.astro", import.meta.url);
+const FAQ_ITEMS = [1, 2, 3].map((n) => ({ q: `Fixture question ${n}?`, a: `Fixture answer ${n}, long enough to read.` }));
+const mainEntity = (items) => items.map((item) => ({ "@type": "Question", name: item.q, acceptedAnswer: { "@type": "Answer", text: item.a } }));
+
+test("FaqList: ld={false} renders the disclosures with no FAQPage, and ldItems is the list the FAQPage carries (go-global §5.6)", async () => {
+  const defaults = await renderAstro(FAQ_LIST, { items: FAQ_ITEMS });
+  assert.deepEqual(ofType(defaults, "FAQPage").map((p) => p.mainEntity), [mainEntity(FAQ_ITEMS)], "by default one FAQPage over the rendered items");
+
+  const plain = await renderAstro(FAQ_LIST, { items: FAQ_ITEMS.slice(0, 2), id: "fixture-faq-au", ld: false });
+  assert.equal((plain.match(/<details\b/g) ?? []).length, 2);
+  assert.match(plain, /<div class="faq[^"]*" id="fixture-faq-au"/);
+  assert.deepEqual(jsonLdIn(plain), [], "ld={false} emits no ld+json at all");
+
+  const marked = await renderAstro(FAQ_LIST, { items: FAQ_ITEMS.slice(2), ldItems: FAQ_ITEMS });
+  assert.equal((marked.match(/<details\b/g) ?? []).length, 1, "only the rendered items are disclosures");
+  assert.deepEqual(ofType(marked, "FAQPage").map((p) => p.mainEntity), [mainEntity(FAQ_ITEMS)], "the FAQPage carries ldItems, in their order");
 });

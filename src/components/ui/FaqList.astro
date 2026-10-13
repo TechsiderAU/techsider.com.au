@@ -1,7 +1,10 @@
 ---
 // FAQ as native <details> disclosures (they work without JS) plus FAQPage JSON-LD
 // (spec §11.3). The +/− indicator is aria-hidden: <details> exposes its own expanded state.
-// Render at most once per page, so the page carries one FAQPage.
+// one FAQPage per page; at most one instance emits it. Another FaqList on the same page passes
+// ld={false} and renders its disclosures only (an industry page's #faq-au, go-global §5.6); the
+// one that emits it passes ldItems when the FAQPage carries more than it shows (an industry #faq
+// marks up the page's full list).
 // An item's optional `meta` line (the Trust FAQ's "Part A · as at …", spec §8.11) renders inside
 // the answer, after it, as <p class="faq-meta">. It describes the answer rather than being part of
 // it, so the FAQPage JSON-LD never carries it.
@@ -10,13 +13,17 @@ import { jsonLd } from "../../lib/json-ld";
 interface Props {
   items: { q: string; a: string; meta?: string }[];
   id?: string;
+  /** false: the disclosures only, no FAQPage. Default true. */
+  ld?: boolean;
+  /** The questions the FAQPage carries when they differ from the rendered items (an industry #faq marks up its full list). Default: items. */
+  ldItems?: { q: string; a: string }[];
 }
 
-const { items, id } = Astro.props;
+const { items, id, ld = true, ldItems = items } = Astro.props;
 const faqPage = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: items.map((item) => ({
+  mainEntity: ldItems.map((item) => ({
     "@type": "Question",
     name: item.q,
     acceptedAnswer: { "@type": "Answer", text: item.a },
@@ -31,7 +38,7 @@ const faqPage = {
     </details>
   ))}
 </div>
-<script type="application/ld+json" set:html={jsonLd(faqPage)} />
+{ld && <script type="application/ld+json" set:html={jsonLd(faqPage)} />}
 
 <style>
   .faq {
