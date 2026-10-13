@@ -642,7 +642,9 @@ test("run-all exits 1 and names the check when a built page breaks a rule", () =
   const html = readFileSync(home, "utf8");
   assert.ok(html.includes("</main>"));
   writeFileSync(home, html.replace("</main>", '<div data-package-status="internal">Fixture internal package</div></main>'));
-  const r = verify(["--dist", copy]);
+  // Check 10 alone: check 13 reads the real reviewBy dates against today's date, so from 2027-01-13 a
+  // full run would also fail it and change the count this test isn't about (final review F30).
+  const r = verify(["--dist", copy, "--checks", "10"]);
   assert.equal(r.status, 1, r.stdout + r.stderr);
   assert.match(r.stdout, /^ {2}FAIL 10-package-status \(1 error\)$/m);
   assert.match(r.stdout, /^ {9}x dist\/index\.html: an internal package renders: <div data-package-status="internal">$/m);

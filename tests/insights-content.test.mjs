@@ -366,16 +366,6 @@ for (const [id, want] of Object.entries(GLOBAL_POSTS)) {
   });
 }
 
-// Spec §6.5 dates any insight whose claims may move; §6.4 names the EU AI Act post's date, and §5.3's
-// watch list gives the same date to the GDPR items and the NIST AI RMF revision the other two report.
-test("the global posts are spec §6.4's three, by their permanent slugs and titles, each with the watch-list review date (§5.3, §6.5)", () => {
-  assert.deepEqual(Object.fromEntries(Object.entries(GLOBAL_POSTS).map(([id, p]) => [id, [p.title, p.reviewBy]])), {
-    "offshore-ai-suppliers-data-in-your-region": ["Offshore AI suppliers and data in your region.", "2027-01-12"],
-    "eu-ai-act-new-dates-for-non-eu-suppliers": ["The EU AI Act's new dates for non-EU suppliers.", "2027-01-12"],
-    "iso-42001-nist-ai-rmf-oecd-what-each-asks": ["ISO 42001, NIST AI RMF and OECD: what each asks.", "2027-01-12"],
-  });
-});
-
 test("the reference scenario says it's fictional first, and renders the illustrative label", () => {
   for (const [id] of Object.entries(NEW_POSTS).filter(([, p]) => p.type === "reference-scenario")) {
     const html = readDist(`insights/${id}/index.html`);

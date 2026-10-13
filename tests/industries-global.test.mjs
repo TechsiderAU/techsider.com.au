@@ -2,17 +2,15 @@
 // them (dist/): "Rules that travel" first, the Australian blocks inside the [data-region="au"]
 // band, the band's heading and contents, the FAQ split with its one FAQPage, the block word budgets
 // (§5.2, §5.4) and the hub's labelled chip rows. Expected values come from the industry YAMLs and
-// the anchor files; an industry whose anchors file Part 4B hasn't written yet renders no chips.
+// the anchor files, which every industry has (the route fails the build without one).
 // Run `npm run build` first.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parse } from "yaml";
 import { blockWords, readDist, visibleText } from "./helpers.mjs";
 import { S1_BANNED, bannedRegExp } from "./support/s1-scan.mjs";
-import { elements, elementsWith, loadYaml, normalizeQuotes, startTags } from "../scripts/ci/lib.mjs";
+import { elements, elementsWith, loadYaml, normalizeQuotes, readJson, startTags } from "../scripts/ci/lib.mjs";
 import { industryFindings, regionFindings } from "../scripts/ci/checks/13-anchors-and-regions.mjs";
 import { anchorFile, makeIndustrySchema, plainRef } from "../src/content/schemas.ts";
 import { anchorChipLabel } from "../src/lib/anchors.ts";
@@ -26,12 +24,9 @@ const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const site = siteContext(false);
 const IDS = site.industries.map((i) => i.id);
 const industrySchema = makeIndustrySchema(plainRef);
-const industry = (id) => industrySchema.parse(parse(readFileSync(join(ROOT, `src/content/industries/${id}.yaml`), "utf8")));
-/** An anchors file, or an empty one while it doesn't exist yet (Part 4A's transitional pages). */
-const anchorsOf = (name) => {
-  const path = join(ROOT, `src/data/anchors/${name}.json`);
-  return existsSync(path) ? anchorFile.parse(JSON.parse(readFileSync(path, "utf8"))) : { anchors: [] };
-};
+const industry = (id) => industrySchema.parse(loadYaml(join(ROOT, `src/content/industries/${id}.yaml`)));
+/** An anchors file, parsed as the route parses it: shared.json, or an industry's own. */
+const anchorsOf = (name) => anchorFile.parse(readJson(join(ROOT, `src/data/anchors/${name}.json`)));
 const page = (id) => readDist(`industries/${id}/index.html`);
 const mainOf = (html) => html.slice(html.search(/<main\b/), html.indexOf("</main>"));
 const text = (html) => visibleText(html).trim();
@@ -98,9 +93,10 @@ test("Rules that travel: the heading, the industry's paragraph, its anchor files
     const anchors = anchorsOf(id);
     const block = byId(html, "rules-that-travel");
     assert.equal(text(byId(block.inner, "rules-that-travel-heading").inner), RULES_HEADING, id);
-    assert.deepEqual(elementsWith(block.inner, "data-rules-paragraph").map((p) => text(p.inner)), data.rulesThatTravel ? [data.rulesThatTravel] : [], id);
+    assert.deepEqual(elementsWith(block.inner, "data-rules-paragraph").map((p) => text(p.inner)), [data.rulesThatTravel], id);
+    assert.deepEqual(elementsWith(block.inner, "data-anchor-row").map((r) => r.attrs["data-anchor-row"]), ["shared", "sector"], `${id}: the chip rows`);
     const expected = [
-      ...(anchors.shared ?? []).map((sid) => [shared.get(sid), "shared"]),
+      ...anchors.shared.map((sid) => [shared.get(sid), "shared"]),
       ...anchors.anchors.filter((a) => a.featured).map((a) => [a, "sector"]),
     ];
     const chips = elementsWith(block.inner, "data-anchor-id").map((a) => [
@@ -109,7 +105,7 @@ test("Rules that travel: the heading, the industry's paragraph, its anchor files
     ]);
     assert.deepEqual(chips, expected.map(([a, scope]) => [a.id, scope, a.source, a.name, anchorChipLabel(a)]), id);
     const labels = elementsWith(block.inner, "data-anchor-row", "shared").map((r) => text(elements(r.inner, (t) => t.name === "p")[0].inner));
-    assert.deepEqual(labels, (anchors.shared ?? []).length > 0 ? [RULES_SHARED_LABEL] : [], id);
+    assert.deepEqual(labels, [RULES_SHARED_LABEL], id);
     assert.deepEqual(elementsWith(html, "data-rules-closing").map((p) => text(p.inner)), [RULES_CLOSING], `${id}: the closing line, once`);
   }
 });
@@ -140,7 +136,7 @@ test("word budgets: Rules that travel at most 280 words, its paragraph at most 1
     const data = industry(id);
     const rules = blockWords(html, "rules-that-travel");
     assert.ok(rules <= 280, `${id}: Rules that travel is ${rules} words`);
-    if (data.rulesThatTravel) assert.ok(wordsOf(data.rulesThatTravel) <= 140, `${id}: the paragraph is ${wordsOf(data.rulesThatTravel)} words`);
+    assert.ok(wordsOf(data.rulesThatTravel) <= 140, `${id}: the paragraph is ${wordsOf(data.rulesThatTravel)} words`);
     const moved = bandBlocks(data).reduce((n, b) => n + blockWords(html, b), 0)
       + data.faq.filter((f) => f.region === "au").reduce((n, f) => n + wordsOf(`${f.q} ${f.a}`), 0);
     const own = blockWords(html, "australia") - moved;
@@ -192,19 +188,13 @@ const TRAVEL_SENTENCES = {
   "legal-and-professional": "Your own court's practice notes and conduct rules always come first.",
 };
 /** Spec §1, S1: the banned strings in a plain text, as tests/support/s1-scan.mjs matches them. The Rules paragraph and the FAQPage JSON-LD (which carries the Australia-tagged FAQs) are not allowed contexts. */
-const s1In = (text) => S1_BANNED.filter((s) => bannedRegExp(s).test(normalizeQuotes(text)));
-const rulesIndustrySchema = makeIndustrySchema(plainRef);
-const rulesIndustry = (id) => rulesIndustrySchema.parse(loadYaml(new URL(`../src/content/industries/${id}.yaml`, import.meta.url)));
-const rulesBuilt = (id) => readDist(`industries/${id}/index.html`);
-const plainText = (html) => visibleText(html).trim();
-/** pageWords' rule (tests/helpers.mjs): whitespace-separated tokens holding a letter or a digit. */
-const tokenCount = (s) => s.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
+const s1In = (copy) => S1_BANNED.filter((s) => bannedRegExp(s).test(normalizeQuotes(copy)));
 
 test("go-global §5.2, §5.5: each industry page renders its own Rules paragraph, 140 words or fewer, ending with its travel sentence", () => {
   for (const id of RULES_PAGE_IDS) {
-    const paragraph = rulesIndustry(id).rulesThatTravel;
+    const paragraph = industry(id).rulesThatTravel;
     assert.equal(typeof paragraph, "string", `${id}: no rulesThatTravel in src/content/industries/${id}.yaml`);
-    assert.ok(tokenCount(paragraph) <= 140, `${id}: the Rules paragraph is ${tokenCount(paragraph)} words; §5.2 allows 140`);
+    assert.ok(wordsOf(paragraph) <= 140, `${id}: the Rules paragraph is ${wordsOf(paragraph)} words; §5.2 allows 140`);
     const travel = TRAVEL_SENTENCES[id];
     for (const [other, sentence] of Object.entries(TRAVEL_SENTENCES)) {
       if (other !== id && sentence !== null) assert.ok(!paragraph.includes(sentence), `${id} carries ${other}'s travel sentence`);
@@ -214,9 +204,9 @@ test("go-global §5.2, §5.5: each industry page renders its own Rules paragraph
       assert.equal(paragraph.indexOf(travel), paragraph.length - travel.length, `${id}: the travel sentence appears twice`);
     }
     assert.deepEqual(s1In(paragraph), [], `${id}: an S1 string (spec §1, S1)`);
-    const rendered = elements(rulesBuilt(id), (t) => "data-rules-paragraph" in t.attrs);
+    const rendered = elements(page(id), (t) => "data-rules-paragraph" in t.attrs);
     assert.equal(rendered.length, 1, `${id}: ${rendered.length} [data-rules-paragraph] elements`);
-    assert.equal(plainText(rendered[0].inner), paragraph, `${id}: the rendered paragraph isn't the content's`);
+    assert.equal(text(rendered[0].inner), paragraph, `${id}: the rendered paragraph isn't the content's`);
   }
 });
 
@@ -229,8 +219,8 @@ const DONT_DO_LINES = {
 
 test("go-global §5.5: Financial services, Education and Healthcare each say what they don't take on, under What we don't do", () => {
   for (const [id, line] of Object.entries(DONT_DO_LINES)) {
-    assert.ok(rulesIndustry(id).dontDo.includes(line), `${id}: dontDo lacks "${line}"`);
-    const items = elements(rulesBuilt(id), (t) => t.name === "li").map((li) => plainText(li.inner));
+    assert.ok(industry(id).dontDo.includes(line), `${id}: dontDo lacks "${line}"`);
+    const items = elements(page(id), (t) => t.name === "li").map((li) => text(li.inner));
     assert.ok(items.includes(line), `${id}: "${line}" isn't rendered as a list item`);
   }
 });
@@ -246,14 +236,14 @@ const AU_TAGGED_FAQS = {
   "resources-and-energy": ["We run a SOCI-covered asset. Where would our data be processed?", "Will this meet our CIRMP obligations?"],
 };
 /** The question text of each FAQ disclosure inside an element. */
-const questionsIn = (html) => elements(html, (t) => /\bfaq-q\b/.test(t.attrs.class ?? "")).map((q) => plainText(q.inner));
+const questionsIn = (html) => elements(html, (t) => /\bfaq-q\b/.test(t.attrs.class ?? "")).map((q) => text(q.inner));
 
 test("go-global §5.6: the Australia-only FAQs are tagged and render in #faq-au inside the band, and the one FAQPage carries every FAQ and no S1 string", () => {
   for (const id of RULES_PAGE_IDS) {
-    const faq = rulesIndustry(id).faq;
+    const faq = industry(id).faq;
     const tagged = faq.filter((f) => f.region === "au").map((f) => f.q);
     assert.deepEqual(tagged, AU_TAGGED_FAQS[id] ?? [], `${id}: the FAQs tagged region "au"`);
-    const html = rulesBuilt(id);
+    const html = page(id);
     const [neutral] = elements(html, (t) => t.attrs.id === "faq");
     assert.deepEqual(questionsIn(neutral.outer), faq.filter((f) => f.region !== "au").map((f) => f.q), `${id}: #faq`);
     const [au] = elements(html, (t) => t.attrs.id === "faq-au");

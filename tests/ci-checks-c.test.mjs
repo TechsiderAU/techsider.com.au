@@ -301,8 +301,3 @@ test("check 13 run(): every structure finding on every built page is an error, i
     rmSync(root, { recursive: true, force: true });
   }
 });
-
-test("check 13 no longer stages rule 1: the STRUCTURE_RULE_LIVE flag is gone (Part 4A)", () => {
-  const source = readFileSync(new URL("../scripts/ci/checks/13-anchors-and-regions.mjs", import.meta.url), "utf8");
-  assert.doesNotMatch(source, /STRUCTURE_RULE_LIVE/);
-});

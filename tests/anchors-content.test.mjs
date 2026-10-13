@@ -272,11 +272,27 @@ test("no UNVERIFIED anchor is written, and only P or P* anchors are featured (sp
   }
 });
 
-test("dates: asAt, lastReviewed and reviewBy are days; statusDate is a day, or the month a source gives (a year only on data-only anchors); reviewBy follows the r4 §5.5 watch list", () => {
+/**
+ * How precisely a raw statusDate must be written (src/data/anchors/README.md; final review F8): an
+ * applies-from chip prints the day, so its date is a full YYYY-MM-DD; a published chip prints only the
+ * month, so a date the source gives to the month may be YYYY-MM; a year alone (YYYY) would print as
+ * January, so it stays on an anchor that isn't featured. statusDate is z.coerce.date(), which keeps
+ * no precision, so this reads the raw JSON.
+ */
+const STATUS_DATE = (a) => (a.status === "applies-from" ? /^\d{4}-\d{2}-\d{2}$/ : a.featured ? /^\d{4}-\d{2}(?:-\d{2})?$/ : /^\d{4}(?:-\d{2}(?:-\d{2})?)?$/);
+
+test("dates: asAt, lastReviewed and reviewBy are days; statusDate is a day on an applies-from anchor, otherwise a day or the month a source gives (a year only on data-only anchors); reviewBy follows the r4 §5.5 watch list", () => {
+  // The rule itself, on the probes the final review used: an applies-from month, and a featured year.
+  assert.doesNotMatch("2027-12", STATUS_DATE({ status: "applies-from", featured: true }));
+  assert.doesNotMatch("2027-12", STATUS_DATE({ status: "applies-from", featured: false }));
+  assert.match("2027-12-02", STATUS_DATE({ status: "applies-from", featured: true }));
+  assert.match("2026-09", STATUS_DATE({ status: "published", featured: true }));
+  assert.doesNotMatch("2023", STATUS_DATE({ status: "published", featured: true }));
+  assert.match("2023", STATUS_DATE({ status: "published", featured: false }));
   for (const [file] of covered()) {
     for (const a of raw(file).anchors) {
       for (const k of ["asAt", "lastReviewed", "reviewBy"]) if (a[k] !== undefined) assert.match(a[k], /^\d{4}-\d{2}-\d{2}$/, `${file}/${a.id}.${k}`);
-      if (a.statusDate !== undefined) assert.match(a.statusDate, a.featured ? /^\d{4}-\d{2}(?:-\d{2})?$/ : /^\d{4}(?:-\d{2}(?:-\d{2})?)?$/, `${file}/${a.id}.statusDate`);
+      if (a.statusDate !== undefined) assert.match(a.statusDate, STATUS_DATE(a), `${file}/${a.id}.statusDate (${a.status}${a.featured ? ", featured" : ""})`);
     }
   }
   for (const { file, a } of everyAnchor()) {
