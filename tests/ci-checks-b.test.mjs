@@ -480,7 +480,7 @@ test("the exception lists are well-formed, and every banned-phrase exception is 
 
 // ---------- run-all ----------
 
-test("run-all runs checks 01-08, 10 and 11 in order (09 is the build gate, 12 the Playwright axe suite)", async () => {
+test("run-all runs checks 01-08, 10, 11 and 13 in order (09 is the build gate, 12 the Playwright axe suite)", async () => {
   assert.deepEqual(CHECKS, [
     "01-slugs",
     "02-links",
@@ -492,6 +492,7 @@ test("run-all runs checks 01-08, 10 and 11 in order (09 is the build gate, 12 th
     "08-regulatory-kits",
     "10-package-status",
     "11-pricing",
+    "13-anchors-and-regions",
   ]);
   for (const id of CHECKS) {
     const mod = await import(new URL(`../scripts/ci/checks/${id}.mjs`, import.meta.url));
@@ -535,9 +536,9 @@ const verify = (args = [], mode = "report") =>
 test("the production build passes every check in report mode", () => {
   const r = verify();
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.match(r.stdout, /^verify: 10 checks against dist \(VERIFY_MODE=report\)$/m);
+  assert.match(r.stdout, /^verify: 11 checks against dist \(VERIFY_MODE=report\)$/m);
   for (const id of CHECKS) assert.match(r.stdout, new RegExp(`^ {2}(ok|warn) +${id}\\b`, "m"), id);
-  assert.match(r.stdout, /^verify: all 10 checks passed/m);
+  assert.match(r.stdout, /^verify: all 11 checks passed/m);
 });
 
 test("--checks picks checks by number or full id, in CHECKS order, and refuses anything else", () => {

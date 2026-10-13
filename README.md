@@ -59,6 +59,7 @@ The production build has three stages, and any one of them fails it:
 | `08-regulatory-kits` | Regulatory rows are complete, every Government section renders a row, and every Safe-Use Kit is complete and lawyer-reviewed (launch gate). |
 | `10-package-status` | On-request and internal packages never render as a tab or a full package block, and the onshore pillar appears only on onshore packages. |
 | `11-pricing` | No pricing language and no currency figures in offer copy. |
+| `13-anchors-and-regions` | Every regulatory row and jurisdiction section on a built page sits inside the Australia band (`[data-region="au"]`), and every industry page puts `#rules-that-travel` before `#australia`. A `reviewBy` date on an anchor in `src/data/anchors/` or an insight in `src/content/insights/` warns from 30 days before it and fails the build once it has passed, whatever `VERIFY_MODE` says, so the weekly rebuild stops until someone reviews the item and moves the date. |
 
 Check 09 is stages 1 and 2. Check 12, the accessibility smoke test, is the Playwright suite.
 

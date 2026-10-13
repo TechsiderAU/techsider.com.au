@@ -6,7 +6,10 @@
 // components and templates render (08 for its built-HTML part: the Government jurisdiction sections,
 // and every built industry page's related insights).
 // Check 9 (type-check and pristine build) is `astro check` plus scripts/ci/build.mjs,
-// and check 12 (axe smoke) is the Playwright suite, so neither runs here.
+// and check 12 (axe smoke) is the Playwright suite, so neither runs here. Check 13 (go-global
+// §10.2: the Australia band and the reviewBy dates) reads the production build and the anchor and
+// insight sources; it is neither a launch gate nor in the preview profile, and its findings are
+// the same in every mode.
 // VERIFY_MODE=gate turns the launch gates (07, 08) from warnings into errors; any
 // other value, or none, is report mode. Exits 1 when any check reports an error.
 import { existsSync, realpathSync } from "node:fs";
@@ -25,6 +28,7 @@ export const CHECKS = [
   "08-regulatory-kits",
   "10-package-status",
   "11-pricing",
+  "13-anchors-and-regions",
 ];
 /** Open items here are printed on the branch and fail only the launch PR and the deploy. */
 export const LAUNCH_GATES = ["07-verify-markers", "08-regulatory-kits"];

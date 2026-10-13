@@ -2,12 +2,13 @@
 // Every clock is fixed: no test reads the real date, the real content or the real build.
 import { after, test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import {
   ANCHORS_DIR, INDUSTRY_PAGE, INSIGHTS_DIR, NAME, WARN_DAYS, daysUntil, industryFindings, regionFindings, reviewByLevel, run,
 } from "../scripts/ci/checks/13-anchors-and-regions.mjs";
+import { CHECKS, LAUNCH_GATES } from "../scripts/ci/run-all.mjs";
 
 const temps = [];
 after(() => {
@@ -90,6 +91,17 @@ test("13: its constants, and INDUSTRY_PAGE matches the built industry pages only
   for (const rel of ["industries/index.html", "preview/templates/industry/index.html", "industries/government/faq/index.html", "solutions/government/index.html"]) {
     assert.doesNotMatch(rel, INDUSTRY_PAGE);
   }
+});
+
+// ---------- wiring ----------
+
+test("13: runs last in every build, and is neither a launch gate nor in the preview profile (go-global §10.2)", () => {
+  assert.equal(CHECKS.at(-1), NAME);
+  assert.ok(!LAUNCH_GATES.includes(NAME));
+  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  const profile = pkg.scripts["build:preview"].match(/--checks (\S+)/)?.[1];
+  assert.ok(profile, "build:preview runs no --checks profile");
+  assert.ok(!profile.split(",").includes("13"), `the preview profile ${profile} runs check 13`);
 });
 
 // ---------- rule 2: the clock ----------
