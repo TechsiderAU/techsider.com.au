@@ -30,7 +30,7 @@ test("insightCards: drafts dropped, newest first, and each card carries its link
   assert.deepEqual(cards.map((c) => c.id), ["newer", "no-body", "older"]);
   assert.deepEqual(cards[0], {
     id: "newer", href: "/insights/newer/", title: "Test title newer", description: "Test description newer",
-    typeLabel: "Reference scenario", date: daysAgo(2), minutes: 3, industries: [],
+    typeLabel: "Reference scenario", date: daysAgo(2), minutes: 3, industries: [], region: null,
   });
   assert.equal(cards[1].minutes, 1);
   assert.equal(cards[2].typeLabel, "Platform guide");
@@ -53,6 +53,13 @@ test("insightCards: industry references become chips, as links only when the pag
     { id: "healthcare", label: "Healthcare", href: siteContext(false).industries.find((i) => i.id === "healthcare").href },
   ]);
   assert.throws(() => insightCards([post("p", NOW, { industries: ["mining"] })], siteContext(true)), /Unknown industry id "mining"/);
+});
+
+test("insightCards: a post tagged region: au carries region \"au\" on its card; an untagged post carries null (go-global §6.1)", () => {
+  const cards = insightCards([post("au-post", daysAgo(1), { region: "au" }), post("global-post", daysAgo(2))], fixtureSite);
+  assert.deepEqual(cards.map((c) => [c.id, c.region]), [["au-post", "au"], ["global-post", null]]);
+  // The gallery exercises both: one fixture post is Australian, the others are not.
+  assert.deepEqual(insightCards(insightFixtures, fixtureSite).filter((c) => c.region === "au").map((c) => c.id), ["fixture-insight-evaluation"]);
 });
 
 test("latestInsights: the newest post exactly 45 days old still shows the newest 3 cards", () => {

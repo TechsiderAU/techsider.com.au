@@ -26,7 +26,7 @@ test("postView: the card, page title, breadcrumb and dates of a published post",
   const v = view();
   assert.deepEqual(v.card, {
     id: "test-post", href: "/insights/test-post/", title: "Test post title", description: "Test post description.",
-    typeLabel: "Article", date: PUBLISHED, minutes: 2, industries: [],
+    typeLabel: "Article", date: PUBLISHED, minutes: 2, industries: [], region: null,
   });
   assert.equal(v.metaTitle, "Test post title | Techsider");
   assert.equal(view({ title: "Test post title." }).metaTitle, "Test post title | Techsider", "the H1's closing full stop stays out of the <title>");
@@ -41,6 +41,14 @@ test("postView: the card, page title, breadcrumb and dates of a published post",
   ]);
   const updated = new Date("2026-07-01T00:00:00Z");
   assert.equal(view({ updatedDate: updated }).updated, updated);
+});
+
+test("postView: a post tagged region: au carries it on its card, and its related cards carry their own (go-global §6.1)", () => {
+  assert.equal(view({ region: "au" }).card.region, "au");
+  const me = post({ region: "au", solutions: ["ai-evaluation"] });
+  const posts = [me, post({ solutions: ["ai-evaluation"] }, "global-twin"), post({ solutions: ["ai-evaluation"], region: "au" }, "au-twin")];
+  const v = postView({ post: me, posts, site: siteContext(false), siteUrl: SITE_URL });
+  assert.deepEqual(v.related.map((c) => [c.id, c.region]).sort(), [["au-twin", "au"], ["global-twin", null]]);
 });
 
 test("postView: a post with no references closes with plain 'Talk to us', linked to /contact/", () => {

@@ -361,6 +361,8 @@ export const insightFixtures: { id: string; body: string; data: InsightData }[] 
     type: "article",
     industries: ["fixture-industry", "fixture-government", "fixture-industry-9"],
     solutions: [],
+    // go-global §6.1: the one Australian fixture post, so the gallery's industry pages show a labelled card.
+    region: "au",
   }),
   insight("fixture-insight-scenario", {
     title: "Fixture reference scenario: an agency tests its fixture assistant",
