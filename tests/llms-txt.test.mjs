@@ -1,12 +1,16 @@
 // /llms.txt (go-global §3.1, §3.2, §9.3): the entity sentence word for word, the headquarters line,
 // the §3.2 paragraph, the facts an assistant should repeat (each restating copy the site carries; the
 // reply sentence built from CONTACT, never a literal), a Profiles list only while SITE.profiles has an
-// entry with a URL, and none of the S1 wording (spec §1). The last test reads dist/llms.txt: run
+// entry with a URL, the "(Australia)" label on each Australian post's line and on no other (go-global
+// §6.1, final review F7), and none of the S1 wording (spec §1). The tests that read dist/llms.txt need
 // `npm run build` first.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { readDist } from "./helpers.mjs";
+import { readFrontmatter } from "../scripts/ci/lib.mjs";
 import { SITE, hqLine } from "../src/data/nav.ts";
 import { CONTACT } from "../src/data/contact.ts";
 import { DISAMBIGUATION } from "../src/lib/fixed-copy.ts";
@@ -24,7 +28,19 @@ const S1_BANNED = [
   "Australian organisations", "for Australian", "in Australia |", "Australia's leading",
   "Australian AI", "Australian teams", "Australian-owned", "most Australian",
 ];
-const POSTS = [{ id: "fixture-post", title: "Fixture post title.", description: "Fixture post description.", publishDate: new Date("2026-10-01") }];
+const POSTS = [
+  { id: "fixture-post", title: "Fixture post title.", description: "Fixture post description.", publishDate: new Date("2026-10-01"), region: null },
+  { id: "fixture-region-post", title: "Fixture regional post title.", description: "Fixture regional post description.", publishDate: new Date("2026-09-30"), region: "au" },
+];
+const INSIGHTS = fileURLToPath(new URL("../src/content/insights/", import.meta.url));
+/** Every published insight's id and region, from its frontmatter. */
+const PUBLISHED = readdirSync(INSIGHTS)
+  .filter((f) => f.endsWith(".md"))
+  .map((f) => ({ id: f.slice(0, -".md".length), fm: readFrontmatter(join(INSIGHTS, f)) }))
+  .filter((p) => p.fm.draft !== true)
+  .map((p) => ({ id: p.id, region: p.fm.region ?? null }));
+/** The lines of an llms.txt that list one post: "- [title](its URL)", " (Australia)" on an Australian post, then ": " and its description. */
+const postLine = (text, id) => text.split("\n").filter((l) => l.startsWith("- [") && l.includes(`](${ORIGIN}/insights/${id}/)`));
 const build = () => llmsTxt({ site: ORIGIN, posts: POSTS });
 const lines = (text) => text.split("\n");
 
@@ -67,6 +83,25 @@ test("Profiles lists only the profiles with a URL, between Company and Optional,
   } finally {
     SITE.profiles = saved;
   }
+});
+
+test("Insights: an Australian post's line carries \"(Australia)\" after its link, and no other line does (go-global §6.1, final review F7)", () => {
+  const text = build();
+  assert.deepEqual(postLine(text, "fixture-post"), [`- [Fixture post title](${ORIGIN}/insights/fixture-post/): Fixture post description. (2026-10-01)`]);
+  assert.deepEqual(postLine(text, "fixture-region-post"), [`- [Fixture regional post title](${ORIGIN}/insights/fixture-region-post/) (Australia): Fixture regional post description. (2026-09-30)`]);
+  assert.equal(text.split("(Australia):").length - 1, 1, "one labelled line");
+});
+
+test("dist/llms.txt: every published post tagged region: au has the (Australia) label after its link, and no other post does (go-global §6.1, final review F7)", () => {
+  const built = readDist("llms.txt");
+  assert.ok(PUBLISHED.filter((p) => p.region === "au").length > 0, "no Australian post to check");
+  for (const { id, region } of PUBLISHED) {
+    const found = postLine(built, id);
+    assert.equal(found.length, 1, `dist/llms.txt lists ${id} ${found.length} times`);
+    const link = `](${ORIGIN}/insights/${id}/)`;
+    assert.ok(found[0].includes(region === "au" ? `${link} (Australia): ` : `${link}: `), `${id} (region ${region}): ${found[0]}`);
+  }
+  assert.equal(built.split("(Australia):").length - 1, PUBLISHED.filter((p) => p.region === "au").length, "a label on a line that isn't an Australian post's");
 });
 
 test("no S1 wording: llms.txt never says Techsider is for Australian organisations (go-global §1 S1, §9.3)", () => {

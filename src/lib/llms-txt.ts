@@ -3,14 +3,16 @@
 // JSON-LD and the About page use too, then the headquarters line the footer and About print
 // (hqLine()), a paragraph on who Techsider builds for, the facts an assistant needs to describe
 // Techsider accurately, then every shown page that has its own canonical URL, grouped as the nav
-// groups them, each with its meta description, every published insight and, once the owner adds any,
-// the directory profiles (go-global §3.1, §3.2, §9.3). The copy is held to the §3.5 banned phrases by
-// CI check 04, which scans the built file, and tests/llms-txt.test.mjs pins it. Node-importable:
-// nav.ts, contact.ts, dates.ts, fixed-copy.ts, meta.ts and reply-time.ts have no Astro imports.
+// groups them, each with its meta description, every published insight (a post tagged region: au
+// marked "(Australia)" after its link, as its card and header are labelled) and, once the owner adds
+// any, the directory profiles (go-global §3.1, §3.2, §6.1, §9.3). The copy is held to the §3.5
+// banned phrases by CI check 04, which scans the built file, and tests/llms-txt.test.mjs pins it.
+// Node-importable: nav.ts, contact.ts, dates.ts, fixed-copy.ts, meta.ts and reply-time.ts have no
+// Astro imports.
 import { CONTACT } from "../data/contact.ts";
 import { NAV_GROUPS, SITE, hqLine, hqPlace, isShown, shownProfiles, type PageEntry } from "../data/nav.ts";
 import { isoDate } from "./dates.ts";
-import { DISAMBIGUATION } from "./fixed-copy.ts";
+import { DISAMBIGUATION, REGION_LABEL } from "./fixed-copy.ts";
 import { pageTitle } from "./meta.ts";
 import { replySentence } from "./reply-time.ts";
 
@@ -41,6 +43,8 @@ export interface LlmsPost {
   title: string;
   description: string;
   publishDate: Date;
+  /** "au" for a post tagged region: au (go-global §6.1): its line says "(Australia)" after the link. */
+  region: "au" | null;
 }
 
 /** A page title without the " | Techsider" suffix, as a link's text. */
@@ -60,7 +64,7 @@ function listed(entry: PageEntry, preview: boolean): boolean {
 export function llmsTxt(input: { site: string | URL; posts: LlmsPost[]; preview?: boolean }): string {
   const { site, posts, preview = false } = input;
   const url = (path: string) => new URL(path, site).href;
-  const line = (text: string, path: string, note: string) => `- [${text}](${url(path)}): ${note}`;
+  const line = (text: string, path: string, note: string, label = "") => `- [${text}](${url(path)})${label}: ${note}`;
   const section = (title: string, entries: PageEntry[]) => {
     const shown = entries.filter((e) => listed(e, preview));
     return shown.length === 0 ? [] : ["", `## ${title}`, "", ...shown.map((e) => line(linkText(e), e.path, e.description as string))];
@@ -92,7 +96,7 @@ export function llmsTxt(input: { site: string | URL; posts: LlmsPost[]; preview?
     ...section("Resources", resources ? [resources.hub, ...resources.items] : []),
     ...(published.length === 0
       ? []
-      : ["", "## Insights", "", ...published.map((p) => line(postText(p.title), `/insights/${p.id}/`, `${p.description} (${isoDate(p.publishDate)})`))]),
+      : ["", "## Insights", "", ...published.map((p) => line(postText(p.title), `/insights/${p.id}/`, `${p.description} (${isoDate(p.publishDate)})`, p.region === "au" ? ` (${REGION_LABEL})` : ""))]),
     ...section("Company", about ? [about.hub, ...about.items] : []),
     ...(profiles.length === 0 ? [] : ["", "## Profiles", "", ...profiles.map((p) => `- [${p.name}](${p.url})`)]),
     "",
