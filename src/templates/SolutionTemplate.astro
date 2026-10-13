@@ -85,8 +85,8 @@ const hero = {
       {view.onRequest.length > 0 && (
         <ul class="on-request">
           {view.onRequest.map((pkg) => (
-            <li data-package-status="on-request">
-              <BracketChip label="On request" /> <a href={pkg.href} class="solution-link">{pkg.name}</a>: {pkg.oneLiner}
+            <li data-package-status="on-request" data-region={pkg.region ?? undefined}>
+              {pkg.region && <Fragment><RegionLabel /> </Fragment>}<BracketChip label="On request" /> <a href={pkg.href} class="solution-link">{pkg.name}</a>: {pkg.oneLiner}
             </li>
           ))}
         </ul>

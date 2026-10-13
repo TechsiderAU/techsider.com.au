@@ -3,7 +3,7 @@
 // gallery's site context, and on the real site contexts, where a planned page has no link.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { packageViews } from "../src/lib/views/offer.ts";
+import { packageRegion, packageViews } from "../src/lib/views/offer.ts";
 import { solutionGuides, solutionView } from "../src/lib/views/solution.ts";
 import { SOLUTION_GUIDES } from "../src/lib/marketing.ts";
 import { crumbs, industryLink, siteContext, solutionLink } from "../src/lib/site.ts";
@@ -54,7 +54,7 @@ test("a PackageView carries every §4.5 and §4.6 field, with a null preconditio
     id: p.id, name: p.name, status: "launch", buyers: p.buyers, forWhom: p.forWhom, scope: p.scope,
     inclusions: p.inclusions, clientTime: p.clientTime, timeline: p.timeline, outOfScope: p.outOfScope,
     gate: p.gate, onshoreNote: p.onshoreNote, precondition: p.precondition ?? null, onshore: p.onshore,
-    testInclusion: p.testInclusion !== false,
+    testInclusion: p.testInclusion !== false, region: p.region ?? null,
   });
   assert.deepEqual(generic, expected(data.genericPackage));
   assert.deepEqual(launch, byStatus(data, "launch").map(expected));
@@ -73,6 +73,24 @@ test("on-request entries link to the contact page with the solution preselected"
   }
   assert.equal(packageViews("document-registers", data, siteContext(true)).onRequest[0].href, "/contact/?interest=document-registers");
   assert.equal(packageViews("document-registers", data, siteContext(false)).onRequest[0].href, TALK_REGISTERS);
+});
+
+test("packageViews carries each package's region: \"au\" for an Australia-only package, else null (go-global §3.3)", () => {
+  const data = solutionFixtures["fixture-solution"];
+  const { generic, launch, onRequest } = packageViews("fixture-solution", data, fixtureSite);
+  assert.equal(generic.region, null);
+  assert.deepEqual(launch.map((p) => [p.id, p.region]), [["fixture-launch-package", "au"], ["fixture-second-launch-package", null]]);
+  assert.deepEqual(onRequest.map((p) => [p.id, p.region]), [["fixture-on-request-package", "au"]]);
+});
+
+test("packageRegion: the region of the package a use case names exactly, or null", () => {
+  const data = solutionFixtures["fixture-solution"];
+  assert.equal(packageRegion(data, "Fixture Launch Package"), "au");
+  assert.equal(packageRegion(data, "Fixture On-Request Package"), "au");
+  assert.equal(packageRegion(data, "Fixture Generic Package"), null);
+  assert.equal(packageRegion(data, "Fixture Second Launch Package"), null);
+  assert.equal(packageRegion(data, "Fixture launch package"), null, "the match is exact");
+  assert.equal(packageRegion(data, "Fixture use case A"), null);
 });
 
 test("packageViews refuses a package id used twice, because package ids are page anchors", () => {

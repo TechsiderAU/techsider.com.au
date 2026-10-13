@@ -78,6 +78,7 @@ packages:
   - id: ato-letter-sorter
     name: ATO Letter Sorter
     status: on-request
+    region: au
     oneLiner: >-
       Reads each ATO letter for the action and due date, matches it to the right job and drafts the
       reply for a person to approve, for practices without an ATO document feed.

@@ -30,6 +30,8 @@ export interface PackageView {
   onshore: boolean;
   /** false → the block leaves out the standard test inclusion (isTestInclusion): the package holds no test on your own examples. */
   testInclusion: boolean;
+  /** "au" for an Australia-only package (region: au in its YAML; go-global §3.3): PackageBlock labels it "Australia". */
+  region: "au" | null;
 }
 
 export interface ListedPackageView {
@@ -40,6 +42,8 @@ export interface ListedPackageView {
   precondition: string | null;
   /** site.contact({ interest: solutionId }): the solution is preselected on the form (spec §8.3 block 4). */
   href: string;
+  /** "au" for an Australia-only package (go-global §3.3): its entry is labelled "Australia". */
+  region: "au" | null;
 }
 
 /** The services copy every solution page repeats: §4.5 inclusions, §4.6 delivery choices and onshore note, §4.4 independence. */
@@ -67,7 +71,17 @@ function launchView(p: LaunchPackageData): PackageView {
     precondition: p.precondition ?? null,
     onshore: p.onshore,
     testInclusion: p.testInclusion !== false,
+    region: p.region ?? null,
   };
+}
+
+/**
+ * The region of the package a use case names (go-global §3.3; the contract's rule 5): the solution's
+ * generic, launch or listed package whose name is exactly `name`, and its region ("au" or null).
+ * A name that matches no package gives null: a use case may describe work no package is named for.
+ */
+export function packageRegion(data: Pick<SolutionData, "genericPackage" | "packages">, name: string): "au" | null {
+  return [data.genericPackage, ...data.packages].find((p) => p.name === name)?.region ?? null;
 }
 
 /**
@@ -91,7 +105,7 @@ export function packageViews(
   for (const p of data.packages) {
     if (p.status === "launch") launch.push(launchView(p));
     else if (p.status === "on-request") {
-      onRequest.push({ id: p.id, name: p.name, status: "on-request", oneLiner: p.oneLiner, precondition: p.precondition ?? null, href });
+      onRequest.push({ id: p.id, name: p.name, status: "on-request", oneLiner: p.oneLiner, precondition: p.precondition ?? null, href, region: p.region ?? null });
     }
   }
   return { generic: launchView(data.genericPackage), launch, onRequest };

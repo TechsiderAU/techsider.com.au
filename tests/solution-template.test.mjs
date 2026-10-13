@@ -12,7 +12,7 @@ import { run as packageStatusCheck } from "../scripts/ci/checks/10-package-statu
 import { PREVIEW_PAGES } from "../src/fixtures/preview-pages.ts";
 import { fixtureSite, servicesFixture, solutionFixtures } from "../src/fixtures/index.ts";
 import { solutionLink } from "../src/lib/site.ts";
-import { ACCEPTANCE_TEST_LABEL, ONSHORE_PILLAR, PACKAGED_OFFER_DISCLAIMER, PROCESSING_NOTE } from "../src/lib/fixed-copy.ts";
+import { ACCEPTANCE_TEST_LABEL, ONSHORE_PILLAR, PACKAGED_OFFER_DISCLAIMER, PROCESSING_NOTE, REGION_LABEL } from "../src/lib/fixed-copy.ts";
 
 const DIST_PREVIEW = fileURLToPath(new URL("../dist-preview/", import.meta.url));
 const PAGES = {
@@ -152,7 +152,9 @@ test("packages: the generic package is the first full block, launch packages are
     for (const [i, p] of onRequest.entries()) {
       const li = listed[i];
       assert.ok(!("data-package-tab" in li.attrs));
-      assert.match(text(li.inner), /^\[ ?On request ?\]/);
+      // An Australia-only package's entry opens with its "Australia" label (go-global §3.3).
+      assert.match(text(li.inner), p.region ? new RegExp(`^${REGION_LABEL} \\[ ?On request ?\\]`) : /^\[ ?On request ?\]/);
+      assert.equal(li.attrs["data-region"], p.region, `${PAGES[id]}: ${p.id} data-region`);
       assert.ok(text(li.inner).includes(p.oneLiner), `${PAGES[id]}: no one-liner for ${p.id}`);
       const a = elements(li.inner, (tag) => tag.name === "a");
       assert.equal(a.length, 1);
@@ -225,6 +227,20 @@ test("every package block shows the §4.5 facts, its region note, the pillar or 
     assert.equal(elementsWith(t, "data-onshore-pillar").length, packages.filter((p) => p.onshore).length, PAGES[id]);
   }
   assert.equal(elementsWith(template("fixture-solution-5"), "data-onshore-pillar").length, 0, "⑤ shows the onshore pillar");
+});
+
+test("go-global §3.3: an Australia-only package's block opens with the Australia label, and no other block has one", () => {
+  for (const id of IDS) {
+    const data = solutionFixtures[id];
+    const blocks = blocksIn(sectionOf(template(id), "packages").outer);
+    [data.genericPackage, ...byStatus(id, "launch")].forEach((p, i) => {
+      assert.equal(blocks[i].attrs["data-region"], p.region, `${PAGES[id]}: ${p.id} data-region`);
+      assert.deepEqual(elementsWith(blocks[i].inner, "data-region-label").map((l) => text(l.inner)), p.region ? [REGION_LABEL] : [], `${PAGES[id]}: ${p.id} label`);
+      if (p.region) assert.match(blocks[i].inner, /^\s*<span\b[^>]*\bdata-region-label="region"/, `${PAGES[id]}: ${p.id}: the label doesn't open the block`);
+    });
+  }
+  assert.ok(byStatus("fixture-solution", "launch").some((p) => p.region === "au"), "the gallery shows a labelled tab");
+  assert.ok(byStatus("fixture-solution", "on-request").some((p) => p.region === "au"), "the gallery shows a labelled on-request entry");
 });
 
 test("CI check 10 passes on dist-preview, where every solution page gives it blocks to check", async () => {

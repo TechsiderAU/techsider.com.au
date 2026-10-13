@@ -269,6 +269,7 @@ packages:
   - id: soci-ai-risk-evidence
     name: SOCI AI Risk Evidence
     status: on-request
+    region: au
     oneLiner: >-
       Maps each AI use a utility or energy business runs to the relevant CIRMP rule items, and gives
       its risk team the data-flow maps, access lists and test reports behind each finding.

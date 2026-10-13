@@ -8,11 +8,13 @@ import { elementsWith } from "../scripts/ci/lib.mjs";
 import { PLATFORM_REGION_LABEL, REGION_EXAMPLE_LABEL, REGION_LABEL } from "../src/lib/fixed-copy.ts";
 import { visibleText } from "./helpers.mjs";
 import { renderAstro } from "./support/render-astro.mjs";
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parse as parseYaml } from "yaml";
 import { readDist } from "./helpers.mjs";
 import { elements, readFrontmatter } from "../scripts/ci/lib.mjs";
+import { makeSolutionSchema, plainRef } from "../src/content/schemas.ts";
 import { SOLUTION_GUIDES } from "../src/lib/marketing.ts";
 import { siteContext } from "../src/lib/site.ts";
 
@@ -124,4 +126,43 @@ test("Practical guides: a link to an Australian post opens with the Australia la
     "ai-switch-on /insights/ai-inside-your-practice-software/",
     "ai-evaluation /insights/copilot-agents-leaving-pilot/",
   ]);
+});
+
+const readRepo = (rel) => readFileSync(join(REPO, rel), "utf8");
+/** go-global §3.3: the Australia-only packages, by solution. */
+const AU_PACKAGES = {
+  "document-registers": ["management-agreement-register", "trust-audit-prep-pack", "bond-claim-evidence-pack"],
+  "draft-for-approval": ["ato-letter-sorter"],
+  "ai-evaluation": ["soci-ai-risk-evidence"],
+};
+const solutionYaml = (id) => makeSolutionSchema(plainRef).parse(parseYaml(readRepo(`src/content/solutions/${id}.yaml`)));
+
+test("data: the five Australia-only packages, and only they, say region: au (go-global §3.3)", () => {
+  const tagged = Object.fromEntries(PROD.solutions
+    .map((s) => {
+      const data = solutionYaml(s.id);
+      return [s.id, [data.genericPackage, ...data.packages].filter((p) => p.region !== undefined).map((p) => p.id)];
+    })
+    .filter(([, ids]) => ids.length > 0));
+  assert.deepEqual(tagged, AU_PACKAGES);
+});
+
+test("solution pages: an Australia-only package's block or on-request entry opens with the Australia label; no other package has one", () => {
+  for (const s of PROD.solutions) {
+    const au = AU_PACKAGES[s.id] ?? [];
+    const main = mainHtml(readDist(`solutions/${s.id}/index.html`));
+    for (const block of elementsWith(main, "data-package-tab")) {
+      const id = block.attrs["data-package-id"];
+      assert.equal(block.attrs["data-region"], au.includes(id) ? "au" : undefined, `${s.id}: ${id} block`);
+      assert.deepEqual(labelsIn(block.inner), au.includes(id) ? AU_LABEL : [], `${s.id}: ${id} block label`);
+    }
+    const onRequest = solutionYaml(s.id).packages.filter((p) => p.status === "on-request");
+    const entries = elementsWith(main, "data-package-status", "on-request");
+    assert.equal(entries.length, onRequest.length, s.id);
+    onRequest.forEach((p, i) => {
+      assert.equal(entries[i].attrs["data-region"], au.includes(p.id) ? "au" : undefined, `${s.id}: ${p.id} entry`);
+      assert.deepEqual(labelsIn(entries[i].inner), au.includes(p.id) ? AU_LABEL : [], `${s.id}: ${p.id} entry label`);
+      if (au.includes(p.id)) assert.ok(plainText(entries[i].inner).startsWith(`${REGION_LABEL} [ On request ]`), `${s.id}: ${p.id}: the label doesn't open the entry`);
+    });
+  }
 });

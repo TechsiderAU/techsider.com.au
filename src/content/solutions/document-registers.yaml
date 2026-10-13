@@ -113,6 +113,7 @@ packages:
   - id: management-agreement-register
     name: Management Agreement & Rent Roll Register
     status: launch
+    region: au
     onshore: true
     buyers: [mid-market]
     forWhom: >-
@@ -158,12 +159,14 @@ packages:
   - id: trust-audit-prep-pack
     name: Trust Audit Prep Pack
     status: on-request
+    region: au
     oneLiner: >-
       Checks sampled disbursements against invoice and owner approval from read-only exports, and
       lists what's missing for your auditor. It isn't an audit, and it never touches the ledger.
   - id: bond-claim-evidence-pack
     name: Bond Claim Evidence Pack
     status: on-request
+    region: au
     oneLiner: >-
       Links each claimed item to its condition-report page, photo and receipt, in one draft a
       property manager checks.

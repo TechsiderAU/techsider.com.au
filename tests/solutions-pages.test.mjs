@@ -19,7 +19,7 @@ import { pageDescription, pageTitle } from "../src/lib/meta.ts";
 import { siteContext } from "../src/lib/site.ts";
 import { solutionView } from "../src/lib/views/solution.ts";
 import { solutionsHubView } from "../src/lib/views/hubs.ts";
-import { ONSHORE_PILLAR, PROCESSING_NOTE } from "../src/lib/fixed-copy.ts";
+import { ONSHORE_PILLAR, PROCESSING_NOTE, REGION_LABEL } from "../src/lib/fixed-copy.ts";
 
 const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
 const DIR = fileURLToPath(new URL("../src/content/solutions/", import.meta.url));
@@ -93,7 +93,8 @@ test("packages: the generic package is the first full block, launch packages are
     const panels = elementsWith(s, "data-tab-panel");
     assert.deepEqual(panels.map((p) => [p.attrs.id, p.attrs["data-tab-label"]]), v.launch.map((p) => [p.id, p.name]), id);
     const listed = elementsWith(s, "data-package-status", "on-request");
-    assert.deepEqual(listed.map((li) => text(li.inner)), v.onRequest.map((p) => `[ On request ] ${p.name}: ${p.oneLiner}`), id);
+    // An Australia-only package's entry opens with its "Australia" label (go-global §3.3).
+    assert.deepEqual(listed.map((li) => text(li.inner)), v.onRequest.map((p) => `${p.region ? `${REGION_LABEL} ` : ""}[ On request ] ${p.name}: ${p.oneLiner}`), id);
     for (const li of listed) assert.deepEqual(hrefsIn(li.inner), [SITE.contact({ interest: id })], id);
   }
   // ② shows its two audience variants as the two tabs (spec §8.3).
