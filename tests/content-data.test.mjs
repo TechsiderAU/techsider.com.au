@@ -12,8 +12,11 @@ import { DELIVERY_MODEL } from "../src/lib/fixed-copy.ts";
 import { replySentence } from "../src/lib/reply-time.ts";
 
 const DATA_DIR = fileURLToPath(new URL("../src/data/", import.meta.url));
-/** src/data/*.ts modules that aren't page data: the page registry (names, paths, statuses, descriptions), with its own tests. */
-const NOT_PAGE_DATA = ["nav.ts"];
+/**
+ * src/data/*.ts modules that aren't page data, each with its own tests: the page registry (names,
+ * paths, statuses, descriptions) and the contact form's country codes (tests/countries.test.mjs).
+ */
+const NOT_PAGE_DATA = ["nav.ts", "countries.ts"];
 /** [file in src/data/, its export, the page-schemas.ts schema that validates it]. */
 const MODULES = [
   ["positioning.ts", "POSITIONING", positioningData],
