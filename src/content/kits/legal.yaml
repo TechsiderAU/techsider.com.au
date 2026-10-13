@@ -6,6 +6,7 @@
 # ⚑ owner: lawyer review of the legal kit before any page links it (spec §12 item 6)
 # ⚑ owner: add the Federal Court's GPN-AI once its live page is checked in a browser (blueprint ruling 1)
 industry: legal-and-professional
+region: au
 title: Legal Safe-Use Kit
 summary: "A starter kit for firms in New South Wales, Victoria and Western Australia using AI in legal work, aligned to the regulators' joint statement of 6 December 2024 and to the AI practice notes of the Supreme Courts of NSW and Victoria and the County Court of Victoria."
 contents:

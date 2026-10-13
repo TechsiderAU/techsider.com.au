@@ -7,12 +7,15 @@
 // - pending (lawyerReviewedAt null): the pending note and no download link. A pending kit's
 //   download path never reaches the page, because downloads are published only after review.
 // Industries without a kit are sent to ⑤ (site.solutions[4]).
+// Every kit so far is Australian (region "au", go-global §3.3): its card carries data-region="au"
+// and opens with the "Australia" label.
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import LinkCard from "../components/page/LinkCard.astro";
 import Notice from "../components/page/Notice.astro";
 import BracketChip from "../components/ui/BracketChip.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
+import RegionLabel from "../components/ui/RegionLabel.astro";
 import type { KitData } from "../content/schemas";
 import { formatDate, isoDate } from "../lib/dates";
 import { KIT_PENDING_NOTE, kitReviewedNote } from "../lib/fixed-copy";
@@ -35,6 +38,7 @@ const views = kits.map(({ id, data }) => {
   const reviewedAt = data.lawyerReviewedAt;
   return {
     anchor: `kit-${id}`,
+    region: data.region ?? null,
     title: data.title,
     industry: { label: industry.shortName, href: industry.href },
     summary: data.summary,
@@ -62,7 +66,8 @@ const views = kits.map(({ id, data }) => {
     <ul class="kits-list">
       {views.map((kit) => (
         <li>
-          <article id={kit.anchor} class="kit" data-kit data-kit-status={kit.review.status}>
+          <article id={kit.anchor} class="kit" data-kit data-kit-status={kit.review.status} data-region={kit.region ?? undefined}>
+            {kit.region && <RegionLabel />}
             <h3 class="kit-title">{kit.title}</h3>
             <p class="kit-industry"><BracketChip label={kit.industry.label} href={kit.industry.href ?? undefined} /></p>
             <p class="kit-summary">{kit.summary}</p>
@@ -126,6 +131,9 @@ const views = kits.map(({ id, data }) => {
     border: 1px solid var(--color-bone-line);
     border-radius: 8px;
     overflow-wrap: anywhere;
+  }
+  .kit > :global(.region-label) {
+    align-self: flex-start;
   }
   .kit-title {
     margin: 0;

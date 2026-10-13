@@ -16,6 +16,7 @@ import {
 } from "../src/fixtures/index.ts";
 import { crumbs, industryLink, solutionLink } from "../src/lib/site.ts";
 import { CHECKER_BADGE, DEMO_BADGE, DEMO_CTA, KIT_PENDING_NOTE, REPORT_BADGE, kitReviewedNote } from "../src/lib/fixed-copy.ts";
+import { REGION_LABEL } from "../src/lib/fixed-copy.ts";
 
 const KINDS = ["resources-hub", "safe-use-kits", "pay-for", "evaluation-method", "demos-hub", "demo", "demo-report"];
 const SAMPLE_CAPTION = "Sample report: Techsider testing its own demo system, so not independent.";
@@ -201,6 +202,11 @@ test("Safe-Use Kits: every kit names its industry, contents and regulatory sourc
     assert.equal(text(src.inner).replace(/ ,/g, ","), `Source: ${data.source.label}, as at ${long(data.source.asAt)}`);
     assert.ok(src.inner.includes(`datetime="${iso(data.source.asAt)}"`));
   });
+});
+
+test("go-global §3.3: a kit whose data says region: au opens its card with the Australia label; the other fixture kit has none", () => {
+  const kits = byAttr(sectionOf(template("safe-use-kits"), "kits"), "data-kit");
+  assert.deepEqual(kits.map((k) => [k.attrs["data-region"], byAttr(k.inner, "data-region-label").map((l) => text(l.inner))]), [[undefined, []], ["au", [REGION_LABEL]]]);
 });
 
 test("Safe-Use Kits: a reviewed kit shows its dated review note and download; a pending kit shows the pending note and no download at all", () => {

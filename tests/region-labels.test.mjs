@@ -12,9 +12,9 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { readDist } from "./helpers.mjs";
+import { readDist, readPreviewDist } from "./helpers.mjs";
 import { elements, readFrontmatter } from "../scripts/ci/lib.mjs";
-import { makeIndustrySchema, makeSolutionSchema, plainRef } from "../src/content/schemas.ts";
+import { makeIndustrySchema, makeKitSchema, makeSolutionSchema, plainRef } from "../src/content/schemas.ts";
 import { SOLUTION_GUIDES } from "../src/lib/marketing.ts";
 import { siteContext } from "../src/lib/site.ts";
 
@@ -229,4 +229,20 @@ test("hubs: /industries/ flagship use cases and /solutions/ By buyer items that 
     assert.deepEqual(labelsIn(li.inner), AU_NAMES.has(nameOf(li)) ? AU_LABEL : [], `${nameOf(li)} label`);
   }
   assert.deepEqual(items.filter((li) => li.attrs["data-region"] === "au").map(nameOf), ["Management Agreement & Rent Roll Register"]);
+});
+
+test("data: the three Safe-Use Kits say region: au (go-global §3.3)", () => {
+  for (const id of ["accounting", "legal", "property"]) {
+    assert.equal(makeKitSchema(plainRef).parse(parseYaml(readRepo(`src/content/kits/${id}.yaml`))).region, "au", id);
+  }
+});
+
+test("Safe-Use Kits: every kit card opens with the Australia label (dist-preview, the build that shows the page)", () => {
+  const kits = elementsWith(mainHtml(readPreviewDist("resources/safe-use-kits/index.html")), "data-kit");
+  assert.deepEqual(kits.map((k) => k.attrs.id), ["kit-accounting", "kit-legal", "kit-property"]);
+  for (const kit of kits) {
+    assert.equal(kit.attrs["data-region"], "au", kit.attrs.id);
+    assert.deepEqual(labelsIn(kit.inner), AU_LABEL, kit.attrs.id);
+    assert.match(kit.inner, /^\s*<span\b[^>]*\bdata-region-label="region"/, `${kit.attrs.id}: the label doesn't open the card`);
+  }
 });
