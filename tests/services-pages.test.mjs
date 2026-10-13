@@ -222,6 +222,11 @@ test("services data: Run is managed or supported, with the exit pack and no escr
   assert.match(notOffered.a, /standalone AI platform or model gateway is on request only, as a Private Workspace/);
 });
 
+test("services data: every launch package names its delivery choice in its region note, and no line says 'onshore note' (go-global §4.2, D5)", () => {
+  assert.ok(SERVICES.standardInclusions.includes("The delivery choice that fits the package, named in its region note."));
+  for (const s of strings(SERVICES)) assert.doesNotMatch(s, /\bonshore note\b/i, s);
+});
+
 // ---------- the two routes ----------
 
 test("both pages are live, and both builds render them with their own title and description", () => {
@@ -339,3 +344,11 @@ for (const { name, read, site } of BUILDS) {
     }
   });
 }
+
+test("/services/: where it runs heads the shared list \"The region note\" in both builds (go-global §4.2, D5)", () => {
+  for (const { name, read } of BUILDS) {
+    const where = byId(mainOf(read(fileOf(SERVICES_PATH))), "where-it-runs");
+    const heads = elements(where.inner, (t) => t.name === "h3").map((h) => text(h.inner));
+    assert.ok(heads.includes("The region note") && !heads.includes("The onshore note"), `${name}: ${heads.join(" | ")}`);
+  }
+});

@@ -7,8 +7,9 @@
 // Ids: blockId = pkg.id + idSuffix on the <section>, `${blockId}-heading` on its heading and
 // `${blockId}-onshore-note` on the onshore note. Inside a TabPanel, which owns the bare package
 // id, pass idSuffix "-block" so the ids stay unique.
-// Onshore scope rule (spec §3.2): ONSHORE_PILLAR only when pkg.onshore; otherwise PROCESSING_NOTE,
-// linking to this block's onshore note.
+// Onshore scope rule (go-global §4.2, R5): ONSHORE_PILLAR only when pkg.onshore, linking to this
+// block's region note, which names the region and the remote access; otherwise PROCESSING_NOTE,
+// linking to the same note. The note's visible label is "Region note"; its id keeps "onshore".
 // "Every package includes" lists the standard inclusions, less the test line for a package that
 // holds no test on your own examples (pkg.testInclusion false: ④'s configuration review).
 import Notice from "./Notice.astro";
@@ -73,12 +74,12 @@ const shared = pkg.testInclusion ? standardInclusions : standardInclusions.filte
       </div>
     )}
     <div id={`${blockId}-onshore-note`} class="package-fact package-fact-wide" data-onshore-note>
-      <dt>Onshore note</dt>
+      <dt>Region note</dt>
       <dd>{pkg.onshoreNote}</dd>
     </div>
   </dl>
   {pkg.onshore ? (
-    <p class="package-pillar" data-onshore-pillar data-onshore="true">{ONSHORE_PILLAR}</p>
+    <p class="package-pillar" data-onshore-pillar data-onshore="true"><a href={`#${blockId}-onshore-note`}>{ONSHORE_PILLAR}</a></p>
   ) : (
     <p class="package-pillar" data-processing-note><a href={`#${blockId}-onshore-note`}>{PROCESSING_NOTE}</a></p>
   )}

@@ -172,7 +172,7 @@ test("packages: the generic package is the first full block, launch packages are
   }
 });
 
-test("every package block shows the §4.5 facts, its onshore note, the pillar or the processing note, and the disclaimer", () => {
+test("every package block shows the §4.5 facts, its region note, the pillar or the processing note (each linking to that note), and the disclaimer", () => {
   for (const id of IDS) {
     const data = solutionFixtures[id];
     const t = template(id);
@@ -195,6 +195,8 @@ test("every package block shows the §4.5 facts, its onshore note, the pillar or
       assert.ok(body.includes("Every package includes"), `${blockId}: no "Every package includes"`);
       const note = byId(block.inner, `${blockId}-onshore-note`);
       assert.equal(note.length, 1, `${blockId}: no #${blockId}-onshore-note`);
+      // go-global §4.2, D5: the note's visible label is "Region note"; its id keeps "onshore".
+      assert.deepEqual(elements(note[0].inner, (tag) => tag.name === "dt").map((dt) => text(dt.inner)), ["Region note"], `${blockId}: the note's label`);
       assert.ok(text(note[0].inner).includes(p.onshoreNote));
       const pillars = elementsWith(block.inner, "data-onshore-pillar");
       const processing = elementsWith(block.inner, "data-processing-note");
@@ -202,6 +204,10 @@ test("every package block shows the §4.5 facts, its onshore note, the pillar or
         assert.equal(pillars.length, 1, `${blockId}: onshore, but no pillar`);
         assert.equal(pillars[0].attrs["data-onshore"], "true");
         assert.equal(text(pillars[0].inner), ONSHORE_PILLAR);
+        // go-global §4.2 (R5): the badge links to the block's region note, which names the region and the remote access.
+        const badge = elements(pillars[0].inner, (tag) => tag.name === "a");
+        assert.equal(badge.length, 1, `${blockId}: the pillar doesn't link to its region note`);
+        assert.equal(badge[0].attrs.href, `#${blockId}-onshore-note`);
         assert.equal(processing.length, 0);
       } else {
         assert.equal(pillars.length, 0, `${blockId}: not onshore, but the pillar renders`);
@@ -253,7 +259,7 @@ test("the ④ and ⑤ adaptations: Engagements and the independence policy on �
   assert.equal(elementsWith(sectionOf(four, "testing").inner, "data-acceptance-label").length, 0, "④ is the independent evaluation, so its #testing has no acceptance-test label");
 });
 
-test("where it runs: lettered choices with the shared copy, the solution's note, then the onshore note", () => {
+test("where it runs: lettered choices with the shared copy, the solution's note, then the region note", () => {
   for (const id of IDS) {
     const data = solutionFixtures[id];
     const s = sectionOf(template(id), "where-it-runs");
@@ -269,7 +275,10 @@ test("where it runs: lettered choices with the shared copy, the solution's note,
     }
     const body = text(s.inner);
     assert.ok(body.includes(data.whereItRuns.note));
-    assert.ok(body.indexOf("The onshore note") > body.indexOf(data.whereItRuns.note));
+    // go-global §4.2, D5: the shared list is headed "The region note".
+    const heads = elements(s.inner, (t) => t.name === "h3").map((h) => text(h.inner));
+    assert.ok(heads.includes("The region note") && !heads.includes("The onshore note"), `${PAGES[id]}: ${heads.join(" | ")}`);
+    assert.ok(body.indexOf("The region note") > body.indexOf(data.whereItRuns.note));
     for (const line of servicesFixture.onshoreNote) assert.ok(body.includes(line), `${PAGES[id]}: missing "${line}"`);
   }
 });

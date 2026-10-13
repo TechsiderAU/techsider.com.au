@@ -246,7 +246,7 @@ export const SERVICES: ServicesData = {
     "Where the work has a test set, a re-run of it when the AI model changes or may have changed: by us on a system we build or run, and by your team, with the kit we hand over, after an evaluation.",
     "A one-page data note: where your data sits, where the model runs, retention and deletion.",
     "A runbook and a handover.",
-    "The delivery choice that fits the package, named in its onshore note.",
+    "The delivery choice that fits the package, named in its region note.",
     "Your time commitment, stated in hours and weeks.",
   ],
   routes: {

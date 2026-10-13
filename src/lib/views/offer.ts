@@ -26,7 +26,7 @@ export interface PackageView {
   gate: string;
   onshoreNote: string;
   precondition: string | null;
-  /** true → ONSHORE_PILLAR (data-onshore-pillar data-onshore="true"); false → PROCESSING_NOTE, linking to the block's onshore note. */
+  /** go-global §4.2: true when every step runs in the region the client chooses (their own account, any cloud region; or managed by Techsider, an Australian region), as the region note says → ONSHORE_PILLAR, linking to the block's region note (data-onshore-pillar data-onshore="true"); false → PROCESSING_NOTE, linking to the same note. */
   onshore: boolean;
   /** false → the block leaves out the standard test inclusion (isTestInclusion): the package holds no test on your own examples. */
   testInclusion: boolean;

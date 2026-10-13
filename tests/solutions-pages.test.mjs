@@ -102,7 +102,7 @@ test("packages: the generic package is the first full block, launch packages are
   assert.equal(elementsWith(page("draft-for-approval"), "data-tabs").length, 0);
 });
 
-test("the onshore pillar renders only on onshore packages; every other launch package links to its own onshore note", () => {
+test("the onshore pillar renders only on onshore packages, linked to its region note; every other launch package links to its own region note", () => {
   for (const id of IDS) {
     const s = sectionOf(mainOf(page(id)), "packages").outer;
     for (const pkg of [VIEWS[id].generic, ...VIEWS[id].launch]) {
@@ -110,9 +110,14 @@ test("the onshore pillar renders only on onshore packages; every other launch pa
       const [block] = elements(s, (t) => t.attrs.id === blockId);
       const pillar = elementsWith(block.outer, "data-onshore-pillar");
       const note = elementsWith(block.outer, "data-processing-note");
+      // go-global §4.2, D5: every block's note is labelled "Region note"; its id keeps "onshore".
+      const [regionNote] = elements(block.outer, (t) => t.attrs.id === `${blockId}-onshore-note`);
+      assert.deepEqual(elements(regionNote.inner, (t) => t.name === "dt").map((dt) => text(dt.inner)), ["Region note"], `${id} ${pkg.id}`);
       if (pkg.onshore) {
         assert.equal(pillar.length, 1, `${id} ${pkg.id}`);
         assert.equal(text(pillar[0].inner), ONSHORE_PILLAR);
+        // R5: the badge links to the region note, which names the region and the remote access.
+        assert.deepEqual(hrefsIn(pillar[0].inner), [`#${blockId}-onshore-note`], `${id} ${pkg.id}`);
         assert.equal(note.length, 0, `${id} ${pkg.id}`);
       } else {
         assert.equal(pillar.length, 0, `${id} ${pkg.id}: the onshore pillar on a package that isn't onshore`);
@@ -123,6 +128,14 @@ test("the onshore pillar renders only on onshore packages; every other launch pa
     }
   }
   assert.ok(!page("ai-switch-on").includes("data-onshore-pillar"), "⑤ shows the onshore pillar");
+});
+
+test("every solution page heads its shared note list \"The region note\" (go-global §4.2, D5)", () => {
+  for (const id of IDS) {
+    const where = sectionOf(mainOf(page(id)), "where-it-runs");
+    const heads = elements(where.inner, (t) => t.name === "h3").map((h) => text(h.inner));
+    assert.ok(heads.includes("The region note") && !heads.includes("The onshore note"), `${id}: ${heads.join(" | ")}`);
+  }
 });
 
 test("no internal package's name or one-liner appears anywhere in dist/", () => {
