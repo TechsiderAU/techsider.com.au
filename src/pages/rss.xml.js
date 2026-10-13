@@ -1,6 +1,6 @@
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
-import { PAGES } from "../data/nav.ts";
+import { PAGES, SITE } from "../data/nav.ts";
 
 // The Insights feed. Its description is the Insights page's own meta description (nav.ts), so the
 // feed, the page and search results describe the section in the same words. BaseLayout links it
@@ -15,7 +15,7 @@ export async function GET(context) {
     title: "Techsider Insights",
     description: INSIGHTS.description,
     site: context.site,
-    customData: "<language>en-au</language>",
+    customData: `<language>${SITE.lang}</language>`,
     items: posts.map((post) => ({
       title: post.data.title,
       pubDate: post.data.publishDate,

@@ -92,7 +92,7 @@ test("postView: the BlogPosting node, authored and published by the Organization
     image: "https://techsider.com.au/og/insight.png",
     datePublished: "2026-06-09T00:00:00.000Z",
     dateModified: "2026-07-01T00:00:00.000Z",
-    inLanguage: "en-AU",
+    inLanguage: "en",
     url: "https://techsider.com.au/insights/test-post/",
     mainEntityOfPage: "https://techsider.com.au/insights/test-post/",
     author: organization,

@@ -142,7 +142,7 @@ test("service() and pageGraph(): a Service in its page's words, provided by the 
     "@id": `${ORIGIN}/#website`,
     name: "Techsider",
     url: `${ORIGIN}/`,
-    inLanguage: "en-AU",
+    inLanguage: "en",
     publisher: { "@id": ORG_ID },
   });
   const context = "https://schema.org";

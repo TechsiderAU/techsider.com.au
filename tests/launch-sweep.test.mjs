@@ -1,7 +1,8 @@
 // The launch sweep of the production build (spec §1 criteria 3 and 6, §11.3, §12 item 4). It holds
 // every page in dist/, and the files that point search engines at them, to the site-wide launch
 // rules no other sweep pins:
-// - every page is in Australian English (<html lang="en-AU">);
+// - every page is in English (<html lang="en">, go-global §3.4; the copy keeps Australian spelling),
+//   and so is the RSS feed;
 // - robots.txt names the sitemap index, and the sitemaps list exactly the canonical URL of every
 //   page that isn't noindex, each once;
 // - every page shows the contact email as plain text, read by plainText() from
@@ -36,9 +37,11 @@ test("the launch sweep reads the production build", () => {
   assert.ok(BUILT.some((p) => !noindex(p.html)), "every page in dist/ is noindex");
 });
 
-test("every page is in Australian English: <html lang=\"en-AU\"> (spec §11.3)", () => {
-  const others = BUILT.filter(({ html }) => startTags(html).find((t) => t.name === "html")?.attrs.lang !== "en-AU").map((p) => p.url);
+test("every page is in English: <html lang=\"en\">, and the RSS feed says so too (spec §11.3; go-global §3.4)", () => {
+  assert.equal(SITE.lang, "en");
+  const others = BUILT.filter(({ html }) => startTags(html).find((t) => t.name === "html")?.attrs.lang !== "en").map((p) => p.url);
   assert.deepEqual(others, []);
+  assert.match(readText(join(DIST, "rss.xml")), /<language>en<\/language>/);
 });
 
 test("robots.txt names the sitemap index, and the sitemaps list exactly the canonical URL of every page meant to be found, once (spec §11.3)", () => {

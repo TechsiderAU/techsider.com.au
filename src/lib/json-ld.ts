@@ -118,7 +118,7 @@ export function website(site: SiteUrl): JsonLdNode {
     "@id": websiteId(site),
     name: SITE.name,
     url: homeUrl(site),
-    inLanguage: "en-AU",
+    inLanguage: SITE.lang,
     publisher: organizationRef(site),
   };
 }
@@ -161,7 +161,7 @@ export function blogPosting(
     image: new URL(input.image, site).href,
     datePublished: input.published.toISOString(),
     ...(input.modified ? { dateModified: input.modified.toISOString() } : {}),
-    inLanguage: "en-AU",
+    inLanguage: SITE.lang,
     url,
     mainEntityOfPage: url,
     author: organizationRef(site),
