@@ -110,7 +110,7 @@ export const SITE = {
    * engines and AI assistants describe an organisation from statements that agree across sources.
    */
   summary:
-    "Techsider is an Australian AI automation company. It designs, builds and supports AI workflow automation, document processing and internal knowledge assistants that keep people in control, and independently evaluates AI bought or built elsewhere.",
+    "Techsider is an AI automation company headquartered in Sydney, Australia. It designs, builds and supports AI workflow automation, document processing and internal knowledge assistants that keep people in control, for organisations in Australia and internationally, and independently evaluates AI bought or built elsewhere.",
   slogan: "AI that ships.",
   proofLine: "Measured before it ships.",
   /**

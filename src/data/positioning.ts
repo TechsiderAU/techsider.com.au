@@ -11,7 +11,7 @@ import type { PositioningData } from "../content/page-schemas.ts";
 export const POSITIONING: PositioningData = {
   // ⚑ owner: confirm the sub-promise wording (spec §12 item 12)
   subPromise:
-    "We design, build and run AI solutions for Australian organisations, from 40-person practices to federal agencies. In your environment, with your data onshore by default.",
+    "We design, build and run AI solutions, from 40-person practices to government agencies. In your environment, with your data kept in the region you choose.",
   originLine: "AI pilots are easy to start and hard to ship. We build the kind that survive scrutiny.",
   pillars: [
     {

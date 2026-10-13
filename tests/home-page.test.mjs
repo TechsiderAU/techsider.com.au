@@ -64,6 +64,8 @@ for (const [build, { read, dir, site }] of Object.entries(BUILDS)) {
     assert.ok(HOME_PAGE.description.includes("AI automation"));
     const hero = one(main, "data-page-hero");
     assert.ok(text(hero.inner).includes(AUTOMATION.sub));
+    // go-global §3.2, S2: the eyebrow names no country.
+    assert.deepEqual(elements(hero.inner, (t) => t.attrs.class === "page-hero-eyebrow").map((e) => text(e.inner)), ["AI automation, wherever you operate"]);
     assert.deepEqual(tagged(hero.inner, "a").map(a=>[text(a.inner),a.attrs.href]), [["Talk about your workflow",site.contact()],["Explore solutions","#services"]]);
     const services = one(main,"id","services");
     const capabilities = elementsWith(services.inner,"data-capability");

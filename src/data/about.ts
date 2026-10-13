@@ -9,9 +9,9 @@ import { POSITIONING } from "./positioning.ts";
 
 export const ABOUT: AboutData = {
   mission: "Ship AI that is measured on your own work before anyone relies on it.",
-  // ⚑ owner: confirm the "40-person practices to federal agencies" range reads as who the offer is for, not as clients (spec §1 criterion 6, §12 item 12)
+  // ⚑ owner: confirm the "40-person practices to government agencies" range reads as who the offer is for, not as clients (spec §1 criterion 6, §12 item 12)
   whoWeServe:
-    "Built for Australian organisations in nine industries, from 40-person practices to federal agencies: mid-market firms with no AI team of their own, and enterprise and government teams that need independent evidence about the AI they run.",
+    "Built for organisations in nine industries, from 40-person practices to government agencies: mid-market firms with no AI team of their own, and enterprise and government teams that need independent evidence about the AI they run.",
   whyControl:
     "AI that reads your documents or drafts your letters handles client data and records that people rely on. So you keep control: answers cite their source or say they don't know, a person approves anything sent or changed, and the tests stay yours to re-run.",
   principles: [

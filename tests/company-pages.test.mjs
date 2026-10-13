@@ -146,6 +146,20 @@ test("About: the principles are the four pillars word for word, then vendor neut
   assert.doesNotMatch(team.body, /\d/, "the team line carries a number");
 });
 
+test("About: the entity sentence and who we serve are go-global's, word for word, and the range marker quotes the new range (go-global §3.1, §3.2)", () => {
+  assert.equal(
+    SITE.summary,
+    "Techsider is an AI automation company headquartered in Sydney, Australia. It designs, builds and supports AI workflow automation, document processing and internal knowledge assistants that keep people in control, for organisations in Australia and internationally, and independently evaluates AI bought or built elsewhere.",
+  );
+  assert.equal(
+    ABOUT.whoWeServe,
+    "Built for organisations in nine industries, from 40-person practices to government agencies: mid-market firms with no AI team of their own, and enterprise and government teams that need independent evidence about the AI they run.",
+  );
+  const lines = source("src/data/about.ts").split("\n").map((l) => l.trim());
+  const marker = lines.indexOf('// ⚑ owner: confirm the "40-person practices to government agencies" range reads as who the offer is for, not as clients (spec §1 criterion 6, §12 item 12)');
+  assert.ok(marker >= 0 && lines[marker + 1] === "whoWeServe:", "the range marker doesn't quote the new range on the line above whoWeServe");
+});
+
 test("About: the build log holds real, dated events from this repository's history only", () => {
   const shallow = execFileSync("git", ["rev-parse", "--is-shallow-repository"], { cwd: ROOT, encoding: "utf8" }).trim();
   assert.equal(shallow, "false", "a shallow clone can't evidence the build log: check out with fetch-depth: 0");
@@ -337,6 +351,11 @@ test("/about/: the mission, who it's for, the origin line, the principles, how w
 test("/resources/: a linked card for each resource this build shows, and no unlinked card (nothing 'coming soon')", () => {
   const main = mainOf(readDist("resources/index.html"));
   one(main, "data-template", "resources-hub");
+  // go-global §3.2: the hero speaks to any team.
+  const hero = one(main, "data-page-hero");
+  assert.deepEqual(elements(hero.inner, (t) => t.attrs.class === "page-hero-sub").map((p) => text(p.inner)), [
+    "Guides, demos and tools for teams deciding where AI fits: what the software you already pay for includes, how to test an AI system before anyone relies on it, and field notes on retrieval, evaluation and hosting.",
+  ]);
   const shown = siteContext(false).resources.filter((r) => r.href !== null);
   const cards = elementsWith(main, "data-resource");
   assert.deepEqual(cards.map((c) => c.attrs["data-resource"]), shown.map((r) => r.key));

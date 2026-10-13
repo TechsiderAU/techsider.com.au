@@ -50,10 +50,10 @@ const HEADCOUNT = /\b(?:\d+\+?|one|two|three|four|five|six|seven|eight|nine|ten|
 
 // ---------- the data and its owner-held wording ----------
 
-test("positioning: the sub-promise is ruling 12's safer wording; the origin line and pillar titles are spec §3.1–§3.2's", () => {
+test("positioning: the sub-promise is go-global §3.2's wording; the origin line and pillar titles are spec §3.1–§3.2's", () => {
   assert.equal(
     POSITIONING.subPromise,
-    "We design, build and run AI solutions for Australian organisations, from 40-person practices to federal agencies. In your environment, with your data onshore by default.",
+    "We design, build and run AI solutions, from 40-person practices to government agencies. In your environment, with your data kept in the region you choose.",
   );
   assert.equal(POSITIONING.originLine, "AI pilots are easy to start and hard to ship. We build the kind that survive scrutiny.");
   assert.deepEqual(POSITIONING.pillars.map((p) => p.title), [
