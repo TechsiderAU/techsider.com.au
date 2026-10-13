@@ -283,7 +283,12 @@ test("the go-global primary hosts count as primary, and look-alikes and mirrors 
 // keeps to Australian contexts, in the <head> or the body. They use the vocabulary spec §3.3 and
 // §6.4 set and pass check 04 (FAIL and WARN). A post whose dates or statuses may move carries a
 // reviewBy (§6.5, with §5.3's watch-list date), which check 13 enforces.
-const GLOBAL_POSTS = {};
+const GLOBAL_POSTS = {
+  "offshore-ai-suppliers-data-in-your-region": {
+    title: "Offshore AI suppliers and data in your region.", type: "article", industries: [], solutions: ["ai-evaluation", "knowledge-assistant"],
+    reviewBy: "2027-01-12",
+  },
+};
 /** Spec §1 S1: the strings no page may show outside an allowed context. A post with no region is never one. */
 const S1_STRINGS = /australian organisations|for australian|in australia \||australia's leading|australian ai|australian teams|australian-owned|most australian/i;
 /** Spec §3.3 and §6.4: what a global post writes instead. */
