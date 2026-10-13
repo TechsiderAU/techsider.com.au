@@ -292,7 +292,19 @@ const GLOBAL_POSTS = {
     title: "The EU AI Act's new dates for non-EU suppliers.", type: "article",
     industries: ["government", "financial-services", "education", "healthcare"], solutions: ["ai-evaluation", "ai-switch-on"], reviewBy: "2027-01-12",
   },
+  "iso-42001-nist-ai-rmf-oecd-what-each-asks": {
+    title: "ISO 42001, NIST AI RMF and OECD: what each asks.", type: "article", industries: [], solutions: ["ai-evaluation", "knowledge-assistant"],
+    reviewBy: "2027-01-12",
+  },
 };
+// Held for a person's read of row F3 (go-global §6.4): the IEC listing's abstract names only continual
+// improvement, and iso.org refuses automated reads. This post stays a draft until a person reads ISO/IEC
+// 42001 on iso.org and records F3 as CONFIRMED in the verification note; then it is published and HELD goes.
+const HELD = "iso-42001-nist-ai-rmf-oecd-what-each-asks";
+/** A held post has no page, so its prose comes from its markdown by the built page's rules: each link
+ * becomes an anchor and each ordered-list number goes. For prose with no code block, the counts match. */
+const proseFromMarkdown = (body) =>
+  body.replace(/^\s*\d+\.\s+/gm, "").replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label, href) => `<a href="${href}">${label}</a>`);
 /** Spec §1 S1: the strings no page may show outside an allowed context. A post with no region is never one. */
 const S1_STRINGS = /australian organisations|for australian|in australia \||australia's leading|australian ai|australian teams|australian-owned|most australian/i;
 /** Spec §3.3 and §6.4: what a global post writes instead. */
@@ -305,7 +317,9 @@ const GLOBAL_VOCABULARY = [
 for (const [id, want] of Object.entries(GLOBAL_POSTS)) {
   test(`${id}: a global post with the October posts' copy rules, no region, nothing S1 bans and three primary sources (go-global §6.4)`, () => {
     const { fm, body } = post(id);
-    assert.equal(fm.draft, false, `${id}: a draft has no page`);
+    const held = id === HELD;
+    // The held post stays a draft for a person's read of F3 (HELD); every other global post is published.
+    assert.equal(fm.draft, held, held ? `${id}: held as a draft until a person's read of F3 is recorded; then publish it and clear HELD` : `${id}: a draft has no page`);
     assert.equal(fm.title, want.title, `${id}: the approved title (spec §6.4)`);
     assert.ok(fm.title.length <= 48, `${id}: the title is ${fm.title.length} characters (spec §6.4: 48 or fewer)`);
     assert.match(fm.title, /^[A-Z].*\.$/, `${id}: "${fm.title}" isn't a sentence ending in a period (spec §3.3)`);
@@ -334,9 +348,10 @@ for (const [id, want] of Object.entries(GLOBAL_POSTS)) {
         assert.ok(quoted.includes(phrase), `${id}: the heading "${heading}" quotes "${phrase}", which no blockquote says`);
       }
     }
-    const n = words(proseOf(id).inner);
+    const prose = held ? proseFromMarkdown(body) : proseOf(id).inner;
+    const n = words(prose);
     assert.ok(n >= 800 && n <= 1400, `${id}: ${n} words`);
-    const hrefs = elements(proseOf(id).inner, (t) => t.name === "a").map((a) => a.attrs.href);
+    const hrefs = elements(prose, (t) => t.name === "a").map((a) => a.attrs.href);
     for (const href of hrefs.filter((h) => h.startsWith("/"))) {
       const local = href.split(/[?#]/)[0];
       assert.ok(existsSync(join(DIST, local, local.endsWith("/") ? "index.html" : "")), `${id}: ${href} is missing`);
@@ -349,6 +364,16 @@ for (const [id, want] of Object.entries(GLOBAL_POSTS)) {
     assert.ok(new Set(sources).size >= 3, `${id}: ${new Set(sources).size} distinct sources`);
   });
 }
+
+// Spec §6.5 dates any insight whose claims may move; §6.4 names the EU AI Act post's date, and §5.3's
+// watch list gives the same date to the GDPR items and the NIST AI RMF revision the other two report.
+test("the global posts are spec §6.4's three, by their permanent slugs and titles, each with the watch-list review date (§5.3, §6.5)", () => {
+  assert.deepEqual(Object.fromEntries(Object.entries(GLOBAL_POSTS).map(([id, p]) => [id, [p.title, p.reviewBy]])), {
+    "offshore-ai-suppliers-data-in-your-region": ["Offshore AI suppliers and data in your region.", "2027-01-12"],
+    "eu-ai-act-new-dates-for-non-eu-suppliers": ["The EU AI Act's new dates for non-EU suppliers.", "2027-01-12"],
+    "iso-42001-nist-ai-rmf-oecd-what-each-asks": ["ISO 42001, NIST AI RMF and OECD: what each asks.", "2027-01-12"],
+  });
+});
 
 test("the reference scenario says it's fictional first, and renders the illustrative label", () => {
   for (const [id] of Object.entries(NEW_POSTS).filter(([, p]) => p.type === "reference-scenario")) {
