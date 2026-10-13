@@ -63,6 +63,7 @@ dontDo:
   - Rebuild matter Q&A, legal research or drafting inside Word. Your practice and research tools already do these.
   - Build KYC, ID verification or AML/CTF program software.
   - Draft or tailor legal wording. Your own adviser approves any policy, consent or engagement-letter text.
+rulesThatTravel: "Courts and professional bodies in many countries have reached the same few rules for generative AI. The Council of Bars and Law Societies of Europe published its guide on generative AI for lawyers in 2025. Its 2026 technical guide says lawyers must understand how the tools they use work, and explains hosting options so they can choose tools that protect client confidentiality. Courts and bar associations elsewhere have published guidance along the same lines. The EU AI Act's high-risk list covers AI that helps a court research and interpret facts and law, not a law firm's own tools. We test tools on your own matters and keep a record of every check. Your own court's practice notes and conduct rules always come first."
 problem:
   from: Lawyers reach for general-purpose AI and check each answer by hand, often in workplaces with no AI guidelines.
   to: Your firm chooses its AI on a test of your own matters, and keeps a record of every check on court work.

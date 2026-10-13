@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
 import { blockWords, readDist, visibleText } from "./helpers.mjs";
-import { elements, elementsWith, startTags } from "../scripts/ci/lib.mjs";
+import { elements, elementsWith, loadYaml, startTags } from "../scripts/ci/lib.mjs";
 import { industryFindings, regionFindings } from "../scripts/ci/checks/13-anchors-and-regions.mjs";
 import { anchorFile, makeIndustrySchema, plainRef } from "../src/content/schemas.ts";
 import { anchorChipLabel } from "../src/lib/anchors.ts";
@@ -170,5 +170,51 @@ test("the measured prototype: Manufacturing shows five shared and three sector c
     assert.equal(elementsWith(block.inner, "data-anchor-scope", "shared").length, shared, id);
     assert.equal(elementsWith(block.inner, "data-anchor-scope", "sector").length, sector, id);
     assert.equal(elementsWith(block.inner, "data-rules-paragraph").length, 1, id);
+  }
+});
+
+// ---------- go-global §5.2, §5.5, §5.6: the nine Rules paragraphs, the travel sentences, the "What we
+// don't do" lines and the Australia-only FAQs, in the content and on the production pages ----------
+
+/** The nine industry pages, in nav order. */
+const RULES_PAGE_IDS = ["government", "financial-services", "accounting", "education", "manufacturing", "real-estate", "healthcare", "resources-and-energy", "legal-and-professional"];
+/** Spec §5.5: the sentence that ends each page's Rules paragraph, word for word. Financial services and Manufacturing have none. */
+const TRAVEL_SENTENCES = {
+  government: "For government, we only claim to know Australia's rules. Outside Australia, we test unclassified systems on public or synthetic data.",
+  "financial-services": null,
+  accounting: "Your own regulator's rules always come first.",
+  education: "Your own education authority's rules always come first.",
+  manufacturing: null,
+  "real-estate": "Property rules are set locally, and we only claim to know Australia's. Outside Australia, we'd map your local rules with your compliance lead first.",
+  healthcare: "Each country's regulator decides when an AI scribe becomes a medical device. We don't make that call; we measure what the scribe gets wrong, and your regulatory team decides.",
+  "resources-and-energy": "Your own regulators set the conditions; we make them easy to check.",
+  "legal-and-professional": "Your own court's practice notes and conduct rules always come first.",
+};
+/** Spec §1, S1: banned in a page's HTML outside the allowed contexts. The Rules paragraph and the FAQPage JSON-LD (which carries the Australia-tagged FAQs) are not allowed contexts. */
+const S1_BANNED = ["australian organisations", "for australian", "in australia |", "australia's leading", "australian ai", "australian teams", "australian-owned", "most australian"];
+const rulesIndustrySchema = makeIndustrySchema(plainRef);
+const rulesIndustry = (id) => rulesIndustrySchema.parse(loadYaml(new URL(`../src/content/industries/${id}.yaml`, import.meta.url)));
+const rulesBuilt = (id) => readDist(`industries/${id}/index.html`);
+const plainText = (html) => visibleText(html).trim();
+/** pageWords' rule (tests/helpers.mjs): whitespace-separated tokens holding a letter or a digit. */
+const tokenCount = (s) => s.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
+
+test("go-global §5.2, §5.5: each industry page renders its own Rules paragraph, 140 words or fewer, ending with its travel sentence", () => {
+  for (const id of RULES_PAGE_IDS) {
+    const paragraph = rulesIndustry(id).rulesThatTravel;
+    assert.equal(typeof paragraph, "string", `${id}: no rulesThatTravel in src/content/industries/${id}.yaml`);
+    assert.ok(tokenCount(paragraph) <= 140, `${id}: the Rules paragraph is ${tokenCount(paragraph)} words; §5.2 allows 140`);
+    const travel = TRAVEL_SENTENCES[id];
+    for (const [other, sentence] of Object.entries(TRAVEL_SENTENCES)) {
+      if (other !== id && sentence !== null) assert.ok(!paragraph.includes(sentence), `${id} carries ${other}'s travel sentence`);
+    }
+    if (travel !== null) {
+      assert.ok(paragraph.endsWith(` ${travel}`), `${id}: the paragraph doesn't end with its travel sentence`);
+      assert.equal(paragraph.indexOf(travel), paragraph.length - travel.length, `${id}: the travel sentence appears twice`);
+    }
+    for (const s of S1_BANNED) assert.ok(!paragraph.toLowerCase().includes(s), `${id}: "${s}" (spec §1, S1)`);
+    const rendered = elements(rulesBuilt(id), (t) => "data-rules-paragraph" in t.attrs);
+    assert.equal(rendered.length, 1, `${id}: ${rendered.length} [data-rules-paragraph] elements`);
+    assert.equal(plainText(rendered[0].inner), paragraph, `${id}: the rendered paragraph isn't the content's`);
   }
 });

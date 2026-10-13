@@ -47,6 +47,7 @@ dontDo:
   - We don't rebuild bookkeeping, reconciliation or BAS preparation.
   - We don't make due-diligence decisions. Your AML/CTF compliance officer does.
   - We don't give legal or tax advice, or draft engagement-letter wording.
+rulesThatTravel: "The IESBA Code of Ethics for accountants already covers AI. Since December 2024, it has asked accountants to judge whether a tool's output is fit for purpose, including its limits, data quality and bias, and to guard against automation bias. In 2026, IESBA put it plainly: professional responsibility can't be delegated to a machine. The FATF Recommendations put due-diligence and record-keeping duties on accountants for some client work, such as setting up or managing companies and trusts. We build registers and drafts that a person approves, and we never make the due-diligence decision. Your own regulator's rules always come first."
 problem:
   from: More than a million trusts appear in the ATO's 2023–24 trust return statistics. Seniors read each client's deeds by hand, again every year end.
   to: One register of every client trust, each field linked to its page and checked against deeds your seniors already know.
