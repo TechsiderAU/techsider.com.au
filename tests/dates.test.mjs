@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { htmlFiles, listFiles, readText, relPath, startTags } from "../scripts/ci/lib.mjs";
-import { formatDate, isoDate } from "../src/lib/dates.ts";
+import { formatDate, formatMonthYear, formatShortDate, isoDate } from "../src/lib/dates.ts";
 
 const SRC = fileURLToPath(new URL("../src/", import.meta.url));
 const BUILDS = ["dist", "dist-preview"].map((d) => fileURLToPath(new URL(`../${d}/`, import.meta.url)));
@@ -33,6 +33,22 @@ test("formatDate and isoDate print a content date in UTC", () => {
   const late = new Date("2026-06-30T23:30:00Z"); // already 1 July in Sydney, still 30 June in UTC
   assert.equal(formatDate(late), "30 June 2026");
   assert.equal(isoDate(late), "2026-06-30");
+});
+
+test("formatShortDate and formatMonthYear print an anchor chip's dates in UTC, with three-letter months (go-global §5.2)", () => {
+  assert.equal(formatShortDate(new Date("2027-12-02")), "2 Dec 2027");
+  assert.equal(formatMonthYear(new Date("2026-10-01")), "Oct 2026");
+  // en-AU's own short months print "Sept", "June" and "July"; the chips always use three letters.
+  assert.equal(formatShortDate(new Date("2026-09-16")), "16 Sep 2026");
+  assert.equal(formatMonthYear(new Date("2026-06-18")), "Jun 2026");
+  assert.equal(formatMonthYear(new Date("2025-07-26")), "Jul 2025");
+  const late = new Date("2026-06-30T23:30:00Z"); // already 1 July in Sydney, still 30 June in UTC
+  assert.equal(formatShortDate(late), "30 Jun 2026");
+  assert.equal(formatMonthYear(late), "Jun 2026");
+  assert.deepEqual(
+    Array.from({ length: 12 }, (_, m) => formatMonthYear(new Date(Date.UTC(2026, m, 1)))),
+    ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m) => `${m} 2026`),
+  );
 });
 
 test("no file in src/ but src/lib/dates.ts turns a date into text (WB-14)", () => {
