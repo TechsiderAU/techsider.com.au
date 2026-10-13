@@ -136,6 +136,24 @@ export function slugify(name: string): string {
     .replace(/[\s-]+/g, "-");
 }
 
+/**
+ * Where Techsider is headquartered, in words: "Sydney, Australia" (go-global §3.2). The country's
+ * English name comes from Intl.DisplayNames, from SITE.hq.country, so the code is written once.
+ */
+export function hqPlace(site: typeof SITE = SITE): string {
+  const country = new Intl.DisplayNames("en", { type: "region" }).of(site.hq.country) ?? site.hq.country;
+  return `${site.hq.locality}, ${country}`;
+}
+
+/**
+ * The headquarters line (go-global §3.2): "Headquartered in Sydney, Australia · Techsider Pty Ltd ·
+ * ABN 12 636 205 868", the ABN part only while SITE.abn is set. The footer and About print it in a
+ * [data-hq] element and /llms.txt repeats it, so all three say it in the same words.
+ */
+export function hqLine(site: typeof SITE = SITE): string {
+  return [`Headquartered in ${hqPlace(site)}`, site.legalName, ...(site.abn ? [`ABN ${site.abn}`] : [])].join(" · ");
+}
+
 function page(group: Group, shortName: string, base: string, path: string, status: Status, fullName?: string, oneLiner?: string): PageEntry {
   const entry: PageEntry = { shortName, fullName: fullName ?? shortName, base, path, group, status };
   if (oneLiner) entry.oneLiner = oneLiner;

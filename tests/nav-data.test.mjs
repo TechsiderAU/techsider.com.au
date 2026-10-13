@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   PAGES, NAV_GROUPS, EXEMPT_PATHS, CTAS, SITE,
-  slugify, visibleGroups, noJsLinks, footerLabel, footerColumns, legalLinks, resolveCta,
+  slugify, visibleGroups, noJsLinks, footerLabel, footerColumns, legalLinks, resolveCta, hqLine, hqPlace,
 } from "../src/data/nav.ts";
 
 // Spec §7.1, every page that ships at launch.
@@ -221,4 +221,16 @@ test("no-JS links, footer and legal row only point at shown pages", () => {
 test("one-liners carry no banned implied-proof or hype phrases (spec §3.5)", () => {
   const banned = /trusted by|our clients|clients include|case study|world-class|cutting-edge|seamless|frontier|revolutioni[sz]e|certified|accredited|fixed[- ]price/i;
   for (const p of PAGES) if (p.oneLiner) assert.doesNotMatch(p.oneLiner, banned, p.shortName);
+});
+
+test("hqPlace and hqLine: the headquarters from SITE.hq, then the legal name and, while it is set, the ABN (go-global §3.2)", () => {
+  assert.deepEqual(SITE.hq, { locality: "Sydney", region: "NSW", country: "AU" });
+  assert.equal(hqPlace(), "Sydney, Australia");
+  assert.equal(hqLine(), "Headquartered in Sydney, Australia · Techsider Pty Ltd · ABN 12 636 205 868");
+  assert.equal(hqLine({ ...SITE, abn: null }), "Headquartered in Sydney, Australia · Techsider Pty Ltd", "the ABN part drops while SITE.abn is null");
+  // The country's English name comes from the ISO code, not a literal.
+  assert.equal(
+    hqLine({ ...SITE, hq: { locality: "Fixture City", region: "FX", country: "NZ" } }),
+    "Headquartered in Fixture City, New Zealand · Techsider Pty Ltd · ABN 12 636 205 868",
+  );
 });
