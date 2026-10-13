@@ -388,6 +388,28 @@ test("contact: the selects offer every country by its English name, the nine ind
   assert.deepEqual(options("interest"), [placeholder, ...fixtureSite.solutions.map((s) => [s.id, s.shortName]), ...EXTRA_INTERESTS.map((e) => [e.id, e.label])]);
 });
 
+test("contact: How did you find us? stays optional, and offers directories, more AI assistants and our own outreach as answers (go-global §8.1)", () => {
+  const form = one(mainOf(page("contact")), "data-contact-form");
+  const select = elements(form.inner, (t) => t.name === "select" && t.attrs.name === "discovery")[0];
+  assert.ok(!("required" in select.attrs));
+  assert.deepEqual(tagged(select.inner, "option").map((o) => [o.attrs.value, text(o.inner)]), [
+    ["", "Prefer not to say"],
+    ["Google Search", "Google Search"],
+    ["Bing Search", "Bing Search"],
+    ["ChatGPT", "ChatGPT"],
+    ["Microsoft Copilot", "Microsoft Copilot"],
+    ["Perplexity", "Perplexity"],
+    ["Gemini or Google AI Mode", "Gemini or Google AI Mode"],
+    ["Claude", "Claude"],
+    ["Other AI assistant", "Other AI assistant"],
+    ["Directory listing", "Directory listing"],
+    ["LinkedIn", "LinkedIn"],
+    ["Referral", "Referral"],
+    ["Techsider contacted me", "Techsider contacted me"],
+    ["Other", "Other"],
+  ]);
+});
+
 test("contact: every visible control has a visible <label for>; the consent and the collection notice link to the privacy policy (WB-12)", () => {
   const form = one(mainOf(page("contact")), "data-contact-form");
   const labels = new Map(tagged(form.inner, "label").map((l) => [l.attrs.for, l]));
