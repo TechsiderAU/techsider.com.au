@@ -1,5 +1,5 @@
 // Spec §11.5 check 11 (D4): no pricing in offer copy. Check 04's §3.5 pricing list
-// (including "from $<n>") and any currency figure, (A|AU)?$ followed by a digit, fail in:
+// (including "from $<n>", in any currency it knows) and any currency figure fail in:
 // - the offer sources: src/content/solutions/, src/content/kits/ and src/data/demos/
 //   (every file but README.md and dotfiles), src/data/services.ts and src/data/contact.ts;
 // - the visible text of the built offer pages: /, /solutions/**, /services/** (with
@@ -13,11 +13,19 @@ import { htmlFiles, listFiles, loadExceptions, readText, relPath, result, visibl
 import { EXCEPTIONS_FILE, PRICING, scan } from "./04-banned-phrases.mjs";
 
 export const NAME = "11-pricing";
-/** `(A|AU)?\$\s?\d`. The lookbehind leaves "from $9" to PRICING's "from $<n>", so it is reported once. */
+/**
+ * A currency figure (go-global §10.2 widens it beyond dollars): `$`, `A$` or `AU$` (so US$, NZ$
+ * and S$ too), `€` or `£` before a digit; USD, EUR or GBP before a digit, with or without a space;
+ * AUD before one; or a number ending in a digit and then USD, EUR, GBP or AUD ("1,200 EUR", but
+ * not "2028, EUR" or "1689 EUR-Lex"). The lookbehinds leave what PRICING's "from $<n>" catches
+ * ("from €9", "from NZ$9", "from USD 9") to it, and a number already reported by its symbol
+ * ("$900 USD") to that, so each figure is reported once. Bare currency stays out of PRICING, which
+ * check 04 applies site-wide: insights and regulatory data may cite third-party amounts.
+ */
 export const CURRENCY = {
   label: "currency figure",
   category: "currency figure (D4)",
-  re: /(?<!\bfrom\s+(?:AU?)?)(?:\bAU?)?\$\s?\d/gi,
+  re: /(?<!\bfrom\s+(?:AU?|US|NZ|S)?)(?:(?:\bAU?)?\$|[€£])\s?\d|(?<!\bfrom\s+)\b(?:USD|EUR|GBP)\s\d|\b(?:USD|EUR|GBP)\d|\bAUD\s?\d|(?<![\d,.]|[$€£]\s?)\d(?:[\d,.]*\d)?\s?(?:USD|EUR|GBP|AUD)\b(?![-‐‑]\w)/gi,
 };
 export const OFFER_RULES = [...PRICING, CURRENCY];
 export const OFFER_DIRS = ["src/content/solutions", "src/content/kits", "src/data/demos"];

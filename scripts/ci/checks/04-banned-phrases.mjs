@@ -2,7 +2,8 @@
 // every built page and built XML file (the RSS feed's channel and item copy, the sitemaps), and
 // the text files at the build's root (llms.txt, robots.txt).
 // FAIL phrases are errors; WARN phrases are printed as warnings. go-global §4.6 adds the
-// conformity, residency and readiness claims to OVERCLAIM.
+// conformity, residency and readiness claims to OVERCLAIM, and §10.2 adds VAT, sales tax and
+// other currencies to PRICING.
 // Matching is case-insensitive, whole phrase (\b at both ends), hyphen ≡ space.
 import { join, resolve } from "node:path";
 import {
@@ -109,13 +110,20 @@ export const PRICING = group("pricing language (D4)", [
   "price list",
   ["ex GST", rx("\\bex(?:cl?|cluding)?\\.? gst\\b")],
   ["inc GST", rx("\\binc(?:l|luding)?\\.? gst\\b")],
+  // go-global §10.2: VAT and sales tax, read the way the GST entries are.
+  ["ex VAT", rx("\\bex(?:cl?|cluding)?\\.? vat\\b")],
+  "plus VAT",
+  ["inc VAT", rx("\\binc(?:l|luding)?\\.? vat\\b")],
+  "sales tax",
   "payback",
   "single-approver",
   "delegated authority",
   "SME band",
   "SME threshold",
   "direct-engagement",
-  ["from $<n>", rx("\\bfrom\\s+(?:AU?)?\\$\\s?\\d")],
+  // "From" a price in any currency check 11 knows (go-global §10.2): $ (A$, AU$, US$, NZ$, S$), € or £,
+  // or USD, EUR or GBP and a space.
+  ["from $<n>", rx("\\bfrom\\s+(?:(?:AU?|US|NZ|S)?\\$|[€£]|(?:USD|EUR|GBP)\\s)\\s?\\d")],
 ]);
 
 export const FAIL_PHRASES = [...IMPLIED, ...HYPE, ...OVERCLAIM, ...PRICING];

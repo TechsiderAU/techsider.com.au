@@ -307,6 +307,15 @@ test("11: the currency rule catches A$, AU$ and bare $ figures, and leaves 'from
   assert.deepEqual(currency("Section 3, clause $ref, 30 dollars"), []);
 });
 
+test("11: the currency rule also catches €, £ and USD, EUR, GBP or AUD figures, each once, and leaves every 'from' form PRICING knows to it (go-global §10.2)", () => {
+  const currency = (text) => findAll(text, CURRENCY.re).map((h) => h.match);
+  assert.deepEqual(currency("€450, £ 1,200, EUR 900, 900 EUR, USD1200, 1,200.50 GBP and AUD 75"), ["€4", "£ 1", "EUR 9", "900 EUR", "USD1", "1,200.50 GBP", "AUD 7"]);
+  assert.deepEqual(currency("from €900, from £90, from USD 900, from EUR 9, from GBP 90, from US$30, from NZ$ 5 and from S$9"), []);
+  assert.deepEqual(currency("from USD900, from AUD 900 and from NZ $9"), ["USD9", "AUD 9", "$9"]); // forms PRICING doesn't catch
+  assert.deepEqual(currency("$900 USD, € 900 EUR and AU$5 AUD"), ["$9", "€ 9", "AU$5"]);
+  assert.deepEqual(currency("Europe, an audit, the eurozone, USDA rules, 2 Aug 2028, EUR-Lex, Regulation 2024/1689 EUR-Lex"), []);
+});
+
 test("11: offer copy without pricing passes; regulatory data, platform-ai.json and insights are out of scope", async () => {
   const t = tree({
     "src/content/solutions/fixture-solution.yaml": "scope: Fixture scope with referral fees, a tradie quote and fee earners\n",
@@ -347,6 +356,31 @@ test("11: pricing phrases and currency figures fail in every offer source and of
   ]));
   assert.ok(r.errors.some((e) => e.includes('"AU$ 1" (currency figure (D4))')), r.errors.join("\n"));
   assert.ok(r.errors.some((e) => e.includes('"payback" (pricing language (D4))')), r.errors.join("\n"));
+  assert.deepEqual(r.warnings, []);
+});
+
+test("11: euro, pound and currency-code figures fail in offer copy, and stay allowed in insights and regulatory data (go-global §10.2)", async () => {
+  const t = tree({
+    "src/content/solutions/fixture-solution.yaml": "scope: Fixture scope at €4,500\n",
+    "src/content/kits/fixture-kit.yaml": "summary: Fixture kit for 450 GBP\n",
+    "src/data/services.ts": 'export const services = [{ name: "Fixture service", note: "USD 900 a month" }];\n',
+    "src/data/regulatory/fixture-industry.json": { rows: [{ note: "Fixture fine up to €35 million or EUR 15 million" }] },
+    "src/content/insights/fixture-post.md": "The EU caps Fixture fines at €35 million.\n",
+    "dist/solutions/fixture-solution/index.html": page("<p>Fixture seats at £12 or 12 AUD</p>"),
+    "dist/contact/index.html": page("<p>Fixture plans from €900</p>"),
+    "dist/insights/fixture-post/index.html": page("<p>Fixture fines reach €35 million.</p>"),
+  });
+  const r = await pricing({ ...t, mode: "report" });
+  assert.deepEqual(sorted(r.errors.map(where)), sorted([
+    'src/content/solutions/fixture-solution.yaml:1: "€4"',
+    'src/content/kits/fixture-kit.yaml:1: "450 GBP"',
+    'src/data/services.ts:1: "USD 9"',
+    'dist/solutions/fixture-solution/index.html: "£1"',
+    'dist/solutions/fixture-solution/index.html: "12 AUD"',
+    'dist/contact/index.html: "from €9"',
+  ]));
+  assert.ok(r.errors.some((e) => e.includes('"from €9" (pricing language (D4))')), r.errors.join("\n"));
+  assert.ok(r.errors.some((e) => e.includes('"450 GBP" (currency figure (D4))')), r.errors.join("\n"));
   assert.deepEqual(r.warnings, []);
 });
 

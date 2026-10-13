@@ -490,6 +490,32 @@ test("04: the go-global overclaims fail: bare 'compliant', the alignment and con
   ]);
 });
 
+test("04: the widened pricing rules fail: VAT, sales tax, and 'from' a price in any currency (go-global §10.2)", async () => {
+  const res = await check(banned, {
+    "src/content/solutions/alpha-fixture.yaml": { ...solution(), scope: "Ex VAT, excl. VAT, plus VAT or inc VAT.", note: "Including VAT and sales tax." },
+    "dist/solutions/alpha-fixture/index.html": page(
+      `<p>From €900, from £90, from USD 900, from US$30, from NZ$ 5 or from S$9.</p>`,
+    ),
+  });
+  assertErrors(res, [
+    /alpha-fixture\.yaml:\d+: "Ex VAT" \(pricing language \(D4\)\)/,
+    /alpha-fixture\.yaml:\d+: "excl\. VAT" \(pricing language/,
+    /alpha-fixture\.yaml:\d+: "plus VAT" \(pricing language/,
+    /alpha-fixture\.yaml:\d+: "inc VAT" \(pricing language/,
+    /alpha-fixture\.yaml:\d+: "Including VAT" \(pricing language/,
+    /alpha-fixture\.yaml:\d+: "sales tax" \(pricing language/,
+    /alpha-fixture\/index\.html: "From €9" \(pricing language/,
+    /alpha-fixture\/index\.html: "from £9" \(pricing language/,
+    /alpha-fixture\/index\.html: "from USD 9" \(pricing language/,
+    /alpha-fixture\/index\.html: "from US\$3" \(pricing language/,
+    /alpha-fixture\/index\.html: "from NZ\$ 5" \(pricing language/,
+    /alpha-fixture\/index\.html: "from S\$9" \(pricing language/,
+  ]);
+  // A bare amount is check 11's business, and only in offer copy: insights may cite fines.
+  const bare = await check(banned, { "src/content/insights/fixture-post.md": `${post()}\nFines can reach €35 million, or EUR 15 million for other breaches.\n` });
+  assertErrors(bare, []);
+});
+
 test("04: near misses pass, and src/fixtures/ is not scanned", async () => {
   const res = await check(banned, {
     "src/components/Hero.astro": "<p>A benchmark, working with your documents, uncertified claims avoided, frontiersman.</p>",
