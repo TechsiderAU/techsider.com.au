@@ -311,10 +311,27 @@ test("11: the currency rule catches A$, AU$ and bare $ figures, and leaves 'from
 test("11: the currency rule also catches €, £ and USD, EUR, GBP or AUD figures, each once, and leaves every 'from' form PRICING knows to it (go-global §10.2)", () => {
   const currency = (text) => findAll(text, CURRENCY.re).map((h) => h.match);
   assert.deepEqual(currency("€450, £ 1,200, EUR 900, 900 EUR, USD1200, 1,200.50 GBP and AUD 75"), ["€4", "£ 1", "EUR 9", "900 EUR", "USD1", "1,200.50 GBP", "AUD 7"]);
-  assert.deepEqual(currency("from €900, from £90, from USD 900, from EUR 9, from GBP 90, from US$30, from NZ$ 5 and from S$9"), []);
-  assert.deepEqual(currency("from USD900, from AUD 900 and from NZ $9"), ["USD9", "AUD 9", "$9"]); // forms PRICING doesn't catch
+  assert.deepEqual(currency("from €900, from £90, from USD 900, from EUR 9, from GBP 90, from AUD 900, from US$30, from NZ$ 5 and from S$9"), []);
+  assert.deepEqual(currency("from USD900, from AUD900 and from NZ $9"), ["USD9", "AUD9", "$9"]); // forms PRICING doesn't catch
   assert.deepEqual(currency("$900 USD, € 900 EUR and AU$5 AUD"), ["$9", "€ 9", "AU$5"]);
   assert.deepEqual(currency("Europe, an audit, the eurozone, USDA rules, 2 Aug 2028, EUR-Lex, Regulation 2024/1689 EUR-Lex"), []);
+});
+
+test("11: 'from AUD' is a price PRICING reports, once; an AUD figure without it is a currency figure; near misses pass (final review F33)", async () => {
+  const t = tree({
+    "src/content/solutions/fixture-solution.yaml": "scope: Fixture scope from AUD 9,000\n",
+    "dist/solutions/fixture-solution/index.html": page("<p>Fixture seats at AUD 12, or from AUD900</p>"),
+  });
+  const r = await pricing({ ...t, mode: "report" });
+  assert.deepEqual(sorted(r.errors.map(where)), sorted([
+    'src/content/solutions/fixture-solution.yaml:1: "from AUD 9"',
+    'dist/solutions/fixture-solution/index.html: "AUD 1"',
+    'dist/solutions/fixture-solution/index.html: "AUD9"',
+  ]));
+  assert.ok(r.errors.some((e) => e.includes('"from AUD 9" (pricing language (D4))')), r.errors.join("\n"));
+  assert.ok(r.errors.some((e) => e.includes('"AUD 1" (currency figure (D4))')), r.errors.join("\n"));
+  const currency = (text) => findAll(text, CURRENCY.re).map((h) => h.match);
+  assert.deepEqual(currency("An AUDIT 2026 note, an AUD-denominated budget and audits from 2024"), []);
 });
 
 test("11: offer copy without pricing passes; regulatory data, platform-ai.json and insights are out of scope", async () => {

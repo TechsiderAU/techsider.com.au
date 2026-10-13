@@ -15,17 +15,18 @@ import { EXCEPTIONS_FILE, PRICING, scan } from "./04-banned-phrases.mjs";
 export const NAME = "11-pricing";
 /**
  * A currency figure (go-global §10.2 widens it beyond dollars): `$`, `A$` or `AU$` (so US$, NZ$
- * and S$ too), `€` or `£` before a digit; USD, EUR or GBP before a digit, with or without a space;
- * AUD before one; or a number ending in a digit and then USD, EUR, GBP or AUD ("1,200 EUR", but
- * not "2028, EUR" or "1689 EUR-Lex"). The lookbehinds leave what PRICING's "from $<n>" catches
- * ("from €9", "from NZ$9", "from USD 9") to it, and a number already reported by its symbol
- * ("$900 USD") to that, so each figure is reported once. Bare currency stays out of PRICING, which
- * check 04 applies site-wide: insights and regulatory data may cite third-party amounts.
+ * and S$ too), `€` or `£` before a digit; USD, EUR, GBP or AUD before a digit, with or without a
+ * space; or a number ending in a digit and then USD, EUR, GBP or AUD ("1,200 EUR", but not
+ * "2028, EUR" or "1689 EUR-Lex"). The lookbehinds leave what PRICING's "from $<n>" catches
+ * ("from €9", "from NZ$9", "from USD 9", "from AUD 9") to it, and a number already reported by
+ * its symbol ("$900 USD") to that, so each figure is reported once; AUD takes the lookbehind USD,
+ * EUR and GBP have (final review F33). Bare currency stays out of PRICING, which check 04 applies
+ * site-wide: insights and regulatory data may cite third-party amounts.
  */
 export const CURRENCY = {
   label: "currency figure",
   category: "currency figure (D4)",
-  re: /(?<!\bfrom\s+(?:AU?|US|NZ|S)?)(?:(?:\bAU?)?\$|[€£])\s?\d|(?<!\bfrom\s+)\b(?:USD|EUR|GBP)\s\d|\b(?:USD|EUR|GBP)\d|\bAUD\s?\d|(?<![\d,.]|[$€£]\s?)\d(?:[\d,.]*\d)?\s?(?:USD|EUR|GBP|AUD)\b(?![-\u2010\u2011]\w)/gi,
+  re: /(?<!\bfrom\s+(?:AU?|US|NZ|S)?)(?:(?:\bAU?)?\$|[€£])\s?\d|(?<!\bfrom\s+)\b(?:USD|EUR|GBP|AUD)\s\d|\b(?:USD|EUR|GBP|AUD)\d|(?<![\d,.]|[$€£]\s?)\d(?:[\d,.]*\d)?\s?(?:USD|EUR|GBP|AUD)\b(?![-\u2010\u2011]\w)/gi,
 };
 export const OFFER_RULES = [...PRICING, CURRENCY];
 export const OFFER_DIRS = ["src/content/solutions", "src/content/kits", "src/data/demos"];

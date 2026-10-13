@@ -490,6 +490,34 @@ test("04: the go-global overclaims fail: bare 'compliant', the alignment and con
   ]);
 });
 
+test("04: an alignment claim with the standard first, and a price 'from AUD', fail like their other forms; near misses pass (final review F33)", async () => {
+  const res = await check(banned, {
+    "src/components/Hero.astro": [
+      "<p>ISO 27001-aligned, ISO/IEC 27001 aligned, NIST-aligned and NIST AI RMF-aligned.</p>",
+      "<p>SOC 2-aligned, SOC2\u2011aligned and ISO42001-aligned.</p>",
+      "<p>Plans from AUD 9,000, or from aud 90.</p>",
+    ].join("\n"),
+  });
+  assertErrors(res, [
+    /Hero\.astro:1: "ISO 27001-aligned" \(overclaim\)/,
+    /Hero\.astro:1: "ISO\/IEC 27001 aligned" \(overclaim\)/,
+    /Hero\.astro:1: "NIST-aligned" \(overclaim\)/,
+    /Hero\.astro:1: "NIST AI RMF-aligned" \(overclaim\)/,
+    /Hero\.astro:2: "SOC 2-aligned" \(overclaim\)/,
+    /Hero\.astro:2: "SOC2\u2011aligned" \(overclaim\)/,
+    /Hero\.astro:2: "ISO42001-aligned" \(overclaim\)/,
+    /Hero\.astro:3: "from AUD 9" \(pricing language \(D4\)\)/,
+    /Hero\.astro:3: "from aud 9" \(pricing language \(D4\)\)/,
+  ]);
+  const near = await check(banned, {
+    "src/components/Hero.astro": [
+      "<p>Teams aligned on the goal, SOC 2 reports aligned with your control owners, NIST, aligned with your own risk register, and ISO 27001 alignment work.</p>",
+      "<p>From audits in 2024, from AUDIT 9 onwards, and an AUD-denominated budget.</p>",
+    ].join("\n"),
+  });
+  assertErrors(near, []);
+});
+
 test("04: the widened pricing rules fail: VAT, sales tax, and 'from' a price in any currency (go-global §10.2)", async () => {
   const res = await check(banned, {
     "src/content/solutions/alpha-fixture.yaml": { ...solution(), scope: "Ex VAT, excl. VAT, plus VAT or inc VAT.", note: "Including VAT and sales tax." },

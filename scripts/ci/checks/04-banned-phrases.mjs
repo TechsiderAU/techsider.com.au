@@ -55,13 +55,14 @@ export const HYPE = group("hype", [
   "frontier",
 ]);
 
-// go-global §4.6 adds the last eight entries. Bare "compliant" moved here from WARN_PHRASES, so it
-// also covers the old "SOC 2 compliant" and "ISO 27001 compliant" entries. Patterns (a)–(d) are
-// §4.6's own: (a) and (d) match its literals "nothing leaves your region", "EU AI Act-ready" and
-// "AI Act ready", so those are their labels rather than separate entries (each would report the
-// same words a second or third time). "conforms to" stays a literal, since it fails with any subject;
-// "Techsider conforms to" is reported by it and by (b). Quoted third-party text goes in
-// banned-phrase-exceptions.json.
+// go-global §4.6 adds the entries from "compliant" on, and the final review (F33) the suffix form
+// of (c). Bare "compliant" moved here from WARN_PHRASES, so it also covers the old "SOC 2 compliant"
+// and "ISO 27001 compliant" entries. Patterns (a)–(d) are §4.6's own: (a) and (d) match its literals
+// "nothing leaves your region", "EU AI Act-ready" and "AI Act ready", and (c)'s suffix form matches
+// its "ISO 42001-aligned" and "ISO/IEC 42001-aligned", so those are their labels rather than separate
+// entries (each would report the same words a second or third time). "conforms to" stays a literal,
+// since it fails with any subject; "Techsider conforms to" is reported by it and by (b). Quoted
+// third-party text goes in banned-phrase-exceptions.json.
 export const OVERCLAIM = group("overclaim", [
   "certified",
   "IRAP-aligned",
@@ -75,8 +76,6 @@ export const OVERCLAIM = group("overclaim", [
   "our partner",
   "our partners",
   "compliant",
-  "ISO 42001-aligned",
-  "ISO/IEC 42001-aligned",
   "conforms to",
   // (a) A negated leave or send with a place. Short residency lines say where systems run (go-global §4.1).
   [
@@ -87,6 +86,9 @@ export const OVERCLAIM = group("overclaim", [
   ["we comply with", rx("\\b(?:we|techsider|our(?: \\w+){1,2})(?: (?:are|is|fully|already))* (?:compl(?:y|ies)|conforms?) (?:with|to)\\b")],
   // (c) "Aligned" with a named standard or framework. "(?: )?" keeps the space optional: rx() reads " ?" as a required gap.
   ["aligned with ISO 42001", rx("\\baligned (?:with|to) (?:the )?(?:ISO(?:/IEC)?(?: )?(?:42001|27001)|NIST(?: AI RMF)?|SOC(?: )?2)\\b")],
+  // (c), suffix form: the same standards with "aligned" after them, "ISO 27001-aligned", "NIST-aligned" or
+  // "SOC 2 aligned", so word order doesn't decide whether the claim passes (final review F33).
+  ["ISO 42001-aligned", rx("\\b(?:ISO(?:/IEC)?(?: )?(?:42001|27001)|NIST(?: AI RMF)?|SOC(?: )?2) aligned\\b")],
   // (d) "Act-ready", with any dash: \u2010-\u2014 run from the hyphen to the em dash.
   ["EU AI Act-ready", rx("\\b(?:EU[\\s\\-\\u2010-\\u2014]+)?AI[\\s\\-\\u2010-\\u2014]+Act(?:[\\s\\-\\u2010\\u2011]+|[\\u2013\\u2014])ready\\b")],
 ]);
@@ -122,8 +124,8 @@ export const PRICING = group("pricing language (D4)", [
   "SME threshold",
   "direct-engagement",
   // "From" a price in any currency check 11 knows (go-global §10.2): $ (A$, AU$, US$, NZ$, S$), € or £,
-  // or USD, EUR or GBP and a space.
-  ["from $<n>", rx("\\bfrom\\s+(?:(?:AU?|US|NZ|S)?\\$|[€£]|(?:USD|EUR|GBP)\\s)\\s?\\d")],
+  // or USD, EUR, GBP or AUD and a space (AUD from the final review, F33).
+  ["from $<n>", rx("\\bfrom\\s+(?:(?:AU?|US|NZ|S)?\\$|[€£]|(?:USD|EUR|GBP|AUD)\\s)\\s?\\d")],
 ]);
 
 export const FAIL_PHRASES = [...IMPLIED, ...HYPE, ...OVERCLAIM, ...PRICING];
