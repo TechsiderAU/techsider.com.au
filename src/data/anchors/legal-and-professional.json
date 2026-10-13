@@ -11,9 +11,9 @@
       "statusDate": "2025-10-02",
       "asks": "Guidance for lawyers on the use of generative AI, published on 2 October 2025 and cited in the CCBE's 2026 technical guide.",
       "evidence": "A test of the tool on your own matters, listing every wrong or made-up citation.",
-      "source": "https://www.ccbe.eu/fileadmin/speciality_distribution/public/documents/IT_LAW/ITL_Guides_recommendations/EN_ITL_20251002_CCBE-guide-on-the-use-of-generative-AI-for-lawyers.pdf",
+      "source": "https://www.ccbe.eu/fileadmin/speciality_distribution/public/documents/IT_LAW/ITL_Guides_recommendations/EN_ITL_20251002_CCBE-guide-on-the-use-of-the-use-of-generative-AI-for-lawyers.pdf",
       "asAt": "2026-10-12",
-      "lastReviewed": "2026-10-12",
+      "lastReviewed": "2026-10-14",
       "solutions": ["ai-evaluation", "ai-switch-on"],
       "featured": true,
       "checkLevel": "P*"
