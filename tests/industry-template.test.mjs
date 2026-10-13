@@ -1,18 +1,22 @@
-// The industry template (spec §8.5) as built on its two gallery specimens in dist-preview/:
-// /preview/templates/industry/ (single mode) and /preview/templates/industry-government/
-// (jurisdiction mode). Expected values come from fixtureIndustryView(), the view the specimens
-// render, so these tests pin the markup, not the fixture copy.
+// The industry template (spec §8.5, as amended by go-global §5) as built on its two gallery
+// specimens in dist-preview/: /preview/templates/industry/ (single mode) and
+// /preview/templates/industry-government/ (jurisdiction mode). Expected values come from
+// fixtureIndustryView(), the view the specimens render, so these tests pin the markup, not the
+// fixture copy.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readPreviewDist, visibleText } from "./helpers.mjs";
+import { blockWords, readPreviewDist, visibleText } from "./helpers.mjs";
 import { elements, elementsWith, startTags } from "../scripts/ci/lib.mjs";
 import { run as regulatoryKits } from "../scripts/ci/checks/08-regulatory-kits.mjs";
+import { industryFindings, regionFindings } from "../scripts/ci/checks/13-anchors-and-regions.mjs";
 import { SECTION_TITLE } from "../src/content/schemas.ts";
-import { NOT_LEGAL_ADVICE, SCENARIO_LABEL } from "../src/lib/fixed-copy.ts";
+import {
+  AU_BAND_HEADING, AU_BAND_INTRO, NOT_LEGAL_ADVICE, RULES_CLOSING, RULES_HEADING, RULES_SHARED_LABEL, SCENARIO_LABEL,
+} from "../src/lib/fixed-copy.ts";
 import { industryFixtures } from "../src/fixtures/index.ts";
 import { fixtureIndustryView } from "../src/preview/specimens/industry-view.ts";
 
@@ -21,7 +25,10 @@ const read = (kind) => readPreviewDist(`preview/templates/${kind}/index.html`);
 const single = fixtureIndustryView("fixture-industry");
 const gov = fixtureIndustryView("fixture-government");
 
-const SECTION_IDS = ["designed-around", "commonwealth", "state", "local", "problem", "workflow", "packages", "regulatory-map", "scenario", "first-engagement", "insights", "faq", "contact"];
+const SECTION_IDS = [
+  "rules-that-travel", "problem", "workflow", "packages", "scenario", "first-engagement", "australia", "designed-around",
+  "commonwealth", "state", "local", "regulatory-map", "faq-au", "insights", "faq", "contact",
+];
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const mainOf = (html) => html.slice(html.search(/<main\b/), html.indexOf("</main>"));
 const text = (html) => visibleText(html).trim();
@@ -31,6 +38,11 @@ const headerLabels = (html) => elements(elements(html, (t) => t.name === "thead"
 // Dates print as the template prints them: "1 September 2026", in UTC.
 const formatDate = (d) => d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const PAGES = [["industry", single], ["industry-government", gov]];
+/** pageWords' rule over a plain string: whitespace-separated tokens holding a letter or a digit. */
+const wordsOf = (s) => s.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
+const withClass = (html, cls) => elements(html, (t) => (t.attrs.class ?? "").split(/\s+/).includes(cls));
+const faqQuestions = (html) => withClass(html, "faq-q").map((q) => text(q.inner));
+const faqPages = (html) => [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1])).filter((b) => b["@type"] === "FAQPage");
 
 test("each industry specimen renders one template root, one h1 (the promise) and headings that never skip a level", () => {
   for (const [kind, view] of PAGES) {
@@ -44,11 +56,13 @@ test("each industry specimen renders one template root, one h1 (the promise) and
   }
 });
 
-test("the blocks come in spec §8.5 order, and Government repeats blocks 2, 5 and 6 per jurisdiction", () => {
+test("the blocks come in go-global §5.1 order: Rules that travel first, the Australian blocks inside the band, Government's per jurisdiction", () => {
   const order = (html) => startTags(mainOf(html)).map((t) => t.attrs.id).filter((id) => SECTION_IDS.includes(id));
-  const tail = (view) => ["scenario", "first-engagement", ...(view.insights.length ? ["insights"] : []), "faq", "contact"];
-  assert.deepEqual(order(read("industry")), ["designed-around", "problem", "workflow", "packages", "regulatory-map", ...tail(single)]);
-  assert.deepEqual(order(read("industry-government")), ["designed-around", "commonwealth", "state", "local", "problem", "workflow", "packages", ...tail(gov)]);
+  const head = ["rules-that-travel", "problem", "workflow", "packages", "scenario", "first-engagement", "australia", "designed-around"];
+  const tail = (view) => [...(view.faqAu.length ? ["faq-au"] : []), ...(view.insights.length ? ["insights"] : []), "faq", "contact"];
+  assert.ok(single.faqAu.length > 0 && gov.faqAu.length > 0, "both specimens render #faq-au");
+  assert.deepEqual(order(read("industry")), [...head, "regulatory-map", ...tail(single)]);
+  assert.deepEqual(order(read("industry-government")), [...head, "commonwealth", "state", "local", ...tail(gov)]);
 });
 
 test("ids are unique on both industry pages", () => {
@@ -139,12 +153,16 @@ test("jurisdiction mode: #designed-around jumps to Commonwealth, State and Local
   assert.deepEqual(sections.map((s) => [s.name, s.attrs.id, s.attrs["data-jurisdiction-section"]]), gov.sections.map((s) => ["section", s.id, s.id]));
   for (const [i, s] of gov.sections.entries()) {
     const el = sections[i];
-    assert.equal(text(elements(el.inner, (t) => t.name === "h2")[0].inner), SECTION_TITLE[s.id]);
+    // One level lower inside the Australia band (go-global §5.4): the section is h3, its sub-blocks h4.
+    assert.equal(text(elements(el.inner, (t) => t.name === "h3")[0].inner), SECTION_TITLE[s.id]);
+    assert.equal(elements(el.inner, (t) => t.name === "h2").length, 0, `#${s.id} holds an h2`);
     for (const sub of ["designed-around", "packages", "regulatory-map"]) {
       const block = byId(el.inner, `${s.id}-${sub}`);
       assert.ok(block, `no #${s.id}-${sub} inside #${s.id}`);
-      assert.equal(elements(block.inner, (t) => t.name === "h3").length > 0, true, `#${s.id}-${sub} has no h3`);
+      assert.equal(elements(block.inner, (t) => t.name === "h4").length, 1, `#${s.id}-${sub} has no h4`);
     }
+    const titles = elements(byId(el.inner, `${s.id}-packages`).inner, (t) => /^h[1-6]$/.test(t.name)).map((h) => h.name);
+    assert.deepEqual(titles, ["h4", ...s.packages.map(() => "h5")], `#${s.id}-packages: an h4, then h5 card titles`);
     const chips = linksIn(byId(el.inner, `${s.id}-designed-around`).inner);
     assert.deepEqual(chips, s.chips.map((c) => c.href));
     assert.ok(chips.length >= 4 && chips.length <= 6, `${s.id}: ${chips.length} chips`);
@@ -282,5 +300,106 @@ test("check 08 reads the Government specimen: every jurisdiction section holds r
     assert.deepEqual(broken.errors, ['dist/preview/index.html: jurisdiction section "state" has no regulatory row ([data-regulatory-row])']);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+// ---------- go-global §5: Rules that travel, the Australia band, the FAQ split, budgets, check 13 ----------
+
+test("Rules that travel: the heading, the paragraph, the Everywhere row, the unlabelled sector row and the closing line once (go-global §5.2)", () => {
+  for (const [kind, view] of PAGES) {
+    const block = byId(read(kind), "rules-that-travel");
+    assert.equal(block.name, "section", kind);
+    assert.equal(text(byId(block.inner, "rules-that-travel-heading").inner), RULES_HEADING, kind);
+    assert.deepEqual(elementsWith(block.inner, "data-rules-paragraph").map((p) => text(p.inner)), [view.rules.paragraph], kind);
+    const rows = elementsWith(block.inner, "data-anchor-row");
+    assert.deepEqual(rows.map((r) => r.attrs["data-anchor-row"]), ["shared", "sector"], kind);
+    const [shared, sector] = rows;
+    assert.equal(text(byId(shared.inner, "rules-that-travel-shared-label").inner), RULES_SHARED_LABEL, kind);
+    assert.equal(elements(shared.inner, (t) => t.name === "ul")[0].attrs["aria-labelledby"], "rules-that-travel-shared-label", kind);
+    assert.equal(elements(sector.inner, (t) => t.name === "p").length, 0, `${kind}: the sector row has a visible label`);
+    for (const [row, chips] of [[shared, view.rules.shared], [sector, view.rules.sector]]) {
+      const links = elementsWith(row.inner, "data-anchor-id");
+      assert.deepEqual(
+        links.map((a) => [a.name, a.attrs["data-anchor-id"], a.attrs["data-anchor-scope"], a.attrs.href]),
+        chips.map((c) => ["a", c.id, c.scope, c.href]),
+        kind,
+      );
+      links.forEach((a, i) => {
+        assert.deepEqual(elementsWith(a.inner, "data-anchor-name").map((n) => text(n.inner)), [chips[i].name]);
+        assert.deepEqual(elementsWith(a.inner, "data-anchor-label").map((n) => text(n.inner)), [chips[i].label]);
+      });
+    }
+    assert.deepEqual(elementsWith(read(kind), "data-rules-closing").map((p) => text(p.inner)), [RULES_CLOSING], `${kind}: the closing line, once per page`);
+  }
+});
+
+test("the Australia band: one bone section marked data-region=au, its h2 and intro line, then the Australian blocks one level lower (go-global §5.4)", () => {
+  for (const [kind, view] of PAGES) {
+    const html = read(kind);
+    const band = byId(html, "australia");
+    assert.equal(band.name, "section", kind);
+    assert.equal(band.attrs["data-region"], "au", kind);
+    assert.equal(band.attrs["aria-labelledby"], "australia-heading", kind);
+    assert.match(band.attrs.class, /\bsurface-bone\b/, kind);
+    const heading = byId(band.inner, "australia-heading");
+    assert.deepEqual([heading.name, text(heading.inner)], ["h2", AU_BAND_HEADING], kind);
+    assert.deepEqual(withClass(band.inner, "section-lede").map((p) => text(p.inner)), [AU_BAND_INTRO], kind);
+    // One band. Part 5 marks other Australia-only items data-region="au" too (package cards, use
+    // cases, the scenario: contract §5), so count the band by its id, not by the attribute.
+    assert.equal(elements(html, (t) => t.attrs.id === "australia").length, 1, `${kind}: one Australia band`);
+    // Every Australian block, row and jurisdiction section sits inside the band.
+    const inside = view.single ? ["designed-around", "regulatory-map"] : ["designed-around", "commonwealth", "state", "local"];
+    for (const id of [...inside, ...(view.faqAu.length ? ["faq-au"] : [])]) assert.ok(byId(band.inner, id), `${kind}: #${id} is outside the band`);
+    assert.equal(elementsWith(band.inner, "data-regulatory-row").length, elementsWith(html, "data-regulatory-row").length, `${kind}: a regulatory row outside the band`);
+    assert.equal(elementsWith(band.inner, "data-jurisdiction-section").length, elementsWith(html, "data-jurisdiction-section").length, kind);
+    for (const id of ["designed-around", ...(view.single ? ["regulatory-map"] : [])]) {
+      assert.equal(elements(byId(band.inner, id).inner, (t) => /^h[1-6]$/.test(t.name))[0].name, "h3", `${kind}: #${id} is not an h3 block`);
+    }
+    for (const id of ["rules-that-travel", "problem", "workflow", "packages", "scenario", "first-engagement", "faq"]) {
+      assert.equal(byId(band.inner, id), undefined, `${kind}: #${id} is inside the band`);
+    }
+  }
+});
+
+test("FAQs: #faq shows the untagged questions, #faq-au in the band the region au ones, and one FAQPage carries every question in data order (go-global §5.6)", () => {
+  for (const [kind, view] of PAGES) {
+    const html = read(kind);
+    const faqAu = byId(html, "faq-au");
+    assert.equal(text(byId(faqAu.inner, "faq-au-heading").inner), "Questions", kind);
+    assert.equal(byId(faqAu.inner, "faq-au-heading").name, "h3", kind);
+    assert.deepEqual(faqQuestions(faqAu.inner), view.faqAu.map((f) => f.q), kind);
+    assert.deepEqual(faqQuestions(byId(html, "faq").inner), view.faqNeutral.map((f) => f.q), kind);
+    assert.equal(faqAu.inner.includes("application/ld+json"), false, `${kind}: #faq-au emits JSON-LD`);
+    const pages = faqPages(html);
+    assert.equal(pages.length, 1, `${kind}: FAQPage blocks`);
+    assert.deepEqual(pages[0].mainEntity.map((q) => [q.name, q.acceptedAnswer.text]), view.faq.map((f) => [f.q, f.a]), kind);
+  }
+});
+
+test("word budgets: Rules that travel at most 280 words and its paragraph at most 140; the band adds at most 20 (go-global §5.2, §5.4)", () => {
+  for (const [kind, view] of PAGES) {
+    const html = read(kind);
+    assert.ok(blockWords(html, "rules-that-travel") <= 280, `${kind}: Rules that travel is ${blockWords(html, "rules-that-travel")} words`);
+    assert.ok(wordsOf(view.rules.paragraph) <= 140, `${kind}: the paragraph is ${wordsOf(view.rules.paragraph)} words`);
+    const blocks = view.single ? ["designed-around", "regulatory-map"] : ["designed-around", ...view.sections.map((s) => s.id)];
+    const moved = blocks.reduce((n, id) => n + blockWords(html, id), 0) + view.faqAu.reduce((n, f) => n + wordsOf(`${f.q} ${f.a}`), 0);
+    const own = blockWords(html, "australia") - moved;
+    assert.equal(own, wordsOf(`${AU_BAND_HEADING} ${AU_BAND_INTRO} Questions`), `${kind}: the band's own words`);
+    assert.ok(own <= 20, `${kind}: the band adds ${own} words`);
+  }
+});
+
+test("check 13's structure rule passes on both specimens, and fails once the band loses data-region or Rules that travel moves below it", () => {
+  for (const [kind] of PAGES) {
+    const html = read(kind);
+    const file = `dist-preview/preview/templates/${kind}/index.html`;
+    assert.deepEqual([...regionFindings(html, file), ...industryFindings(html, file)], [], kind);
+    const unmarked = html.replace(/(<section id="australia"[^>]*?) data-region="au"/, "$1");
+    assert.notEqual(unmarked, html, `${kind}: the band's data-region attribute wasn't found`);
+    assert.ok(regionFindings(unmarked, file).length > 0, `${kind}: rows outside the band pass rule 1a`);
+    assert.ok(industryFindings(unmarked, file).length > 0, `${kind}: an unmarked band passes rule 1b`);
+    const rules = byId(html, "rules-that-travel").outer;
+    const moved = html.replace(rules, "").replace("</main>", `${rules}</main>`);
+    assert.ok(industryFindings(moved, file).length > 0, `${kind}: Rules that travel below the band passes rule 1b`);
   }
 });

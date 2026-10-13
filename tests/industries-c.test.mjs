@@ -98,8 +98,11 @@ test("the three industry pages and the hub are live, each with its own 150–160
   }
 });
 
-test("each page renders its promise as the one h1, the §8.5 sections in order, and the talk CTA", () => {
-  const ORDER = ["designed-around", "problem", "workflow", "packages", "regulatory-map", "scenario", "first-engagement", "insights", "faq", "contact"];
+test("each page renders its promise as the one h1, the go-global §5.1 sections in order, and the talk CTA", () => {
+  const ORDER = [
+    "rules-that-travel", "problem", "workflow", "packages", "scenario", "first-engagement", "australia", "designed-around", "regulatory-map",
+    "insights", "faq", "contact",
+  ];
   for (const id of TASK6) {
     const data = industryData(id);
     const main = mainOf(built(`/industries/${id}/`));
@@ -134,10 +137,10 @@ test("every Designed around chip links to a regulatory-map row on its own page",
   }
 });
 
-test("each industry page runs 900–1,400 words, counting tables and FAQ (spec §8.5)", () => {
+test("each industry page runs 900–1,800 words, counting tables and FAQ (spec §8.5; go-global §5.7)", () => {
   for (const id of TASK6) {
     const words = pageWords(built(`/industries/${id}/`));
-    assert.ok(words >= 900 && words <= 1400, `${id}: ${words} words`);
+    assert.ok(words >= 900 && words <= 1800, `${id}: ${words} words`);
   }
 });
 

@@ -164,8 +164,11 @@ test("the three pages are live and built, each with its industry title and its o
   }
 });
 
-test("each page has one h1 (its promise), the spec §8.5 blocks in order and unique ids", () => {
-  const blocks = ["designed-around", "problem", "workflow", "packages", "regulatory-map", "scenario", "first-engagement", "insights", "faq", "contact"];
+test("each page has one h1 (its promise), the go-global §5.1 blocks in order and unique ids", () => {
+  const blocks = [
+    "rules-that-travel", "problem", "workflow", "packages", "scenario", "first-engagement", "australia", "designed-around", "regulatory-map",
+    "insights", "faq", "contact",
+  ];
   for (const id of IDS) {
     const page = html(id);
     const main = mainOf(page);
@@ -212,10 +215,10 @@ test("the scenario is labelled illustrative, and the FAQ answers exactly the con
   }
 });
 
-test("each page runs 900–1,400 words, counting the regulatory map and the FAQ (spec §8.5)", () => {
+test("each page runs 900–1,800 words, counting the regulatory map and the FAQ (spec §8.5; go-global §5.7)", () => {
   for (const id of IDS) {
     const n = pageWords(html(id));
-    assert.ok(n >= 900 && n <= 1400, `${id}: ${n} words`);
+    assert.ok(n >= 900 && n <= 1800, `${id}: ${n} words`);
   }
 });
 

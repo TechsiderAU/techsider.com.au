@@ -21,8 +21,8 @@ import { pageDescription, pageTitle } from "../src/lib/meta.ts";
 import { siteContext } from "../src/lib/site.ts";
 
 const IDS = ["government", "financial-services", "accounting"];
-/** Spec §8.5: 900–1,400 words counting tables and FAQ; the Government page 1,800–2,600. */
-const WORD_RANGE = { government: [1800, 2600], "financial-services": [900, 1400], accounting: [900, 1400] };
+/** Spec §8.5 as amended by go-global §5.7 (R3): 900–1,800 words counting tables and FAQ; the Government page 1,800–3,000. */
+const WORD_RANGE = { government: [1800, 3000], "financial-services": [900, 1800], accounting: [900, 1800] };
 const SOLUTION_IDS = ["document-registers", "knowledge-assistant", "draft-for-approval", "ai-evaluation", "ai-switch-on"];
 /** Phase C ruling 1: rows held until they are re-checked. */
 const HELD_ROWS = { government: ["cth-app-1-adm-transparency"], accounting: ["tpb-verify-and-document"] };
@@ -144,14 +144,15 @@ test("each page renders its promise as the one h1, its own title and description
   }
 });
 
-test("spec §8.5 structure: each page's blocks in order (Government by jurisdiction), and no id used twice", () => {
-  const single = ["designed-around", "problem", "workflow", "packages", "regulatory-map", "scenario", "first-engagement", "faq", "contact"];
+test("go-global §5.1 structure: each page's blocks in order, the Australian ones in the band (Government by jurisdiction), and no id used twice", () => {
+  const head = ["rules-that-travel", "problem", "workflow", "packages", "scenario", "first-engagement", "australia", "designed-around"];
+  const single = [...head, "regulatory-map", "faq", "contact"];
   // Jurisdiction mode: Commonwealth, State and Local each carry their own chips, packages and map.
-  const jurisdiction = ["designed-around", "commonwealth", "state", "local", "problem", "workflow", "packages", "scenario", "first-engagement", "faq", "contact"];
+  const jurisdiction = [...head, "commonwealth", "state", "local", "faq", "contact"];
   for (const id of IDS) {
     const html = page(id);
     const blocks = id === "government" ? jurisdiction : single;
-    // Task 8's #insights sits between first-engagement and faq; it isn't in the list, so it doesn't count here.
+    // #faq-au (go-global §5.6) and Task 8's #insights sit between the band's blocks and #faq; neither is in the list, so they don't count here.
     const found = startTags(mainOf(html)).map((t) => t.attrs.id).filter((x) => blocks.includes(x));
     assert.deepEqual(found, blocks, `${id}: block order`);
     const ids = startTags(html).map((t) => t.attrs.id).filter(Boolean);
@@ -192,7 +193,7 @@ test("Government: Commonwealth, State and Local sections, each with its rows, 4�
   assert.equal(byId(html, "regulatory-map"), undefined, "a page-wide map on the Government page");
 });
 
-test("spec §8.5 word counts: 900–1,400 words, and 1,800–2,600 on the Government page", () => {
+test("spec §8.5 word counts, as amended by go-global §5.7: 900–1,800 words, and 1,800–3,000 on the Government page", () => {
   for (const id of IDS) {
     const [min, max] = WORD_RANGE[id];
     const n = pageWords(page(id));

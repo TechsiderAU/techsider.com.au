@@ -1,0 +1,125 @@
+---
+// The "Rules that travel" block (go-global §5.2): block 2 of every industry page, a bone
+// PageSection. In order: the industry's neutral paragraph (when it has one), the shared row
+// labelled "Everywhere", the sector row (no visible label of its own) and the closing line, once.
+// Each chip links to its anchor's primary source and reads "{name} {Kind} · {status} · as at
+// {Mon YYYY}"; the view builds every label (src/lib/views/industry.ts), never this component. A
+// row with no chips renders nothing, so a page whose anchors file is still empty shows the heading
+// and the closing line only. Budget, pinned by tests/industries-global.test.mjs: the whole section
+// 280 words or fewer, the paragraph 140 or fewer.
+import PageSection from "./PageSection.astro";
+import { RULES_CLOSING, RULES_HEADING, RULES_SHARED_LABEL } from "../../lib/fixed-copy";
+import type { RulesBlockView } from "../../lib/views/industry";
+
+interface Props {
+  rules: RulesBlockView;
+}
+
+const { rules } = Astro.props;
+const hasChips = rules.shared.length > 0 || rules.sector.length > 0;
+---
+<PageSection id="rules-that-travel" title={RULES_HEADING}>
+  {rules.paragraph && <p class="rules-paragraph" data-rules-paragraph>{rules.paragraph}</p>}
+  {hasChips && (
+    <div class="rules-rows">
+      {rules.shared.length > 0 && (
+        <div class="rules-row" data-anchor-row="shared">
+          <p class="rules-row-label" id="rules-that-travel-shared-label">{RULES_SHARED_LABEL}</p>
+          <ul class="rules-chips" aria-labelledby="rules-that-travel-shared-label">
+            {rules.shared.map((chip) => (
+              <li>
+                <a class="rules-chip" href={chip.href} data-anchor-scope={chip.scope} data-anchor-id={chip.id}><span class="rules-chip-name" data-anchor-name>{chip.name}</span>{" "}<span class="rules-chip-label" data-anchor-label>{chip.label}</span></a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {rules.sector.length > 0 && (
+        <div class="rules-row" data-anchor-row="sector">
+          <ul class="rules-chips">
+            {rules.sector.map((chip) => (
+              <li>
+                <a class="rules-chip" href={chip.href} data-anchor-scope={chip.scope} data-anchor-id={chip.id}><span class="rules-chip-name" data-anchor-name>{chip.name}</span>{" "}<span class="rules-chip-label" data-anchor-label>{chip.label}</span></a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )}
+  <p class="rules-closing" data-rules-closing>{RULES_CLOSING}</p>
+</PageSection>
+
+<style>
+  .rules-paragraph {
+    margin: 0;
+    max-width: 65ch;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  .rules-rows {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .rules-row-label {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+  /* Outlined chips that wrap: a long name breaks inside its chip, so 320px never scrolls. */
+  .rules-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .rules-chips > li {
+    display: flex;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .rules-chip {
+    display: grid;
+    align-content: center;
+    gap: 0.25rem;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0.625rem 0.875rem;
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid var(--color-bone-line);
+    border-radius: 6px;
+    overflow-wrap: anywhere;
+  }
+  .rules-chip:hover {
+    border-color: currentColor;
+  }
+  .rules-chip-name {
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted-dark);
+    text-underline-offset: 3px;
+  }
+  .rules-chip:hover .rules-chip-name {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+  .rules-chip-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--color-muted-dark);
+  }
+  .rules-closing {
+    margin: 0;
+    max-width: 65ch;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--color-muted-dark);
+  }
+</style>
