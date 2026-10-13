@@ -1,0 +1,58 @@
+{
+  "shared": ["x1", "x4", "x6", "x7"],
+  "anchors": [
+    {
+      "id": "who-lmm-guidance",
+      "name": "WHO guidance on large multi-modal models",
+      "issuer": "World Health Organization (WHO)",
+      "kind": "guidance",
+      "binding": "Ethics and governance guidance from the World Health Organization.",
+      "status": "published",
+      "statusDate": "2024-01-18",
+      "asks": "Lists documenting and summarising patient visits among the uses of large multi-modal models. It warns that automation bias can let errors go unnoticed by health professionals and patients, and asks governments for independent post-release auditing and impact assessment.",
+      "evidence": "A count of what the AI tool leaves out, adds or gets wrong on scripted or consented consultations, before rollout and after each update.",
+      "source": "https://www.who.int/news/item/18-01-2024-who-releases-ai-ethics-and-governance-guidance-for-large-multi-modal-models",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["ai-evaluation"],
+      "featured": true,
+      "checkLevel": "P"
+    },
+    {
+      "id": "eu-ai-act-annex-i-medical-devices",
+      "name": "EU AI Act Annex I: medical devices",
+      "issuer": "European Union",
+      "kind": "law",
+      "binding": "Law in the EU: Regulation (EU) 2024/1689, as amended by Regulation (EU) 2026/1744.",
+      "status": "applies-from",
+      "statusDate": "2028-08-02",
+      "asks": "AI that is a medical device, or a safety component of one, and needs third-party conformity assessment under the EU's medical device rules becomes high-risk from 2 August 2028 (as amended in July 2026).",
+      "evidence": "Measured error counts on your own cases, for your regulatory team to use in its own assessment.",
+      "source": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "reviewBy": "2027-01-12",
+      "solutions": ["ai-evaluation"],
+      "featured": true,
+      "checkLevel": "P"
+    },
+    {
+      "id": "eu-ai-act-annex-iii-5a-5d",
+      "name": "EU AI Act Annex III 5(a) and 5(d)",
+      "issuer": "European Union",
+      "kind": "law",
+      "binding": "Law in the EU: Regulation (EU) 2024/1689, as amended by Regulation (EU) 2026/1744.",
+      "status": "applies-from",
+      "statusDate": "2027-12-02",
+      "asks": "Eligibility for public healthcare services (5(a)) and emergency healthcare patient triage (5(d)) are high-risk uses from 2 December 2027 (as amended in July 2026). Patient-facing chatbots must also tell people they are dealing with AI (Art 50).",
+      "evidence": "Measured test results and a failure list on your own cases, before rollout and after each update.",
+      "source": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/annex-3",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "reviewBy": "2027-01-12",
+      "solutions": ["ai-evaluation", "knowledge-assistant"],
+      "featured": true,
+      "checkLevel": "P"
+    }
+  ]
+}

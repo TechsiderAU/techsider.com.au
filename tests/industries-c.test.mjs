@@ -296,3 +296,18 @@ test("Resources & energy: the problem's From line says only what DCCEEW's Compli
   assert.doesNotMatch(from, /spreadsheet|by hand/i);
   assert.ok(inlineText(mainOf(built("/industries/resources-and-energy/"))).includes(from), "the built page doesn't show the From line");
 });
+
+// ---------- go-global Part 4B: the "Rules that travel" anchor data ----------
+
+test("go-global §5.2: these pages' anchor data carries no keep-off string or §3.4 wording, and Resources says operational technology", () => {
+  const shared = new Map(JSON.parse(readRel("src/data/anchors/shared.json")).anchors.map((a) => [a.id, a]));
+  for (const id of TASK6) {
+    const own = JSON.parse(readRel(`src/data/anchors/${id}.json`));
+    const t = [...own.shared.map((s) => shared.get(s)), ...own.anchors].flatMap((a) => [a.name, a.issuer, a.binding, a.asks, a.evidence]).join(" ");
+    for (const s of KEEP_OFF[id]) assert.ok(!t.includes(s), `${id}: "${s}" is in its anchor data`);
+    assert.doesNotMatch(t, /\bagents?\b|\bsprints?\b|\btenancy\b|APRA audit/i, `${id}: §3.4 wording`);
+    assert.doesNotMatch(t, /\bnever evaluates?\b/i, `${id}: §4.4 independence wording`);
+  }
+  const iec = JSON.parse(readRel("src/data/anchors/resources-and-energy.json")).anchors.find((a) => a.id === "iec-62443");
+  assert.equal(iec.name, "IEC 62443: operational technology security");
+});

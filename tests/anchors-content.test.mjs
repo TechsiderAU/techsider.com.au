@@ -146,6 +146,47 @@ const INDUSTRIES = {
       ["eu-ai-act-annex-iii-5b", "asks", /\bscreening rental applications\b/],
     ],
   },
+  healthcare: {
+    shared: BASE_ROW,
+    featured: ["who-lmm-guidance", "eu-ai-act-annex-i-medical-devices", "eu-ai-act-annex-iii-5a-5d"],
+    chips: [
+      "WHO guidance on large multi-modal models Guidance · published Jan 2024 · as at Oct 2026",
+      "EU AI Act Annex I: medical devices Law · applies from 2 Aug 2028 · as at Oct 2026",
+      "EU AI Act Annex III 5(a) and 5(d) Law · applies from 2 Dec 2027 · as at Oct 2026",
+    ],
+    dataOnly: [],
+    reviewBy: { "eu-ai-act-annex-i-medical-devices": "2027-01-12", "eu-ai-act-annex-iii-5a-5d": "2027-01-12" },
+    pins: [["who-lmm-guidance", "asks", /\bautomation bias\b/]],
+  },
+  "resources-and-energy": {
+    shared: BASE_ROW,
+    featured: ["iso-14001-2026", "iec-62443", "joint-ot-ai-principles"],
+    chips: [
+      "ISO 14001:2026 Standard · published Apr 2026 · as at Oct 2026",
+      "IEC 62443: operational technology security Standard · in force · as at Oct 2026",
+      "Joint principles for AI in operational technology Guidance · published Dec 2025 · as at Oct 2026",
+    ],
+    dataOnly: ["gistm"],
+    reviewBy: {},
+    // §5.2: never "control systems".
+    pins: [["iec-62443", "name", "IEC 62443: operational technology security"]],
+  },
+  "legal-and-professional": {
+    shared: BASE_ROW,
+    featured: ["ccbe-genai-guide", "ccbe-technical-guide", "eu-ai-act-annex-iii-8a"],
+    chips: [
+      "CCBE guide on generative AI for lawyers Guidance · published Oct 2025 · as at Oct 2026",
+      "CCBE technical guide on AI tools Guidance · published Mar 2026 · as at Oct 2026",
+      "EU AI Act Annex III 8(a): AI for courts Law · applies from 2 Dec 2027 · as at Oct 2026",
+    ],
+    dataOnly: [],
+    reviewBy: { "eu-ai-act-annex-iii-8a": "2027-01-12" },
+    pins: [
+      // Rule 6: the guide is P* for its URL and date only (r4 §3.5); its content was read only through a secondary summary.
+      ["ccbe-genai-guide", "asks", "Guidance for lawyers on the use of generative AI, published on 2 October 2025 and cited in the CCBE's 2026 technical guide."],
+      ["eu-ai-act-annex-iii-8a", "asks", /\bUse by law firms is not in this category\.$/],
+    ],
+  },
 };
 
 /** Spec §1 S1: these never render outside an allowed context, and a chip renders outside the band. */
