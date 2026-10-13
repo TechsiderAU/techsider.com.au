@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { readDist } from "./helpers.mjs";
 import { elements, readFrontmatter } from "../scripts/ci/lib.mjs";
-import { makeSolutionSchema, plainRef } from "../src/content/schemas.ts";
+import { makeIndustrySchema, makeSolutionSchema, plainRef } from "../src/content/schemas.ts";
 import { SOLUTION_GUIDES } from "../src/lib/marketing.ts";
 import { siteContext } from "../src/lib/site.ts";
 
@@ -199,4 +199,34 @@ test("industry pages: a package card or workflow use case that names an Australi
     ],
     "resources-and-energy": ["card SOCI AI Risk Evidence", "use case SOCI AI Risk Evidence"],
   });
+});
+
+const industryYaml = (id) => makeIndustrySchema(plainRef).parse(parseYaml(readRepo(`src/content/industries/${id}.yaml`)));
+
+test("hubs: /industries/ flagship use cases and /solutions/ By buyer items that name an Australia-only package carry the Australia label", () => {
+  const seen = [];
+  for (const card of elementsWith(mainHtml(readDist("industries/index.html")), "data-industry-card")) {
+    const id = card.attrs["data-industry-card"];
+    const [list] = elements(card.inner, (t) => classList(t).includes("industry-card-uses"));
+    const uses = elements(list.inner, (t) => t.name === "li");
+    industryYaml(id).flagshipUseCases.slice(0, 3).forEach((u, k) => {
+      const au = AU_NAMES.has(u.name);
+      assert.equal(uses[k].attrs["data-region"], au ? "au" : undefined, `${id}: ${u.name}`);
+      assert.deepEqual(labelsIn(uses[k].inner), au ? AU_LABEL : [], `${id}: ${u.name} label`);
+      if (au) seen.push(`${id}: ${u.name}`);
+    });
+  }
+  assert.deepEqual(seen, [
+    "accounting: ATO Letter Sorter",
+    "real-estate: Management Agreement & Rent Roll Register",
+    "real-estate: Bond Claim Evidence Pack",
+    "resources-and-energy: SOCI AI Risk Evidence",
+  ]);
+  const items = elementsWith(mainHtml(readDist("solutions/index.html")), "data-buyer-list").flatMap((list) => elements(list.inner, (t) => t.name === "li"));
+  const nameOf = (li) => plainText(elements(li.inner, (t) => t.name === "a")[0].inner);
+  for (const li of items) {
+    assert.equal(li.attrs["data-region"], AU_NAMES.has(nameOf(li)) ? "au" : undefined, nameOf(li));
+    assert.deepEqual(labelsIn(li.inner), AU_NAMES.has(nameOf(li)) ? AU_LABEL : [], `${nameOf(li)} label`);
+  }
+  assert.deepEqual(items.filter((li) => li.attrs["data-region"] === "au").map(nameOf), ["Management Agreement & Rent Roll Register"]);
 });

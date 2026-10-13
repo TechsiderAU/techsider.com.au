@@ -10,6 +10,7 @@ import LinkCard from "../components/page/LinkCard.astro";
 import BracketChip from "../components/ui/BracketChip.astro";
 import DataTable from "../components/ui/DataTable.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
+import RegionLabel from "../components/ui/RegionLabel.astro";
 import Tabs from "../components/ui/Tabs.astro";
 import TabPanel from "../components/ui/TabPanel.astro";
 import type { BuyerItem, SolutionsHubView } from "../lib/views/hubs";
@@ -56,7 +57,8 @@ const buyerLists: { id: string; title: string; items: BuyerItem[] }[] = [
               <h4 id={`${list.id}-heading`} class="buyer-list-title">{list.title}</h4>
               <ul class="buyer-items" aria-labelledby={`${list.id}-heading`}>
                 {list.items.map((item) => (
-                  <li class="buyer-item" data-package-status="launch">
+                  <li class="buyer-item" data-package-status="launch" data-region={item.region ?? undefined}>
+                    {item.region && <RegionLabel />}
                     {item.href ? <a href={item.href} class="hub-link">{item.name}</a> : <span class="buyer-item-name">{item.name}</span>}
                     <BracketChip label={`${item.solution.number} ${item.solution.shortName}`} />
                   </li>

@@ -7,6 +7,7 @@ import type { z } from "astro/zod";
 import { JURISDICTION_SECTION, type makeIndustrySchema, type makeSolutionSchema } from "../../content/schemas.ts";
 import type { Cell } from "../data-table.ts";
 import { refId, solutionLink, type SiteContext } from "../site.ts";
+import { packageRegion } from "./offer.ts";
 
 type SolutionData = z.infer<ReturnType<typeof makeSolutionSchema>>;
 type IndustryData = z.infer<ReturnType<typeof makeIndustrySchema>>;
@@ -28,6 +29,8 @@ export interface BuyerItem {
   solution: { number: string; shortName: string };
   /** `${solution href}#${packageId}` (the package's block or tab), or null while the solution page isn't shown. */
   href: string | null;
+  /** "au" for an Australia-only package (go-global §3.3): the item is labelled "Australia". */
+  region: "au" | null;
 }
 
 export interface SolutionsHubView {
@@ -44,8 +47,11 @@ export interface IndustriesHubView {
     shortName: string;
     fullName: string;
     hook: string;
-    /** The first three flagship use cases; an on-request one is labelled "On request" (spec §5). */
-    useCases: { name: string; number: string; onRequest: boolean }[];
+    /**
+     * The first three flagship use cases; an on-request one is labelled "On request" (spec §5), and
+     * one that names an Australia-only package "Australia" (go-global §3.3).
+     */
+    useCases: { name: string; number: string; onRequest: boolean; region: "au" | null }[];
     chips: { label: string; href: string | null }[];
     href: string | null;
   }[];
@@ -121,6 +127,7 @@ export function solutionsHubView(input: { solutions: Record<string, SolutionData
         name: pkg.name,
         solution: { number: s.number, shortName: s.shortName },
         href: s.href === null ? null : `${s.href}#${pkg.id}`,
+        region: pkg.region ?? null,
       };
       if (pkg.buyers.includes("mid-market")) midMarket.push(item);
       if (pkg.buyers.includes("enterprise-government")) enterprise.push({ ...item, solution: { ...item.solution } });
@@ -159,6 +166,7 @@ export function industriesHubView(input: {
         name: u.name,
         number: solutionLink(site, refId(u.solution)).number,
         onRequest: u.status === "on-request",
+        region: packageRegion(solutionData(solutions, refId(u.solution)), u.name),
       })),
       chips: data.obligationChips.slice(0, CARD_ITEMS).map((chip) => ({
         label: chip.label,

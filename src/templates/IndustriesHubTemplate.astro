@@ -36,7 +36,7 @@ const { view } = Astro.props;
             <details class="industry-details"><summary>Use cases and requirements</summary>
             <ul class="industry-card-uses">
               {card.useCases.map((useCase) => (
-                <li><span class="industry-card-number">{useCase.number}</span> <span>{useCase.name}{useCase.onRequest && " "}{useCase.onRequest && <span class="industry-card-on-request">On request</span>}</span></li>
+                <li data-region={useCase.region ?? undefined}><span class="industry-card-number">{useCase.number}</span> <span>{useCase.name}{useCase.region && " "}{useCase.region && <RegionLabel />}{useCase.onRequest && " "}{useCase.onRequest && <span class="industry-card-on-request">On request</span>}</span></li>
               ))}
             </ul>
             <div class="industry-region" data-region="au">
