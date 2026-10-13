@@ -5,7 +5,7 @@ import { test, expect } from "@playwright/test";
 //   between two bone sections' content is one rhythm step (6rem from 64rem, 4rem below), not two.
 //   A bone section that follows the carbon hero keeps its own top padding.
 // - WB-5: the Government page's jurisdiction jump links sit one rhythm step above the
-//   "Commonwealth" heading.
+//   "Commonwealth" heading, both inside the Australia band (go-global §5.4).
 const STEP = { 390: 64, 1280: 96 };
 const BONE_RUNS = ["/solutions/knowledge-assistant/", "/industries/government/", "/industries/accounting/", "/services/", "/about/"];
 
@@ -37,7 +37,7 @@ for (const width of [390, 1280]) {
     }
   });
 
-  test(`Government: the jump links sit one rhythm step above the Commonwealth heading at ${width}px (WB-5)`, async ({ page }) => {
+  test(`Government: inside the Australia band, the jump links sit one rhythm step above the Commonwealth heading at ${width}px (WB-5)`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/industries/government/");
     const jumps = await page.locator("#designed-around .ind-jumps").boundingBox();

@@ -53,3 +53,18 @@ test("at 320px none of the three pages scrolls sideways", async ({ page }) => {
     expect(overflow, path).toBeLessThanOrEqual(0);
   }
 });
+
+// go-global §5.2: the measured prototype's chips (Part 4A) are 44px tap targets that open their
+// primary sources, and none runs past a 320px viewport.
+test("Manufacturing's Rules that travel chips open their primary sources and are 44px tap targets inside 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("/industries/manufacturing/");
+  const chips = page.locator("#rules-that-travel a[data-anchor-id]");
+  await expect(chips).toHaveCount(8);
+  for (const chip of await chips.all()) {
+    expect(await chip.getAttribute("href")).toMatch(/^https:\/\//);
+    const box = await chip.boundingBox();
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.x + box.width).toBeLessThanOrEqual(320);
+  }
+});

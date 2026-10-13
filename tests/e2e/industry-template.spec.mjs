@@ -4,10 +4,11 @@ import { focusKeys } from "../support/keys.mjs";
 import { NOT_LEGAL_ADVICE, SCENARIO_LABEL } from "../../src/lib/fixed-copy.ts";
 import { fixtureIndustryView } from "../../src/preview/specimens/industry-view.ts";
 
-// The industry template (spec §8.5) on /preview/templates/industry/ (single mode) and
-// /preview/templates/industry-government/ (jurisdiction mode): chip → row anchors at 390px and
-// 1280px, the workflow tabs with and without JavaScript, the fixed labels, the keyboard path into
-// the chips, 320px reflow and axe. Expected values come from the view the specimens render.
+// The industry template (spec §8.5, as amended by go-global §5) on /preview/templates/industry/
+// (single mode) and /preview/templates/industry-government/ (jurisdiction mode): chip → row
+// anchors at 390px and 1280px, the workflow tabs with and without JavaScript, the fixed labels,
+// the keyboard path into the Rules that travel chips and on to a row, the chips' tap targets,
+// 320px reflow and axe. Expected values come from the view the specimens render.
 const SINGLE = "/preview/templates/industry/";
 const GOV = "/preview/templates/industry-government/";
 const single = fixtureIndustryView("fixture-industry");
@@ -116,21 +117,56 @@ test("the scenario label and every not-legal-advice line are visible, and the pr
   }
 });
 
-test("keyboard: after the hero CTAs, Tab reaches the first Designed around chip with a carbon focus ring, and Enter follows it", async ({ page, browserName }) => {
+test("keyboard: after the hero CTAs, Tab reaches the first Rules that travel chip with a carbon focus ring, and a Designed around chip follows Enter to its row", async ({ page, browserName }) => {
   const keys = focusKeys(browserName);
   await page.setViewportSize(WIDE);
   await page.goto(SINGLE);
   await page.locator("[data-page-hero]").getByRole("link", { name: single.ctas.secondary.label, exact: true }).focus();
   await page.keyboard.press(keys.next);
-  const chip = page.locator("#designed-around").getByRole("link", { name: single.single.chips[0].label, exact: true });
-  await expect(chip).toBeFocused();
-  const ring = await chip.evaluate((el) => {
+  const first = single.rules.shared[0];
+  const rule = page.locator(`#rules-that-travel a[data-anchor-id="${first.id}"]`);
+  await expect(rule).toBeFocused();
+  await expect(rule).toHaveAttribute("href", first.href);
+  const ring = await rule.evaluate((el) => {
     const s = getComputedStyle(el);
     return { visible: el.matches(":focus-visible"), style: s.outlineStyle, width: s.outlineWidth, color: s.outlineColor };
   });
   expect(ring).toEqual({ visible: true, style: "solid", width: "2px", color: CARBON });
+  const chip = page.locator("#designed-around").getByRole("link", { name: single.single.chips[0].label, exact: true });
+  await chip.focus();
+  await expect(chip).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(new RegExp(`${single.single.chips[0].href}$`));
+});
+
+for (const vp of [{ width: 320, height: 700 }, NARROW]) {
+  test(`every Rules that travel chip is a 44px tap target inside the viewport at ${vp.width}px`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    for (const [path, view] of PAGES) {
+      await page.goto(path);
+      const chips = page.locator("#rules-that-travel a[data-anchor-id]");
+      await expect(chips).toHaveCount(view.rules.shared.length + view.rules.sector.length);
+      for (const chip of await chips.all()) {
+        const box = await chip.boundingBox();
+        expect(box.height, `${path}: a chip under 44px`).toBeGreaterThanOrEqual(44);
+        expect(box.x + box.width, `${path}: a chip past the viewport`).toBeLessThanOrEqual(vp.width);
+      }
+    }
+  });
+}
+
+test("the Australia band's questions open as disclosures, and the band's rows sit inside it", async ({ page }) => {
+  await page.setViewportSize(NARROW);
+  for (const [path, view] of PAGES) {
+    await page.goto(path);
+    const questions = page.locator("#australia #faq-au details");
+    await expect(questions).toHaveCount(view.faqAu.length);
+    await questions.first().locator("summary").click();
+    await expect(questions.first()).toHaveAttribute("open", "");
+    await expect(questions.first().locator(".faq-answer")).toBeVisible();
+    const rows = await page.locator("[data-regulatory-row]").count();
+    await expect(page.locator('[data-region="au"] [data-regulatory-row]')).toHaveCount(rows);
+  }
 });
 
 for (const [path] of PAGES) {
