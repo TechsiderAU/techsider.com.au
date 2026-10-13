@@ -2,6 +2,7 @@ import { defineCollection, reference } from "astro:content";
 import { glob } from "astro/loaders";
 import { optionalGlob } from "./content/optional-glob";
 import {
+  anchorFile,
   makeDemoSchema,
   makeIndustrySchema,
   makeInsightSchema,
@@ -40,6 +41,14 @@ const regulatory = defineCollection({
   schema: regulatoryFile,
 });
 
+// go-global §5.3: the "Rules that travel" anchors, one file per industry plus shared.json. Routes
+// read them with getCollection("anchors"), never getEntry(), which logs a warning for a missing
+// entry and so fails the pristine build.
+const anchors = defineCollection({
+  loader: optionalGlob({ pattern: "*.json", base: "./src/data/anchors" }),
+  schema: anchorFile,
+});
+
 const demos = defineCollection({
   loader: optionalGlob({ pattern: "*.json", base: "./src/data/demos" }),
   schema: makeDemoSchema(reference),
@@ -58,4 +67,4 @@ const documents = defineCollection({
   schema: documentSchema,
 });
 
-export const collections = { insights, solutions, industries, kits, regulatory, demos, traces, documents };
+export const collections = { insights, solutions, industries, kits, regulatory, anchors, demos, traces, documents };

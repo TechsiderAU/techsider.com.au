@@ -83,9 +83,9 @@ test("the Home page's latest insights tag each card by type, as the index does",
   assertNoPillar(visibleText(section), "home #insights");
 });
 
-test("the content layer registers all eight collections from the shared schemas", () => {
+test("the content layer registers all nine collections from the shared schemas", () => {
   const dir = join(ROOT, ".astro/collections");
-  for (const name of ["insights", "solutions", "industries", "kits", "regulatory", "demos", "traces", "documents"]) {
+  for (const name of ["insights", "solutions", "industries", "kits", "regulatory", "anchors", "demos", "traces", "documents"]) {
     assert.ok(existsSync(join(dir, `${name}.schema.json`)), `.astro/collections/${name}.schema.json is missing (run npm run build)`);
   }
   const insights = JSON.parse(readFileSync(join(dir, "insights.schema.json"), "utf8"));
@@ -95,4 +95,8 @@ test("the content layer registers all eight collections from the shared schemas"
   assert.ok(traces.required?.includes("provenance"), "traces schema does not require provenance");
   const documents = JSON.parse(readFileSync(join(dir, "documents.schema.json"), "utf8"));
   assert.deepEqual(documents.required, ["title", "summary", "lastUpdated"], "documents schema (src/content/page-schemas.ts documentSchema)");
+  // go-global §5.3: the "Rules that travel" anchors load as their own collection (src/content/schemas.ts anchorFile).
+  const anchors = JSON.parse(readFileSync(join(dir, "anchors.schema.json"), "utf8"));
+  assert.deepEqual(anchors.required, ["anchors"], "anchors schema (src/content/schemas.ts anchorFile)");
+  assert.deepEqual(anchors.properties.anchors.items.properties.checkLevel?.enum, ["P", "P*", "S", "UNVERIFIED"], "anchors schema has no checkLevel enum");
 });
