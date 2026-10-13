@@ -55,6 +55,7 @@ packages:
 platformFirst: "If staff have Microsoft Copilot licences, SharePoint's built-in AI already answers from your policy libraries within existing permissions. Gemini for Education comes with every Google Workspace for Education edition. If either is good enough, we'll say so."
 dontDo:
   - "We don't build student-facing tutors or chat tools."
+  - "We don't build anything that admits, grades or monitors students."
   - "We don't compete with NSWEduChat, SA's EdChat or cechat."
   - "We don't write AI policies or privacy-policy wording."
 # go-global §5.2: this paragraph prints EU AI Act dates; review it with the EU AI Act anchors (reviewBy 2027-01-12).

@@ -218,3 +218,18 @@ test("go-global §5.2, §5.5: each industry page renders its own Rules paragraph
     assert.equal(plainText(rendered[0].inner), paragraph, `${id}: the rendered paragraph isn't the content's`);
   }
 });
+
+/** Spec §5.5 (D13, D14, R7): the line each page adds to "What we don't do", in that list's own style. */
+const DONT_DO_LINES = {
+  "financial-services": "We don't take on work that supports a critical or important function of an EU bank or insurer under DORA.",
+  education: "We don't build anything that admits, grades or monitors students.",
+  healthcare: "Take on work that needs a US HIPAA business associate agreement.",
+};
+
+test("go-global §5.5: Financial services, Education and Healthcare each say what they don't take on, under What we don't do", () => {
+  for (const [id, line] of Object.entries(DONT_DO_LINES)) {
+    assert.ok(rulesIndustry(id).dontDo.includes(line), `${id}: dontDo lacks "${line}"`);
+    const items = elements(rulesBuilt(id), (t) => t.name === "li").map((li) => plainText(li.inner));
+    assert.ok(items.includes(line), `${id}: "${line}" isn't rendered as a list item`);
+  }
+});

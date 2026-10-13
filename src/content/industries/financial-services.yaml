@@ -43,6 +43,7 @@ dontDo:
   - We don't red-team or penetration-test in-house. A CREST-accredited tester you engage does.
   - We don't build a private AI platform or model gateway.
   - We don't write AI policy paperwork. Your policy owners do.
+  - We don't take on work that supports a critical or important function of an EU bank or insurer under DORA.
 # go-global §5.2: this paragraph prints EU AI Act dates; review it with the EU AI Act anchors (reviewBy 2027-01-12).
 rulesThatTravel: "Supervisors use different words, but they ask the same questions about AI. The Basel Committee's principles on operational resilience and third-party risk expect a bank to withstand technology failures, including at its providers, and to check each provider before signing and monitor it after. In the EU, DORA requires banks, insurers and other financial entities to keep a register of their ICT arrangements and to put set terms into those contracts. The EU AI Act treats credit scoring of individuals, and risk assessment and pricing for life and health insurance, as high-risk from 2 December 2027 (as amended in July 2026). We test vendor AI on your own cases, before you sign and whenever the model may have changed."
 problem:
