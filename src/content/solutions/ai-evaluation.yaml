@@ -5,6 +5,8 @@
 # "Engagements" and the page publishes the independence policy (spec §4.4, §8.3).
 # Every package is onshore: false. The test runs in the client's environment, but the system under
 # test runs where its vendor runs it, so the page shows where data is processed instead (spec §3.2).
+# Its region notes (onshoreNote) name no region, so none carries the remote-access sentence; the
+# page's your-account delivery choice does (go-global §4.1, §4.2).
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: ai-evaluation
 job: >-

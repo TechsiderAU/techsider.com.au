@@ -89,8 +89,10 @@ const CANON = {
   },
 };
 
-// Spec §3.2 onshore scope rule, per package id: true only where every processing step, model
-// inference included, runs in an Australian region under delivery choice (a) or (b).
+// The onshore scope rule (go-global §4.2), per package id: true only where every processing step,
+// model inference included, runs in the region the client chooses: in their own account under
+// delivery choice (a), in any cloud region, or managed by Techsider under (b), in an Australian
+// region. The package's region note says which. The flags themselves are unchanged (R5).
 const ONSHORE = {
   "one-document-family": true, "trust-deed-register": true, "management-agreement-register": true,
   "one-manual-one-team": false, "sop-work-instruction-assistant": true, "policy-procedure-assistant": false,
@@ -142,6 +144,47 @@ test("packages are the canonical set: ids, names, statuses and buyers, in order"
 test("onshore flags follow the §3.2 scope rule: ②'s Microsoft 365 variant and every ④ and ⑤ package are false", () => {
   const flags = Object.fromEntries(IDS.flatMap((id) => launchOf(DATA[id]).map((p) => [p.id, p.onshore])));
   assert.deepEqual(flags, ONSHORE);
+});
+
+// go-global §4.2, D4: a region note that names a region says where it runs, then ends with the
+// remote-access sentence. Remote access from Sydney is a transfer (EDPB Guidelines 05/2021, ICO),
+// so no note may read as "nothing leaves your region".
+const REMOTE_ACCESS_END = /Our team reaches (?:it|them|the register|the assistant|the automation) remotely from Sydney, under the data-transfer terms in your contract\.$/;
+const MODEL_AVAILABILITY = "If the model you want isn't offered in your chosen region, you hear that before you decide.";
+const NAMING_A_REGION = [
+  "one-document-family", "trust-deed-register", "management-agreement-register",
+  "one-manual-one-team", "sop-work-instruction-assistant", "policy-procedure-assistant",
+  "one-job-drafts-for-approval",
+];
+
+test("region notes: every note that names a region ends with the remote-access sentence (go-global §4.2, D4)", () => {
+  const naming = [];
+  for (const id of IDS) {
+    for (const p of launchOf(DATA[id])) {
+      if (!/\bregion\b/i.test(p.onshoreNote)) continue;
+      naming.push(p.id);
+      assert.ok(p.onshoreNote.includes("remotely from Sydney"), `${id} ${p.id}: names a region without "remotely from Sydney"`);
+      assert.match(p.onshoreNote, REMOTE_ACCESS_END, `${id} ${p.id}: the remote-access sentence isn't the note's last`);
+    }
+  }
+  // ④'s notes and ⑤'s name no region: the vendor or the client's environment sets the location,
+  // and the page's delivery choice carries the remote-access sentence (go-global §4.1).
+  assert.deepEqual(naming, NAMING_A_REGION);
+});
+
+// Where Techsider runs the model in the client's chosen region, the model on offer depends on that
+// region. Inside a licensed platform (policy-procedure-assistant, ④, ⑤) the vendor runs it.
+const WE_RUN_THE_MODEL = [
+  "one-document-family", "trust-deed-register", "management-agreement-register",
+  "one-manual-one-team", "sop-work-instruction-assistant", "one-job-drafts-for-approval",
+];
+
+test("region notes: where we run the model, the note says what happens when the model isn't offered in the chosen region (go-global §4.2)", () => {
+  const notes = Object.fromEntries(IDS.flatMap((id) => launchOf(DATA[id]).map((p) => [p.id, p.onshoreNote])));
+  for (const id of WE_RUN_THE_MODEL) {
+    assert.ok(notes[id].includes(MODEL_AVAILABILITY), `${id}: no model-availability sentence`);
+  }
+  for (const [id, note] of Object.entries(notes)) assert.doesNotMatch(note, /isn't (?:offered|available) in an Australian region/, id);
 });
 
 test("per-solution switches: ④ is 'Engagements' with the independence policy; ⑤ has no program", () => {

@@ -2,6 +2,8 @@
 # The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
 # fill byIndustry and matrix. `demo` names the hero's demo, src/data/demos/document-registers.json,
 # which /demos/document-registers/ also shows.
+# Region notes (onshoreNote) follow go-global §4.2: a note that names a region ends with the
+# remote-access sentence, and only a register we manage runs in an Australian region.
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: document-registers
 job: >-
@@ -65,10 +67,11 @@ genericPackage:
     At the end of the Two-Week Trial you see the error rate for each field on your own answer key,
     with every miss listed, and you decide whether to continue.
   onshoreNote: >-
-    Runs in your own Microsoft or AWS account, or in an environment we manage, with document reading
-    and model inference in an Australian region. The data note records the model provider's
-    retention, abuse-monitoring and human-review settings. If the model a job needs isn't offered in
-    an Australian region, you hear that before you decide.
+    Document reading and model inference run in the cloud region you choose, in your own Microsoft
+    or AWS account, or in an Australian region if we manage the register for you. The data note
+    records the model provider's retention, abuse-monitoring and human-review settings. If the model
+    you want isn't offered in your chosen region, you hear that before you decide. Our team reaches
+    the register remotely from Sydney, under the data-transfer terms in your contract.
 packages:
   - id: trust-deed-register
     name: Trust Deed & Client Structure Register
@@ -102,9 +105,11 @@ packages:
       After the Trial, you see the error rate for each field on deeds your seniors already know,
       with every miss listed, and you decide whether to run the rest.
     onshoreNote: >-
-      Deeds are read, and the model runs, in an Australian region: in your own Microsoft or AWS
-      account, or in an environment we manage. The data note names every processor, what each keeps
-      and for how long.
+      Deeds are read, and the model runs, in the cloud region you choose, in your own Microsoft or AWS
+      account, or in an Australian region if we manage the register for you. The data note names every
+      processor, what each keeps and for how long. If the model you want isn't offered in your chosen
+      region, you hear that before you decide. Our team reaches the register remotely from Sydney,
+      under the data-transfer terms in your contract.
   - id: management-agreement-register
     name: Management Agreement & Rent Roll Register
     status: launch
@@ -138,9 +143,12 @@ packages:
       After the Trial, you see the error rate for each field on agreements your senior staff already
       know, with every miss listed, and you decide whether to run the full portfolio.
     onshoreNote: >-
-      Agreements are read, and the model runs, in an Australian region: in your own Microsoft or AWS
-      account, or in an environment we manage. Before work starts, the data note maps every place
-      owner and tenant information will land, with the retention you set for each copy.
+      Agreements are read, and the model runs, in the cloud region you choose, in your own Microsoft or
+      AWS account, or in an Australian region if we manage the register for you. Before work starts,
+      the data note maps every place owner and tenant information will land, with the retention you
+      set for each copy. If the model you want isn't offered in your chosen region, you hear that
+      before you decide. Our team reaches the register remotely from Sydney, under the data-transfer
+      terms in your contract.
   - id: permit-conditions-register
     name: Approval & Permit Conditions Register
     status: on-request

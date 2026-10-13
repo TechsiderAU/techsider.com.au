@@ -5,6 +5,8 @@
 # (spec §8.3). Every package is onshore: false, because the vendor sets where processing runs.
 # Kits are named, never described as reviewed, and offered only "where one is published": they stay
 # unpublished until a lawyer reviews them (plan Global Constraints, Kits; research index A1).
+# Its region notes (onshoreNote) name no region, so they carry no remote-access sentence; the
+# platform-you-license delivery choice on the page does (go-global §4.2, §4.3).
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: ai-switch-on
 job: >-
@@ -99,8 +101,8 @@ packages:
       either way.
     onshoreNote: >-
       Every feature Switch-On sets up runs inside a platform you already license, where the vendor
-      sets the processing location. Many vendors don't publish where AI processing runs for
-      Australian customers, and the data note says so vendor by vendor, with the date it was checked.
+      sets the processing location. The data note goes vendor by vendor: what each publishes about
+      where its AI processing runs, or that it publishes none, with the date it was checked.
   - id: private-workspace
     name: Private Workspace
     status: on-request

@@ -4,6 +4,8 @@
 # which /demos/draft-for-approval/ also shows. No ③ package is in the launch set, so the page shows
 # the generic package and the on-request list. Prior-year variance flags stay off: their platform
 # overlap is unverified.
+# Region notes (onshoreNote) follow go-global §4.2: a note that names a region ends with the
+# remote-access sentence, and only an automation we manage runs in an Australian region.
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: draft-for-approval
 job: >-
@@ -60,10 +62,12 @@ genericPackage:
     Before go-live, you see how the automation handled 50–100 of your past cases, with every
     mis-route and bad draft, and you decide whether it goes live.
   onshoreNote: >-
-    The automation, and the model it calls, run in an Australian region, in your own Microsoft or AWS
-    account or in one we manage. A draft that lands in a system you already license is stored where
-    that vendor stores your other records, and the data note records what the vendor publishes about
-    that location, or that it publishes none.
+    The automation, and the model it calls, run in the cloud region you choose, in your own Microsoft
+    or AWS account, or in an Australian region if we manage it for you. A draft that lands in a system
+    you already license is stored where that vendor stores your other records, and the data note
+    records what the vendor publishes about that location, or that it publishes none. If the model
+    you want isn't offered in your chosen region, you hear that before you decide. Our team reaches
+    the automation remotely from Sydney, under the data-transfer terms in your contract.
 packages:
   - id: shared-inbox-triage
     name: Shared Inbox & After-Hours Triage
