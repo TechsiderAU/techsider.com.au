@@ -192,7 +192,7 @@ test("Trust: no Part B term is confirmed, so only Part A answers show; SOC 2 is 
   assert.deepEqual(terms, []);
   assert.ok(faq.length >= 5, `${faq.length} answers show; spec §8.11 needs a questionnaire`);
   assert.ok(faq.every((f) => f.part === "A"));
-  const soc = TRUST.faq.find((f) => f.q === "Do you hold SOC 2 or ISO 27001?");
+  const soc = TRUST.faq.find((f) => f.q === "Do you hold SOC 2, ISO 27001 or ISO/IEC 42001?");
   assert.ok(soc, "no SOC 2 question");
   assert.ok(soc.a.startsWith("No. "), "the SOC 2 answer doesn't open with a plain No");
   assert.equal(soc.part, "A");
@@ -515,4 +515,41 @@ test("/about/: the onshore principle shows go-global §4.1's title and mechanism
   assert.ok(item, `no principle titled "${onshore.title}"`);
   assert.equal(text(tagged(item.inner, "p")[0].inner), onshore.mechanism);
   assert.match(onshore.mechanism, /\bOur team reaches them remotely from Sydney, under the data-transfer terms in your contract\./);
+});
+
+// go-global §4.1–§4.4 and §7.2: the residency term and the answers that rest on it say where systems
+// run (your own account in the region you choose, or an Australian region when Techsider manages
+// it) and that the team reaches them remotely from Sydney. They stay unconfirmed, so /trust/ shows
+// none of them yet. The certification answer merges ISO/IEC 42001 into the one SOC 2 question.
+test("Trust: the residency term and its answers follow go-global §4.1–§4.4 and §7.2, remote access included, and stay unconfirmed", () => {
+  const residency = TRUST.partB.find((t) => t.id === "residency");
+  assert.equal(
+    residency.body,
+    "The systems Techsider builds for you process and store your data in the cloud region you choose, in your own Microsoft or AWS account; systems Techsider manages for you run in an Australian region. Techsider's team reaches them remotely from Sydney, under the data-transfer terms in your contract.",
+  );
+  assert.equal(residency.confirmed, false, "Trust Part B stays unconfirmed (go-global §4.4)");
+  const answer = (q) => {
+    const found = TRUST.faq.filter((f) => f.q === q);
+    assert.equal(found.length, 1, `"${q}"`);
+    return found[0];
+  };
+  const processed = answer("Where is our data processed during an engagement?");
+  assert.equal(
+    processed.a,
+    "In the cloud region you choose, for the systems Techsider builds for you in your own Microsoft or AWS account; systems Techsider manages for you run in an Australian region. Our team reaches them remotely from Sydney, under the data-transfer terms in your contract. Where the work runs inside software you already license, the vendor sets the processing location, and the data note states it with its source and date.",
+  );
+  assert.deepEqual([processed.part, processed.term], ["B", "residency"]);
+  const access = answer("Who can access our systems during an engagement?");
+  assert.equal(
+    access.a,
+    "Only the people doing the work, each with their own named access, limited to what the job needs. They reach your systems remotely from Sydney, under the data-transfer terms in your contract. Access is logged while the work runs, and it is removed when the engagement ends.",
+  );
+  assert.deepEqual([access.part, access.term], ["B", "access-logging"]);
+  const cert = answer("Do you hold SOC 2, ISO 27001 or ISO/IEC 42001?");
+  assert.equal(
+    cert.a,
+    "No. Techsider holds no ISO/IEC 27001 or ISO/IEC 42001 certification and no SOC 2 attestation report, and claims no alignment with any of them. What you can check instead is on this page: the services that handle website and email data and what each one touches, the independence policy that governs evaluation work, and how Techsider uses AI in its own work.",
+  );
+  assert.equal(cert.part, "A");
+  assert.equal(TRUST.faq.filter((f) => /\bSOC 2\b|\bISO\b/.test(f.q)).length, 1, "one certification question (go-global §7.2 merges them)");
 });

@@ -28,7 +28,7 @@ export const TRUST: TrustData = {
     {
       id: "residency",
       title: "Data residency",
-      body: "The systems Techsider builds or runs for you process and store your data in an Australian region, in your own Microsoft or AWS account or in one Techsider manages.",
+      body: "The systems Techsider builds for you process and store your data in the cloud region you choose, in your own Microsoft or AWS account; systems Techsider manages for you run in an Australian region. Techsider's team reaches them remotely from Sydney, under the data-transfer terms in your contract.",
       confirmed: false,
     },
     {
@@ -85,8 +85,8 @@ export const TRUST: TrustData = {
       part: "A", asAt,
     },
     {
-      q: "Do you hold SOC 2 or ISO 27001?",
-      a: "No. Techsider holds neither certification and claims no alignment with either. What you can check instead is on this page: the services that handle website and email data and what each one touches, the independence policy that governs evaluation work, and how Techsider uses AI in its own work.",
+      q: "Do you hold SOC 2, ISO 27001 or ISO/IEC 42001?",
+      a: "No. Techsider holds no ISO/IEC 27001 or ISO/IEC 42001 certification and no SOC 2 attestation report, and claims no alignment with any of them. What you can check instead is on this page: the services that handle website and email data and what each one touches, the independence policy that governs evaluation work, and how Techsider uses AI in its own work.",
       part: "A", asAt,
     },
     {
@@ -106,12 +106,12 @@ export const TRUST: TrustData = {
     },
     {
       q: "Where is our data processed during an engagement?",
-      a: "In an Australian region, for the systems Techsider builds or runs for you: in your own Microsoft or AWS account, or in one Techsider manages. Where the work runs inside software you already license, the vendor sets the processing location, and the data note states it with its source and date.",
+      a: "In the cloud region you choose, for the systems Techsider builds for you in your own Microsoft or AWS account; systems Techsider manages for you run in an Australian region. Our team reaches them remotely from Sydney, under the data-transfer terms in your contract. Where the work runs inside software you already license, the vendor sets the processing location, and the data note states it with its source and date.",
       part: "B", term: "residency", asAt,
     },
     {
       q: "Who can access our systems during an engagement?",
-      a: "Only the people doing the work, each with their own named access, limited to what the job needs. Access is logged while the work runs, and it is removed when the engagement ends.",
+      a: "Only the people doing the work, each with their own named access, limited to what the job needs. They reach your systems remotely from Sydney, under the data-transfer terms in your contract. Access is logged while the work runs, and it is removed when the engagement ends.",
       part: "B", term: "access-logging", asAt,
     },
     {
