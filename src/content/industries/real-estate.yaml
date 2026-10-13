@@ -150,5 +150,7 @@ faq:
     a: "None yet. You get evidence on your own files instead: an error rate on agreements your senior staff know, before you rely on it."
   - q: "Is this an audit? Will our auditor accept it?"
     a: "No. It isn't an audit, and we give no opinion. Your approved auditor decides what evidence to rely on. The Trust Audit Prep Pack gathers the sample they ask for and lists what's missing."
+    region: au
   - q: "Does AML/CTF Tranche 2 apply to property management?"
     a: "From 1 July 2026, AUSTRAC regulates brokering the sale, purchase or transfer of real estate. Its guidance (updated 31 August 2026) says \"real estate\" excludes leases of 30 years or less. Confirm your position with your adviser."
+    region: au

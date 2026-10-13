@@ -133,8 +133,10 @@ faq:
     a: No. We have no clients yet, so you start with a Two-Week Trial on one approval, measured against conditions your team already tracks.
   - q: We run a SOCI-covered asset. Where would our data be processed?
     a: Every step we build, model inference included, is designed to run in an Australian region. If your model isn't available there, we tell you before build. Inside a platform you already license, the vendor sets the location; we show you where.
+    region: au
   - q: Will this meet our CIRMP obligations?
     a: No. Your CIRMP stays yours. SOCI AI Risk Evidence gives your risk team artefacts such as data-flow maps and test reports. It isn't legal advice.
+    region: au
   - q: We already run Mitti or Microsoft Copilot. Why not use their AI?
     a: Try them first; if they answer your procedures well enough, we'll say so. We build for the manuals outside those tools.
   - q: Will the assistant work at remote sites?

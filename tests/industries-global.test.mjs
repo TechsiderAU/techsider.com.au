@@ -233,3 +233,40 @@ test("go-global §5.5: Financial services, Education and Healthcare each say wha
     assert.ok(items.includes(line), `${id}: "${line}" isn't rendered as a list item`);
   }
 });
+
+/** Spec §5.6: the FAQs only about an Australian rule, program or package, by page, in data order. Every other FAQ stays untagged. */
+const AU_TAGGED_FAQS = {
+  government: ["We're a council. What do you design around?"],
+  education: ["Will your evaluation report satisfy TEQSA?"],
+  manufacturing: ["Should we go to an AI Adopt Centre first?"],
+  "real-estate": ["Is this an audit? Will our auditor accept it?", "Does AML/CTF Tranche 2 apply to property management?"],
+  "resources-and-energy": ["We run a SOCI-covered asset. Where would our data be processed?", "Will this meet our CIRMP obligations?"],
+};
+/** The question text of each FAQ disclosure inside an element. */
+const questionsIn = (html) => elements(html, (t) => /\bfaq-q\b/.test(t.attrs.class ?? "")).map((q) => plainText(q.inner));
+
+test("go-global §5.6: the Australia-only FAQs are tagged and render in #faq-au inside the band, and the one FAQPage carries every FAQ and no S1 string", () => {
+  for (const id of RULES_PAGE_IDS) {
+    const faq = rulesIndustry(id).faq;
+    const tagged = faq.filter((f) => f.region === "au").map((f) => f.q);
+    assert.deepEqual(tagged, AU_TAGGED_FAQS[id] ?? [], `${id}: the FAQs tagged region "au"`);
+    const html = rulesBuilt(id);
+    const [neutral] = elements(html, (t) => t.attrs.id === "faq");
+    assert.deepEqual(questionsIn(neutral.outer), faq.filter((f) => f.region !== "au").map((f) => f.q), `${id}: #faq`);
+    const [au] = elements(html, (t) => t.attrs.id === "faq-au");
+    if (tagged.length === 0) {
+      assert.equal(au, undefined, `${id}: #faq-au renders with nothing in it`);
+    } else {
+      const [band] = elements(html, (t) => t.attrs.id === "australia");
+      assert.equal(band.attrs["data-region"], "au", `${id}: #australia isn't the Australia band`);
+      assert.ok(band.outer.includes(au.outer), `${id}: #faq-au sits outside #australia`);
+      assert.deepEqual(questionsIn(au.outer), tagged, `${id}: #faq-au`);
+    }
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
+    const faqPage = blocks.filter((b) => b["@type"] === "FAQPage");
+    assert.equal(faqPage.length, 1, `${id}: FAQPage blocks`);
+    assert.deepEqual(faqPage[0].mainEntity.map((q) => q.name), faq.map((f) => f.q), `${id}: the FAQPage questions`);
+    const json = JSON.stringify(faqPage[0]).toLowerCase();
+    for (const s of S1_BANNED) assert.ok(!json.includes(s), `${id}: the FAQPage carries "${s}" (spec §1, S1)`);
+  }
+});

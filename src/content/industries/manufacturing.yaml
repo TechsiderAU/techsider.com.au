@@ -150,3 +150,4 @@ faq:
   # ⚑ owner: confirm the AI Adopt Centres are still taking SMEs (manufacturing dossier, open item 9)
   - q: "Should we go to an AI Adopt Centre first?"
     a: "If you're an eligible SME, it's a sensible first step. The ARM Hub AI Adopt Centre is listed on business.gov.au as offering training, demonstrations and an AI adoption roadmap, with a focus on manufacturing."
+    region: au

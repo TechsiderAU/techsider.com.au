@@ -162,3 +162,4 @@ faq:
     a: Not to us. The test and its graders run in your own subscription. The system under test handles each question where its vendor runs it, as in normal use, and the report records the vendor's published processing location, with its date. While your privacy and security assessments run, we start on public or synthetic data in a Feasibility Sprint.
   - q: We're a council. What do you design around?
     a: "Your state's privacy and records rules, listed with their sources in the Local government section: the PPIP Act and State Records Act in NSW, PROV's recordkeeping policy for Victorian records, and the Information Privacy Act and Public Records Act in Queensland."
+    region: au

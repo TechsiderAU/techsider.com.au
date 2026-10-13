@@ -143,5 +143,6 @@ faq:
     a: "No. It reads staff policies and procedures only; student records and wellbeing notes are out of scope. The data note lists what it reads and logs, and for how long."
   - q: "Will your evaluation report satisfy TEQSA?"
     a: "No one can promise that. The report gives your governing body findings rated to your risk matrix, the method and a replay script: findings, not an assurance opinion."
+    region: au
   - q: "Can you evaluate the Copilot set-up you configured for us?"
     a: "No. We never independently evaluate a system we built, configured or advised on for the same institution. We can give another evaluator our results, labelled as not independent."
