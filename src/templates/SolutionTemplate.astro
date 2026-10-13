@@ -86,7 +86,7 @@ const hero = {
         <ul class="on-request">
           {view.onRequest.map((pkg) => (
             <li data-package-status="on-request" data-region={pkg.region ?? undefined}>
-              {pkg.region && <Fragment><RegionLabel /> </Fragment>}<BracketChip label="On request" /> <a href={pkg.href} class="solution-link">{pkg.name}</a>: {pkg.oneLiner}
+              {pkg.region && <Fragment><RegionLabel id={`${pkg.id}-region-label`} /> </Fragment>}<BracketChip label="On request" /> <a href={pkg.href} class="solution-link" aria-describedby={pkg.region ? `${pkg.id}-region-label` : undefined}>{pkg.name}</a>: {pkg.oneLiner}
             </li>
           ))}
         </ul>
@@ -170,8 +170,8 @@ const hero = {
 
   <PageSection id="guides" title="Practical guides" width="prose">
     <ul class="solution-list">
-      {guides.map((guide) => (
-        <li data-region={guide.region ?? undefined}>{guide.region && <Fragment><RegionLabel /> </Fragment>}<a href={guide.href} class="solution-link">{guide.title}</a></li>
+      {guides.map((guide, i) => (
+        <li data-region={guide.region ?? undefined}>{guide.region && <Fragment><RegionLabel id={`guide-${i + 1}-region-label`} /> </Fragment>}<a href={guide.href} class="solution-link" aria-describedby={guide.region ? `guide-${i + 1}-region-label` : undefined}>{guide.title}</a></li>
       ))}
     </ul>
   </PageSection>

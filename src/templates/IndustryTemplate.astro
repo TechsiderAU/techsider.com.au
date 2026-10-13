@@ -131,8 +131,8 @@ const mapRows = (b: RegulatoryBlockView) =>
         <ul class="ind-cards">
           {view.single.packages.map((p) => (
             <li>
-              <article class="ind-card" data-package-status={p.status} data-region={p.region ?? undefined}>{p.region && <RegionLabel />}
-                <h3 class="ind-card-title">{p.href ? <a href={p.href}>{p.name}</a> : p.name}</h3>
+              <article class="ind-card" data-package-status={p.status} data-region={p.region ?? undefined}>{p.region && <RegionLabel id={`${p.id}-card-region-label`} />}
+                <h3 class="ind-card-title" aria-describedby={p.region && !p.href ? `${p.id}-card-region-label` : undefined}>{p.href ? <a href={p.href} aria-describedby={p.region ? `${p.id}-card-region-label` : undefined}>{p.name}</a> : p.name}</h3>
                 <p class="ind-meta">
                   <BracketChip label={solutionLabel(p.solution)} href={p.solution.href ?? undefined} />
                   {p.status === "on-request" && <span class="ind-tag">On request</span>}
@@ -240,8 +240,8 @@ const mapRows = (b: RegulatoryBlockView) =>
           <ul class="ind-cards">
             {s.packages.map((p) => (
               <li>
-                <article class="ind-card" data-package-status={p.status} data-region={p.region ?? undefined}>{p.region && <RegionLabel />}
-                  <h5 class="ind-card-title">{p.href ? <a href={p.href}>{p.name}</a> : p.name}</h5>
+                <article class="ind-card" data-package-status={p.status} data-region={p.region ?? undefined}>{p.region && <RegionLabel id={`${s.id}-${p.id}-card-region-label`} />}
+                  <h5 class="ind-card-title" aria-describedby={p.region && !p.href ? `${s.id}-${p.id}-card-region-label` : undefined}>{p.href ? <a href={p.href} aria-describedby={p.region ? `${s.id}-${p.id}-card-region-label` : undefined}>{p.name}</a> : p.name}</h5>
                   <p class="ind-meta">
                     <BracketChip label={solutionLabel(p.solution)} href={p.solution.href ?? undefined} />
                     {p.status === "on-request" && <span class="ind-tag">On request</span>}

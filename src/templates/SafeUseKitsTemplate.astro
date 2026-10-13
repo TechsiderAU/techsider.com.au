@@ -67,8 +67,8 @@ const views = kits.map(({ id, data }) => {
       {views.map((kit) => (
         <li>
           <article id={kit.anchor} class="kit" data-kit data-kit-status={kit.review.status} data-region={kit.region ?? undefined}>
-            {kit.region && <RegionLabel />}
-            <h3 class="kit-title">{kit.title}</h3>
+            {kit.region && <RegionLabel id={`${kit.anchor}-region-label`} />}
+            <h3 class="kit-title" aria-describedby={kit.region ? `${kit.anchor}-region-label` : undefined}>{kit.title}</h3>
             <p class="kit-industry"><BracketChip label={kit.industry.label} href={kit.industry.href ?? undefined} /></p>
             <p class="kit-summary">{kit.summary}</p>
             <ul class="kit-contents">

@@ -13,7 +13,8 @@
 // "Every package includes" lists the standard inclusions, less the test line for a package that
 // holds no test on your own examples (pkg.testInclusion false: ④'s configuration review).
 // An Australia-only package (pkg.region "au", go-global §3.3) marks its block data-region="au" and
-// opens it with the "Australia" label (RegionLabel), before the heading.
+// opens it with the "Australia" label (RegionLabel), before the heading, which names the label
+// (`${blockId}-region-label`) in its aria-describedby.
 import Notice from "./Notice.astro";
 import RegionLabel from "../ui/RegionLabel.astro";
 import { ONSHORE_PILLAR, PACKAGED_OFFER_DISCLAIMER, PROCESSING_NOTE } from "../../lib/fixed-copy.ts";
@@ -29,14 +30,15 @@ interface Props {
 const { pkg, standardInclusions, headingLevel = 3, idSuffix = "" } = Astro.props;
 const blockId = `${pkg.id}${idSuffix}`;
 const headingId = `${blockId}-heading`;
+const regionId = pkg.region ? `${blockId}-region-label` : undefined;
 const shared = pkg.testInclusion ? standardInclusions : standardInclusions.filter((line) => !isTestInclusion(line));
 ---
 <section id={blockId} class="package-block" aria-labelledby={headingId} data-package-tab data-package-status="launch" data-package-id={pkg.id} data-region={pkg.region ?? undefined}>
-  {pkg.region && <RegionLabel />}
+  {pkg.region && <RegionLabel id={regionId} />}
   {headingLevel === 4 ? (
-    <h4 id={headingId} class="package-heading">{pkg.name}</h4>
+    <h4 id={headingId} class="package-heading" aria-describedby={regionId}>{pkg.name}</h4>
   ) : (
-    <h3 id={headingId} class="package-heading">{pkg.name}</h3>
+    <h3 id={headingId} class="package-heading" aria-describedby={regionId}>{pkg.name}</h3>
   )}
   <dl class="package-facts">
     <div class="package-fact package-fact-wide">

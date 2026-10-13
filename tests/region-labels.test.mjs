@@ -1,7 +1,8 @@
 // Region labels (go-global §3.3, §6.1, §6.3): the visible "Australia", "Australian example" and
 // "Australian plans and vendor pages" labels. Each is one RegionLabel, marked [data-region-label]
 // (an allowed context for the go-global S1 rule), at the start of the element that carries
-// data-region="au". Part 1A renders the component on its own; Part 5 adds the built-page checks.
+// data-region="au". Part 1A renders the component on its own; Part 5 adds the built-page checks, and
+// the final review (F16) the check that each labelled item's heading or title link names its label.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { elementsWith } from "../scripts/ci/lib.mjs";
@@ -326,4 +327,47 @@ test("every region label on a built page sits inside a data-region=\"au\" wrappe
     }
   }
   assert.ok(labels > 0, "no region label on any built page: run npm run build first");
+});
+
+/**
+ * Final review F16: an item whose label sits beside its heading or title link, rather than inside it,
+ * names the label in that heading's or link's aria-describedby, so a screen reader moving by headings
+ * or links still hears it. Each kind of item: where it sits, what it is, and the element that must
+ * point at its label.
+ */
+const whole = (main) => main;
+const DESCRIBED_ITEMS = [
+  ["insight card", whole, (t) => "data-insight-card" in t.attrs, (inner) => elements(inner, (t) => t.name === "a" && classList(t).includes("insight-card-link"))[0]],
+  ["industry package card", whole, (t) => t.name === "article" && classList(t).includes("ind-card"), (inner) => {
+    const [heading] = elements(inner, (t) => classList(t).includes("ind-card-title"));
+    return elements(heading.inner, (t) => t.name === "a")[0] ?? heading;
+  }],
+  ["package block", whole, (t) => "data-package-tab" in t.attrs, (inner) => elements(inner, (t) => classList(t).includes("package-heading"))[0]],
+  ["kit", whole, (t) => "data-kit" in t.attrs, (inner) => elements(inner, (t) => classList(t).includes("kit-title"))[0]],
+  ["By buyer item", whole, (t) => t.name === "li" && classList(t).includes("buyer-item"), (inner) => elements(inner, (t) => classList(t).includes("hub-link") || classList(t).includes("buyer-item-name"))[0]],
+  ["on-request entry", whole, (t) => t.name === "li" && t.attrs["data-package-status"] === "on-request", (inner) => elements(inner, (t) => t.name === "a" && classList(t).includes("solution-link"))[0]],
+  ["Practical guides link", (main) => elements(main, (t) => t.attrs.id === "guides")[0]?.inner ?? "", (t) => t.name === "li", (inner) => elements(inner, (t) => t.name === "a" && classList(t).includes("solution-link"))[0]],
+];
+
+test("every labelled card, package, kit, By buyer item, on-request entry and guide names its Australia label in its title link's or heading's aria-describedby, by an id unique on the page (final review F16)", () => {
+  const pages = [...allHtmlFiles().map((file) => [`dist/${file}`, readDist(file)]), ["dist-preview/resources/safe-use-kits/index.html", readPreviewDist("resources/safe-use-kits/index.html")]];
+  const seen = Object.fromEntries(DESCRIBED_ITEMS.map(([kind]) => [kind, 0]));
+  for (const [file, html] of pages) {
+    const main = mainHtml(html);
+    const ids = startTags(html).map((t) => t.attrs.id).filter(Boolean);
+    for (const [kind, scope, isItem, target] of DESCRIBED_ITEMS) {
+      for (const item of elements(scope(main), (t) => isItem(t) && t.attrs["data-region"] === "au")) {
+        const [label] = elementsWith(item.inner, "data-region-label");
+        assert.ok(label, `${file}: a ${kind} marked data-region="au" has no label`);
+        const id = label.attrs.id;
+        assert.ok(id, `${file}: a ${kind}'s Australia label has no id`);
+        assert.equal(ids.filter((x) => x === id).length, 1, `${file}: the id "${id}" isn't unique on the page`);
+        const el = target(item.inner);
+        assert.ok(el, `${file}: a ${kind} has no heading or title link`);
+        assert.ok((el.attrs["aria-describedby"] ?? "").split(/\s+/).includes(id), `${file}: a ${kind}'s <${el.name}> doesn't name "${id}" in aria-describedby`);
+        seen[kind]++;
+      }
+    }
+  }
+  for (const [kind, n] of Object.entries(seen)) assert.ok(n > 0, `no labelled ${kind} found on a built page`);
 });

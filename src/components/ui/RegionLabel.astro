@@ -5,17 +5,23 @@
 // checker. It goes at the start of the element that carries data-region="au" (a post's label sits in
 // its header instead), and [data-region-label] is one of the go-global S1 rule's allowed contexts.
 // It imports only fixed-copy, so tests/region-labels.test.mjs renders it on its own.
+// `id`: where the label sits beside an item's heading or title link rather than inside it, the host
+// gives the label an id unique on the page and points that heading or link at it with
+// aria-describedby, so a screen reader moving by headings or links still hears it (final review F16).
+// It sets its own weight and style, so a bold or italic host can't restyle it (F14).
 import { PLATFORM_REGION_LABEL, REGION_EXAMPLE_LABEL, REGION_LABEL } from "../../lib/fixed-copy";
 
 interface Props {
   /** "region" (the default): "Australia"; "example": "Australian example"; "platform": the checker's label. */
   kind?: "region" | "example" | "platform";
+  /** The label's id, for the aria-describedby of the heading or link it labels; unique on the page. */
+  id?: string;
 }
 
 const TEXT = { region: REGION_LABEL, example: REGION_EXAMPLE_LABEL, platform: PLATFORM_REGION_LABEL } as const;
-const { kind = "region" } = Astro.props;
+const { kind = "region", id } = Astro.props;
 ---
-<span class="region-label" data-region-label={kind}>{TEXT[kind]}</span>
+<span id={id} class="region-label" data-region-label={kind}>{TEXT[kind]}</span>
 
 <style>
   /* A quiet outlined tag in the mono face, like the demo frame's provenance label. */
@@ -25,6 +31,8 @@ const { kind = "region" } = Astro.props;
     padding: 0.125rem 0.5rem;
     font-family: var(--font-mono);
     font-size: 0.8125rem;
+    font-style: normal;
+    font-weight: 400;
     line-height: 1.4;
     color: var(--color-muted);
     border: 1px solid var(--color-graphite);

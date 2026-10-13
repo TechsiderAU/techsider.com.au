@@ -56,10 +56,14 @@ const buyerLists: { id: string; title: string; items: BuyerItem[] }[] = [
             <div class="buyer-list" data-buyer-list={list.id}>
               <h4 id={`${list.id}-heading`} class="buyer-list-title">{list.title}</h4>
               <ul class="buyer-items" aria-labelledby={`${list.id}-heading`}>
-                {list.items.map((item) => (
+                {list.items.map((item, i) => (
                   <li class="buyer-item" data-package-status="launch" data-region={item.region ?? undefined}>
-                    {item.region && <RegionLabel />}
-                    {item.href ? <a href={item.href} class="hub-link">{item.name}</a> : <span class="buyer-item-name">{item.name}</span>}
+                    {item.region && <RegionLabel id={`${list.id}-${i + 1}-region-label`} />}
+                    {item.href ? (
+                      <a href={item.href} class="hub-link" aria-describedby={item.region ? `${list.id}-${i + 1}-region-label` : undefined}>{item.name}</a>
+                    ) : (
+                      <span class="buyer-item-name" aria-describedby={item.region ? `${list.id}-${i + 1}-region-label` : undefined}>{item.name}</span>
+                    )}
                     <BracketChip label={`${item.solution.number} ${item.solution.shortName}`} />
                   </li>
                 ))}
