@@ -22,13 +22,13 @@ import { EXCEPTIONS_FILE, SOURCE_FILE, WARN_PHRASES, scan } from "../scripts/ci/
 import { SCOPES as VERIFY_SCOPES } from "../scripts/ci/checks/07-verify-markers.mjs";
 import { documentSchema } from "../src/content/page-schemas.ts";
 import { makeKitSchema, plainRef } from "../src/content/schemas.ts";
-import { PAGES, SITE } from "../src/data/nav.ts";
+import { PAGES, SITE, hqLine } from "../src/data/nav.ts";
 import { ABOUT } from "../src/data/about.ts";
 import { CONTACT } from "../src/data/contact.ts";
 import { POSITIONING } from "../src/data/positioning.ts";
 import { SERVICES } from "../src/data/services.ts";
 import { TRUST } from "../src/data/trust.ts";
-import { CONTACT_H1 } from "../src/lib/fixed-copy.ts";
+import { ABN_NOTE, CONTACT_H1, DELIVERY_MODEL, DISAMBIGUATION } from "../src/lib/fixed-copy.ts";
 import { pageDescription, pageTitle } from "../src/lib/meta.ts";
 import { siteContext } from "../src/lib/site.ts";
 import { trustView } from "../src/lib/views/company.ts";
@@ -346,6 +346,22 @@ test("/about/: the mission, who it's for, the origin line, the principles, how w
   assert.deepEqual(tagged(log.inner, "time").map((t) => t.attrs.datetime), ABOUT.buildLog.map((e) => isoDate(e.date)).sort().reverse());
   for (const e of ABOUT.buildLog) assert.ok(text(log.inner).includes(e.event), e.event);
   assert.deepEqual(tagged(one(main, "id", "contact").inner, "a").map((a) => a.attrs.href), ["/contact/"]);
+});
+
+test("/about/: #who ends with the HQ block: the [data-hq] line, the ABN note linked to the ABN Lookup record, the delivery model and the disambiguation (go-global §3.2, D6, D18)", () => {
+  const main = mainOf(readDist("about/index.html"));
+  const block = one(one(main, "id", "who").inner, "data-about-hq");
+  assert.deepEqual(tagged(block.inner, "p").map((p) => inlineText(p.inner)), [
+    "Headquartered in Sydney, Australia · Techsider Pty Ltd · ABN 12 636 205 868",
+    "An ABN is an Australian Business Number; anyone can check ours on the public register at ABN Lookup.",
+    "Delivered remotely from Sydney; on-site visits by arrangement.",
+    "Techsider is not affiliated with other organisations named TechSider.",
+  ]);
+  // The rendered lines are the shared copy, not a second wording of it.
+  assert.deepEqual(tagged(block.inner, "p").map((p) => inlineText(p.inner)), [hqLine(), ABN_NOTE, DELIVERY_MODEL, DISAMBIGUATION]);
+  assert.equal(inlineText(one(block.inner, "data-hq").inner), hqLine());
+  assert.deepEqual(tagged(block.inner, "a").map((a) => [a.attrs.href, inlineText(a.inner)]), [["https://abr.business.gov.au/ABN/View?abn=12636205868", "ABN Lookup"]]);
+  assert.equal(elementsWith(main, "data-hq").length, 1, "one HQ line in <main>; the footer carries the other");
 });
 
 test("/resources/: a linked card for each resource this build shows, and no unlinked card (nothing 'coming soon')", () => {
