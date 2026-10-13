@@ -3,8 +3,9 @@
 //   src/lib/json-ld.ts, which escapes "<" so no string in the data can close the script element
 //   early or open an HTML comment inside it.
 // - The builders: the Organization (minimal off Home; in full on Home, with legalName only once it
-//   differs from the name, and knowsAbout naming no agents, spec §3.4), the WebSite, a Service and
-//   each page's @graph.
+//   differs from the name, knowsAbout naming no agents, spec §3.4, and the headquarters address, a
+//   sales contact point, areaServed "Worldwide", knowsLanguage and sameAs from the ABN Lookup record
+//   and the owner's profiles, go-global §9.2), the WebSite, a Service and each page's @graph.
 // - Every built page, in both builds: its JSON-LD parses; it holds one Organization (a nested one
 //   counts), with the site's @id; every @id it points to is a node on the same page; every typed
 //   object carries the properties its type requires, and no property its type doesn't allow; and
@@ -27,7 +28,7 @@ const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const SRC = join(ROOT, "src");
 const ORIGIN = "https://techsider.com.au";
 const ORG_ID = `${ORIGIN}/#organization`;
-const AUSTRALIA = { "@type": "Country", name: "Australia" };
+const WORLDWIDE = "Worldwide";
 
 test("jsonLd escapes every '<', so data can't end the script or open a comment, and still round-trips", () => {
   const data = {
@@ -69,7 +70,7 @@ test("every ld+json script in src/ is serialised by jsonLd()", () => {
   for (const [rel, tag] of scripts) assert.match(tag, /\sset:html=\{jsonLd\([^)]*\)\}/, `${rel}: ${tag}`);
 });
 
-test("organization(): minimal off Home; in full on Home, with the fixed summary, the logo, the slogan and proof line, Australia, and knowsAbout naming no agents (spec §3.4)", () => {
+test("organization(): minimal off Home; in full on Home, with the fixed summary, the logo, the slogan and proof line, the Sydney address, a sales contact point, Worldwide, English, and knowsAbout naming no agents (spec §3.4; go-global §9.2)", () => {
   assert.deepEqual(organization(ORIGIN, false), { "@type": "Organization", "@id": ORG_ID, name: "Techsider", url: `${ORIGIN}/` });
   assert.deepEqual(organization(ORIGIN, true), {
     "@type": "Organization",
@@ -83,7 +84,10 @@ test("organization(): minimal off Home; in full on Home, with the fixed summary,
     email: SITE.email,
     logo: `${ORIGIN}/icon-512.png`,
     slogan: "AI that ships. Measured before it ships.",
-    areaServed: AUSTRALIA,
+    address: { "@type": "PostalAddress", addressLocality: "Sydney", addressRegion: "NSW", addressCountry: "AU" },
+    contactPoint: { "@type": "ContactPoint", contactType: "sales", email: "admin@techsider.com.au", areaServed: WORLDWIDE, availableLanguage: "en" },
+    areaServed: WORLDWIDE,
+    knowsLanguage: "en",
     knowsAbout: KNOWS_ABOUT,
   });
   assert.equal(organizationId(`${ORIGIN}/insights/a-post/`), ORG_ID, "every page names the one @id");
@@ -126,7 +130,18 @@ test("abn: an identifier and the ABN Lookup record in sameAs, on the full Organi
   }
 });
 
-test("service() and pageGraph(): a Service in its page's words, provided by the Organization in Australia; Home's graph holds the full Organization and the WebSite, any other page's the minimal one, then its own nodes", () => {
+test("sameAs: the ABN Lookup record, then each profile the owner has given a URL; one without a URL is skipped (go-global §9.2)", () => {
+  const saved = SITE.profiles;
+  try {
+    SITE.profiles = [{ name: "Fixture directory", url: "https://example.com/fixture-profile" }, { name: "Fixture pending", url: "" }];
+    assert.deepEqual(organization(ORIGIN, true).sameAs, ["https://abr.business.gov.au/ABN/View?abn=12636205868", "https://example.com/fixture-profile"]);
+    assert.equal("sameAs" in organization(ORIGIN, false), false, "the minimal node grew a sameAs");
+  } finally {
+    SITE.profiles = saved;
+  }
+});
+
+test("service() and pageGraph(): a Service in its page's words, provided by the Organization and served worldwide; Home's graph holds the full Organization and the WebSite, any other page's the minimal one, then its own nodes", () => {
   const listed = service(ORIGIN, { path: "/services/", key: "fit-call", name: "Fit Call", description: "A call." });
   assert.deepEqual(listed, {
     "@type": "Service",
@@ -135,7 +150,7 @@ test("service() and pageGraph(): a Service in its page's words, provided by the 
     description: "A call.",
     url: `${ORIGIN}/services/`,
     provider: { "@id": ORG_ID },
-    areaServed: AUSTRALIA,
+    areaServed: WORLDWIDE,
   });
   assert.deepEqual(website(ORIGIN), {
     "@type": "WebSite",
@@ -183,8 +198,9 @@ const REQUIRED = {
   FAQPage: ["mainEntity"],
   Question: ["name", "acceptedAnswer"],
   Answer: ["text"],
-  Country: ["name"],
   PropertyValue: ["propertyID", "value"],
+  PostalAddress: ["addressLocality", "addressRegion", "addressCountry"],
+  ContactPoint: ["contactType", "email"],
 };
 /**
  * Every property each type may carry: what src/lib/json-ld.ts, Breadcrumb and FaqList emit (with
@@ -193,7 +209,7 @@ const REQUIRED = {
  * without a row fails an independent table assertion, even if REQUIRED already has its row.
  */
 const ALLOWED = {
-  Organization: ["@type", "@id", "name", "url", "legalName", "identifier", "sameAs", "description", "email", "logo", "slogan", "areaServed", "knowsAbout"],
+  Organization: ["@type", "@id", "name", "url", "legalName", "identifier", "sameAs", "description", "email", "logo", "slogan", "address", "contactPoint", "areaServed", "knowsLanguage", "knowsAbout"],
   PropertyValue: ["@type", "propertyID", "value"],
   WebSite: ["@type", "@id", "name", "url", "inLanguage", "publisher"],
   Service: ["@type", "@id", "name", "description", "url", "provider", "areaServed"],
@@ -203,7 +219,9 @@ const ALLOWED = {
   FAQPage: ["@context", "@type", "mainEntity"],
   Question: ["@type", "name", "acceptedAnswer"],
   Answer: ["@type", "text"],
-  Country: ["@type", "name"],
+  // go-global §9.2: the headquarters without a street address, and one sales contact point.
+  PostalAddress: ["@type", "addressLocality", "addressRegion", "addressCountry"],
+  ContactPoint: ["@type", "contactType", "email", "areaServed", "availableLanguage"],
 };
 const filled = (v) => v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0);
 /** Assert both tables separately before reading either row. */

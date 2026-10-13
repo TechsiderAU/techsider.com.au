@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   PAGES, NAV_GROUPS, EXEMPT_PATHS, CTAS, SITE,
-  slugify, visibleGroups, noJsLinks, footerLabel, footerColumns, legalLinks, resolveCta, hqLine, hqPlace,
+  slugify, visibleGroups, noJsLinks, footerLabel, footerColumns, legalLinks, resolveCta, hqLine, hqPlace, shownProfiles,
 } from "../src/data/nav.ts";
 
 // Spec §7.1, every page that ships at launch.
@@ -233,4 +233,15 @@ test("hqPlace and hqLine: the headquarters from SITE.hq, then the legal name and
     hqLine({ ...SITE, hq: { locality: "Fixture City", region: "FX", country: "NZ" } }),
     "Headquartered in Fixture City, New Zealand · Techsider Pty Ltd · ABN 12 636 205 868",
   );
+});
+
+test("shownProfiles: only SITE.profiles entries with a URL, in order; none until the owner adds one (go-global §9.1, O7)", () => {
+  assert.deepEqual(SITE.profiles, [], "go-global O7: no profile is listed until the owner creates it");
+  assert.deepEqual(shownProfiles(), []);
+  const profiles = [
+    { name: "Fixture directory A", url: "https://example.com/a" },
+    { name: "Fixture directory B", url: " " },
+    { name: "Fixture directory C", url: "https://example.com/c" },
+  ];
+  assert.deepEqual(shownProfiles({ ...SITE, profiles }), [profiles[0], profiles[2]]);
 });

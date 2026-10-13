@@ -154,6 +154,14 @@ export function hqLine(site: typeof SITE = SITE): string {
   return [`Headquartered in ${hqPlace(site)}`, site.legalName, ...(site.abn ? [`ABN ${site.abn}`] : [])].join(" · ");
 }
 
+/**
+ * The directory and social profiles that render (go-global §9.1, O7): SITE.profiles entries with a
+ * URL, in order. The Organization's sameAs and /llms.txt's Profiles list read this, never the raw list.
+ */
+export function shownProfiles(site: typeof SITE = SITE): { name: string; url: string }[] {
+  return site.profiles.filter((p) => p.url.trim() !== "");
+}
+
 function page(group: Group, shortName: string, base: string, path: string, status: Status, fullName?: string, oneLiner?: string): PageEntry {
   const entry: PageEntry = { shortName, fullName: fullName ?? shortName, base, path, group, status };
   if (oneLiner) entry.oneLiner = oneLiner;
