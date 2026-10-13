@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { readDist, readPreviewDist } from "./helpers.mjs";
 import { elements, readFrontmatter } from "../scripts/ci/lib.mjs";
-import { makeIndustrySchema, makeKitSchema, makeSolutionSchema, plainRef } from "../src/content/schemas.ts";
+import { makeIndustrySchema, makeKitSchema, makeSolutionSchema, plainRef, traceFile } from "../src/content/schemas.ts";
 import { SOLUTION_GUIDES } from "../src/lib/marketing.ts";
 import { siteContext } from "../src/lib/site.ts";
 
@@ -244,5 +244,25 @@ test("Safe-Use Kits: every kit card opens with the Australia label (dist-preview
     assert.equal(kit.attrs["data-region"], "au", kit.attrs.id);
     assert.deepEqual(labelsIn(kit.inner), AU_LABEL, kit.attrs.id);
     assert.match(kit.inner, /^\s*<span\b[^>]*\bdata-region-label="region"/, `${kit.attrs.id}: the label doesn't open the card`);
+  }
+});
+
+/** go-global §6.3: the industries whose scenario trace is built on Australian sources. */
+const AU_TRACES = ["government", "financial-services", "real-estate"];
+const EXAMPLE_LABEL = [["example", REGION_EXAMPLE_LABEL]];
+
+test("data: the government, financial-services and real-estate scenario traces, and only they, say region: au (go-global §6.3)", () => {
+  for (const id of INDUSTRY_IDS) {
+    assert.equal(traceFile.parse(JSON.parse(readRepo(`src/data/traces/${id}-scenario.json`))).region, AU_TRACES.includes(id) ? "au" : undefined, id);
+  }
+});
+
+test("industry scenarios on an Australian trace are marked data-region=au and labelled Australian example, right after the provenance label", () => {
+  for (const id of INDUSTRY_IDS) {
+    const [scenario] = elements(mainHtml(readDist(`industries/${id}/index.html`)), (t) => t.attrs.id === "scenario");
+    const au = AU_TRACES.includes(id);
+    assert.equal(scenario.attrs["data-region"], au ? "au" : undefined, id);
+    assert.deepEqual(labelsIn(scenario.inner), au ? EXAMPLE_LABEL : [], `${id}: label`);
+    if (au) assert.match(scenario.inner, /^\s*<p\b[^>]*\bdata-provenance-label\b[^>]*>[^<]*<\/p>\s*<span\b[^>]*\bdata-region-label="example"/, `${id}: the label doesn't follow the provenance label`);
   }
 });

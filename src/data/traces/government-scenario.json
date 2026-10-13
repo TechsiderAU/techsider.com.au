@@ -1,6 +1,7 @@
 {
   "title": "Policy agent test run at a fictional state department",
   "provenance": "illustrative",
+  "region": "au",
   "lines": [
     { "t": "09:00:00", "op": "plan.thresholds", "detail": "Pass thresholds agreed before the run" },
     { "t": "09:05:02", "op": "run.replay", "detail": "Labelled questions replayed in the department's own subscription" },

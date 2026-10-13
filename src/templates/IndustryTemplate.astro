@@ -159,8 +159,9 @@ const mapRows = (b: RegulatoryBlockView) =>
     </div>
   </PageSection>
 
-  <section id="scenario" class="ind-band ind-scenario" aria-labelledby="scenario-heading" data-provenance="illustrative">
+  <section id="scenario" class="ind-band ind-scenario" aria-labelledby="scenario-heading" data-provenance="illustrative" data-region={view.scenario.trace.region}>
     <p class="ind-scenario-label" data-provenance-label>{SCENARIO_LABEL}</p>
+    {view.scenario.trace.region && <RegionLabel kind="example" />}
     <SectionHeader id="scenario-heading" title={view.scenario.title} />
     <ol class="ind-steps">
       <li class="ind-step">
@@ -400,8 +401,10 @@ const mapRows = (b: RegulatoryBlockView) =>
     border: 1px solid var(--color-bone-line);
     border-radius: 8px;
   }
-  /* go-global §3.3: the "Australia" label keeps its own width in the card grid. */
-  .ind-card > :global(.region-label) {
+  /* go-global §3.3, §6.3: the "Australia" and "Australian example" labels keep their own width in
+     the card and scenario grids. */
+  .ind-card > :global(.region-label),
+  .ind-scenario > :global(.region-label) {
     justify-self: start;
   }
   .ind-card-title {

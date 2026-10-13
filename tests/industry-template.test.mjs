@@ -17,7 +17,7 @@ import { SECTION_TITLE } from "../src/content/schemas.ts";
 import {
   AU_BAND_HEADING, AU_BAND_INTRO, NOT_LEGAL_ADVICE, RULES_CLOSING, RULES_HEADING, RULES_SHARED_LABEL, SCENARIO_LABEL,
 } from "../src/lib/fixed-copy.ts";
-import { REGION_LABEL } from "../src/lib/fixed-copy.ts";
+import { REGION_EXAMPLE_LABEL, REGION_LABEL } from "../src/lib/fixed-copy.ts";
 import { industryFixtures } from "../src/fixtures/index.ts";
 import { fixtureIndustryView } from "../src/preview/specimens/industry-view.ts";
 
@@ -261,6 +261,15 @@ test("go-global §3.3: an Australia-only package's card opens with the Australia
       assert.deepEqual(elementsWith(cards[i].inner, "data-region-label").map((l) => text(l.inner)), p.region ? [REGION_LABEL] : [], `${kind}: ${p.id} label`);
     });
     assert.ok(packages.some((p) => p.region === "au") && packages.some((p) => p.region === null), `${kind}: the fixtures label some cards and not others`);
+  }
+});
+
+test("go-global §6.3: a scenario on an Australian trace is marked data-region=au and labelled Australian example", () => {
+  for (const [kind, view] of PAGES) {
+    const scenario = byId(mainOf(read(kind)), "scenario");
+    assert.equal(scenario.attrs["data-region"], view.scenario.trace.region, kind);
+    assert.equal(view.scenario.trace.region, "au", `${kind}: the gallery's fixture trace is Australian`);
+    assert.deepEqual(elementsWith(scenario.inner, "data-region-label").map((l) => [l.attrs["data-region-label"], text(l.inner)]), [["example", REGION_EXAMPLE_LABEL]], kind);
   }
 });
 
