@@ -101,6 +101,51 @@ const INDUSTRIES = {
       ["fatf-r22-r23", "binding", "International standards for countries (FATF Recommendations, as amended)."],
     ],
   },
+  education: {
+    shared: BASE_ROW,
+    featured: ["unesco-genai-guidance", "ec-oecd-ailit-framework", "eu-ai-act-annex-iii-3"],
+    chips: [
+      "UNESCO guidance for generative AI in education Guidance · published Sep 2023 · as at Oct 2026",
+      "EC–OECD AI Literacy Framework Guidance · published Jun 2026 · as at Oct 2026",
+      "EU AI Act Annex III point 3: education Law · applies from 2 Dec 2027 · as at Oct 2026",
+    ],
+    dataOnly: ["unesco-ai-competency-teachers"],
+    reviewBy: { "eu-ai-act-annex-iii-3": "2027-01-12" },
+    pins: [
+      // §5.2: UNESCO paraphrased, never quoted as "human-agent".
+      ["unesco-genai-guidance", "asks", /\ba human-centred, age-appropriate approach to validating tools\b/],
+      // Correction 6: the source's own words ("a common reference"), and "dimensions", not "domains".
+      ["ec-oecd-ailit-framework", "binding", "A common reference framework for AI literacy in primary and secondary education."],
+      ["ec-oecd-ailit-framework", "asks", /\bfour dimensions\b/],
+    ],
+  },
+  manufacturing: {
+    shared: GDPR_ROW,
+    featured: ["iso-9001-2026", "iec-62443", "joint-ot-ai-principles"],
+    chips: [
+      "ISO 9001:2026 Standard · published Sep 2026 · as at Oct 2026",
+      "IEC 62443: operational technology security Standard · in force · as at Oct 2026",
+      "Joint principles for AI in operational technology Guidance · published Dec 2025 · as at Oct 2026",
+    ],
+    dataOnly: ["iso-45001", "eu-gmp-annex-22"],
+    reviewBy: { "iso-45001": "2027-04-12", "eu-gmp-annex-22": "2027-01-12" },
+    pins: [["iec-62443", "name", "IEC 62443: operational technology security"]],
+  },
+  "real-estate": {
+    shared: GDPR_ROW,
+    featured: ["eu-ai-act-annex-iii-5b", "fatf-r22-property"],
+    chips: [
+      "EU AI Act Annex III 5(b): credit scoring Law · applies from 2 Dec 2027 · as at Oct 2026",
+      "FATF Recommendation 22: buying and selling property Standard · in force · as at Oct 2026",
+    ],
+    dataOnly: ["oecd-privacy-guidelines"],
+    reviewBy: { "eu-ai-act-annex-iii-5b": "2027-01-12" },
+    pins: [
+      // §5.2: FATF covers sales, not leasing; "rental applications", never "tenancy".
+      ["fatf-r22-property", "asks", "Businesses that act for clients in buying or selling property must identify those clients and keep records. Leasing and property management are outside it."],
+      ["eu-ai-act-annex-iii-5b", "asks", /\bscreening rental applications\b/],
+    ],
+  },
 };
 
 /** Spec §1 S1: these never render outside an allowed context, and a chip renders outside the band. */

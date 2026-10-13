@@ -277,3 +277,23 @@ test("Real estate: the Queensland trust-audit chip uses its row's words (C5-T5-F
   assert.equal(chip.label, "Trust audits and unannounced checks, Qld");
   assert.ok(chip.label.length <= 40);
 });
+
+// ---------- go-global Part 4B: the "Rules that travel" anchor data ----------
+
+test("go-global §5.2: these pages' anchor data keeps mid-market language (spec §3.4, §5, D4; rulings 5, 8, 9)", () => {
+  const shared = new Map(readJson(`${ROOT}src/data/anchors/shared.json`).anchors.map((a) => [a.id, a]));
+  const textOf = (id) => {
+    const own = readJson(`${ROOT}src/data/anchors/${id}.json`);
+    return [...own.shared.map((s) => shared.get(s)), ...own.anchors].flatMap((a) => [a.name, a.issuer, a.binding, a.asks, a.evidence]).join(" ");
+  };
+  for (const id of IDS) {
+    const t = textOf(id);
+    assert.doesNotMatch(t, /\bagents?\b/i, `${id}: "agent" in its anchor data`);
+    assert.doesNotMatch(t, /\btenancy\b|\bsprint\b|APRA audit/i, id);
+    assert.doesNotMatch(t, /(?:\bAU?)?\$\s?\d|\bfrom\s+\$/i, `${id}: a currency figure`);
+    assert.doesNotMatch(t, /coming (?:soon|later)/i, id);
+  }
+  assert.doesNotMatch(textOf("manufacturing"), /\bfree\b|Sales Order/i, "manufacturing: 'free' or a vendor agent product (ruling 8)");
+  assert.doesNotMatch(textOf("real-estate"), /Connector|\btenants?\b/i, "real estate: the PropertyMe Connector (ruling 9), or 'tenant' where §5.2 says rental applications");
+  assert.doesNotMatch(textOf("education"), /\bRTOs?\b|\bASQA\b|ChatGPT Edu/, "education: RTOs or an unverified system (ruling 5)");
+});
