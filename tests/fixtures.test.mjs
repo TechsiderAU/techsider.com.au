@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import {
   plainRef, makeSolutionSchema, makeIndustrySchema, makeKitSchema, makeDemoSchema, makeInsightSchema,
   regulatoryFile, traceFile, sampleReport, mockPanel, JURISDICTION_SECTION, SECTION_ORDER,
+  anchorFile, anchorKind, anchorStatus,
 } from "../src/content/schemas.ts";
 import {
   positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema,
@@ -26,6 +27,7 @@ const {
   FIXTURE_NOW, FIXTURE_STALE_NOW,
   positioningFixture, servicesFixture, contactFixture, contactNoEndpointFixture, trustFixture, trustNoTermsFixture, aboutFixture,
   homeFixture, documentFixtures,
+  sharedAnchorsFixture, anchorFixture, gdprAnchorFixture, governmentAnchorFixture, anchorFixtures,
 } = all;
 
 const SRC = fileURLToPath(new URL("../src/", import.meta.url));
@@ -58,10 +60,15 @@ const CASES = [
   ["trustNoTermsFixture", trustData, trustNoTermsFixture],
   ["aboutFixture", aboutData, aboutFixture],
   ["homeFixture", homeData, homeFixture],
+  ["sharedAnchorsFixture", anchorFile, sharedAnchorsFixture],
+  ["anchorFixture", anchorFile, anchorFixture],
+  ["gdprAnchorFixture", anchorFile, gdprAnchorFixture],
+  ["governmentAnchorFixture", anchorFile, governmentAnchorFixture],
   ...Object.entries(solutionFixtures).map(([id, v]) => [`solutionFixtures.${id}`, solutionSchema, v]),
   ...Object.entries(industryFixtures).map(([id, v]) => [`industryFixtures.${id}`, industrySchema, v]),
   ...Object.entries(regulatoryFixtures).map(([id, v]) => [`regulatoryFixtures.${id}`, regulatoryFile, v]),
   ...Object.entries(traceFixtures).map(([id, v]) => [`traceFixtures.${id}`, traceFile, v]),
+  ...Object.entries(anchorFixtures).map(([id, v]) => [`anchorFixtures.${id}`, anchorFile, v]),
   ...insightFixtures.map((p) => [`insightFixtures.${p.id}`, insightSchema, p.data]),
   ...documentFixtures.map((d) => [`documentFixtures.${d.id}`, documentSchema, d.data]),
 ];
@@ -73,11 +80,14 @@ const MARKER = /\bfixture\b|\bexample\.com\b/i;
 const TOKEN_KEYS = new Set([
   "id", "status", "kind", "provenance", "rating", "method", "jurisdiction", "jurisdictions",
   "choices", "solution", "industry", "byIndustry", "leadSolutions", "demo", "trace", "row",
-  "type", "buyers", "package", "entry",
+  "type", "buyers", "package", "entry", "region",
 ]);
 const TOKEN = /^[a-z0-9-]+$/;
 // Enum values that aren't token-shaped: exempt only when the value is one of the enum's options.
-const ENUM_KEYS = { packagesHeading: ["Packages", "Engagements"], part: ["A", "B"] };
+const ENUM_KEYS = {
+  packagesHeading: ["Packages", "Engagements"], part: ["A", "B"],
+  checkLevel: ["P", "P*", "S", "UNVERIFIED"],
+};
 // Fixed spec copy a schema requires verbatim (src/lib/fixed-copy.ts), so no fixture can reword it.
 const FIXED_COPY = new Set([HOME_TRUST_QUESTION]);
 const TIME = /^\d{2}:\d{2}:\d{2}$/;
@@ -125,6 +135,9 @@ test("assertFictional rejects real-looking copy, real hosts and prose in token f
   assert.throws(() => assertFictional({ packagesHeading: "Programs" }), /not visibly fictional/);
   assert.throws(() => assertFictional({ faq: [{ q: "Why choose our company?" }] }), /not visibly fictional/);
   assertFictional({ packagesHeading: "Engagements", part: "B", buyers: ["mid-market"], faq: [{ q: HOME_TRUST_QUESTION }] });
+  // go-global: a check level passes under its own key only; a region is a token.
+  assertFictional({ checkLevel: "P*", region: "au" });
+  assert.throws(() => assertFictional({ name: "P*" }), /not visibly fictional/);
   assertFictional({
     status: "on-request", name: "Northwind Fixture Pty Ltd", href: "https://example.com/fixture",
     asAt: new Date("2026-09-01"), n: 3, t: "09:00:00", target: { value: 90, unit: "%" }, metric: { value: 420, unit: "ms" },
@@ -165,6 +178,13 @@ test("the fixture sets are the gallery's whole fictional site: 5 solutions, 9 in
   }
   assert.deepEqual(traceFixtures, { [TRACE_FIXTURE_ID]: traceFixture, [HERO_TRACE_FIXTURE_ID]: heroTraceFixture });
   assert.equal(FIXTURE_NOW.toISOString(), "2026-09-29T00:00:00.000Z");
+  // One anchors file per industry (go-global §5.3): Government has its own, fixture-industry-3 is the
+  // five-chip Draft-for-Approval page, and the rest share anchorFixture.
+  assert.deepEqual(Object.keys(anchorFixtures), Object.keys(industryFixtures));
+  for (const [id, file] of Object.entries(anchorFixtures)) {
+    const expected = id === GOVERNMENT_INDUSTRY_FIXTURE_ID ? governmentAnchorFixture : id === "fixture-industry-3" ? gdprAnchorFixture : anchorFixture;
+    assert.equal(file, expected, id);
+  }
   assert.equal(FIXTURE_STALE_NOW.toISOString(), "2027-01-15T00:00:00.000Z");
 });
 
@@ -207,6 +227,18 @@ test("fixture references resolve to other fixtures", () => {
   assert.equal(kitFixture.industry, INDUSTRY_FIXTURE_ID);
   assert.equal(pendingKitFixture.industry, INDUSTRY_FIXTURE_ID);
   assert.equal(demoFixture.solution, SOLUTION_FIXTURE_ID);
+  // Anchors (go-global §5.2, §5.3): every shared id is a featured shared anchor, no page shows an id
+  // twice or more than three sector chips, and every anchor's solutions are fixture solutions.
+  const sharedById = new Map(sharedAnchorsFixture.anchors.map((a) => [a.id, a]));
+  assert.equal(sharedAnchorsFixture.shared, undefined, "the shared file lists no shared row of its own");
+  for (const [name, file] of Object.entries({ anchorFixture, gdprAnchorFixture, governmentAnchorFixture })) {
+    for (const id of file.shared) assert.ok(sharedById.get(id)?.featured, `${name}: shared id ${id} is not a featured shared anchor`);
+    for (const a of file.anchors) assert.ok(!sharedById.has(a.id), `${name}: ${a.id} is a shared id`);
+    assert.ok(file.anchors.filter((a) => a.featured).length <= 3, `${name}: more than three sector chips`);
+  }
+  for (const a of [sharedAnchorsFixture, anchorFixture, gdprAnchorFixture, governmentAnchorFixture].flatMap((f) => f.anchors)) {
+    for (const x of a.solutions) assert.ok(solutionIds.includes(x), `anchor ${a.id}: solution ${x}`);
+  }
 });
 
 test("the solution fixture covers every package status", () => {
@@ -279,6 +311,19 @@ test("industry fixtures meet spec §8.5's counts, and Government meets them in e
   assert.deepEqual(rows.find((r) => r.id === "fixture-gov-row-5").jurisdictions, ["cth", "nsw"]);
   const sectionsOf = (r) => new Set(r.jurisdictions.map((j) => JURISDICTION_SECTION[j]));
   assert.deepEqual(SECTION_ORDER.map((s) => rows.filter((r) => sectionsOf(r).has(s)).length), [5, 4, 4]);
+});
+
+test("anchor fixtures exercise every chip state: each kind and status, four or five shared chips, two or three sector chips (go-global §5.2)", () => {
+  const anchors = [sharedAnchorsFixture, anchorFixture, gdprAnchorFixture, governmentAnchorFixture].flatMap((f) => f.anchors);
+  assert.deepEqual([...new Set(anchors.map((a) => a.kind))].sort(), [...anchorKind.options].sort());
+  assert.deepEqual([...new Set(anchors.map((a) => a.status))].sort(), [...anchorStatus.options].sort());
+  assert.deepEqual([anchorFixture, gdprAnchorFixture, governmentAnchorFixture].map((f) => f.shared.length), [4, 5, 4]);
+  assert.deepEqual([anchorFixture, gdprAnchorFixture, governmentAnchorFixture].map((f) => f.anchors.filter((a) => a.featured).length), [2, 3, 2]);
+  // Data only: an unfeatured shared anchor, and an S-level sector anchor that waits for a primary read.
+  assert.deepEqual(sharedAnchorsFixture.anchors.filter((a) => !a.featured).map((a) => a.id), ["fixture-x5"]);
+  assert.deepEqual(anchorFixture.anchors.filter((a) => !a.featured).map((a) => [a.id, a.checkLevel]), [["fixture-sector-draft", "S"]]);
+  // The EU AI Act and GDPR stand-ins carry a reviewBy, as their names require.
+  for (const id of ["fixture-x7", "fixture-x8"]) assert.ok(sharedAnchorsFixture.anchors.find((a) => a.id === id).reviewBy instanceof Date, id);
 });
 
 test("fixture-industry-3 carries the long-text edge case for the 320px checks", () => {
