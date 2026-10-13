@@ -344,9 +344,12 @@ test("contact: a plain POST form to the endpoint, with native validation on requ
     elements(form.inner, (t) => ["input", "select", "textarea"].includes(t.name)).map((c) => [c.attrs.name, c]),
   );
   // The stand-in provider's hidden fields, the enquiry fields, then the honeypot under the provider's name.
-  assert.deepEqual(Object.keys(controls), ["_redirect", "_append", "name", "email", "organisation", "country", "industry", "size", "interest", "message", "discovery", "consent", "_gotcha"]);
+  assert.deepEqual(Object.keys(controls), ["_redirect", "_append", "name", "email", "organisation", "country", "industry", "size", "interest", "message", "discovery", "consent", "_gotcha", "timezone"]);
   assert.equal(controls.discovery.name, "select");
   assert.ok(!("required" in controls.discovery.attrs));
+  // go-global §8.1: the browser's time zone, empty until the form's own script fills it, never required.
+  const zone = controls.timezone;
+  assert.deepEqual([zone.name, zone.attrs.type, zone.attrs.value, "data-timezone" in zone.attrs, "required" in zone.attrs], ["input", "hidden", "", true, false]);
   const expect = {
     name: { tag: "input", type: "text", autocomplete: "name" },
     email: { tag: "input", type: "email", autocomplete: "email" },
@@ -415,6 +418,8 @@ test("contact: an unavailable privacy policy uses a visible enquiry notice witho
   const notice = one(inline, "id", "enquiry-privacy");
   assert.ok(text(notice.inner).includes(contactFixture.formProvider.name));
   assert.ok(text(notice.inner).includes(contactFixture.emailProvider.name));
+  // go-global §8.1: the notice the consent box points to also names the time zone the form records.
+  assert.ok(text(notice.inner).includes("We also record your browser's time zone, so our reply suits your working hours."));
   const shown = { ...unavailable, page: (id) => ({ ...unavailable.page(id), href: id === "privacy" ? "/privacy/" : unavailable.page(id).href }) };
   const html = await renderAstro(component, { contact: contactFixture, site: shown });
   assert.match(html, /data-contact-form/);
@@ -441,7 +446,7 @@ test("contact: the collection notice names both providers, directly above the Se
   const { formProvider: f, emailProvider: e } = contactFixture;
   assert.equal(
     inlineText(notice.inner),
-    `Your enquiry is sent via ${f.name} to our ${e.name} mailbox. See our privacy policy.`,
+    `Your enquiry is sent via ${f.name} to our ${e.name} mailbox. We also record your browser's time zone, so our reply suits your working hours. See our privacy policy.`,
   );
   const button = tagged(form.inner, "button");
   assert.equal(button.length, 1);

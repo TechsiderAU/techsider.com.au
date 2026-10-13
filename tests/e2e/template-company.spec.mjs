@@ -172,6 +172,7 @@ test("without JavaScript, a complete enquiry is a plain form POST of every field
     discovery: "",
     consent: "yes",
     _gotcha: "",
+    timezone: "",
   });
 });
 

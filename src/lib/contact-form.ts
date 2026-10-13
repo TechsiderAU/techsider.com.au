@@ -10,8 +10,12 @@
  * provider's own fields never reuse these names.
  */
 export const ENQUIRY_FIELDS = ["name", "email", "organisation", "country", "industry", "size", "interest", "message", "consent"] as const;
-/** Optional answers travel with the enquiry; they do not add validation requirements. */
-export const OPTIONAL_ENQUIRY_FIELDS = ["discovery"] as const;
+/**
+ * Optional answers travel with the enquiry; they do not add validation requirements. timezone is
+ * ContactForm's hidden field, filled by its own inline script with the browser's time zone and empty
+ * without JavaScript (go-global §8.1).
+ */
+export const OPTIONAL_ENQUIRY_FIELDS = ["discovery", "timezone"] as const;
 export type EnquiryField = (typeof ENQUIRY_FIELDS)[number];
 
 /** The longest message the form takes (spec §10.2: up to 1,000 characters). */

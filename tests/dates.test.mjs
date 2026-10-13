@@ -10,7 +10,9 @@ import { formatDate, formatMonthYear, formatShortDate, isoDate } from "../src/li
 
 const SRC = fileURLToPath(new URL("../src/", import.meta.url));
 const BUILDS = ["dist", "dist-preview"].map((d) => fileURLToPath(new URL(`../${d}/`, import.meta.url)));
-const FORMATS_A_DATE = /\.toLocaleDateString\(|\.toISOString\(\)\.slice\(|\bIntl\.DateTimeFormat\b/;
+// Reading the browser's time zone (ContactForm.astro's own inline script, go-global §8.1) turns no
+// date into text, so that one exact call is exempt.
+const FORMATS_A_DATE = /\.toLocaleDateString\(|\.toISOString\(\)\.slice\(|\bIntl\.DateTimeFormat\b(?!\(\)\.resolvedOptions\(\)\.timeZone)/;
 /** The files that show a date, each through the shared helpers. */
 const SHOWS_DATES = [
   "components/page/InsightCard.astro",
@@ -58,6 +60,19 @@ test("no file in src/ but src/lib/dates.ts turns a date into text (WB-14)", () =
   assert.deepEqual(offenders, []);
   for (const rel of SHOWS_DATES) {
     assert.match(readText(join(SRC, rel)), /^import \{ formatDate(?:, isoDate)? \} from "(?:\.\.\/)+(?:lib\/)?dates(?:\.ts)?";$/m, rel);
+  }
+});
+
+test("FORMATS_A_DATE: reading the browser's time zone turns no date into text; every way of formatting one still counts (go-global §8.1)", () => {
+  assert.doesNotMatch("const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;", FORMATS_A_DATE);
+  for (const code of [
+    'new Intl.DateTimeFormat("en-AU").format(d)',
+    "Intl.DateTimeFormat().format(d)",
+    'Intl.DateTimeFormat("en").resolvedOptions().timeZone',
+    'd.toLocaleDateString("en-AU")',
+    "d.toISOString().slice(0, 10)",
+  ]) {
+    assert.match(code, FORMATS_A_DATE, code);
   }
 });
 

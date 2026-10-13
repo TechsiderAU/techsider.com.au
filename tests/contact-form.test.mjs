@@ -24,7 +24,7 @@ import { CONTACT } from "../src/data/contact.ts";
 import { PAGES, SITE } from "../src/data/nav.ts";
 import { contactFixture, fixtureSite } from "../src/fixtures/index.ts";
 import {
-  ENQUIRY_FIELDS, FIELD_ERRORS, FORM_MESSAGES, MESSAGE_MAX, errorLine, preselection, problemOf, rejectedFields,
+  ENQUIRY_FIELDS, FIELD_ERRORS, FORM_MESSAGES, MESSAGE_MAX, OPTIONAL_ENQUIRY_FIELDS, errorLine, preselection, problemOf, rejectedFields,
 } from "../src/lib/contact-form.ts";
 import { EXTRA_INTERESTS } from "../src/lib/fixed-copy.ts";
 import { gatedPaths } from "../src/lib/pages.ts";
@@ -55,6 +55,8 @@ const ENQUIRY = {
 
 test("the enquiry fields are spec §10.2's and go-global §8.1's country, in form order, and each error line says what to do", () => {
   assert.deepEqual([...ENQUIRY_FIELDS], ["name", "email", "organisation", "country", "industry", "size", "interest", "message", "consent"]);
+  // go-global §8.1: the browser's time zone travels with the enquiry, filled by ContactForm's own script.
+  assert.deepEqual([...OPTIONAL_ENQUIRY_FIELDS], ["discovery", "timezone"]);
   assert.equal(MESSAGE_MAX, 1000);
   assert.deepEqual(FIELD_ERRORS, {
     name: { missing: "Enter your name." },
@@ -217,6 +219,26 @@ test("mock provider: an enquiry with no country is incomplete, refused as a plai
   });
 });
 
+test("mock provider: the time zone reaches the mailbox as posted, and an empty one still makes a complete enquiry (go-global §8.1)", async () => {
+  await withMock(async (base) => {
+    const organisation = "Fixture Time Zone Organisation";
+    for (const timezone of ["Pacific/Auckland", "UTC", ""]) {
+      assert.equal((await post(base, { ...FORMSPARK, ...ENQUIRY, organisation, timezone })).status, 303, JSON.stringify(timezone));
+    }
+    const { delivered } = await logFor(base, organisation);
+    assert.deepEqual(delivered.map((f) => [f.country, f.timezone]), [["NZ", "Pacific/Auckland"], ["NZ", "UTC"], ["NZ", ""]]);
+    assert.deepEqual(problems({ ...ENQUIRY, timezone: "" }), []);
+  });
+});
+
+test("data: no provider field may take the country or time-zone name, which the form posts itself (go-global §8.1)", () => {
+  for (const name of ["country", "timezone"]) {
+    const parsed = contactData.safeParse({ ...contactFixture, hiddenFields: { [name]: "Fixture" } });
+    assert.equal(parsed.success, false, name);
+    assert.ok(parsed.error.issues.some((i) => i.message === `"${name}" is already a field of the enquiry form`), name);
+  }
+});
+
 test("mock provider: it reads the gallery form's field names, runs on the gallery form's port, and knows the site's origin", async () => {
   assert.equal(MOCK_FORM.redirectField, REDIRECT_FIELD);
   assert.deepEqual(MOCK_FORM.hiddenFields, { [APPEND_FIELD]: "false" });
@@ -244,6 +266,8 @@ test("data: an enabled form has a confirmation route, disclosure and registered 
       const notice = one(html, "id", "enquiry-privacy");
       assert.ok(text(notice.inner).includes(CONTACT.formProvider.name));
       assert.ok(text(notice.inner).includes(CONTACT.emailProvider.name));
+      // go-global §8.1: the notice the consent box points to also names the time zone the form records.
+      assert.ok(text(notice.inner).includes("We also record your browser's time zone, so our reply suits your working hours."));
       assert.equal(tagged(html, "a").filter((a) => a.attrs.href === "#enquiry-privacy").length, 2);
     }
     assert.ok(CONTACT.subProcessors.some((s) => s.entity === CONTACT.formProvider?.name), "the Trust page's Part A table names the form provider (spec §8.11)");
@@ -295,14 +319,43 @@ test("gallery: the form posts to the stand-in provider, its hidden fields first,
   assert.equal(form.attrs.action, MOCK_FORM.formEndpoint);
   assert.equal(form.attrs["data-sent"], fixtureSite.page("sent").href);
   assert.equal(fixtureSite.page("sent").href, "/preview/templates/sent/");
-  const hidden = tagged(form.inner, "input").filter((i) => i.attrs.type === "hidden");
+  const inputs = tagged(form.inner, "input").filter((i) => i.attrs.type === "hidden");
+  // The provider's own hidden fields; the form's time-zone field (go-global §8.1) is checked below.
+  const hidden = inputs.filter((i) => !("data-timezone" in i.attrs));
   assert.deepEqual(hidden.map((i) => [i.attrs.name, i.attrs.value]), [
     [MOCK_FORM.redirectField, `${SITE_ORIGIN}/preview/templates/sent/`],
     ...Object.entries(MOCK_FORM.hiddenFields),
   ]);
   assert.ok(form.inner.startsWith(hidden.map((i) => i.outer).join("")), "the provider's hidden fields don't open the form");
+  const zone = inputs.filter((i) => "data-timezone" in i.attrs);
+  assert.equal(zone.length, 1, "the form has no single time-zone input");
+  assert.deepEqual([zone[0].attrs.name, zone[0].attrs.value], ["timezone", ""]);
+  const at = (outer) => form.inner.indexOf(outer);
+  const lastProvider = hidden.at(-1);
+  assert.ok(at(zone[0].outer) >= at(lastProvider.outer) + lastProvider.outer.length, "the time-zone input sits among the provider's fields");
+  assert.ok(at(zone[0].outer) > at(controlNamed(form.inner, "consent").outer), "the time-zone input sits among the visible fields");
   const honeypot = one(form.inner, "data-honeypot");
   assert.deepEqual(tagged(honeypot.inner, "input").map((i) => i.attrs.name), [MOCK_FORM.honeypotField]);
+});
+
+test("the time zone has its own small inline script after the form, one try/catch that nothing it meets can break (go-global §8.1)", () => {
+  const pages = { gallery: readPreviewDist("preview/templates/contact/index.html"), production: readDist("contact/index.html") };
+  for (const [label, html] of Object.entries(pages)) {
+    const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)].filter(([, , code]) => code.includes("data-timezone"));
+    assert.equal(scripts.length, 1, `${label}: ${scripts.length} scripts fill the time zone`);
+    const [whole, attrs, code] = scripts[0];
+    assert.equal(attrs.trim(), "", `${label}: the time-zone script is bundled or loaded from a file (${attrs.trim()})`);
+    assert.match(code, /^\s*try\s*\{[\s\S]*\}\s*catch\s*\{\s*\}\s*$/, `${label}: the script isn't one try/catch`);
+    assert.ok(code.includes("Intl.DateTimeFormat().resolvedOptions().timeZone"), `${label}: the script doesn't read the browser's zone`);
+    assert.ok(Buffer.byteLength(code) < 512, `${label}: the time-zone script is ${Buffer.byteLength(code)} bytes`);
+    const form = one(html, "data-contact-form");
+    assert.ok(html.indexOf(whole) >= html.indexOf(form.outer) + form.outer.length, `${label}: the script runs before the form is parsed`);
+  }
+  // The bundled form script stays under Astro's 4 KB inline limit because it leaves the zone alone.
+  const bundled = [...readDist("contact/index.html").matchAll(/<script type="module">([\s\S]*?)<\/script>/g)]
+    .map((m) => m[1])
+    .find((code) => code.includes("[data-form-summary]"));
+  assert.ok(bundled !== undefined && !bundled.includes("timeZone"), "the form's bundled script reads the time zone");
 });
 
 test("gallery: every enquiry field has one empty, hidden error line carrying its words, and the empty polite summary sits above the fields", () => {

@@ -11,12 +11,18 @@ import { withoutScripts } from "../support/no-scripts.mjs";
 // enquiry is a plain POST, which the provider answers with a 303 to the gallery's message-sent page.
 // With it, the same fields go by fetch, and errors show in place. Each test names its own
 // organisation, and the mock logs enquiries by organisation, so a test reads only its own, whatever
-// runs beside it. Also here: the preview build's own /contact/sent/.
+// runs beside it. Also here: the preview build's own /contact/sent/. go-global §8.1: Country is
+// required, and the hidden time zone travels with every enquiry: the contexts run in a fixed zone
+// (ZONE), so an enquiry sent with JavaScript carries it and one sent without carries "".
 const CONTACT = "/preview/templates/contact/";
 const SENT = "/preview/templates/sent/";
 const MOCK = new URL(MOCK_FORM.formEndpoint).origin;
 const WIDE = { width: 1280, height: 800 };
 const NARROW = { width: 390, height: 844 };
+// go-global §8.1: every context here runs in one fixed zone, so the time zone an enquiry carries is
+// known: this zone with JavaScript, "" without it.
+const ZONE = "Pacific/Auckland";
+test.use({ timezoneId: ZONE });
 const CONTROL_ID = {
   name: "contact-name", email: "contact-email", organisation: "contact-organisation", country: "contact-country",
   industry: "contact-industry", size: "contact-size", interest: "contact-interest", message: "contact-message",
@@ -36,7 +42,10 @@ const POSTED = {
   discovery: "",
   consent: "yes",
   _gotcha: "",
+  timezone: ZONE,
 };
+/** The same enquiry sent without JavaScript: the time-zone field stays empty. */
+const NO_JS = { ...POSTED, timezone: "" };
 
 const axe = (page) => new AxeBuilder({ page }).include("main").withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]);
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -69,7 +78,8 @@ test("without JavaScript, a complete enquiry is a plain POST, and the provider's
   await Promise.all([sentUrl(page), send(page).click()]);
   expect(new URL(page.url()).search).toBe("");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Message sent.");
-  expect(await logged(request, org)).toEqual({ delivered: [{ ...POSTED, organisation: org }], spam: [] });
+  // The country and an empty time zone reach the provider (go-global §8.1).
+  expect(await logged(request, org)).toEqual({ delivered: [{ ...NO_JS, organisation: org }], spam: [] });
 });
 
 test("without JavaScript, a filled honeypot still lands on the message-sent page, and the provider drops the enquiry", async ({ page, request }) => {
@@ -85,7 +95,7 @@ test("without JavaScript, a filled honeypot still lands on the message-sent page
   await Promise.all([sentUrl(page), send(page).click()]);
   expect(await logged(request, org)).toEqual({
     delivered: [],
-    spam: [{ ...POSTED, organisation: org, _gotcha: "https://example.com/fixture-spam" }],
+    spam: [{ ...NO_JS, organisation: org, _gotcha: "https://example.com/fixture-spam" }],
   });
 });
 
@@ -103,6 +113,39 @@ test("with JavaScript, a complete enquiry goes by fetch, urlencoded with Accept:
   expect(new URL(page.url()).search).toBe("");
   expect(await logged(request, org)).toEqual({ delivered: [{ ...POSTED, organisation: org }], spam: [] });
 });
+
+test("with JavaScript, the hidden time-zone field holds the browser's IANA zone, and the enquiry carries it (go-global §8.1)", async ({ page, request }) => {
+  const org = organisation();
+  await page.goto(CONTACT);
+  await expect(page.locator("input[data-timezone]")).toHaveValue(ZONE);
+  await fillEnquiry(page, org);
+  await Promise.all([sentUrl(page), send(page).click()]);
+  const { delivered } = await logged(request, org);
+  expect(delivered.map((f) => f.timezone)).toEqual([ZONE]);
+  expect(delivered[0].timezone).toMatch(/^[A-Za-z]+(?:\/[A-Za-z0-9_+-]+)+$/);
+});
+
+// go-global §8.1: the time-zone script can't stop an enquiry. Each case replaces Intl before any page
+// script runs; the enquiry still goes, with the zone the browser gave, or "" when it gave none.
+const ZONE_CASES = [
+  ["Intl is missing", () => { delete globalThis.Intl; }, ""],
+  ["Intl.DateTimeFormat throws", () => { Intl.DateTimeFormat = () => { throw new Error("Fixture: no time zone"); }; }, ""],
+  ["the browser reports no zone", () => { Intl.DateTimeFormat = () => ({ resolvedOptions: () => ({}) }); }, ""],
+  ["the browser reports an empty zone", () => { Intl.DateTimeFormat = () => ({ resolvedOptions: () => ({ timeZone: "" }) }); }, ""],
+  // Privacy-minded browsers report UTC. It is still the browser's zone, so it is recorded as given.
+  ["the browser reports UTC", () => { Intl.DateTimeFormat = () => ({ resolvedOptions: () => ({ timeZone: "UTC" }) }); }, "UTC"],
+];
+for (const [label, stub, zone] of ZONE_CASES) {
+  test(`with JavaScript, when ${label}, the enquiry still goes, its time zone ${zone === "" ? "empty" : `"${zone}"`}`, async ({ page, request }) => {
+    const org = organisation();
+    await page.addInitScript(stub);
+    await page.goto(CONTACT);
+    await expect(page.locator("input[data-timezone]")).toHaveValue(zone);
+    await fillEnquiry(page, org);
+    await Promise.all([sentUrl(page), send(page).click()]);
+    expect(await logged(request, org)).toEqual({ delivered: [{ ...POSTED, organisation: org, timezone: zone }], spam: [] });
+  });
+}
 
 test("native submission mode retains accessible validation and posts through the browser instead of fetch", async ({ page, request }) => {
   const org = organisation();
