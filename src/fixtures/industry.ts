@@ -3,6 +3,9 @@
 // jurisdiction fields only the Government page uses: three sub-sections (Commonwealth, State,
 // Local), each with 4 chips, 3 works-alongside systems and 3 packages, all tagged (spec §8.5).
 // One package recurs in two sub-sections, as a real Government page may repeat an offer.
+// Each has its own "Rules that travel" paragraph (go-global §5.2), and industryFixture's fifth
+// question is tagged region "au", so both specimens render #faq-au in the Australia band (§5.6);
+// governmentIndustryFixture inherits the question list.
 // src/fixtures/sets.ts holds the seven other fixture industries.
 import type { IndustryData } from "../content/schemas.ts";
 import { mockPanelFixture } from "./mock-panel.ts";
@@ -43,6 +46,7 @@ export const industryFixture: IndustryData = {
     "Fixture limit: we don't make the final call on a fixture record.",
     "Fixture limit: we don't rebuild what the fixture records system already does.",
   ],
+  rulesThatTravel: "Fixture rules paragraph: fixture organisations everywhere answer the same fixture questions about AI, so the fixture anchors below name the rules that travel. Your own fixture regulator's rules always come first.",
   problem: {
     from: "Fixture before: a fixture officer reads each agreement by hand.",
     to: "Fixture after: the fixture officer checks a register with linked sources.",
@@ -73,7 +77,7 @@ export const industryFixture: IndustryData = {
     { q: "Fixture question two?", a: "Fixture answer two, long enough to pass the schema." },
     { q: "Fixture question three?", a: "Fixture answer three, long enough to pass the schema." },
     { q: "Fixture question four?", a: "Fixture answer four, long enough to pass the schema." },
-    { q: "Fixture question five?", a: "Fixture answer five, long enough to pass the schema." },
+    { q: "Fixture question five?", a: "Fixture answer five, long enough to pass the schema.", region: "au" },
   ],
 };
 
@@ -129,5 +133,6 @@ export const governmentIndustryFixture: IndustryData = {
   ],
   platformFirst: "Fixture platform-first note: the fixture agency suite already summarises cases, so try that first.",
   dontDo: ["Fixture limit: we never evaluate a fixture system we built for the same agency."],
+  rulesThatTravel: "Fixture rules paragraph: fixture agencies everywhere test their AI before use. For fixture government, we only claim to know the fixture home rules.",
   jurisdictions: ["cth", "nsw", "vic", "local"],
 };

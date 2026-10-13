@@ -12,7 +12,6 @@
 // - The scenario is a carbon section marked data-provenance="illustrative" whose first child is
 //   the fixed label, marked data-provenance-label: CI check 06 reads it, and not the trace panel's
 //   own label nested below it. Its container is padding, not a wrapper element.
-import { AUTOMATION } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import ChipRow from "../components/page/ChipRow.astro";
@@ -70,7 +69,7 @@ const mapRows = (b: RegulatoryBlockView) =>
     art="workflow"
     display={false}
     eyebrow="industry"
-    sub={AUTOMATION.industries[view.shortName] ?? view.constraintSet}
+    sub={view.heroSub ?? undefined}
     breadcrumb={view.breadcrumb}
     ctas={view.ctas}
   />

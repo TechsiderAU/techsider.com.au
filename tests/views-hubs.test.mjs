@@ -8,7 +8,9 @@ import { readFileSync } from "node:fs";
 import { industriesHubView, matrixView, solutionsHubView } from "../src/lib/views/hubs.ts";
 import { industryView } from "../src/lib/views/industry.ts";
 import { JURISDICTION_SECTION } from "../src/content/schemas.ts";
-import { fixtureSite, industryFixtures, regulatoryFixtures, solutionFixtures, traceFixtures } from "../src/fixtures/index.ts";
+import {
+  anchorFixtures, fixtureSite, industryFixtures, regulatoryFixtures, sharedAnchorsFixture, solutionFixtures, traceFixtures,
+} from "../src/fixtures/index.ts";
 
 const site = fixtureSite;
 const solutions = solutionFixtures;
@@ -169,6 +171,7 @@ test("industriesHubView: every chip anchor is a chip and a row of its industry p
   for (const card of v.cards.filter((c) => c.href !== null)) {
     const page = industryView({
       id: card.id, data: industries[card.id], rows: regulatoryFixtures[card.id].rows,
+      sharedAnchors: sharedAnchorsFixture, anchors: anchorFixtures[card.id],
       solutions, traces: traceFixtures, insights: [], site,
     });
     const blocks = page.mode === "single" ? [page.single] : page.sections;

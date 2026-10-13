@@ -1,7 +1,13 @@
-// The industry page's view model (spec §8.5, §5). Pure TypeScript that Node can import: it never
-// imports astro:content, and it reads every reference field through refId(). IndustryTemplate
-// renders the result; a Phase C route builds it from the content collections, the gallery
-// specimens from the fixtures.
+// The industry page's view model (spec §8.5, §5; go-global §5). Pure TypeScript that Node can
+// import: it never imports astro:content, and it reads every reference field through refId().
+// IndustryTemplate renders the result; a Phase C route builds it from the content collections, the
+// gallery specimens from the fixtures.
+// - "Rules that travel" (go-global §5.2): the "Everywhere" row lists the shared.json anchors the
+//   industry's anchors file names in `shared`, in that order; the sector row lists the industry
+//   file's featured anchors, in data order. Each chip's label is built here (anchorChipLabel), never
+//   in the template.
+// - FAQs (go-global §5.6): `faq` is the full list in data order (the page's one FAQPage),
+//   `faqNeutral` the untagged questions (#faq) and `faqAu` the region "au" ones (#faq-au).
 // - Every link comes from the SiteContext: a page that isn't shown has a null href, and an
 //   on-request package or the contact CTA falls back to email while /contact/ isn't shown.
 // - Regulatory-map rows get page-unique anchors: `reg-${rowId}` on a single-map page, and
@@ -10,13 +16,18 @@
 // - Broken data fails the build: a chip whose row isn't in its map, a package that doesn't
 //   exist or is internal, a missing scenario trace, a repeated regulatory row id, a workflow
 //   stage id that repeats or that the page already writes (a section id or a reg- row anchor),
-//   or (jurisdiction mode) a row that names no jurisdiction.
+//   (jurisdiction mode) a row that names no jurisdiction, a shared anchor that isn't in
+//   shared.json or isn't featured there, more than three featured sector anchors, or a sector
+//   anchor that repeats a shared one.
 import type { z } from "astro/zod";
 import type {
-  MockPanelData, SectionId, TraceData, jurisdiction, makeIndustrySchema, makeSolutionSchema, regulatoryRow,
+  AnchorData, AnchorFileData, MockPanelData, SectionId, TraceData, jurisdiction, makeIndustrySchema, makeSolutionSchema,
+  regulatoryRow,
 } from "../../content/schemas.ts";
 import { JURISDICTION_SECTION, SECTION_ORDER, SECTION_TITLE } from "../../content/schemas.ts";
+import { anchorChipLabel } from "../anchors.ts";
 import { WORKS_METHOD_LABEL } from "../fixed-copy.ts";
+import { AUTOMATION } from "../marketing.ts";
 import type { Link, SiteContext } from "../site.ts";
 import { crumbs, industryLink, refId, solutionLink } from "../site.ts";
 import type { InsightCardView } from "./insights.ts";
@@ -39,12 +50,26 @@ export interface RegRowView {
 }
 export interface RegulatoryBlockView { chips: ChipView[]; works: WorksView[]; packages: RecommendedPackageView[]; rows: RegRowView[]; lastReviewed: Date }
 export interface JurisdictionSectionView extends RegulatoryBlockView { id: SectionId; title: string }
+/** One "Rules that travel" chip: the anchor's name, its "{Kind} · {status} · as at {Mon YYYY}" label, its primary source. */
+export interface AnchorChipView { id: string; name: string; label: string; href: string; scope: "shared" | "sector" }
+export interface RulesBlockView {
+  /** The industry's neutral paragraph (rulesThatTravel), or null while it has none. */
+  paragraph: string | null;
+  /** The "Everywhere" row, in the industry file's `shared` order. */
+  shared: AnchorChipView[];
+  /** The industry file's featured anchors, in data order. */
+  sector: AnchorChipView[];
+}
+export interface FaqItemView { q: string; a: string }
 export interface IndustryView {
   id: string; shortName: string; fullName: string; breadcrumb: Link[];
-  promise: string; constraintSet: string;
+  promise: string;
+  /** The hero sub: the industry's AUTOMATION line, or null when it has none (the fixtures). It replaces constraintSet, which no page renders (go-global §5.1). */
+  heroSub: string | null;
   ctas: { primary: Link; secondary: Link };
   mode: "single" | "jurisdictions";
   single: RegulatoryBlockView | null; sections: JurisdictionSectionView[];
+  rules: RulesBlockView;
   problem: { from: string; to: string; source: { label: string; url: string; asAt: Date } };
   workflow: { id: string; stage: string; useCases: { name: string; solution: { number: string; shortName: string; href: string | null }; onRequest: boolean; note: string | null }[] }[];
   mockPanel: MockPanelData;
@@ -54,9 +79,17 @@ export interface IndustryView {
   scenario: { title: string; problem: string; approach: string; measure: string[]; shipsFirst: string; trace: TraceData };
   firstEngagement: { needFromYou: string[]; youGet: string[]; exitRamp: string };
   insights: InsightCardView[];
-  faq: { q: string; a: string }[];
+  /** Every question in data order, region stripped: the page's one FAQPage. */
+  faq: FaqItemView[];
+  /** The untagged questions, for #faq. */
+  faqNeutral: FaqItemView[];
+  /** The region "au" questions, for #faq-au in the Australia band. */
+  faqAu: FaqItemView[];
   closing: { command: "talk_to_us"; args: string; label: string; href: string };
 }
+
+/** At most this many featured sector anchors per page (go-global §5.2: 2–3; the minimum is a content test). */
+const MAX_SECTOR_ANCHORS = 3;
 
 /** The "Applies to" cell of a state-section row: its states, in NSW, Vic, Qld order. */
 const STATES: { id: Jurisdiction; label: string }[] = [
@@ -130,16 +163,43 @@ function block(
   };
 }
 
+function anchorChip(a: AnchorData, scope: AnchorChipView["scope"]): AnchorChipView {
+  return { id: a.id, name: a.name, label: anchorChipLabel(a), href: a.source, scope };
+}
+
+function rulesBlock(industryId: string, paragraph: string | undefined, sharedAnchors: AnchorFileData, anchors: AnchorFileData): RulesBlockView {
+  const sharedById = new Map(sharedAnchors.anchors.map((a) => [a.id, a]));
+  const shared = (anchors.shared ?? []).map((sharedId) => {
+    const a = sharedById.get(sharedId);
+    if (!a) throw new Error(`industryView(${industryId}): shared anchor "${sharedId}" isn't in src/data/anchors/shared.json`);
+    if (!a.featured) throw new Error(`industryView(${industryId}): shared anchor "${sharedId}" isn't featured in src/data/anchors/shared.json`);
+    return anchorChip(a, "shared");
+  });
+  const featured = anchors.anchors.filter((a) => a.featured);
+  if (featured.length > MAX_SECTOR_ANCHORS) {
+    throw new Error(`industryView(${industryId}): ${featured.length} featured sector anchors; the sector row shows at most ${MAX_SECTOR_ANCHORS} (go-global §5.2)`);
+  }
+  const sharedIds = new Set(shared.map((c) => c.id));
+  for (const a of featured) {
+    if (sharedIds.has(a.id)) throw new Error(`industryView(${industryId}): sector anchor "${a.id}" is also in the shared row`);
+  }
+  return { paragraph: paragraph ?? null, shared, sector: featured.map((a) => anchorChip(a, "sector")) };
+}
+
 export function industryView(input: {
   id: string;
   data: IndustryData;
   rows: RegulatoryRow[];
+  /** src/data/anchors/shared.json: the anchors an industry's "Everywhere" row may show. */
+  sharedAnchors: AnchorFileData;
+  /** src/data/anchors/<id>.json: the industry's shared-row ids and its sector anchors. */
+  anchors: AnchorFileData;
   solutions: Record<string, SolutionData>;
   traces: Record<string, TraceData>;
   insights: InsightCardView[];
   site: SiteContext;
 }): IndustryView {
-  const { id, data, rows, solutions, traces, insights, site } = input;
+  const { id, data, rows, sharedAnchors, anchors, solutions, traces, insights, site } = input;
   const link = industryLink(site, id);
   const lower = link.shortName.toLowerCase();
   const talk = { label: `Talk to us about AI for ${lower}`, href: site.contact({ industry: id }) };
@@ -149,6 +209,7 @@ export function industryView(input: {
   // is also an id the template writes (a section, a jurisdiction sub-block, a chip row, the
   // workflow tab group or a reg- row anchor), would give the page two elements with one id.
   const pageIds = new Set<string>([
+    "rules-that-travel", "rules-that-travel-shared-label", "australia", "faq-au",
     "designed-around", "designed-around-obligations", "designed-around-systems",
     ...SECTION_ORDER.flatMap((s) => [s, `${s}-designed-around`, `${s}-obligations`, `${s}-systems`, `${s}-packages`, `${s}-regulatory-map`]),
     "problem", "workflow", "packages", "packages-lead", "regulatory-map", "scenario", "first-engagement", "insights", "faq", "contact",
@@ -193,6 +254,9 @@ export function industryView(input: {
     single = block(id, null, { chips: data.obligationChips, works: data.worksAlongside, packages: data.packages, rows }, solutions, site);
   }
 
+  const rules = rulesBlock(id, data.rulesThatTravel, sharedAnchors, anchors);
+  const faqItem = (f: { q: string; a: string }): FaqItemView => ({ q: f.q, a: f.a });
+
   const trace = traces[data.scenario.trace];
   if (!trace) throw new Error(`industryView(${id}): scenario trace "${data.scenario.trace}" isn't in traces`);
 
@@ -202,11 +266,12 @@ export function industryView(input: {
     fullName: link.fullName,
     breadcrumb: crumbs(site, ["industries", { label: link.shortName, path: link.path }]),
     promise: data.promise,
-    constraintSet: data.constraintSet,
+    heroSub: AUTOMATION.industries[link.shortName] ?? null,
     ctas: { primary: talk, secondary: { label: `See the ${lower} scenario`, href: "#scenario" } },
     mode: data.jurisdictions ? "jurisdictions" : "single",
     single,
     sections,
+    rules,
     problem: { from: data.problem.from, to: data.problem.to, source: { label: data.problem.source.label, url: data.problem.source.url, asAt: data.problem.source.asAt } },
     workflow: data.workflow.map((stage) => ({
       id: stage.id,
@@ -232,7 +297,9 @@ export function industryView(input: {
       .filter((card) => card.industries.some((i) => i.id === id))
       .sort((a, b) => b.date.getTime() - a.date.getTime())
       .slice(0, MAX_INSIGHTS),
-    faq: data.faq.map((f) => ({ q: f.q, a: f.a })),
+    faq: data.faq.map(faqItem),
+    faqNeutral: data.faq.filter((f) => f.region === undefined).map(faqItem),
+    faqAu: data.faq.filter((f) => f.region === "au").map(faqItem),
     closing: { command: "talk_to_us", args: `--about=${id}`, label: talk.label, href: talk.href },
   };
 }

@@ -13,6 +13,7 @@ import { elements, elementsWith, startTags } from "../scripts/ci/lib.mjs";
 import { run as regulatoryKits } from "../scripts/ci/checks/08-regulatory-kits.mjs";
 import { SECTION_TITLE } from "../src/content/schemas.ts";
 import { NOT_LEGAL_ADVICE, SCENARIO_LABEL } from "../src/lib/fixed-copy.ts";
+import { industryFixtures } from "../src/fixtures/index.ts";
 import { fixtureIndustryView } from "../src/preview/specimens/industry-view.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -58,13 +59,16 @@ test("ids are unique on both industry pages", () => {
   }
 });
 
-test("hero: the breadcrumb, the industry eyebrow, the constraint set and both CTAs", () => {
+test("hero: the breadcrumb, the industry eyebrow, the view's hero sub (none on the fixtures), never the constraint set, and both CTAs", () => {
   for (const [kind, view] of PAGES) {
     const hero = elementsWith(read(kind), "data-page-hero")[0];
     assert.ok(hero, `${kind}: no [data-page-hero]`);
     const t = text(hero.inner);
     assert.match(t, /\bindustry\b/, `${kind}: no [industry] eyebrow`);
-    assert.ok(t.includes(view.constraintSet), `${kind}: no constraint set`);
+    // The fixtures' short names have no AUTOMATION line, so heroSub is null and no sub renders (go-global §5.1).
+    assert.equal(view.heroSub, null, kind);
+    assert.deepEqual(elements(hero.inner, (tag) => (tag.attrs.class ?? "").split(/\s+/).includes("page-hero-sub")), [], `${kind}: a hero sub without a heroSub`);
+    assert.ok(!t.includes(industryFixtures[view.id].constraintSet), `${kind}: the constraint set renders`);
     assert.match(hero.inner, /aria-label="Breadcrumb"/);
     const links = elements(hero.inner, (tag) => tag.name === "a").map((a) => [text(a.inner), a.attrs.href]);
     for (const cta of [view.ctas.primary, view.ctas.secondary]) {
