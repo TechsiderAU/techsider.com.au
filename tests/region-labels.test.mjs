@@ -12,8 +12,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { readDist, readPreviewDist } from "./helpers.mjs";
-import { elements, readFrontmatter } from "../scripts/ci/lib.mjs";
+import { allHtmlFiles, readDist, readPreviewDist } from "./helpers.mjs";
+import { elements, readFrontmatter, startTags } from "../scripts/ci/lib.mjs";
 import { makeDemoSchema, makeIndustrySchema, makeKitSchema, makeSolutionSchema, plainRef, traceFile } from "../src/content/schemas.ts";
 import { SOLUTION_GUIDES } from "../src/lib/marketing.ts";
 import { siteContext } from "../src/lib/site.ts";
@@ -296,4 +296,34 @@ test("demos on Australian sources: their frames, and the ④ report wherever it 
     assert.equal(elementsWith(wrappers[0].inner, "data-sample-report").length, 1, `${page}: the wrapper holds the report`);
     assert.deepEqual(labelsIn(wrappers[0].inner), EXAMPLE_LABEL, `${page}: the report's label`);
   }
+});
+
+const PLATFORM_LABEL = [["platform", PLATFORM_REGION_LABEL]];
+
+test("the checker, its vendor table and the compact summary open with the platform label: every fact is checked for Australian customers", () => {
+  for (const page of ["resources/what-you-already-pay-for/index.html", "demos/ai-switch-on/index.html"]) {
+    const main = mainHtml(readDist(page));
+    for (const hook of ["data-checker", "data-platform-facts"]) {
+      const [el] = elementsWith(main, hook);
+      assert.equal(el.attrs["data-region"], "au", `${page}: [${hook}]`);
+      assert.deepEqual(labelsIn(el.inner), PLATFORM_LABEL, `${page}: [${hook}] label`);
+      assert.match(el.inner, /^\s*<span\b[^>]*\bdata-region-label="platform"/, `${page}: [${hook}] doesn't open with its label`);
+    }
+  }
+  const [summary] = elementsWith(mainHtml(readDist("solutions/ai-switch-on/index.html")), "data-checker-summary");
+  assert.equal(summary.attrs["data-region"], "au");
+  assert.deepEqual(labelsIn(summary.inner), PLATFORM_LABEL);
+});
+
+test("every region label on a built page sits inside a data-region=\"au\" wrapper, except an Australian post's header label", () => {
+  let labels = 0;
+  for (const file of allHtmlFiles()) {
+    const html = readDist(file);
+    const wrappers = [...elements(html, (t) => t.attrs["data-region"] === "au"), ...elementsWith(html, "data-post-region")];
+    for (const label of startTags(html).filter((t) => "data-region-label" in t.attrs)) {
+      labels++;
+      assert.ok(wrappers.some((w) => w.start < label.start && label.end <= w.end), `${file}: the region label at offset ${label.start} has no data-region="au" wrapper`);
+    }
+  }
+  assert.ok(labels > 0, "no region label on any built page: run npm run build first");
 });
