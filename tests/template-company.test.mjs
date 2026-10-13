@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, idsIn, startTags } from "../scripts/ci/lib.mjs";
 import { CONTACT_H1, EXTRA_INTERESTS, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../src/lib/fixed-copy.ts";
+import { countryOptions } from "../src/data/countries.ts";
 import { insightCards } from "../src/lib/views/insights.ts";
 import { trustView } from "../src/lib/views/company.ts";
 import {
@@ -343,13 +344,14 @@ test("contact: a plain POST form to the endpoint, with native validation on requ
     elements(form.inner, (t) => ["input", "select", "textarea"].includes(t.name)).map((c) => [c.attrs.name, c]),
   );
   // The stand-in provider's hidden fields, the enquiry fields, then the honeypot under the provider's name.
-  assert.deepEqual(Object.keys(controls), ["_redirect", "_append", "name", "email", "organisation", "industry", "size", "interest", "message", "discovery", "consent", "_gotcha"]);
+  assert.deepEqual(Object.keys(controls), ["_redirect", "_append", "name", "email", "organisation", "country", "industry", "size", "interest", "message", "discovery", "consent", "_gotcha"]);
   assert.equal(controls.discovery.name, "select");
   assert.ok(!("required" in controls.discovery.attrs));
   const expect = {
     name: { tag: "input", type: "text", autocomplete: "name" },
     email: { tag: "input", type: "email", autocomplete: "email" },
     organisation: { tag: "input", type: "text", autocomplete: "organization" },
+    country: { tag: "select", autocomplete: "country" },
     industry: { tag: "select" },
     size: { tag: "select" },
     interest: { tag: "select" },
@@ -366,13 +368,18 @@ test("contact: a plain POST form to the endpoint, with native validation on requ
   }
 });
 
-test("contact: the selects offer the nine industries and Other, the organisation sizes, and the five solutions plus the extra interests", () => {
+test("contact: the selects offer every country by its English name, the nine industries and Other, the organisation sizes, and the five solutions plus the extra interests", () => {
   const form = one(mainOf(page("contact")), "data-contact-form");
   const options = (name) => {
     const select = elements(form.inner, (t) => t.name === "select" && t.attrs.name === name)[0];
     return tagged(select.inner, "option").map((o) => [o.attrs.value, text(o.inner)]);
   };
   const placeholder = ["", "Choose one"];
+  // go-global §8.1: every code in src/data/countries.ts, named by Intl and sorted by name, and no
+  // country chosen for the visitor.
+  assert.deepEqual(options("country"), [placeholder, ...countryOptions().map((o) => [o.value, o.label])]);
+  const country = elements(form.inner, (t) => t.name === "select" && t.attrs.name === "country")[0];
+  assert.equal(tagged(country.inner, "option").filter((o) => "selected" in o.attrs).length, 0, "a country is preselected");
   assert.deepEqual(options("industry"), [placeholder, ...fixtureSite.industries.map((i) => [i.id, i.shortName]), ["other", "Other"]]);
   assert.deepEqual(options("size"), [placeholder, ...ORG_SIZES.map((s) => [s, s])]);
   assert.deepEqual(options("interest"), [placeholder, ...fixtureSite.solutions.map((s) => [s.id, s.shortName]), ...EXTRA_INTERESTS.map((e) => [e.id, e.label])]);

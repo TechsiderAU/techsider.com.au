@@ -36,6 +36,7 @@ for (const javaScriptEnabled of [true, false]) {
       await page.getByLabel("Name").fill("Contact Test");
       await page.getByLabel("Work email").fill("contact-test@example.com");
       await page.getByLabel("Organisation", { exact: true }).fill("Test Organisation");
+      await page.getByLabel("Country").selectOption("NZ");
       await page.getByLabel("Industry").selectOption("government");
       await page.getByLabel("Organisation size").selectOption({ index: 1 });
       await page.getByLabel("Interest").selectOption("ai-evaluation");
@@ -51,7 +52,7 @@ for (const javaScriptEnabled of [true, false]) {
       expect(submission.native).toBe(true);
       expect(submission.method).toBe("POST");
       expect(submission.fields).toMatchObject({
-        name: "Contact Test", email: "contact-test@example.com", organisation: "Test Organisation",
+        name: "Contact Test", email: "contact-test@example.com", organisation: "Test Organisation", country: "NZ",
         industry: "government", interest: "ai-evaluation", consent: "yes", _honey: "",
         _next: "https://techsider.com.au/contact/sent/", ...CONTACT.hiddenFields,
       });

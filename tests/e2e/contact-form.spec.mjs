@@ -18,8 +18,9 @@ const MOCK = new URL(MOCK_FORM.formEndpoint).origin;
 const WIDE = { width: 1280, height: 800 };
 const NARROW = { width: 390, height: 844 };
 const CONTROL_ID = {
-  name: "contact-name", email: "contact-email", organisation: "contact-organisation", industry: "contact-industry",
-  size: "contact-size", interest: "contact-interest", message: "contact-message", consent: "contact-consent",
+  name: "contact-name", email: "contact-email", organisation: "contact-organisation", country: "contact-country",
+  industry: "contact-industry", size: "contact-size", interest: "contact-interest", message: "contact-message",
+  consent: "contact-consent",
 };
 // Every field a complete enquiry posts, the provider's included, less the organisation each test names.
 const POSTED = {
@@ -27,6 +28,7 @@ const POSTED = {
   _append: "false",
   name: "Fixture Person",
   email: "fixture-person@example.com",
+  country: "NZ",
   industry: "fixture-government",
   size: "200–999",
   interest: "evaluation-partner",
@@ -50,6 +52,7 @@ async function fillEnquiry(page, org) {
   await page.getByLabel("Name").fill(POSTED.name);
   await page.getByLabel("Work email").fill(POSTED.email);
   await page.getByLabel("Organisation", { exact: true }).fill(org);
+  await page.getByLabel("Country").selectOption(POSTED.country);
   await page.getByLabel("Industry").selectOption(POSTED.industry);
   await page.getByLabel("Organisation size").selectOption(POSTED.size);
   await page.getByLabel("Interest").selectOption(POSTED.interest);
@@ -162,9 +165,38 @@ test("with JavaScript, an answered field loses its error; a resubmit re-checks t
   await send(page).click();
   await expect(page.locator("#contact-email-error")).toHaveText(FIELD_ERRORS.email.invalid);
   await expect(summary(page).getByRole("link")).toHaveText([
-    FIELD_ERRORS.email.invalid, FIELD_ERRORS.organisation.missing, FIELD_ERRORS.size.missing, FIELD_ERRORS.interest.missing,
+    FIELD_ERRORS.email.invalid, FIELD_ERRORS.organisation.missing, FIELD_ERRORS.country.missing, FIELD_ERRORS.size.missing,
+    FIELD_ERRORS.interest.missing,
   ]);
   await expect(page.getByLabel("Work email")).toBeFocused();
+});
+
+test("with JavaScript, an enquiry with no country sends nothing: the country's error shows, the summary names it alone, and focus moves to the select (go-global §8.1)", async ({ page, request }) => {
+  const org = organisation();
+  await page.goto(CONTACT);
+  await fillEnquiry(page, org);
+  await page.getByLabel("Country").selectOption("");
+  await send(page).click();
+  await expect(page.getByLabel("Country")).toBeFocused();
+  await expect(page.locator("#contact-country-error")).toHaveText(FIELD_ERRORS.country.missing);
+  await expect(page.getByLabel("Country")).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByLabel("Country")).toHaveAccessibleDescription(FIELD_ERRORS.country.missing);
+  await expect(summary(page).getByRole("link")).toHaveText([FIELD_ERRORS.country.missing]);
+  await expect(page).toHaveURL(new RegExp(`${CONTACT}$`));
+  expect(await logged(request, org)).toEqual({ delivered: [], spam: [] });
+});
+
+test("without JavaScript, the browser's own validation keeps an enquiry with no country on the page (go-global §8.1)", async ({ page, request }) => {
+  const org = organisation();
+  await withoutScripts(page, CONTACT);
+  await page.goto(CONTACT);
+  await expect(page.locator("html")).toHaveClass(/\bno-js\b/);
+  await fillEnquiry(page, org);
+  await page.getByLabel("Country").selectOption("");
+  await send(page).click();
+  await expect(page).toHaveURL(new RegExp(`${CONTACT}$`));
+  expect(await page.getByLabel("Country").evaluate((el) => el.validity.valueMissing)).toBe(true);
+  expect(await logged(request, org)).toEqual({ delivered: [], spam: [] });
 });
 
 test("with JavaScript, the provider's 422 shows the error of each field it names, nothing is delivered, and the fixed enquiry goes", async ({ page, request }) => {

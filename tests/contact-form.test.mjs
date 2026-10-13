@@ -48,18 +48,19 @@ const controlNamed = (html, name) =>
 // The origin the browser tests serve the preview build from (playwright.config.mjs).
 const PREVIEW_ORIGIN = "http://127.0.0.1:4322";
 const ENQUIRY = {
-  name: "Fixture Person", email: "fixture-person@example.com", organisation: "Fixture Organisation",
+  name: "Fixture Person", email: "fixture-person@example.com", organisation: "Fixture Organisation", country: "NZ",
   industry: "fixture-government", size: "200–999", interest: "evaluation-partner",
   message: "Fixture message: what we are trying to fix.", consent: "yes",
 };
 
-test("the enquiry fields are spec §10.2's, in form order, and each error line says what to do", () => {
-  assert.deepEqual([...ENQUIRY_FIELDS], ["name", "email", "organisation", "industry", "size", "interest", "message", "consent"]);
+test("the enquiry fields are spec §10.2's and go-global §8.1's country, in form order, and each error line says what to do", () => {
+  assert.deepEqual([...ENQUIRY_FIELDS], ["name", "email", "organisation", "country", "industry", "size", "interest", "message", "consent"]);
   assert.equal(MESSAGE_MAX, 1000);
   assert.deepEqual(FIELD_ERRORS, {
     name: { missing: "Enter your name." },
     email: { missing: "Enter your work email address.", invalid: "Enter an email address like name@example.com." },
     organisation: { missing: "Enter your organisation's name." },
+    country: { missing: "Choose your country." },
     industry: { missing: "Choose your industry, or Other." },
     size: { missing: "Choose your organisation's size." },
     interest: { missing: "Choose what you'd like to talk about, or Not sure yet." },
@@ -205,6 +206,17 @@ test("mock provider: with Accept: application/json, 200 and CORS for a complete 
   });
 });
 
+test("mock provider: an enquiry with no country is incomplete, refused as a plain POST and named in a 422 (go-global §8.1)", async () => {
+  await withMock(async (base) => {
+    const organisation = "Fixture No-Country Organisation";
+    assert.equal((await post(base, { ...FORMSPARK, ...ENQUIRY, organisation, country: "" })).status, 400);
+    const rejected = await post(base, { ...FORMSPARK, ...ENQUIRY, organisation, country: "" }, { accept: "application/json" });
+    assert.equal(rejected.status, 422);
+    assert.deepEqual(rejectedFields(await rejected.json()), ["country"]);
+    assert.deepEqual(await logFor(base, organisation), { delivered: [], spam: [] });
+  });
+});
+
 test("mock provider: it reads the gallery form's field names, runs on the gallery form's port, and knows the site's origin", async () => {
   assert.equal(MOCK_FORM.redirectField, REDIRECT_FIELD);
   assert.deepEqual(MOCK_FORM.hiddenFields, { [APPEND_FIELD]: "false" });
@@ -327,7 +339,7 @@ function runsFormScript(dir, html) {
   });
 }
 
-test("the form's script loads only with the form: on the gallery's contact page, and on /contact/ once it has a form endpoint", () => {
+test("the form's script loads only with the form: on the gallery's contact page, and on /contact/ once it has a form endpoint", (t) => {
   // /contact/ renders the form in both builds once src/data/contact.ts has an endpoint; until then only the gallery does.
   const contact = CONTACT.formEndpoint === null ? [] : ["contact/index.html"];
   const expected = { dist: contact, "dist-preview": [...contact, "preview/templates/contact/index.html"] };
@@ -347,6 +359,17 @@ test("the form's script loads only with the form: on the gallery's contact page,
   const chunks = readdirSync(join(ROOT, "dist", "_astro")).filter((f) => f.endsWith(".js"));
   for (const f of chunks) {
     assert.ok(!readText(join(ROOT, "dist", "_astro", f)).includes("[data-form-summary]"), `dist/_astro/${f} carries the form's script: it has outgrown Astro's 4 KB inline limit`);
+  }
+  // go-global §8.1: re-measured with the Country field (4,010 bytes before it). The time zone has a
+  // small script of its own, so it adds nothing here.
+  if (CONTACT.formEndpoint !== null) {
+    const inline = [...readDist("contact/index.html").matchAll(/<script type="module">([\s\S]*?)<\/script>/g)]
+      .map((m) => m[1])
+      .find((code) => code.includes("[data-form-summary]"));
+    assert.ok(inline !== undefined, "/contact/'s form script isn't inline");
+    const bytes = Buffer.byteLength(inline);
+    t.diagnostic(`the form's inline script: ${bytes} bytes of Astro's 4,096`);
+    assert.ok(bytes < 4096, `the form's inline script is ${bytes} bytes`);
   }
 });
 

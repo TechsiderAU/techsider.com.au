@@ -19,8 +19,13 @@
 // the Trust page's sub-processor table, so the two can't disagree. The consent and the notice both
 // link to the published privacy policy or the contact page's factual enquiry-handling notice.
 // The separate legal draft remains unpublished until its review.
+// go-global §8.1: Country is required, after Organisation. Its options are every code in
+// src/data/countries.ts, named in English when the site builds and sorted by name, with
+// autocomplete="country" and nothing preselected. Interest takes a whole row, which would
+// otherwise end the two-column grid with an empty cell.
 import type { ContactData } from "../../content/page-schemas";
 import type { SiteContext } from "../../lib/site";
+import { countryOptions } from "../../data/countries";
 import { EXTRA_INTERESTS, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../../lib/fixed-copy";
 import { FIELD_ERRORS, FORM_MESSAGES, MESSAGE_MAX, type EnquiryField } from "../../lib/contact-form";
 
@@ -52,7 +57,14 @@ const hidden: [string, string][] = [
 ];
 /** An error line's words, for the script to show (an attribute left undefined isn't rendered). */
 const words = (name: EnquiryField) => ({ "data-missing": FIELD_ERRORS[name].missing, "data-invalid": FIELD_ERRORS[name].invalid });
-const selects: { id: string; name: EnquiryField; label: string; options: { value: string; label: string }[] }[] = [
+const selects: { id: string; name: EnquiryField; label: string; autocomplete?: string; wide?: boolean; options: { value: string; label: string }[] }[] = [
+  {
+    id: "contact-country",
+    name: "country",
+    label: "Country",
+    autocomplete: "country",
+    options: countryOptions(),
+  },
   {
     id: "contact-industry",
     name: "industry",
@@ -69,6 +81,7 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
     id: "contact-interest",
     name: "interest",
     label: "Interest",
+    wide: true,
     options: [
       ...site.solutions.map((s) => ({ value: s.id, label: s.shortName })),
       ...EXTRA_INTERESTS.map((e) => ({ value: e.id, label: e.label })),
@@ -106,10 +119,10 @@ const selects: { id: string; name: EnquiryField; label: string; options: { value
       <p id="contact-organisation-error" class="contact-error" data-error-for="organisation" {...words("organisation")} hidden></p>
     </div>
     {selects.map((select) => (
-      <div class="contact-field">
+      <div class:list={["contact-field", select.wide && "contact-field-wide"]}>
         <label for={select.id} class="contact-label">{select.label}</label>
         <span class="contact-select">
-          <select id={select.id} name={select.name} required class="contact-control">
+          <select id={select.id} name={select.name} autocomplete={select.autocomplete} required class="contact-control">
             <option value="">Choose one</option>
             {select.options.map((option) => <option value={option.value}>{option.label}</option>)}
           </select>

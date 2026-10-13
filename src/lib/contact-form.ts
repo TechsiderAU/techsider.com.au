@@ -5,8 +5,11 @@
 // importing it, so it stays under Astro's 4 KB inline limit: a larger script would be emitted to
 // dist/_astro/ even where no page renders the form. Plain TypeScript with no imports.
 
-/** The fields ContactForm posts, in form order (spec §10.2). A provider's own fields never reuse these names. */
-export const ENQUIRY_FIELDS = ["name", "email", "organisation", "industry", "size", "interest", "message", "consent"] as const;
+/**
+ * The fields ContactForm requires, in form order (spec §10.2; country from go-global §8.1). A
+ * provider's own fields never reuse these names.
+ */
+export const ENQUIRY_FIELDS = ["name", "email", "organisation", "country", "industry", "size", "interest", "message", "consent"] as const;
 /** Optional answers travel with the enquiry; they do not add validation requirements. */
 export const OPTIONAL_ENQUIRY_FIELDS = ["discovery"] as const;
 export type EnquiryField = (typeof ENQUIRY_FIELDS)[number];
@@ -22,6 +25,7 @@ export const FIELD_ERRORS: Record<EnquiryField, { missing: string; invalid?: str
   name: { missing: "Enter your name." },
   email: { missing: "Enter your work email address.", invalid: "Enter an email address like name@example.com." },
   organisation: { missing: "Enter your organisation's name." },
+  country: { missing: "Choose your country." },
   industry: { missing: "Choose your industry, or Other." },
   size: { missing: "Choose your organisation's size." },
   interest: { missing: "Choose what you'd like to talk about, or Not sure yet." },

@@ -22,7 +22,7 @@ const MUTED_DARK = "rgb(92, 91, 85)";
 // The consent and the collection notice each link to the privacy policy (WB-12), so Tab reaches
 // both links, after the checkbox and before the submit button.
 const PRIVACY = `${BASE}/legal-document/`;
-const FORM_ORDER = ["contact-name", "contact-email", "contact-organisation", "contact-industry", "contact-size", "contact-interest", "contact-message", "contact-discovery", "contact-consent", PRIVACY, PRIVACY, "submit"];
+const FORM_ORDER = ["contact-name", "contact-email", "contact-organisation", "contact-country", "contact-industry", "contact-size", "contact-interest", "contact-message", "contact-discovery", "contact-consent", PRIVACY, PRIVACY, "submit"];
 
 const axe = (page) => new AxeBuilder({ page }).include("main").withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]);
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -49,6 +49,7 @@ async function fillEnquiry(page) {
   await page.getByLabel("Name").fill("Fixture Person");
   await page.getByLabel("Work email").fill("fixture-person@example.com");
   await page.getByLabel("Organisation", { exact: true }).fill("Fixture Organisation");
+  await page.getByLabel("Country").selectOption("NZ");
   await page.getByLabel("Industry").selectOption("fixture-government");
   await page.getByLabel("Organisation size").selectOption("200–999");
   await page.getByLabel("Interest").selectOption("evaluation-partner");
@@ -163,6 +164,7 @@ test("without JavaScript, a complete enquiry is a plain form POST of every field
     name: "Fixture Person",
     email: "fixture-person@example.com",
     organisation: "Fixture Organisation",
+    country: "NZ",
     industry: "fixture-government",
     size: "200–999",
     interest: "evaluation-partner",
@@ -229,7 +231,7 @@ test("a Trust FAQ answer opens to show its Part and as-at date", async ({ page }
 test("decorative generated content has empty alternative text: the select arrows and the About step numbers", async ({ page }) => {
   await page.goto(CONTACT);
   const selects = page.locator(".contact-select");
-  await expect(selects).toHaveCount(4);
+  await expect(selects).toHaveCount(5);
   for (const select of await selects.all()) {
     expect(await select.evaluate((el) => getComputedStyle(el, "::after").content)).toBe('"▾" / ""');
   }
