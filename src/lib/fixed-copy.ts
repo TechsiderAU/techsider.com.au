@@ -30,7 +30,7 @@ export const DEMO_CTA = "Want this on your documents, in your environment?"; // 
 export const ONSHORE_PILLAR = "Your data stays onshore."; // §3.2
 export const PROCESSING_NOTE = "We show you where your data is processed."; // §3.2 scope rule
 export const ACCEPTANCE_TEST_LABEL = "Acceptance test (not independent)"; // §4.4
-export const HOME_PROMPT = { command: "applied_ai", args: "--region=au" } as const; // §8.1.1
+export const HOME_PROMPT = { command: "applied_ai", args: "--region=yours" } as const; // §8.1.1; go-global D19
 export const HOME_CLOSING = { command: "talk_to_us", args: "--about=<industry>" } as const; // §8.1.11
 export const HOME_TRUST_QUESTION = "Why should we trust you?"; // §8.1.10; wording updated by owner
 export const CONTACT_H1 = "Tell us what you're trying to fix."; // §8.11

@@ -28,7 +28,7 @@ test("fixed copy: every constant is pinned word for word: the spec's text, and R
   assert.equal(copy.ONSHORE_PILLAR, "Your data stays onshore.");
   assert.equal(copy.PROCESSING_NOTE, "We show you where your data is processed.");
   assert.equal(copy.ACCEPTANCE_TEST_LABEL, "Acceptance test (not independent)");
-  assert.deepEqual(copy.HOME_PROMPT, { command: "applied_ai", args: "--region=au" });
+  assert.deepEqual(copy.HOME_PROMPT, { command: "applied_ai", args: "--region=yours" }); // go-global D19
   assert.deepEqual(copy.HOME_CLOSING, { command: "talk_to_us", args: "--about=<industry>" });
   assert.equal(copy.HOME_TRUST_QUESTION, "Why should we trust you?");
   assert.equal(copy.CONTACT_H1, "Tell us what you're trying to fix.");
