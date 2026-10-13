@@ -176,3 +176,20 @@ test("the README explains go-global: the Australia band, Rules that travel, regi
   assert.match(row("08-regulatory-kits"), /Government jurisdiction section in the Australia band/);
   assert.match(row("10-package-status"), /appears on exactly the launch packages flagged `onshore: true`/);
 });
+
+/** go-global §3.5: the content READMEs that say where Australian content renders, and what each must say. */
+const CONTENT_READMES = {
+  "src/data/regulatory/README.md": ["Australia band", 'data-region="au"', "CI check 13", "src/data/anchors/"],
+  "src/content/industries/README.md": ["`rulesThatTravel`", "140 words", "`#australia`", "`region: au`", "`#faq-au`", "900–1,800", "Australia band"],
+  "src/content/solutions/README.md": ["`onshoreNote`", "remotely from Sydney", ONSHORE_PILLAR, "`region: au`", "(Australia)"],
+  "src/data/anchors/README.md": ["does not exist", "`industryView()`", "tests/anchors-content.test.mjs", "`YYYY-MM`", "once a quarter"],
+};
+
+test("the content READMEs say where Australian content renders, what feeds Rules that travel and what a region note says, naming only paths that exist (go-global §3.5)", () => {
+  for (const [rel, needles] of Object.entries(CONTENT_READMES)) {
+    const text = readFileSync(join(ROOT, rel), "utf8");
+    for (const s of needles) assert.ok(text.includes(s), `${rel} never mentions ${s}`);
+    const named = [...text.matchAll(/`([^`\n]+)`/g)].map((m) => m[1]).filter((s) => REPO_PATH.test(s));
+    assert.deepEqual(named.filter((p) => !existsSync(join(ROOT, p))), [], `${rel} names paths that don't exist`);
+  }
+});
