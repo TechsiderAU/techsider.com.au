@@ -1,0 +1,40 @@
+{
+  "shared": ["x1", "x4", "x6", "x7"],
+  "anchors": [
+    {
+      "id": "unesco-ai-ethics-recommendation",
+      "name": "UNESCO Recommendation on the Ethics of AI",
+      "issuer": "UNESCO",
+      "kind": "guidance",
+      "binding": "A recommendation adopted by UNESCO's 193 member states",
+      "status": "published",
+      "statusDate": "2021-11",
+      "asks": "Human oversight and determination, transparency and explainability, and responsibility and accountability for AI systems across their life cycle.",
+      "evidence": "A measured test of the system on your own questions before it leaves pilot, with every failure listed for the official accountable for AI use.",
+      "source": "https://www.unesco.org/en/artificial-intelligence/recommendation-ethics",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["ai-evaluation", "knowledge-assistant"],
+      "featured": true,
+      "checkLevel": "P"
+    },
+    {
+      "id": "eu-ai-act-art-27-annex-iii-5a",
+      "name": "EU AI Act Art 27 and Annex III 5(a)",
+      "issuer": "European Union",
+      "kind": "law",
+      "binding": "EU law; it applies to public bodies that deploy high-risk systems listed in Annex III in the EU",
+      "status": "applies-from",
+      "statusDate": "2027-12-02",
+      "asks": "Before first using a high-risk system listed in Annex III, other than for critical infrastructure, a public body assesses its impact on fundamental rights and notifies the regulator; it can rely on an existing data protection impact assessment. Eligibility for public assistance benefits is an Annex III use.",
+      "evidence": "Test results and failure lists that your fundamental rights impact assessment can cite.",
+      "source": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-27",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "reviewBy": "2027-01-12",
+      "solutions": ["ai-evaluation"],
+      "featured": true,
+      "checkLevel": "P"
+    }
+  ]
+}

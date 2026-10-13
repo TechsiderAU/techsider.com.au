@@ -163,3 +163,12 @@ test("hub: each card's Designed around chips sit in one [data-region=au] wrapper
     assert.equal(elementsWith(wrapper.inner, "data-bracket-chip").length, elementsWith(card.inner, "data-bracket-chip").length, `${id}: a chip outside the wrapper`);
   }
 });
+
+test("the measured prototype: Manufacturing shows five shared and three sector chips, Government four and two, each under its own paragraph (go-global §5.7)", () => {
+  for (const [id, shared, sector] of [["manufacturing", 5, 3], ["government", 4, 2]]) {
+    const block = byId(page(id), "rules-that-travel");
+    assert.equal(elementsWith(block.inner, "data-anchor-scope", "shared").length, shared, id);
+    assert.equal(elementsWith(block.inner, "data-anchor-scope", "sector").length, sector, id);
+    assert.equal(elementsWith(block.inner, "data-rules-paragraph").length, 1, id);
+  }
+});

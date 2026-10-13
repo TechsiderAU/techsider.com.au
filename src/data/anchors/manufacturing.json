@@ -1,0 +1,55 @@
+{
+  "shared": ["x1", "x4", "x6", "x7", "x8"],
+  "anchors": [
+    {
+      "id": "iso-9001-2026",
+      "name": "ISO 9001:2026",
+      "issuer": "ISO/TC 176/SC 2",
+      "kind": "international-standard",
+      "binding": "International standard; certifiable by a certification body",
+      "status": "published",
+      "statusDate": "2026-09-16",
+      "asks": "Keep documented information controlled, so the right version of each document is available where the work happens.",
+      "evidence": "An assistant that answers only from your current controlled SOPs and work instructions, citing the page and revision.",
+      "source": "https://www.iso.org/news/2026/09/ISO9001-2026",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["knowledge-assistant", "document-registers"],
+      "featured": true,
+      "checkLevel": "P"
+    },
+    {
+      "id": "iec-62443",
+      "name": "IEC 62443: operational technology security",
+      "issuer": "ISA and IEC",
+      "kind": "international-standard",
+      "binding": "Series of international standards",
+      "status": "in-force",
+      "asks": "Security for operational technology: zones and conduits, asset-owner security programmes and supplier requirements. AI that reads operational technology data inherits them.",
+      "evidence": "A read-only design that keeps the assistant on your documents, away from plant equipment, with its access listed for your operational technology security lead.",
+      "source": "https://www.isa.org/news-press-releases/2025/december/update-to-isa-iec-62443-series-includes-guidance-o",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["knowledge-assistant", "draft-for-approval"],
+      "featured": true,
+      "checkLevel": "P"
+    },
+    {
+      "id": "ot-ai-principles",
+      "name": "Joint principles for AI in operational technology",
+      "issuer": "Cyber security agencies of seven countries",
+      "kind": "guidance",
+      "binding": "Joint guidance; voluntary",
+      "status": "published",
+      "statusDate": "2025-12-03",
+      "asks": "Understand AI risks in operational technology, assess each use, govern it, and test and evaluate AI models continuously, with oversight and incident response built in.",
+      "evidence": "A test set that is re-run after each model or document change, with every failure listed.",
+      "source": "https://www.cisa.gov/resources-tools/resources/principles-secure-integration-artificial-intelligence-operational-technology",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["knowledge-assistant", "ai-evaluation"],
+      "featured": true,
+      "checkLevel": "P*"
+    }
+  ]
+}

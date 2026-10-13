@@ -66,6 +66,7 @@ platformFirst: "If your procedures already live in SafetyCulture (now Mitti), tr
 dontDo:
   - "We don't build predictive maintenance, vision QA or SOP Q&A inside SafetyCulture."
   - "We don't build Q&A over your ERP data."
+rulesThatTravel: "Manufacturers work to the same few international standards wherever they are. ISO 9001, revised in September 2026, still asks that the right version of each document is available where the work happens. IEC 62443 covers the security of operational technology, and joint principles published in December 2025 by cyber security agencies in seven countries ask for AI in operational technology to be tested and evaluated continuously. Our assistant answers only from your current SOPs and work instructions, shows the page, and stays read-only. Work requests and quotes we draft wait for a person to approve them."
 problem:
   from: "In 2024–25, 9% of manufacturing businesses reported using AI, against 12% of all businesses. On the floor, answers come from binders and whoever has been on the line longest."
   to: "Operators ask in their own language and get the current SOP step and page, or \"not in our documents\"."
