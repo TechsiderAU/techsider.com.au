@@ -1,0 +1,45 @@
+---
+// The visible region label (go-global §3.3, §6.1, §6.3): "Australia" on Australia-only posts,
+// packages, kits, guides and the Industries hub's obligation chips; "Australian example" on demos and
+// scenario traces built on Australian sources; "Australian plans and vendor pages" on the platform
+// checker. It goes at the start of the element that carries data-region="au" (a post's label sits in
+// its header instead), and [data-region-label] is one of the go-global S1 rule's allowed contexts.
+// It imports only fixed-copy, so tests/region-labels.test.mjs renders it on its own.
+import { PLATFORM_REGION_LABEL, REGION_EXAMPLE_LABEL, REGION_LABEL } from "../../lib/fixed-copy";
+
+interface Props {
+  /** "region" (the default): "Australia"; "example": "Australian example"; "platform": the checker's label. */
+  kind?: "region" | "example" | "platform";
+}
+
+const TEXT = { region: REGION_LABEL, example: REGION_EXAMPLE_LABEL, platform: PLATFORM_REGION_LABEL } as const;
+const { kind = "region" } = Astro.props;
+---
+<span class="region-label" data-region-label={kind}>{TEXT[kind]}</span>
+
+<style>
+  /* A quiet outlined tag in the mono face, like the demo frame's provenance label. */
+  .region-label {
+    display: inline-block;
+    max-width: 100%;
+    padding: 0.125rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--color-muted);
+    border: 1px solid var(--color-graphite);
+    border-radius: 4px;
+  }
+
+  /* On bone: muted-dark text on a bone-line outline (spec §6.1). */
+  :global(.surface-bone) .region-label {
+    color: var(--color-muted-dark);
+    border-color: var(--color-bone-line);
+  }
+
+  /* A dark island (bg-carbon / bg-graphite) inside a bone section is a dark surface again. */
+  :global(.surface-bone :is(.bg-carbon, .bg-graphite)) .region-label {
+    color: var(--color-muted);
+    border-color: var(--color-graphite);
+  }
+</style>
