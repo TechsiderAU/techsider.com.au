@@ -337,3 +337,16 @@ test("Accounting: the A1 kit marker covers the Industries hub, which shows the s
   const at = lines.findIndex((l) => l.includes("- name: Admin Hours Audit + Switch-On, with the accounting Safe-Use Kit"));
   assert.equal(lines[at - 1].trim(), "# ⚑ owner: the accounting Safe-Use Kit must be lawyer-reviewed and published before the Accounting page or the Industries hub launches (spec §12 item 6; research index A1)");
 });
+
+// ---------- go-global Part 4B: the "Rules that travel" anchor data ----------
+
+test("go-global §5.2: these pages' anchor data carries no keep-off phrase, no 'sprint' and, on Accounting, no 'agent'", () => {
+  const shared = new Map(readJson("src/data/anchors/shared.json").anchors.map((a) => [a.id, a]));
+  for (const id of IDS) {
+    const own = readJson(`src/data/anchors/${id}.json`);
+    const t = [...own.shared.map((s) => shared.get(s)), ...own.anchors].flatMap((a) => [a.name, a.issuer, a.binding, a.asks, a.evidence]).join(" ");
+    for (const phrase of KEEP_OFF) assert.ok(!t.includes(phrase), `${id}: "${phrase}" is in its anchor data`);
+    assert.doesNotMatch(t, /\bsprint\b/i, `${id}: "sprint" in its anchor data`);
+    if (id === "accounting") assert.doesNotMatch(t, /\bagents?\b/i, "Accounting's anchor data says agent(s)");
+  }
+});

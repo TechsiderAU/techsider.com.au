@@ -53,7 +53,55 @@ const SHARED_REVIEW_BY = { x4: "2027-01-12", x7: "2027-01-12", x8: "2027-01-12" 
  * sector anchors (data order) and their chips' text; the data-only anchors; the r4 §5.5 review
  * dates; and the §5.2 rewrites and §5.3 corrections, as [anchor id, field, exact text or a pattern].
  */
-const INDUSTRIES = {};
+const INDUSTRIES = {
+  government: {
+    shared: BASE_ROW,
+    featured: ["unesco-ethics-of-ai", "eu-ai-act-art-27-annex-iii-5a"],
+    chips: [
+      "UNESCO Recommendation on the Ethics of AI Guidance · published Nov 2021 · as at Oct 2026",
+      "EU AI Act Art 27 and Annex III 5(a) Law · applies from 2 Dec 2027 · as at Oct 2026",
+    ],
+    dataOnly: ["oecd-governing-with-ai", "g7-toolkit-ai-public-sector", "unesco-ethical-impact-assessment"],
+    reviewBy: { "eu-ai-act-art-27-annex-iii-5a": "2027-01-12" },
+    pins: [
+      // Rule 6 and Appendix A: r4 records only the Recommendation's adoption, never the EIA's content.
+      ["unesco-ethics-of-ai", "asks", "Shared principles for the ethics of AI, adopted by UNESCO's 193 member states."],
+      // Correction 9: the public-body assessment excludes Annex III point 2 and relies on, never "cross-refers to", a DPIA.
+      ["eu-ai-act-art-27-annex-iii-5a", "asks", /\bexcept point 2 \(critical infrastructure\)/],
+      ["eu-ai-act-art-27-annex-iii-5a", "asks", /\bThe assessment can rely on an existing DPIA\./],
+    ],
+  },
+  "financial-services": {
+    shared: BASE_ROW,
+    featured: ["bcbs-operational-resilience", "bcbs-third-party-risk", "dora"],
+    chips: [
+      "BCBS principles for operational resilience Guidance · published Mar 2021 · as at Oct 2026",
+      "BCBS principles for third-party risk Guidance · published Dec 2025 · as at Oct 2026",
+      "DORA: duties of EU financial entities Law · in force · as at Oct 2026",
+    ],
+    dataOnly: ["fsb-ai-monitoring-report", "iosco-ai-supervisory-toolkit", "eu-ai-act-annex-iii-5b-5c"],
+    reviewBy: { "eu-ai-act-annex-iii-5b-5c": "2027-01-12" },
+    pins: [
+      // §5.2: DORA is the financial entity's duty.
+      ["dora", "asks", /^In the EU, DORA requires banks, insurers and other financial entities to keep a register of their ICT arrangements and to put set terms into those contracts\. /],
+    ],
+  },
+  accounting: {
+    shared: GDPR_ROW,
+    featured: ["iesba-code-technology", "iesba-emerging-technologies", "fatf-r22-r23"],
+    chips: [
+      "IESBA Code technology revisions Standard · in force · as at Oct 2026",
+      "IESBA staff paper on emerging technologies Guidance · published Jul 2026 · as at Oct 2026",
+      "FATF Recommendations 22 and 23 Standard · in force · as at Oct 2026",
+    ],
+    dataOnly: ["iaasb-technology", "pcaob-genai-spotlight"],
+    reviewBy: { "iesba-emerging-technologies": "2027-01-12", "iaasb-technology": "2027-01-12" },
+    pins: [
+      // Correction 4: "as amended", with no month.
+      ["fatf-r22-r23", "binding", "International standards for countries (FATF Recommendations, as amended)."],
+    ],
+  },
+};
 
 /** Spec §1 S1: these never render outside an allowed context, and a chip renders outside the band. */
 const S1 = /australian organisations|for australian|in australia \||australia's leading|australian ai|australian teams|australian-owned|most australian/i;
