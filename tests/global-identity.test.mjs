@@ -1,8 +1,9 @@
 // go-global S1 (spec §1, §10.3): no built page says Techsider is Australian, serves Australian
 // organisations or targets Australia outside the contexts spec §1 allows, and every page is
 // <html lang="en">. tests/support/s1-scan.mjs defines the scan. The first tests pin it on synthetic
-// markup: every banned string is found wherever it sits in a page, near misses pass, and each
-// allowed context, and nothing else, is skipped. The rest run it over every page of the production
+// markup: every banned string is found wherever it sits in a page, split by inline markup or with a
+// space or any dash for its hyphen, near misses pass, and each allowed context, and nothing else, is
+// skipped. The rest run it over every page of the production
 // build, the pages spec §1 names first, and hold the allowed contexts to what spec §1 allows, so no
 // wrapper can excuse a whole page. There is no known-violations list: a hit is fixed in the copy or
 // moved into its Australia-only wrapper, never excused here (go-global §10.1).
@@ -59,6 +60,24 @@ test("S1 scan: each banned string is found in the head, the text, attributes and
     "Australian AI": 1, "Australian teams": 1, "Australian-owned": 1, "most Australian": 1,
   });
   assert.ok(hits.every((h) => typeof h.at === "string" && h.at.length > 0), "each hit carries the words around it");
+});
+
+test("S1 scan: a banned string is found when inline markup splits it, and with a space or any dash for its hyphen (final review F6, F28)", () => {
+  const hits = s1Hits(
+    page(
+      "<title>Fixture</title>",
+      `<main><p>Built for <em>Australian</em> teams.</p><p>Australian<br>teams</p><p>Built for <a href="/x">Australian organisations</a>.</p>` +
+        "<p>Australian owned and run. Australian\u2013owned, Australian \u2014 owned.</p></main>",
+    ),
+    SYNTHETIC,
+  );
+  assert.deepEqual(count(hits), {
+    "Australian organisations": 1, "for Australian": 2, "in Australia |": 0, "Australia's leading": 0,
+    "Australian AI": 0, "Australian teams": 2, "Australian-owned": 3, "most Australian": 0,
+  });
+  // A phrase inside one element, which the scan always found, is still reported once, not once per pass.
+  assert.equal(s1Hits(page("<title>Fixture</title>", "<p><strong>Australian organisations</strong></p>"), SYNTHETIC).length, 1);
+  assert.equal(bannedRegExp("Australian-owned").test("Australian owned"), true);
 });
 
 test("S1 scan: near misses pass: another word's tail, Australia as a place, and Australian spelling", () => {

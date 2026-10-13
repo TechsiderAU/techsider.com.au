@@ -9,6 +9,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { readDist } from "./helpers.mjs";
+import { S1_BANNED, bannedRegExp } from "./support/s1-scan.mjs";
 import {
   ROOT, elements, elementsWith, listFiles, normalizeQuotes, readJson, readText, relPath, result, visibleText,
 } from "../scripts/ci/lib.mjs";
@@ -198,8 +199,8 @@ const INDUSTRIES = {
   },
 };
 
-/** Spec §1 S1: these never render outside an allowed context, and a chip renders outside the band. */
-const S1 = /australian organisations|for australian|in australia \||australia's leading|australian ai|australian teams|australian-owned|most australian/i;
+/** Spec §1 S1: the banned strings never render outside an allowed context, and a chip renders outside the band. */
+const s1In = (text) => S1_BANNED.filter((s) => bannedRegExp(s).test(text));
 /** D10: no national body outside Australia and the EU in a chip; Australian regulators belong in the band (NIST's framework is §5.2's X4). */
 const NATIONAL_BODIES = /\b(?:FDA|Health Canada|MHRA|NHS|CISA|ASD|ACSC|NSA|FBI|ABA|PCAOB|ICO|FedRAMP|TGA|APRA|ASIC|AUSTRAC|OAIC)\b/;
 /**
@@ -300,7 +301,7 @@ test("copy gates: no check 04 phrase (FAIL or WARN), S1 string or blocked fact i
       const r = result();
       scan(t, `src/data/anchors/${file}.json`, [], r, { phrases: [...FAIL_PHRASES, ...WARN_PHRASES] });
       out.push(...r.errors.map((e) => `${file}/${a.id}.${k}: ${e}`));
-      if (S1.test(t)) out.push(`${file}/${a.id}.${k}: an S1 string`);
+      for (const s of s1In(t)) out.push(`${file}/${a.id}.${k}: the S1 string "${s}"`);
       for (const [label, re] of BLOCKED) if (re.test(t)) out.push(`${file}/${a.id}.${k}: ${label}`);
       if (/\bFATF\b/.test(a.name) && MONTH.test(t)) out.push(`${file}/${a.id}.${k}: a FATF amendment month (correction 4)`);
     }

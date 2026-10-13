@@ -10,7 +10,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readDist } from "./helpers.mjs";
-import { readFrontmatter } from "../scripts/ci/lib.mjs";
+import { S1_BANNED, bannedRegExp } from "./support/s1-scan.mjs";
+import { normalizeQuotes, readFrontmatter } from "../scripts/ci/lib.mjs";
 import { SITE, hqLine } from "../src/data/nav.ts";
 import { CONTACT } from "../src/data/contact.ts";
 import { DISAMBIGUATION } from "../src/lib/fixed-copy.ts";
@@ -23,11 +24,8 @@ const SUMMARY =
 const HQ_LINE = "Headquartered in Sydney, Australia · Techsider Pty Ltd · ABN 12 636 205 868";
 const PARAGRAPH =
   "Techsider Pty Ltd (ABN 12 636 205 868) is headquartered in Sydney, Australia, and builds for organisations in nine industries: mid-market firms with no AI team of their own, and enterprise and government teams that need independent evidence about the AI they run. Contact: admin@techsider.com.au or https://techsider.com.au/contact/.";
-/** Spec §1 S1: wording that says Techsider is Australian, serves Australian organisations or targets Australia. */
-const S1_BANNED = [
-  "Australian organisations", "for Australian", "in Australia |", "Australia's leading",
-  "Australian AI", "Australian teams", "Australian-owned", "most Australian",
-];
+/** Spec §1 S1: the banned strings in a plain text, matched as tests/support/s1-scan.mjs matches them. */
+const s1In = (text) => S1_BANNED.filter((s) => bannedRegExp(s).test(normalizeQuotes(text)));
 const POSTS = [
   { id: "fixture-post", title: "Fixture post title.", description: "Fixture post description.", publishDate: new Date("2026-10-01"), region: null },
   { id: "fixture-region-post", title: "Fixture regional post title.", description: "Fixture regional post description.", publishDate: new Date("2026-09-30"), region: "au" },
@@ -105,8 +103,7 @@ test("dist/llms.txt: every published post tagged region: au has the (Australia) 
 });
 
 test("no S1 wording: llms.txt never says Techsider is for Australian organisations (go-global §1 S1, §9.3)", () => {
-  const text = build().toLowerCase();
-  for (const s of S1_BANNED) assert.ok(!text.includes(s.toLowerCase()), `llms.txt says "${s}"`);
+  assert.deepEqual(s1In(build()), [], "llms.txt says an S1 string");
 });
 
 test("dist/llms.txt: the built file carries the entity sentence, the HQ line, the paragraph and every fact, and none of the S1 wording", () => {
@@ -115,5 +112,5 @@ test("dist/llms.txt: the built file carries the entity sentence, the HQ line, th
   for (const line of [`> ${SUMMARY}`, HQ_LINE, PARAGRAPH, ...LLMS_FACTS.map((f) => `- ${f}`)]) {
     assert.ok(text.includes(line), `dist/llms.txt lacks "${line}"`);
   }
-  for (const s of S1_BANNED) assert.ok(!built.toLowerCase().includes(s.toLowerCase()), `dist/llms.txt says "${s}"`);
+  assert.deepEqual(s1In(built), [], "dist/llms.txt says an S1 string");
 });

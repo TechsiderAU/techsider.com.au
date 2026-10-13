@@ -11,7 +11,8 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
 import { blockWords, readDist, visibleText } from "./helpers.mjs";
-import { elements, elementsWith, loadYaml, startTags } from "../scripts/ci/lib.mjs";
+import { S1_BANNED, bannedRegExp } from "./support/s1-scan.mjs";
+import { elements, elementsWith, loadYaml, normalizeQuotes, startTags } from "../scripts/ci/lib.mjs";
 import { industryFindings, regionFindings } from "../scripts/ci/checks/13-anchors-and-regions.mjs";
 import { anchorFile, makeIndustrySchema, plainRef } from "../src/content/schemas.ts";
 import { anchorChipLabel } from "../src/lib/anchors.ts";
@@ -190,8 +191,8 @@ const TRAVEL_SENTENCES = {
   "resources-and-energy": "Your own regulators set the conditions; we make them easy to check.",
   "legal-and-professional": "Your own court's practice notes and conduct rules always come first.",
 };
-/** Spec §1, S1: banned in a page's HTML outside the allowed contexts. The Rules paragraph and the FAQPage JSON-LD (which carries the Australia-tagged FAQs) are not allowed contexts. */
-const S1_BANNED = ["australian organisations", "for australian", "in australia |", "australia's leading", "australian ai", "australian teams", "australian-owned", "most australian"];
+/** Spec §1, S1: the banned strings in a plain text, as tests/support/s1-scan.mjs matches them. The Rules paragraph and the FAQPage JSON-LD (which carries the Australia-tagged FAQs) are not allowed contexts. */
+const s1In = (text) => S1_BANNED.filter((s) => bannedRegExp(s).test(normalizeQuotes(text)));
 const rulesIndustrySchema = makeIndustrySchema(plainRef);
 const rulesIndustry = (id) => rulesIndustrySchema.parse(loadYaml(new URL(`../src/content/industries/${id}.yaml`, import.meta.url)));
 const rulesBuilt = (id) => readDist(`industries/${id}/index.html`);
@@ -212,7 +213,7 @@ test("go-global §5.2, §5.5: each industry page renders its own Rules paragraph
       assert.ok(paragraph.endsWith(` ${travel}`), `${id}: the paragraph doesn't end with its travel sentence`);
       assert.equal(paragraph.indexOf(travel), paragraph.length - travel.length, `${id}: the travel sentence appears twice`);
     }
-    for (const s of S1_BANNED) assert.ok(!paragraph.toLowerCase().includes(s), `${id}: "${s}" (spec §1, S1)`);
+    assert.deepEqual(s1In(paragraph), [], `${id}: an S1 string (spec §1, S1)`);
     const rendered = elements(rulesBuilt(id), (t) => "data-rules-paragraph" in t.attrs);
     assert.equal(rendered.length, 1, `${id}: ${rendered.length} [data-rules-paragraph] elements`);
     assert.equal(plainText(rendered[0].inner), paragraph, `${id}: the rendered paragraph isn't the content's`);
@@ -268,7 +269,6 @@ test("go-global §5.6: the Australia-only FAQs are tagged and render in #faq-au 
     const faqPage = blocks.filter((b) => b["@type"] === "FAQPage");
     assert.equal(faqPage.length, 1, `${id}: FAQPage blocks`);
     assert.deepEqual(faqPage[0].mainEntity.map((q) => q.name), faq.map((f) => f.q), `${id}: the FAQPage questions`);
-    const json = JSON.stringify(faqPage[0]).toLowerCase();
-    for (const s of S1_BANNED) assert.ok(!json.includes(s), `${id}: the FAQPage carries "${s}" (spec §1, S1)`);
+    assert.deepEqual(s1In(JSON.stringify(faqPage[0])), [], `${id}: the FAQPage carries an S1 string (spec §1, S1)`);
   }
 });

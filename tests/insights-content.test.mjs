@@ -10,6 +10,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readDist, visibleText } from "./helpers.mjs";
+import { S1_BANNED, bannedRegExp } from "./support/s1-scan.mjs";
 import { decodeEntities, elements, elementsWith, readFrontmatter, result } from "../scripts/ci/lib.mjs";
 import { FAIL_PHRASES, WARN_PHRASES, scan } from "../scripts/ci/checks/04-banned-phrases.mjs";
 import { insightFindings } from "../scripts/ci/checks/08-regulatory-kits.mjs";
@@ -305,8 +306,8 @@ const HELD = "iso-42001-nist-ai-rmf-oecd-what-each-asks";
  * becomes an anchor and each ordered-list number goes. For prose with no code block, the counts match. */
 const proseFromMarkdown = (body) =>
   body.replace(/^\s*\d+\.\s+/gm, "").replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label, href) => `<a href="${href}">${label}</a>`);
-/** Spec §1 S1: the strings no page may show outside an allowed context. A post with no region is never one. */
-const S1_STRINGS = /australian organisations|for australian|in australia \||australia's leading|australian ai|australian teams|australian-owned|most australian/i;
+/** Spec §1 S1: the banned strings in a plain text, as tests/support/s1-scan.mjs matches them. A post with no region is never an allowed context. */
+const s1In = (text) => S1_BANNED.filter((s) => bannedRegExp(s).test(text));
 /** Spec §3.3 and §6.4: what a global post writes instead. */
 const GLOBAL_VOCABULARY = [
   [/\bcertified\b|\baccredited\b/i, "write certification, certifiable or certification body (spec §3.3)"],
@@ -338,7 +339,7 @@ for (const [id, want] of Object.entries(GLOBAL_POSTS)) {
       const hit = all.match(re);
       assert.equal(hit, null, `${id}: "${hit?.[0]}" (${why})`);
     }
-    assert.equal(all.match(S1_STRINGS)?.[0], undefined, `${id}: an S1 string outside every allowed context (spec §1)`);
+    assert.deepEqual(s1In(all), [], `${id}: an S1 string outside every allowed context (spec §1)`);
     const r = result();
     scan(all, `src/content/insights/${id}.md`, [], r, { phrases: [...FAIL_PHRASES, ...WARN_PHRASES] });
     assert.deepEqual(r.errors, [], `${id}: check 04 phrases (spec §3.3, §4.6)`);
