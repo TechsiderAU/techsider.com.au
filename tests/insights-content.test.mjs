@@ -10,7 +10,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readDist, visibleText } from "./helpers.mjs";
-import { decodeEntities, elements, elementsWith, readFrontmatter } from "../scripts/ci/lib.mjs";
+import { decodeEntities, elements, elementsWith, readFrontmatter, result } from "../scripts/ci/lib.mjs";
+import { FAIL_PHRASES, WARN_PHRASES, scan } from "../scripts/ci/checks/04-banned-phrases.mjs";
 import { insightFindings } from "../scripts/ci/checks/08-regulatory-kits.mjs";
 import { PAGES, SITE } from "../src/data/nav.ts";
 import { SCENARIO_LABEL } from "../src/lib/fixed-copy.ts";
@@ -83,6 +84,13 @@ const PRIMARY_HOSTS = new Set([
   "www.xero.com", "www.myob.com", "dext.com", "karbonhq.com", "mitti.com",
   "www.propertyme.com.au", "www.rexsoftware.com",
   "www.thomsonreuters.com.au", "developers.harvey.ai", "www.leaplegalsoftware.com", "www.lexisnexis.com",
+  // go-global §6.4: the publishers the global posts cite. Add a host only after a primary read.
+  "eur-lex.europa.eu", "commission.europa.eu", "www.edpb.europa.eu", "edpb.europa.eu",
+  "ai-act-service-desk.ec.europa.eu", "digital-strategy.ec.europa.eu",
+  "ico.org.uk", "www.legislation.gov.uk",
+  "www.nist.gov", "nvlpubs.nist.gov", "airc.nist.gov",
+  "oecd.ai", "legalinstruments.oecd.org", "www.oecd.org",
+  "www.iso.org", "webstore.iec.ch",
 ]);
 const primary = (host) => host.endsWith(".gov.au") || PRIMARY_HOSTS.has(host);
 
@@ -251,6 +259,87 @@ test("the October posts keep the Phase C copy rules: titles, description, keep-o
     assert.ok(new Set(sources).size >= 3, `${id}: ${new Set(sources).size} distinct sources`);
   }
 });
+
+// go-global §6.4: the hosts the global posts cite, each the publisher of a primary source (EU
+// institutions, the UK's data protection regulator and legislature, NIST, the OECD, ISO and IEC).
+// Exact hosts only, so a look-alike or a mirror of the legislation never passes.
+test("the go-global primary hosts count as primary, and look-alikes and mirrors don't (spec §6.4)", () => {
+  for (const host of [
+    "eur-lex.europa.eu", "commission.europa.eu", "www.edpb.europa.eu", "edpb.europa.eu",
+    "ai-act-service-desk.ec.europa.eu", "digital-strategy.ec.europa.eu", "ico.org.uk", "www.legislation.gov.uk",
+    "www.nist.gov", "nvlpubs.nist.gov", "airc.nist.gov", "oecd.ai", "legalinstruments.oecd.org", "www.oecd.org",
+    "www.iso.org", "webstore.iec.ch",
+  ]) {
+    assert.ok(primary(host), `${host} isn't a primary-source host`);
+  }
+  for (const host of ["europa.eu", "ec.europa.eu", "eur-lex.europa.eu.example.com", "www.ico.org.uk", "nist.gov", "iso.org", "artificialintelligenceact.eu", "gdpr-info.eu"]) {
+    assert.equal(primary(host), false, `${host} counts as a primary-source host`);
+  }
+});
+
+// go-global §6.4, §6.5: three posts for organisations anywhere, each checked claim by claim against
+// its primary sources before publishing (the PR's verification note lists every claim). They keep
+// the October posts' rules. Because they carry no region, nothing in them may say what spec §1 (S1)
+// keeps to Australian contexts, in the <head> or the body. They use the vocabulary spec §3.3 and
+// §6.4 set and pass check 04 (FAIL and WARN). A post whose dates or statuses may move carries a
+// reviewBy (§6.5, with §5.3's watch-list date), which check 13 enforces.
+const GLOBAL_POSTS = {};
+/** Spec §1 S1: the strings no page may show outside an allowed context. A post with no region is never one. */
+const S1_STRINGS = /australian organisations|for australian|in australia \||australia's leading|australian ai|australian teams|australian-owned|most australian/i;
+/** Spec §3.3 and §6.4: what a global post writes instead. */
+const GLOBAL_VOCABULARY = [
+  [/\bcertified\b|\baccredited\b/i, "write certification, certifiable or certification body (spec §3.3)"],
+  [/General Data Protection Regulation/i, "cite the GDPR by its short name (spec §6.4)"],
+  [/\boverseas\b/i, "write outside, not overseas (spec §3.3)"],
+];
+
+for (const [id, want] of Object.entries(GLOBAL_POSTS)) {
+  test(`${id}: a global post with the October posts' copy rules, no region, nothing S1 bans and three primary sources (go-global §6.4)`, () => {
+    const { fm, body } = post(id);
+    assert.equal(fm.draft, false, `${id}: a draft has no page`);
+    assert.equal(fm.title, want.title, `${id}: the approved title (spec §6.4)`);
+    assert.ok(fm.title.length <= 48, `${id}: the title is ${fm.title.length} characters (spec §6.4: 48 or fewer)`);
+    assert.match(fm.title, /^[A-Z].*\.$/, `${id}: "${fm.title}" isn't a sentence ending in a period (spec §3.3)`);
+    assert.equal(fm.type, want.type, `${id}: type`);
+    assert.deepEqual(fm.industries ?? [], want.industries, `${id}: industries`);
+    assert.deepEqual(fm.solutions ?? [], want.solutions, `${id}: solutions`);
+    assert.equal(fm.region, undefined, `${id}: a global post has no region (spec §6.4)`);
+    assert.equal(fm.reviewBy, want.reviewBy, `${id}: reviewBy (spec §6.5)`);
+    assert.ok(new Date(fm.publishDate) >= new Date("2026-10-13"), `${id}: publishDate ${fm.publishDate}`);
+    for (const t of [fm.title, fm.seoTitle].filter(Boolean)) {
+      assert.ok(`${t} | ${SITE.name}`.length <= 60, `${id}: "${t} | ${SITE.name}" is over 60 characters (spec §11.3)`);
+    }
+    assert.ok(fm.description.length >= 150 && fm.description.length <= 160, `${id}: the description is ${fm.description.length} characters`);
+    const all = `${fm.title}\n${fm.seoTitle ?? ""}\n${fm.description}\n${body}`.replace(/[‘’]/g, "'");
+    for (const [re, why] of [...KEEP_OFF, ...GLOBAL_VOCABULARY]) {
+      const hit = all.match(re);
+      assert.equal(hit, null, `${id}: "${hit?.[0]}" (${why})`);
+    }
+    assert.equal(all.match(S1_STRINGS)?.[0], undefined, `${id}: an S1 string outside every allowed context (spec §1)`);
+    const r = result();
+    scan(all, `src/content/insights/${id}.md`, [], r, { phrases: [...FAIL_PHRASES, ...WARN_PHRASES] });
+    assert.deepEqual(r.errors, [], `${id}: check 04 phrases (spec §3.3, §4.6)`);
+    const quoted = body.split("\n").filter((l) => l.startsWith(">")).join("\n").replace(/[“”]/g, '"');
+    for (const heading of body.split("\n").filter((l) => /^#{2,6} /.test(l))) {
+      for (const [, phrase] of heading.replace(/[“”]/g, '"').matchAll(/"([^"]+)"/g)) {
+        assert.ok(quoted.includes(phrase), `${id}: the heading "${heading}" quotes "${phrase}", which no blockquote says`);
+      }
+    }
+    const n = words(proseOf(id).inner);
+    assert.ok(n >= 800 && n <= 1400, `${id}: ${n} words`);
+    const hrefs = elements(proseOf(id).inner, (t) => t.name === "a").map((a) => a.attrs.href);
+    for (const href of hrefs.filter((h) => h.startsWith("/"))) {
+      const local = href.split(/[?#]/)[0];
+      assert.ok(existsSync(join(DIST, local, local.endsWith("/") ? "index.html" : "")), `${id}: ${href} is missing`);
+    }
+    const sources = hrefs.filter((h) => !h.startsWith("/"));
+    for (const href of sources) {
+      assert.match(href, /^https:\/\//, `${id}: ${href} is not an https source link`);
+      assert.ok(primary(new URL(href).host), `${id}: ${new URL(href).host} is not a primary-source host`);
+    }
+    assert.ok(new Set(sources).size >= 3, `${id}: ${new Set(sources).size} distinct sources`);
+  });
+}
 
 test("the reference scenario says it's fictional first, and renders the illustrative label", () => {
   for (const [id] of Object.entries(NEW_POSTS).filter(([, p]) => p.type === "reference-scenario")) {
