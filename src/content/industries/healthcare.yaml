@@ -60,7 +60,7 @@ dontDo:
 # go-global §5.2: this paragraph prints EU AI Act dates; review it with the EU AI Act anchors (reviewBy 2027-01-12).
 rulesThatTravel: "Health systems differ, but the questions about AI documentation tools are converging. The World Health Organization's 2024 guidance on large multi-modal models warns of automation bias in health professionals and patients. The good machine learning practice principles, first published by national regulators, ask for testing in clinically relevant conditions, attention to how clinician and AI perform together, and monitoring once a model is deployed. In the EU, AI in a medical device that needs third-party assessment is high-risk from 2 August 2028 (as amended in July 2026). Each country's regulator decides when an AI scribe becomes a medical device. We don't make that call; we measure what the scribe gets wrong, and your regulatory team decides."
 problem:
-  from: A scribe arrives through a vendor demo or a software update, and what it leaves out of notes in your specialties hasn't been measured.
+  from: In Australia, a scribe arrives through a vendor demo or a software update, and what it leaves out of notes in your specialties hasn't been measured.
   to: Each AI tool is tested on your own scripted consultations before rollout and after each update, with omissions and additions counted.
   source:
     label: "ACSQHC, AI Safety Scenario: Ambient scribe (v1.0)"
@@ -138,10 +138,10 @@ faq:
   - q: Does patient data have to leave our environment?
     a: No. The test uses scripted consultations, not patient records, and the replay script runs in your own Microsoft or AWS account.
   - q: Will your report sign off the scribe?
-    a: No. You get findings rated to your risk matrix and every failure listed. Whether a product is a medical device is the TGA's call.
+    a: No. You get findings rated to your risk matrix and every failure listed. Whether a product is a medical device is your regulator's call (the TGA in Australia), not ours.
   - q: Do you take commissions from scribe vendors?
     a: No. We take no resale margin or referral fees from vendors we evaluate, and disclose any vendor relationship. We never issue an independent evaluation of a system we built, configured or advised on for you.
   - q: We're a public health service. How do we engage you?
-    a: "Directly, or through the Evaluation Partner route: we run the evaluation as a workstream under your existing prime, internal-audit co-source firm or law firm. Findings map to the AI instrument your state applies."
+    a: "Directly, or through the Evaluation Partner route: we run the evaluation as a workstream under your existing prime, internal-audit co-source firm or law firm. Findings map to the AI policy your health system applies."
   - q: Do you cover life sciences?
     a: "One package, on request: the Compliance Dossier Builder turns the documents an audit or inspection asks for into a register linked to source pages."

@@ -65,7 +65,7 @@ dontDo:
   - Draft or tailor legal wording. Your own adviser approves any policy, consent or engagement-letter text.
 rulesThatTravel: "Courts and professional bodies in many countries have reached the same few rules for generative AI. The Council of Bars and Law Societies of Europe published its guide on generative AI for lawyers in 2025. Its 2026 technical guide says lawyers must understand how the tools they use work, and explains hosting options so they can choose tools that protect client confidentiality. Courts and bar associations elsewhere have published guidance along the same lines. The EU AI Act's high-risk list covers AI that helps a court research and interpret facts and law, not a law firm's own tools. We test tools on your own matters and keep a record of every check. Your own court's practice notes and conduct rules always come first."
 problem:
-  from: Lawyers reach for general-purpose AI and check each answer by hand, often in workplaces with no AI guidelines.
+  from: In Victoria, Australia, lawyers reach for general-purpose AI and check each answer by hand, often in workplaces with no AI guidelines.
   to: Your firm chooses its AI on a test of your own matters, and keeps a record of every check on court work.
   source:
     label: VLSB+C, Generative AI Use in the Legal Profession (2025 Victorian Lawyer Census)
@@ -144,7 +144,7 @@ faq:
     a: Only to the tools under test. Tests run in tool accounts your firm controls, on cleared matters or de-identified copies, and a data note first records each vendor's published storage and processing locations, with their dates. Whether a client must consent is your call.
   - q: Are you paid by legal AI vendors?
     a: No. We take no resale margin or referral fees from vendors we evaluate, and disclose any vendor relationship. We never issue an independent evaluation of a system we built, configured or advised on for the same firm.
-  - q: Does your verification record meet the practice notes?
+  - q: Does your verification record meet your court's practice notes?
     a: No. The record is a log, not a safeguard. The responsible lawyer still verifies each authority; the record shows who checked it, against which source, and when.
   - q: Is this page only for law firms?
     a: Mostly. Consultancies can commission an independent evaluation of AI they deliver to clients, or use the Evaluation Partner route under their own contract.

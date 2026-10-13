@@ -279,18 +279,19 @@ test("a read-only system label carries the plan or add-on its API needs (C6-T6-F
   for (const [id, s] of halaxy) assert.equal(s, "Halaxy (with the API add-on)", id);
 });
 
-test("Legal & professional: the problem's source names the Victorian Lawyer Census it rests on (C6-T6-F2)", () => {
-  const { source } = industryData("legal-and-professional").problem;
+test("Legal & professional: the problem's source names the Victorian Lawyer Census it rests on, and its From line says the finding is from Victoria, Australia (C6-T6-F2; go-global §3.3)", () => {
+  const { from, source } = industryData("legal-and-professional").problem;
   assert.match(source.url, /2025-victorian$/);
   assert.equal(source.label, "VLSB+C, Generative AI Use in the Legal Profession (2025 Victorian Lawyer Census)");
+  assert.equal(from, "In Victoria, Australia, lawyers reach for general-purpose AI and check each answer by hand, often in workplaces with no AI guidelines.");
 });
 
-test("Resources & energy: the problem's From line says only what DCCEEW's Compliance outcomes page records (WB-4, the Resources problem line; Phase C ledger, ruling R5)", () => {
+test("Resources & energy: the problem's From line says only what DCCEEW's Compliance outcomes page records, labelled Australian (WB-4, the Resources problem line; Phase C ledger, ruling R5; go-global §3.3)", () => {
   const { from, source } = industryData("resources-and-energy").problem;
   assert.equal(source.url, "https://www.dcceew.gov.au/environment/epbc/compliance/audit-outcomes");
   assert.equal(
     from,
-    "The regulator records approval holders who failed to publish annual compliance reports, implement approved management plans or report non-compliance.",
+    "In Australia, the regulator records approval holders who failed to publish annual compliance reports, implement approved management plans or report non-compliance.",
   );
   // The page lists enforcement outcomes: it says nothing of spreadsheets or how conditions are tracked.
   assert.doesNotMatch(from, /spreadsheet|by hand/i);
@@ -310,4 +311,29 @@ test("go-global §5.2: these pages' anchor data carries no keep-off string or §
   }
   const iec = JSON.parse(readRel("src/data/anchors/resources-and-energy.json")).anchors.find((a) => a.id === "iec-62443");
   assert.equal(iec.name, "IEC 62443: operational technology security");
+});
+
+// ---------- go-global (spec §3.3, §5.6): copy that reads for any country, with Australian detail labelled ----------
+
+test("go-global §3.3, §5.6: Healthcare, Resources & energy and Legal & professional say where their facts and terms are Australian", () => {
+  const answer = (id, q) => {
+    const item = industryData(id).faq.find((f) => f.q === q);
+    assert.ok(item, `${id}: no FAQ "${q}"`);
+    return item.a;
+  };
+  assert.equal(industryData("healthcare").problem.from, "In Australia, a scribe arrives through a vendor demo or a software update, and what it leaves out of notes in your specialties hasn't been measured.");
+  assert.equal(answer("healthcare", "Will your report sign off the scribe?"), "No. You get findings rated to your risk matrix and every failure listed. Whether a product is a medical device is your regulator's call (the TGA in Australia), not ours.");
+  assert.equal(answer("healthcare", "We're a public health service. How do we engage you?"), "Directly, or through the Evaluation Partner route: we run the evaluation as a workstream under your existing prime, internal-audit co-source firm or law firm. Findings map to the AI policy your health system applies.");
+  assert.deepEqual(industryData("legal-and-professional").faq.filter((f) => /verification record/.test(f.q)).map((f) => f.q), ["Does your verification record meet your court's practice notes?"]);
+  assert.deepEqual(industryData("resources-and-energy").dontDo, [
+    "Predictive maintenance, vision QA, orebody modelling or digital twins. Specialist products do those.",
+    "AI policy paperwork. Your risk and policy owners write policy.",
+  ]);
+  // Outside the band, these pages name no Australian regulator or instrument as everyone's.
+  for (const id of TASK6) {
+    const data = industryData(id);
+    for (const s of [data.problem.from, ...data.dontDo, ...data.faq.filter((f) => f.region !== "au").flatMap((f) => [f.q, f.a])]) {
+      assert.doesNotMatch(s, /\bthe TGA's call\b|\bCIRMP\b|\byour state applies\b|\bthe practice notes\b/, `${id}: "${s}"`);
+    }
+  }
 });
