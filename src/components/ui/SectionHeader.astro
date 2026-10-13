@@ -1,10 +1,12 @@
 ---
 // Section heading. The optional prompt line (`> prompt`) is Techsider's own eyebrow form
-// (spec §6.4) and is decorative (aria-hidden): the heading carries the meaning.
+// (spec §6.4) and is decorative (aria-hidden): the heading carries the meaning. Level 4 heads a
+// sub-block inside a level-3 section: a jurisdiction section's blocks in an industry page's
+// Australia band (go-global §5.4).
 interface Props {
   title: string;
   prompt?: string;
-  level?: 2 | 3;
+  level?: 2 | 3 | 4;
   lede?: string;
   id?: string;
 }
@@ -13,7 +15,9 @@ const { title, prompt, level = 2, lede, id } = Astro.props;
 ---
 <div class="section-header" data-section-header>
   {prompt && <p class="section-prompt" aria-hidden="true"><span class="section-prompt-caret">&gt;</span> {prompt}</p>}
-  {level === 3 ? (
+  {level === 4 ? (
+    <h4 id={id} class="section-title section-title-4">{title}</h4>
+  ) : level === 3 ? (
     <h3 id={id} class="section-title section-title-3">{title}</h3>
   ) : (
     <h2 id={id} class="section-title section-title-2">{title}</h2>
@@ -43,6 +47,9 @@ const { title, prompt, level = 2, lede, id } = Astro.props;
   }
   .section-title-3 {
     font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  }
+  .section-title-4 {
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
   }
   .section-lede {
     margin: 1rem 0 0;

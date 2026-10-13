@@ -85,6 +85,20 @@ test("SectionHeader: decorative prompt, the heading at its level with its id, th
   }
 });
 
+// go-global §5.4: a jurisdiction section's sub-blocks in an industry page's Australia band are h4s.
+// renderAstro's container scopes styles with an `astro-…` class, so the class match allows a suffix.
+test("SectionHeader level 4: an h4 with its id and the level-4 title style, and no heading at another level", async () => {
+  const html = await renderAstro(new URL("../src/components/ui/SectionHeader.astro", import.meta.url), {
+    title: "Fixture sub-block", level: 4, id: "fixture-sub-heading", lede: "Fixture lede.",
+  });
+  const h4 = html.match(/<h4 id="fixture-sub-heading" class="section-title section-title-4\b[^"]*"[^>]*>([^<]+)<\/h4>/);
+  assert.ok(h4, "no level-4 heading markup");
+  assert.equal(h4[1], "Fixture sub-block");
+  assert.doesNotMatch(html, /<h[1235-6]\b/);
+  assert.match(html, /<p class="section-lede\b[^"]*"[^>]*>Fixture lede\.<\/p>/);
+  assert.match(html, /\.section-title-4\b[^{]*\{[^}]*font-size:\s*clamp\(/, "no .section-title-4 size step");
+});
+
 test("PromptBlock: a decorative prompt line and a real primary link", () => {
   for (const id of SURFACES) {
     const m = gallery(id).match(/<div class="prompt-block[^"]*"[^>]*data-prompt-block[^>]*>\s*<p class="prompt-line" aria-hidden="true"[^>]*>([\s\S]*?)<\/p>\s*<a href="([^"]+)" class="btn btn-primary"[^>]*>([^<]+)<\/a>\s*<\/div>/);
