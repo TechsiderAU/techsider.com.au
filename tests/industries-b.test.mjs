@@ -58,7 +58,7 @@ const PACKAGES = {
 
 // The solution × industry matrix cells this task adds (spec §8.2: a 3–6-word example per cell).
 const MATRIX = {
-  "document-registers": { manufacturing: "Compliance dossiers, on request", "real-estate": "Management agreement register" },
+  "document-registers": { manufacturing: "Compliance dossiers, on request", "real-estate": "Management agreement register (Australia)" },
   "knowledge-assistant": { education: "Staff policy answers, section cited", manufacturing: "Multilingual SOP answers, page shown" },
   "draft-for-approval": { manufacturing: "Draft work requests, on request", "real-estate": "Shared inbox triage, on request" },
   "ai-evaluation": { education: "Evaluation of deployed staff AI" },

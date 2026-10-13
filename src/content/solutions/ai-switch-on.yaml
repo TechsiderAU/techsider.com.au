@@ -21,8 +21,8 @@ needProfiles:
       them. Switch-On finds the ones you own, sets them up and trains your staff.
   - title: You need ground rules before staff use it.
     body: >-
-      Where a Safe-Use Kit for your industry is published, Switch-On applies it as is. Your own
-      adviser approves any consent, engagement-letter or policy wording.
+      In Australia, where a Safe-Use Kit for your industry is published, Switch-On applies it as is.
+      Your own adviser approves any consent, engagement-letter or policy wording.
   - title: You want to know it saved time.
     body: >-
       The Audit sets a baseline of where staff hours go. Day 30 measures the hours saved against it,
@@ -43,13 +43,13 @@ genericPackage:
     set up or measured.
   scope: >-
     Week 1: an Admin Hours Audit. Weeks 2–3: configure the AI features you already own, apply the
-    Safe-Use Kit for your industry where one is published, and train staff. Day 30: an hours-saved
-    report.
+    Australian Safe-Use Kit for your industry where one is published, and train staff. Day 30: an
+    hours-saved report.
   inclusions:
     - An hours map of where staff time goes, and which of it the tools you own could take on
     - A build, queue or park call on everything else
     - Set-up of the AI features you already license, directly or with your IT provider
-    - The Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry
+    - The Australian Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry
     - Staff training
     - An hours-saved report at day 30, measured against the Audit baseline in your own units
   clientTime: >-
@@ -79,13 +79,13 @@ packages:
       the AI they already license set up with ground rules and measured.
     scope: >-
       The Admin Hours Audit takes 1 week and maps where staff hours go. Switch-On takes 2–3 weeks: it
-      configures features you already own, applies the relevant Safe-Use Kit as published, where one
-      has been published, trains staff and measures the hours saved at day 30.
+      configures features you already own, applies the relevant Australian Safe-Use Kit as published,
+      where one has been published, trains staff and measures the hours saved at day 30.
     inclusions:
       - The Audit's hours map, with build, queue or park for each task
       - The baseline any later build is measured against
       - Set-up of the AI already in your practice, property or office software, such as Karbon AI's email summaries and suggested replies, or Reply with AiMe on PropertyMe's Advanced or Premier plan
-      - "The Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry. Otherwise, your own AI policy applies."
+      - "The Australian Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry. Otherwise, your own AI policy applies."
       - Staff training, and the day-30 hours-saved report
     clientTime: >-
       An operations lead for about 3 hours a week, admin access or your IT provider's help, and 2–3

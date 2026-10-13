@@ -137,7 +137,7 @@ dontDo:
   - We don't build voice bots or customer-facing chat.
   - We don't rebuild a job your platform's own tools already handle.
 matrix:
-  accounting: ATO Letter Sorter, on request
+  accounting: ATO Letter Sorter (Australia), on request
   manufacturing: "Draft work requests, on request"
   real-estate: "Shared inbox triage, on request"
   resources-and-energy: "Shift handover records, on request"

@@ -431,3 +431,23 @@ test("research holds: no platform or delivery claim the research leaves open", (
   assert.ok(kitSentences.length >= 4, "⑤ names the kits in its job, need profile, scope and inclusions");
   for (const s of kitSentences) assert.match(s, /\bwhere (one|a Safe-Use Kit\b[^.]*?) (is|has been) published\b/i, `⑤ offers a kit outright: "${s}"`);
 });
+
+test("go-global §3.3 and contract §5 rules 4–5: a matrix cell, a Safe-Use Kit line or an entry offer that names an Australia-only item says so inline", () => {
+  assert.equal(DATA["ai-evaluation"].matrix["resources-and-energy"], "Pre-contract tests; on-request SOCI evidence (Australia)");
+  assert.equal(DATA["draft-for-approval"].matrix.accounting, "ATO Letter Sorter (Australia), on request");
+  assert.equal(DATA["document-registers"].matrix["real-estate"], "Management agreement register (Australia)");
+  const switchOn = DATA["ai-switch-on"];
+  const adminHours = switchOn.packages.find((p) => p.id === "admin-hours-audit-switch-on");
+  assert.equal(switchOn.needProfiles[1].body, "In Australia, where a Safe-Use Kit for your industry is published, Switch-On applies it as is. Your own adviser approves any consent, engagement-letter or policy wording.");
+  assert.equal(switchOn.genericPackage.scope, "Week 1: an Admin Hours Audit. Weeks 2–3: configure the AI features you already own, apply the Australian Safe-Use Kit for your industry where one is published, and train staff. Day 30: an hours-saved report.");
+  assert.equal(switchOn.genericPackage.inclusions[3], "The Australian Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry");
+  assert.equal(adminHours.scope, "The Admin Hours Audit takes 1 week and maps where staff hours go. Switch-On takes 2–3 weeks: it configures features you already own, applies the relevant Australian Safe-Use Kit as published, where one has been published, trains staff and measures the hours saved at day 30.");
+  assert.equal(adminHours.inclusions[3], "The Australian Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry. Otherwise, your own AI policy applies.");
+  const offers = SERVICES.entryOffers.flatMap((o) => [o.entry, o.then]);
+  for (const s of [
+    "Accounting Safe-Use Kit (Australia), then a Trial of the Trust Deed & Client Structure Register",
+    "The full register; ATO Letter Sorter (Australia, on request); Run",
+    "A Trial of the Management Agreement & Rent Roll Register (Australia); on-request property packages",
+    "SOCI AI Risk Evidence (Australia, on request)",
+  ]) assert.ok(offers.some((o) => o.startsWith(s)), `services entry offers: "${s}"`);
+});

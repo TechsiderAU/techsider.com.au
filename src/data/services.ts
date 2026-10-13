@@ -154,13 +154,13 @@ export const SERVICES: ServicesData = {
     // ⚑ owner: the Accounting Safe-Use Kit must be lawyer-reviewed and published before this entry offer names it (spec §12 item 6; research index A1)
     {
       buyer: "Accounting practice (50–300 staff, or a network)",
-      entry: "Accounting Safe-Use Kit, then a Trial of the Trust Deed & Client Structure Register (outside your peak tax season)",
-      then: "The full register; ATO Letter Sorter (on request); Run",
+      entry: "Accounting Safe-Use Kit (Australia), then a Trial of the Trust Deed & Client Structure Register (outside your peak tax season)",
+      then: "The full register; ATO Letter Sorter (Australia, on request); Run",
     },
     {
       buyer: "Residential property-management group (1,000+ managements)",
       entry: "Admin Hours Audit + Switch-On",
-      then: "A Trial of the Management Agreement & Rent Roll Register; on-request property packages",
+      then: "A Trial of the Management Agreement & Rent Roll Register (Australia); on-request property packages",
     },
     {
       buyer: "Mid-size law firm",
@@ -180,7 +180,7 @@ export const SERVICES: ServicesData = {
     {
       buyer: "Mid-tier miner, utility or renewables developer",
       entry: "Trial of the Approval & Permit Conditions Register on one approval (on request)",
-      then: "SOCI AI Risk Evidence (on request)",
+      then: "SOCI AI Risk Evidence (Australia, on request)",
     },
     {
       buyer: "Independent school or group",
