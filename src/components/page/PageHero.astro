@@ -1,6 +1,8 @@
 ---
 // Shared hero: technical pages keep the dark treatment; business pages pass `art` for a
 // light, responsive introduction beside a labelled application concept. Each page has one H1.
+// The line under the title is the `sub` prop, or a named `sub` slot when it carries markup (the
+// contact page's reply sentence, go-global §3.2); the slot wins.
 import type { Link } from "../../lib/site";
 import { splitHighlight } from "../../lib/highlight";
 import Breadcrumb from "../ui/Breadcrumb.astro";
@@ -14,6 +16,7 @@ interface Props {
   display?: boolean;
   eyebrow?: string;
   prompt?: { command: string; args?: string };
+  /** The line under the title. A `sub` slot replaces it when the line carries markup. */
   sub?: string;
   proofLine?: string;
   breadcrumb?: Link[];
@@ -39,6 +42,7 @@ const {
 // Throws at build time when `highlight` is not one whole word of `title`.
 const parts = highlight === undefined ? null : splitHighlight(title, highlight);
 const hasSlot = Astro.slots.has("default");
+const hasSub = Astro.slots.has("sub");
 ---
 <header class:list={["page-hero", art ? "page-hero-editorial surface-bone" : "bg-carbon scanlines"]} data-page-hero>
   <div class="page-hero-inner">
@@ -52,7 +56,7 @@ const hasSlot = Astro.slots.has("default");
       {parts ? <Fragment>{parts.before}<span class="hl">{parts.word}</span>{parts.after}</Fragment> : title}
     </h1>
     {proofLine && <p class="page-hero-proof">{proofLine}</p>}
-    {sub && <p class="page-hero-sub">{sub}</p>}
+    {hasSub ? <p class="page-hero-sub"><slot name="sub" /></p> : sub && <p class="page-hero-sub">{sub}</p>}
     {ctaPosition === "before-slot" && <CtaLinks primary={ctas?.primary} secondary={ctas?.secondary} />}
     </div>
     {art && <div class="page-hero-art"><BusinessArtwork kind={art} priority /></div>}

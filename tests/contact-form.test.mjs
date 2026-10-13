@@ -29,6 +29,7 @@ import {
 import { EXTRA_INTERESTS } from "../src/lib/fixed-copy.ts";
 import { gatedPaths } from "../src/lib/pages.ts";
 import { siteContext } from "../src/lib/site.ts";
+import { replySentence } from "../src/lib/reply-time.ts";
 import { MOCK_FORM, MOCK_FORM_PORT } from "../src/preview/mock-form.ts";
 import { APPEND_FIELD, HONEYPOT_FIELD, REDIRECT_FIELD, SITE_ORIGIN, createMockForm, problems } from "./support/mock-form.mjs";
 
@@ -443,7 +444,7 @@ test("preview: /contact/sent/ is built from the real contact data, noindex, with
   const main = mainOf(html);
   one(main, "data-template", "sent");
   assert.equal(tagged(main, "h1").length, 1);
-  assert.equal(text(one(main, "data-reply-time").inner), `We reply within ${CONTACT.replyTime}.`);
+  assert.equal(text(one(main, "data-reply-time").inner), replySentence(CONTACT));
   const email = one(main, "data-email");
   assert.equal(text(email.inner), SITE.email);
   assert.equal(tagged(main, "a").filter((a) => a.attrs.href === `mailto:${SITE.email}`).length, 0, "the address is plain text");

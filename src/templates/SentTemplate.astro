@@ -1,12 +1,13 @@
 ---
 // The enquiry confirmation (spec §8.11), body only: the form provider redirects here after a
 // plain POST. The gated route at /contact/sent/ wraps this in BaseLayout (noindex, and left out of
-// the sitemap). It repeats the contact page's reply-time sentence, read from the same
-// contact.replyTime, then what happens next and the email address as plain text.
+// the sitemap). It repeats the contact page's reply-time sentence, built by replySentence() from
+// the same contact data (go-global §4.5), then what happens next and the email address as plain text.
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import type { ContactData } from "../content/page-schemas";
 import type { SiteContext } from "../lib/site";
+import { replySentence } from "../lib/reply-time";
 
 interface Props {
   contact: ContactData;
@@ -19,7 +20,7 @@ const { contact, site } = Astro.props;
   <PageHero title="Message sent." highlight="sent" />
 
   <PageSection id="next" title="What happens next" width="prose">
-    <p class="sent-reply" data-reply-time>We reply within {contact.replyTime}.</p>
+    <p class="sent-reply" data-reply-time>{replySentence(contact)}</p>
     <ol class="sent-steps">
       {contact.whatNext.map((step) => <li>{step}</li>)}
     </ol>

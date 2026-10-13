@@ -28,8 +28,9 @@ import { CONTACT } from "../src/data/contact.ts";
 import { POSITIONING } from "../src/data/positioning.ts";
 import { SERVICES } from "../src/data/services.ts";
 import { TRUST } from "../src/data/trust.ts";
-import { ABN_NOTE, CONTACT_H1, DELIVERY_MODEL, DISAMBIGUATION } from "../src/lib/fixed-copy.ts";
+import { ABN_NOTE, CONTACT_BASE, CONTACT_H1, DELIVERY_MODEL, DISAMBIGUATION } from "../src/lib/fixed-copy.ts";
 import { pageDescription, pageTitle } from "../src/lib/meta.ts";
+import { replySentence } from "../src/lib/reply-time.ts";
 import { siteContext } from "../src/lib/site.ts";
 import { trustView } from "../src/lib/views/company.ts";
 
@@ -318,7 +319,7 @@ test("/contact/: the enquiry form, email fallback, reply time and next steps are
   assert.equal(tagged(main, "form").length, 1);
   assert.equal(one(main, "data-contact-form").attrs.action, CONTACT.formEndpoint);
   assert.equal(text(one(main, "data-email").inner), SITE.email);
-  assert.equal(text(one(main, "data-reply-time").inner), `We reply within ${CONTACT.replyTime}.`);
+  assert.equal(inlineText(one(main, "data-reply-time").inner), replySentence(CONTACT));
   assert.deepEqual(tagged(tagged(one(main, "id", "next").inner, "ol")[0].inner, "li").map((li) => text(li.inner)), CONTACT.whatNext);
   assert.deepEqual(tagged(one(main, "id", "elsewhere").inner, "a").map((a) => a.attrs.href), CONTACT.deflection.map((d) => `mailto:${d.email}`));
 });
@@ -331,7 +332,29 @@ test("the reply time is written once and shared by the contact and confirmation 
   assert.deepEqual(writing, ["src/data/contact.ts"]);
   const stating = allHtmlFiles().filter((f) => /\bwe reply within\b/i.test(visibleText(readDist(f)))).sort();
   assert.deepEqual(stating, ["contact/index.html", "contact/sent/index.html"]);
-  for (const f of stating) assert.ok(visibleText(readDist(f)).includes(`We reply within ${CONTACT.replyTime}.`), f);
+  // go-global §4.5: both pages state the one shared sentence, once.
+  for (const f of stating) {
+    const stamps = elementsWith(readDist(f), "data-reply-time");
+    assert.equal(stamps.length, 1, `${f}: ${stamps.length} reply-time statements`);
+    assert.equal(inlineText(stamps[0].inner), replySentence(CONTACT), f);
+  }
+});
+
+test("/contact/ states the reply time once, in the hero after the delivery line, with its Sydney time base (go-global §3.2, §4.5, R6, S4)", () => {
+  const html = readDist("contact/index.html");
+  const sentence = replySentence(CONTACT);
+  assert.equal(sentence, "We reply within two business days, Sydney time (AEST/AEDT).");
+  assert.equal(CONTACT_BASE, "Based in Sydney, delivered remotely.");
+  assert.equal(elementsWith(html, "data-reply-time").length, 1, "/contact/ has more than one reply-time statement");
+  const hero = one(mainOf(html), "data-page-hero");
+  assert.deepEqual(elements(hero.inner, (t) => t.attrs.class === "page-hero-sub").map((p) => inlineText(p.inner)), [
+    "Based in Sydney, delivered remotely. We reply within two business days, Sydney time (AEST/AEDT).",
+  ]);
+  assert.equal(inlineText(one(hero.inner, "data-reply-time").inner), sentence);
+  const visible = visibleText(html);
+  const times = (s) => visible.split(s).length - 1;
+  assert.deepEqual([times("We reply within"), times("Sydney time"), times(CONTACT.replyTime)], [1, 1, 1], "/contact/ states the reply time again elsewhere");
+  assert.doesNotMatch(text(one(mainOf(html), "id", "next").inner), /\bwe reply\b|\bbusiness days?\b/i, "#next still states the reply time");
 });
 
 test("/about/: the mission, who it's for, the origin line, the principles, how we work, the build log newest first, and a prompt to /contact/", () => {

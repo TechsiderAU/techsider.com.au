@@ -10,8 +10,9 @@ import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, idsIn, startTags } from "../scripts/ci/lib.mjs";
-import { CONTACT_H1, EXTRA_INTERESTS, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../src/lib/fixed-copy.ts";
+import { CONTACT_BASE, CONTACT_H1, EXTRA_INTERESTS, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../src/lib/fixed-copy.ts";
 import { countryOptions } from "../src/data/countries.ts";
+import { replySentence } from "../src/lib/reply-time.ts";
 import { insightCards } from "../src/lib/views/insights.ts";
 import { trustView } from "../src/lib/views/company.ts";
 import {
@@ -34,7 +35,8 @@ const PAGES = {
 };
 // The hubs the 404 offers, in order; only the ones the SiteContext shows are listed.
 const NOT_FOUND_HUBS = ["home", "solutions", "industries", "services", "resources", "insights", "demos", "about"];
-const REPLY_SENTENCE = `We reply within ${contactFixture.replyTime}.`;
+// go-global §4.5: "We reply within one fixture business day, fixture time (FXT)."
+const REPLY_SENTENCE = replySentence(contactFixture);
 const TEMPLATES_DIR = fileURLToPath(new URL("../dist-preview/preview/templates/", import.meta.url));
 
 const page = (kind) => readPreviewDist(`preview/templates/${kind}/index.html`);
@@ -500,12 +502,27 @@ test("contact: the email address is plain text with a hidden copy button and a p
 
   const next = one(main, "id", "next");
   assert.equal(text(one(next.inner, "id", "next-heading").inner), "What happens next");
-  assert.equal(text(one(next.inner, "data-reply-time").inner), REPLY_SENTENCE);
+  // go-global §3.2, R6: the reply time moved to the hero, so #next lists the steps only.
+  assert.equal(elementsWith(next.inner, "data-reply-time").length, 0, "#next still states the reply time");
   assert.deepEqual(tagged(tagged(next.inner, "ol")[0].inner, "li").map((li) => text(li.inner)), contactFixture.whatNext);
   const elsewhere = one(main, "id", "elsewhere");
   assert.equal(text(one(elsewhere.inner, "id", "elsewhere-heading").inner), "Something else?");
   assert.deepEqual(tagged(elsewhere.inner, "h3").map((h) => text(h.inner)), contactFixture.deflection.map((d) => d.title));
   assert.deepEqual(tagged(elsewhere.inner, "a").map((a) => a.attrs.href), contactFixture.deflection.map((d) => `mailto:${d.email}`));
+});
+
+test("contact: the hero's sub is the delivery line, then the one reply-time sentence with its time base (go-global §3.2, §4.5, R6)", () => {
+  assert.equal(REPLY_SENTENCE, "We reply within one fixture business day, fixture time (FXT).");
+  for (const kind of ["contact", "contact-no-endpoint"]) {
+    const html = page(kind);
+    const hero = one(mainOf(html), "data-page-hero");
+    const subs = withClass(hero.inner, "page-hero-sub");
+    assert.equal(subs.length, 1, `${kind}: ${subs.length} hero subs`);
+    assert.equal(inlineText(subs[0].inner), `${CONTACT_BASE} ${REPLY_SENTENCE}`, kind);
+    assert.equal(inlineText(one(subs[0].inner, "data-reply-time").inner), REPLY_SENTENCE, kind);
+    assert.equal(elementsWith(html, "data-reply-time").length, 1, `${kind}: more than one reply-time statement`);
+    assert.equal(withClass(hero.inner, "page-hero-slot").length, 0, `${kind}: the sub slot spilled into the hero's default slot`);
+  }
 });
 
 test("contact-no-endpoint: no form at all, and the email address leads", () => {
@@ -532,10 +549,15 @@ test("sent: the reply-time sentence, what happens next and the email address as 
   assert.equal(tagged(email.inner, "a").length, 0);
 });
 
-test("the reply time is stated on the contact and sent pages only", () => {
+test("the reply time is stated on the contact and sent pages only, once each, as the shared sentence (go-global §4.5, R6)", () => {
   const kinds = readdirSync(TEMPLATES_DIR, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
   const stating = kinds.filter((kind) => visibleText(mainOf(page(kind))).includes(contactFixture.replyTime));
   assert.deepEqual(stating, ["contact", "contact-no-endpoint", "sent"]);
+  for (const kind of stating) {
+    const html = page(kind);
+    assert.equal(visibleText(html).split(contactFixture.replyTime).length - 1, 1, `${kind} states the reply time more than once`);
+    assert.equal(inlineText(one(html, "data-reply-time").inner), REPLY_SENTENCE, kind);
+  }
 });
 
 test("not-found: a card for every shown hub, then Report this link with the address as plain text", () => {
