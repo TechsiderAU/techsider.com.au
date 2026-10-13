@@ -214,6 +214,18 @@ test("lib: elementsWith returns whole elements, balancing nested tags of the sam
   assert.equal(elementsWith(TRACE, "data-provenance", "illustrative").length, 1);
 });
 
+test("lib: elements gives each element's offsets in the page, so a caller can tell what holds what", () => {
+  const html = `<p>x</p><div data-x><div>inner <b>bold</b></div> tail</div><img data-x alt=""><!-- <div data-x> -->`;
+  const [div, img, ...rest] = elementsWith(html, "data-x");
+  assert.deepEqual(rest, [], "markup inside a comment is not an element");
+  assert.equal(div.start, html.indexOf("<div data-x>"));
+  assert.equal(html.slice(div.start, div.end), div.outer);
+  assert.equal(html.slice(img.start, img.end), '<img data-x alt="">');
+  const unclosed = "<section data-x><p>never closed";
+  const [open] = elementsWith(unclosed, "data-x");
+  assert.deepEqual([open.start, open.end], [0, unclosed.length]);
+});
+
 test("lib: phrases match whole words, any case, with hyphen and space interchangeable", () => {
   const re = phraseRegExp("cutting-edge");
   assert.equal("A Cutting Edge idea and a cutting-edge one".match(re).length, 2);
