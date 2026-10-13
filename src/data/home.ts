@@ -36,7 +36,7 @@ export const HOME: HomeData = {
     },
     {
       q: "Where does our data go?",
-      a: "What we build or run for you is deployed in an Australian region, in your own Microsoft or AWS account or managed by us, and each launch package's onshore note records where model inference actually runs. Inside a platform you already license, the vendor sets where processing happens: we show you its published processing location, with the source, or tell you it isn't published.",
+      a: "What we build for you runs in the cloud region you choose, in your own Microsoft or AWS account; systems we manage for you run in an Australian region. Each launch package's region note records where model inference actually runs. Our team reaches systems remotely from Sydney, under the data-transfer terms in your contract. Inside a platform you already license, the vendor sets where processing happens: we show you its published processing location, with the source, or tell you it isn't published.",
     },
     {
       q: "How do we start?",

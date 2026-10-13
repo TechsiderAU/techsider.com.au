@@ -355,7 +355,9 @@ faq:
       scope, method and deliverables stay the same, and the independence policy still applies.
   - q: Does test data leave our environment?
     a: >-
-      Not to us. The test runs in your environment, and the graders run in your own subscription, so
-      test data and results stay with you. The system under test processes each test question where
-      its vendor runs it, as in normal use, and the report records the vendor's published processing
-      location, with its date. While your approvals run, testing can start on public or synthetic data.
+      We don't take a copy. The test runs in your environment, and the graders run in your own
+      subscription, so test data and results stay with you. Our team reaches your environment remotely
+      from Sydney, under the data-transfer terms in your contract. The system under test processes each
+      test question where its vendor runs it, as in normal use, and the report records the vendor's
+      published processing location, with its date. While your approvals run, testing can start on
+      public or synthetic data.
