@@ -16,7 +16,7 @@ import { industryFindings, regionFindings } from "../scripts/ci/checks/13-anchor
 import { anchorFile, makeIndustrySchema, plainRef } from "../src/content/schemas.ts";
 import { anchorChipLabel } from "../src/lib/anchors.ts";
 import {
-  AU_BAND_HEADING, AU_BAND_INTRO, RULES_CLOSING, RULES_HEADING, RULES_SHARED_LABEL,
+  AU_BAND_HEADING, AU_BAND_INTRO, REGION_LABEL, RULES_CLOSING, RULES_HEADING, RULES_SHARED_LABEL,
 } from "../src/lib/fixed-copy.ts";
 import { AUTOMATION } from "../src/lib/marketing.ts";
 import { siteContext } from "../src/lib/site.ts";
@@ -144,5 +144,22 @@ test("word budgets: Rules that travel at most 280 words, its paragraph at most 1
       + data.faq.filter((f) => f.region === "au").reduce((n, f) => n + wordsOf(`${f.q} ${f.a}`), 0);
     const own = blockWords(html, "australia") - moved;
     assert.ok(own <= 20, `${id}: the band adds ${own} words`);
+  }
+});
+
+test("hub: each card's Designed around chips sit in one [data-region=au] wrapper that opens with the Australia label (go-global §5.1)", () => {
+  const cards = elementsWith(mainOf(readDist("industries/index.html")), "data-industry-card");
+  assert.deepEqual(cards.map((c) => c.attrs["data-industry-card"]), IDS);
+  for (const card of cards) {
+    const id = card.attrs["data-industry-card"];
+    // Only the wrapper that holds the chip row: Part 5 marks Australia-only flagship use cases in the
+    // same card <li data-region="au"> (contract §5 rule 5), and those don't count here.
+    const wrappers = elementsWith(card.inner, "data-region", "au").filter((w) => byId(w.inner, `industry-${id}-chips`));
+    assert.equal(wrappers.length, 1, `${id}: [data-region=au] wrappers around the chip row`);
+    const [wrapper] = wrappers;
+    assert.ok((wrapper.attrs.class ?? "").split(/\s+/).includes("industry-region"), `${id}: the wrapper isn't .industry-region`);
+    assert.match(wrapper.inner, /^\s*<span\b[^>]*\bdata-region-label="region"[^>]*>/, `${id}: the label doesn't open the wrapper`);
+    assert.deepEqual(elementsWith(wrapper.inner, "data-region-label").map((l) => text(l.inner)), [REGION_LABEL], id);
+    assert.equal(elementsWith(wrapper.inner, "data-bracket-chip").length, elementsWith(card.inner, "data-bracket-chip").length, `${id}: a chip outside the wrapper`);
   }
 });
