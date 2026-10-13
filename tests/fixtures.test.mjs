@@ -12,7 +12,7 @@ import {
   anchorFile, anchorKind, anchorStatus,
 } from "../src/content/schemas.ts";
 import {
-  positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema,
+  positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema, internationalData,
 } from "../src/content/page-schemas.ts";
 import { HOME_TRUST_QUESTION } from "../src/lib/fixed-copy.ts";
 import * as all from "../src/fixtures/index.ts";
@@ -28,6 +28,7 @@ const {
   positioningFixture, servicesFixture, contactFixture, contactNoEndpointFixture, trustFixture, trustNoTermsFixture, aboutFixture,
   homeFixture, documentFixtures,
   sharedAnchorsFixture, anchorFixture, gdprAnchorFixture, governmentAnchorFixture, anchorFixtures,
+  internationalFixture,
 } = all;
 
 const SRC = fileURLToPath(new URL("../src/", import.meta.url));
@@ -64,6 +65,7 @@ const CASES = [
   ["anchorFixture", anchorFile, anchorFixture],
   ["gdprAnchorFixture", anchorFile, gdprAnchorFixture],
   ["governmentAnchorFixture", anchorFile, governmentAnchorFixture],
+  ["internationalFixture", internationalData, internationalFixture],
   ...Object.entries(solutionFixtures).map(([id, v]) => [`solutionFixtures.${id}`, solutionSchema, v]),
   ...Object.entries(industryFixtures).map(([id, v]) => [`industryFixtures.${id}`, industrySchema, v]),
   ...Object.entries(regulatoryFixtures).map(([id, v]) => [`regulatoryFixtures.${id}`, regulatoryFile, v]),
@@ -86,7 +88,7 @@ const TOKEN = /^[a-z0-9-]+$/;
 // Enum values that aren't token-shaped: exempt only when the value is one of the enum's options.
 const ENUM_KEYS = {
   packagesHeading: ["Packages", "Engagements"], part: ["A", "B"],
-  checkLevel: ["P", "P*", "S", "UNVERIFIED"],
+  checkLevel: ["P", "P*", "S", "UNVERIFIED"], gate: ["owner", "legal"], timeZone: ["Australia/Sydney"],
 };
 // Fixed spec copy a schema requires verbatim (src/lib/fixed-copy.ts), so no fixture can reword it.
 const FIXED_COPY = new Set([HOME_TRUST_QUESTION]);
@@ -138,6 +140,10 @@ test("assertFictional rejects real-looking copy, real hosts and prose in token f
   // go-global: a check level passes under its own key only; a region is a token.
   assertFictional({ checkLevel: "P*", region: "au" });
   assert.throws(() => assertFictional({ name: "P*" }), /not visibly fictional/);
+  // A gate and Sydney's time zone pass under their own keys only; prose under `gate` still says "Fixture".
+  assertFictional({ gate: "legal", timeZone: "Australia/Sydney" });
+  assert.throws(() => assertFictional({ timeZone: "Europe/London" }), /not visibly fictional/);
+  assert.throws(() => assertFictional({ gate: "Real launch gate" }), /not visibly fictional/);
   assertFictional({
     status: "on-request", name: "Northwind Fixture Pty Ltd", href: "https://example.com/fixture",
     asAt: new Date("2026-09-01"), n: 3, t: "09:00:00", target: { value: 90, unit: "%" }, metric: { value: 420, unit: "ms" },
@@ -353,6 +359,10 @@ test("insight fixtures: four posts on the documented dates plus one newer draft,
 test("page fixtures exercise every display state", () => {
   assert.equal(contactFixture.formEndpoint, "https://example.com/fixture/form");
   assert.equal(contactNoEndpointFixture.formEndpoint, null);
+  // go-global §7.3: a confirmed line, the delivery line /contact/ leaves out, and one line per gate.
+  assert.deepEqual(internationalFixture.map((l) => [l.id, l.confirmed, l.gate]), [
+    ["entity", true, null], ["delivery", true, null], ["dpa", false, "legal"], ["representative", false, "owner"],
+  ]);
   assert.deepEqual(trustFixture.partB.map((b) => b.confirmed), [true, true, false]);
   assert.deepEqual([...new Set(trustFixture.faq.map((f) => f.part))].sort(), ["A", "B"]);
   // Part B answers rest on confirmed terms and on the unconfirmed one, so the page shows some and hides one.

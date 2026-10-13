@@ -13,6 +13,7 @@ import {
 } from "../src/content/schemas.ts";
 import {
   positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema,
+  INTERNATIONAL_IDS, internationalLine, internationalData,
 } from "../src/content/page-schemas.ts";
 import { HOME_TRUST_QUESTION } from "../src/lib/fixed-copy.ts";
 import { ENQUIRY_FIELDS } from "../src/lib/contact-form.ts";
@@ -809,6 +810,8 @@ const SERVICES = {
 };
 const CONTACT = {
   replyTime: "one test business day",
+  replyTimeBase: "test time (TST)",
+  timeZone: "Australia/Sydney",
   formEndpoint: "https://example.com/form",
   formProvider: { name: "Test Forms", country: "Test country" },
   redirectField: "_redirect",
@@ -841,6 +844,12 @@ const HOME = {
   trustPageLine: "Test sentence about the Trust page.",
 };
 const DOCUMENT = { title: "Test document", summary: "Test summary, twenty plus characters.", lastUpdated: "2026-09-01" };
+// The "For organisations outside Australia" lines (go-global §7.3): confirmed lines have no gate.
+const INTERNATIONAL = [
+  { id: "entity", text: "Test entity line, ten plus.", confirmed: true, gate: null },
+  { id: "dpa", text: "Test lawyer draft, ten plus.", confirmed: false, gate: "legal" },
+  { id: "representative", text: "Test owner line, ten plus.", confirmed: false, gate: "owner" },
+];
 
 test("page data: positioning holds the four pillars in spec §3.2 order", () => {
   ok(positioningData, POSITIONING, "positioning");
@@ -876,6 +885,32 @@ test("page data: contact takes a form endpoint URL or null, and real email addre
   ok(contactData, { ...CONTACT, deflection: CONTACT.deflection.slice(0, 1) }, "one shared contact mailbox");
   bad(contactData, { ...CONTACT, deflection: [] }, "no contact mailbox");
   bad(contactData, { ...CONTACT, subProcessors: CONTACT.subProcessors.slice(0, 1) }, "one sub-processor");
+});
+
+test("page data: contact names the reply time's base and Sydney's time zone (go-global §4.5, §8.4)", () => {
+  const data = ok(contactData, CONTACT, "contact");
+  assert.deepEqual([data.replyTimeBase, data.timeZone], ["test time (TST)", "Australia/Sydney"]);
+  for (const key of ["replyTimeBase", "timeZone"]) {
+    const { [key]: _, ...unset } = CONTACT;
+    bad(contactData, unset, `${key} left out`);
+  }
+  bad(contactData, { ...CONTACT, replyTimeBase: "TST" }, "a reply time base under 5 characters");
+  bad(contactData, { ...CONTACT, timeZone: "Europe/London" }, "a time zone other than Sydney's");
+});
+
+test("page data: the outside-Australia lines have known ids, each once, and a gate exactly when unconfirmed (go-global §7.3)", () => {
+  assert.deepEqual(INTERNATIONAL_IDS, ["entity", "delivery", "certifications", "dpa", "representative"]);
+  assert.deepEqual(ok(internationalData, INTERNATIONAL, "international lines").map((l) => l.gate), [null, "legal", "owner"]);
+  bad(internationalData, [], "no lines");
+  bad(internationalData, [{ ...INTERNATIONAL[0], id: "phone" }], "an unknown line id");
+  bad(internationalData, [{ ...INTERNATIONAL[0], text: "Too short" }], "a line under 10 characters");
+  bad(internationalData, [{ ...INTERNATIONAL[1], gate: "lawyer" }], "an unknown gate");
+  badWith(internationalData, [INTERNATIONAL[0], INTERNATIONAL[0]], "1.id", 'line id "entity" repeats');
+  badWith(internationalData, [{ ...INTERNATIONAL[0], gate: "owner" }], "0.gate", 'line "entity" is confirmed, so it names no gate');
+  badWith(
+    internationalData, [{ ...INTERNATIONAL[1], gate: null }], "0.gate",
+    'line "dpa" is not confirmed, so it names its gate: "owner" or "legal" (go-global §2.3)',
+  );
 });
 
 test("page data: the form provider is null until a form endpoint needs one (blueprint ruling 16, spec §10.2)", () => {
@@ -971,6 +1006,8 @@ test("every page-data schema rejects unknown keys, at the top level and nested",
     [servicesData, { ...SERVICES, evaluationPartner: { ...SERVICES.evaluationPartner, cta: "Test" } }, "evaluation partner"],
     [contactData, { ...CONTACT, phone: "Test" }, "contact"],
     [contactData, { ...CONTACT, formProvider: { ...CONTACT.formProvider, region: "Test" } }, "contact form provider"],
+    [contactData, { ...CONTACT, meetingNote: "Test" }, "contact meeting note (go-global §8.4: none)"],
+    [internationalLine, { ...INTERNATIONAL[0], href: "https://example.com" }, "international line"],
     [trustData, { ...TRUST, certifications: [] }, "trust"],
     [trustData, { ...TRUST, partB: TRUST.partB.map((b) => ({ ...b, confirmedAt: "2026-09-15" })) }, "trust part B"],
     [aboutData, { ...ABOUT, team: [] }, "about"],

@@ -64,6 +64,11 @@ const providerField = z.string().regex(/^[A-Za-z_][A-Za-z0-9_-]*$/);
 
 export const contactData = z.strictObject({
   replyTime: z.string(), // written once: /contact/ and /contact/sent/ read it, and no other page states a reply time (spec §8.11)
+  // The time base the reply sentence names (go-global §4.5): src/lib/reply-time.ts builds the one
+  // sentence from replyTime and replyTimeBase.
+  replyTimeBase: z.string().min(5),
+  // The business's own time zone (go-global §8.4). No meeting hours are published, so there is no meetingNote.
+  timeZone: z.literal("Australia/Sydney"),
   // null until the owner chooses a form provider (spec §12 item 1): the page then shows the email
   // fallback only. https only: the form posts personal data.
   formEndpoint: z.url({ protocol: /^https$/ }).nullable(),
@@ -99,6 +104,28 @@ export const contactData = z.strictObject({
   claim(c.honeypotField, ["honeypotField"]);
   if (c.redirectField !== null) claim(c.redirectField, ["redirectField"]);
   for (const name of Object.keys(c.hiddenFields)) claim(name, ["hiddenFields", name]);
+});
+
+/** go-global §7.3: the "For organisations outside Australia" lines, by id. */
+export const INTERNATIONAL_IDS = ["entity", "delivery", "certifications", "dpa", "representative"] as const;
+/**
+ * One line of the "For organisations outside Australia" block (go-global §7.3). Only confirmed lines
+ * render. An unconfirmed line names its gate (go-global §2.3): "owner" until the owner confirms it,
+ * "legal" until a lawyer has reviewed it. A confirmed line has none.
+ */
+export const internationalLine = z.strictObject({
+  id: z.enum(INTERNATIONAL_IDS), text: z.string().min(10), confirmed: z.boolean(), gate: z.enum(["owner", "legal"]).nullable(),
+});
+export const internationalData = z.array(internationalLine).min(1).superRefine((lines, ctx) => {
+  const seen = new Set<string>();
+  lines.forEach((l, i) => {
+    if (seen.has(l.id)) ctx.addIssue({ code: "custom", path: [i, "id"], message: `line id "${l.id}" repeats` });
+    seen.add(l.id);
+    if (l.confirmed && l.gate !== null) ctx.addIssue({ code: "custom", path: [i, "gate"], message: `line "${l.id}" is confirmed, so it names no gate` });
+    if (!l.confirmed && l.gate === null) {
+      ctx.addIssue({ code: "custom", path: [i, "gate"], message: `line "${l.id}" is not confirmed, so it names its gate: "owner" or "legal" (go-global §2.3)` });
+    }
+  });
 });
 
 export const trustData = z.strictObject({
@@ -154,6 +181,8 @@ export const documentSchema = z.strictObject({
 export type PositioningData = z.infer<typeof positioningData>;
 export type ServicesData = z.infer<typeof servicesData>;
 export type ContactData = z.infer<typeof contactData>;
+export type InternationalLine = z.infer<typeof internationalLine>;
+export type InternationalData = z.infer<typeof internationalData>;
 export type TrustData = z.infer<typeof trustData>;
 export type AboutData = z.infer<typeof aboutData>;
 export type HomeData = z.infer<typeof homeData>;
