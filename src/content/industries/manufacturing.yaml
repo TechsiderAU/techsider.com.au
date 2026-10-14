@@ -66,8 +66,9 @@ platformFirst: "If your procedures already live in SafetyCulture (now Mitti), tr
 dontDo:
   - "We don't build predictive maintenance, vision QA or SOP Q&A inside SafetyCulture."
   - "We don't build Q&A over your ERP data."
+rulesThatTravel: "Manufacturers in many countries work to the same few standards. ISO 9001, revised in September 2026, still asks for controlled documents: the right version, available where and when the work needs it. IEC 62443 covers the security of operational technology, and the 2025 joint principles from cyber agencies in seven countries ask for AI in operational technology to be tested and evaluated continuously. Our assistant answers only from your current SOPs and work instructions, shows the page and stays read-only. Work requests and quotes we draft wait for a person to approve them."
 problem:
-  from: "In 2024–25, 9% of manufacturing businesses reported using AI, against 12% of all businesses. On the floor, answers come from binders and whoever has been on the line longest."
+  from: "In Australia, 9% of manufacturing businesses reported using AI in 2024–25, against 12% of all businesses. On the floor, answers come from binders and whoever has been on the line longest."
   to: "Operators ask in their own language and get the current SOP step and page, or \"not in our documents\"."
   source:
     label: "Australian Bureau of Statistics, Characteristics of Australian Business, 2024–25"
@@ -131,7 +132,7 @@ firstEngagement:
   needFromYou:
     - "One line's SOPs and machine manuals, read-only"
     - "A document owner for about 2 hours a week"
-    - "5–10 floor staff, including an HSR, writing test questions for about 1 hour each"
+    - "5–10 floor staff, including a health and safety representative, writing test questions for about 1 hour each"
   youGet:
     - "An error rate per language on 30–50 questions"
     - "Every wrong or refused answer, with the page it should have used"
@@ -145,7 +146,8 @@ faq:
   - q: "Can it answer in the languages our crews speak?"
     a: "Yes, for the languages you choose, though quality varies by language. Each gets its own test, and one that misses the agreed threshold doesn't go live."
   - q: "Is it a GMP-validated system?"
-    a: "No. On a medicine, API or sunscreen site, your quality team decides whether the assistant is part of a GMP activity and how to validate it. We supply the test evidence."
+    a: "No. On a GMP-regulated site (in Australia, that includes medicine, API and sunscreen sites), your quality team decides whether the assistant is part of a GMP activity and how to validate it. We supply the test evidence."
   # ⚑ owner: confirm the AI Adopt Centres are still taking SMEs (manufacturing dossier, open item 9)
   - q: "Should we go to an AI Adopt Centre first?"
     a: "If you're an eligible SME, it's a sensible first step. The ARM Hub AI Adopt Centre is listed on business.gov.au as offering training, demonstrations and an AI adoption roadmap, with a focus on manufacturing."
+    region: au

@@ -49,7 +49,8 @@ test("a recorded vendor or tool location is what the vendor publishes or says, i
   const fs = JSON.parse(read("src/data/regulatory/financial-services.json")).rows.find((r) => r.id === "cps230-service-providers");
   assert.equal(fs.design, "Vendor AI is tested on your cases before you sign, and the data note records the vendor's published processing location, with its date.");
   const legal = parse(read("src/content/industries/legal-and-professional.yaml"));
-  assert.match(legal.faq.find((f) => /client files leave the firm/.test(f.q)).a, /a data note first records each vendor's published storage and processing locations, with their dates\./);
+  // Final review F1 made the data note its own sentence, after the remote-access one.
+  assert.match(legal.faq.find((f) => /client files leave the firm/.test(f.q)).a, /A data note first records each vendor's published storage and processing locations, with their dates\./);
   assert.match(read("src/content/insights/court-practice-notes-on-ai-verification.md"), /\*\*A data note per tool\.\*\* It records the vendor's published storage and processing locations, with their dates, and the tool's retention and training settings\./);
 });
 

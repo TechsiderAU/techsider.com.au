@@ -8,9 +8,12 @@ import {
   deliveryChoice, buyer, interval, JURISDICTION_SECTION, SECTION_TITLE, SECTION_ORDER,
   citedSource, corpusRef, assistantTurn, assistantData, registerCell, syntheticDoc, registerData,
   inboxMessage, inboxData, checkerData, platformAiEntry, platformAiFile, CHECKER_PROVENANCE,
+  auRegion, faqItem, industryFaqItem,
+  anchor, anchorFile, anchorKind, anchorStatus, checkLevel, REVIEW_BY_STATUSES, REVIEW_BY_NAME, DATED_STATUSES, FEATURABLE_LEVELS,
 } from "../src/content/schemas.ts";
 import {
   positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema,
+  INTERNATIONAL_IDS, internationalLine, internationalData,
 } from "../src/content/page-schemas.ts";
 import { HOME_TRUST_QUESTION } from "../src/lib/fixed-copy.ts";
 import { ENQUIRY_FIELDS } from "../src/lib/contact-form.ts";
@@ -72,6 +75,7 @@ const USE_CASE = { name: "Test use case", solution: "test-solution", status: "la
 const SOURCE = { label: "Test source", url: "https://example.com/source", asAt: "2026-09-01" };
 const INDUSTRY = {
   promise: "Test promise", constraintSet: "Test constraints", constraintHook: "Test hook",
+  rulesThatTravel: "Test paragraph: the rules that travel to this test industry.",
   flagshipUseCases: [USE_CASE, USE_CASE, { ...USE_CASE, status: "on-request", note: "Test note" }],
   obligationChips: [1, 2, 3, 4].map((n) => ({ label: `Test chip ${n}`, row: `test-row-${n}` })),
   worksAlongside: ["read-only", "import", "draft-for-approval"].map((method, i) => ({ system: `Test system ${i + 1}`, method, verified: "2026-09-01" })),
@@ -89,6 +93,15 @@ const INDUSTRY = {
 const ROW = {
   id: "test-row-1", obligation: "Test obligation", meaning: "Test meaning", design: "Test design", evidence: "Test evidence",
   source: "https://example.com/regulation", asAt: "2026-09-01", lastReviewed: "2026-09-15",
+};
+
+// A "Rules that travel" anchor (go-global §5.3): a published standard read at its primary source.
+const ANCHOR = {
+  id: "test-anchor", name: "Test standard", issuer: "Test body", kind: "international-standard",
+  binding: "Test binding: voluntary", status: "published", statusDate: "2023-12-18",
+  asks: "Test asks: roles and controls", evidence: "Test evidence: a register",
+  source: "https://example.com/standard", asAt: "2026-10-01", lastReviewed: "2026-10-12",
+  solutions: ["test-solution"], featured: true, checkLevel: "P",
 };
 
 const KIT = {
@@ -213,6 +226,34 @@ test("a reference scenario must be marked illustrative (spec §9.3)", () => {
   ok(insightSchema, { ...scenario, illustrative: true }, "reference scenario marked illustrative");
 });
 
+test("go-global region: packages, kits, traces, demos and posts take an optional region \"au\" and no other value (go-global §3.3, §6.1, §6.3)", () => {
+  assert.equal(auRegion.value, "au");
+  for (const [schema, value, label] of [
+    [launchPackage, LAUNCH, "launch package"],
+    [solutionPackage, ON_REQUEST, "on-request package"],
+    [solutionPackage, INTERNAL, "internal package"],
+    [kitSchema, KIT, "kit"],
+    [traceFile, TRACE, "trace"],
+    [demoSchema, DEMO, "demo"],
+    [insightSchema, INSIGHT, "insight"],
+  ]) {
+    assert.equal(ok(schema, value, label).region, undefined, `${label}: region is optional`);
+    assert.equal(ok(schema, { ...value, region: "au" }, `${label} tagged au`).region, "au");
+    for (const region of ["AU", "nz", ""]) bad(schema, { ...value, region }, `${label} tagged ${JSON.stringify(region)}`);
+  }
+  // The checker is Australian by construction (its component root carries data-region="au"), so
+  // its demo entry takes no region.
+  bad(demoSchema, { ...DEMO, kind: "checker", provenance: CHECKER_PROVENANCE, data: CHECKER, region: "au" }, "checker demo tagged au");
+});
+
+test("insight frontmatter: an optional reviewBy date, for a post whose claims rest on dates that may move (go-global §6.5)", () => {
+  assert.equal(ok(insightSchema, INSIGHT, "post").reviewBy, undefined);
+  const data = ok(insightSchema, { ...INSIGHT, reviewBy: "2027-01-12" }, "post with a reviewBy");
+  assert.ok(data.reviewBy instanceof Date);
+  assert.equal(data.reviewBy.toISOString(), "2027-01-12T00:00:00.000Z");
+  bad(insightSchema, { ...INSIGHT, reviewBy: "next quarter" }, "reviewBy that is not a date");
+});
+
 test("every content schema rejects unknown keys, at the top level and nested", () => {
   const cases = [
     [insightSchema, { ...INSIGHT, drafts: true }, "insight"],
@@ -230,6 +271,8 @@ test("every content schema rejects unknown keys, at the top level and nested", (
     [kitSchema, { ...KIT, lawyerReviewed: "2026-09-01" }, "kit"],
     [regulatoryFile, { rows: [{ ...ROW, lastReview: "2026-09-01" }] }, "regulatory row"],
     [regulatoryFile, { rows: [ROW], note: "Test" }, "regulatory file"],
+    [anchor, { ...ANCHOR, sources: [] }, "anchor"],
+    [anchorFile, { anchors: [ANCHOR], note: "Test" }, "anchor file"],
     [traceFile, { ...TRACE, provenace: "measured" }, "trace"],
     [traceFile, { ...TRACE, lines: [{ t: "00:00:01", op: "Test", detail: "Test", metrc: { value: 1 } }] }, "trace line"],
     [traceFile, { ...TRACE, lines: [{ t: "00:00:01", op: "Test", detail: "Test", metric: { value: 1, units: "ms" } }] }, "trace metric"],
@@ -328,6 +371,27 @@ function badWith(schema, value, path, message) {
   assert.ok(issues.some((i) => i.path.join(".") === path && i.message === message), `expected "${message}" at ${path}: ${JSON.stringify(issues)}`);
 }
 
+test("industry: rulesThatTravel holds the Rules that travel paragraph, and is required (go-global §5.2)", () => {
+  assert.equal(ok(industrySchema, INDUSTRY, "industry").rulesThatTravel, INDUSTRY.rulesThatTravel);
+  const { rulesThatTravel, ...without } = INDUSTRY;
+  bad(industrySchema, without, "industry without rulesThatTravel");
+  bad(industrySchema, { ...INDUSTRY, rulesThatTravel: "" }, "an empty rulesThatTravel");
+});
+
+test("industry FAQs: an optional region \"au\" moves a question into the Australia band, and at least one stays untagged (go-global §5.6)", () => {
+  const tagged = (n) => faq(5).map((f, i) => (i < n ? { ...f, region: "au" } : f));
+  const data = ok(industrySchema, { ...INDUSTRY, faq: tagged(4) }, "four of five FAQs tagged au");
+  assert.deepEqual(data.faq.map((f) => f.region ?? null), ["au", "au", "au", "au", null]);
+  badWith(industrySchema, { ...INDUSTRY, faq: tagged(5) }, "faq", 'every FAQ is tagged region "au": keep at least one untagged FAQ for #faq (go-global §5.6)');
+  badWith(industrySchema, { ...GOVERNMENT, faq: tagged(5) }, "faq", 'every FAQ is tagged region "au": keep at least one untagged FAQ for #faq (go-global §5.6)');
+  bad(industrySchema, { ...INDUSTRY, faq: faq(5).map((f, i) => (i === 0 ? { ...f, region: "nz" } : f)) }, "an industry FAQ tagged nz");
+  ok(industryFaqItem, { ...faq(1)[0], region: "au" }, "an industry FAQ tagged au");
+  bad(industryFaqItem, { ...faq(1)[0], regoin: "au" }, "an industry FAQ with a misspelt region");
+  // The shared faqItem (Home, solutions, services, Trust) is unchanged: it takes no region.
+  bad(faqItem, { ...faq(1)[0], region: "au" }, "a shared FAQ tagged au");
+  bad(solutionSchema, { ...SOLUTION, faq: faq(3).map((f, i) => (i === 0 ? { ...f, region: "au" } : f)) }, "a solution FAQ tagged au");
+});
+
 test("industry sections without jurisdictions: 4–6 chips, 3–5 systems, 3–4 packages, none tagged (spec §8.5)", () => {
   const many = (list, n) => Array.from({ length: n }, (_, i) => list[i % list.length]);
   ok(industrySchema, { ...INDUSTRY, obligationChips: many(INDUSTRY.obligationChips, 6), worksAlongside: many(INDUSTRY.worksAlongside, 5), packages: many(INDUSTRY.packages, 4) }, "industry at the maximums");
@@ -407,13 +471,14 @@ test("URL fields use z.url(), not the deprecated z.string().url() (a ts6385 hint
   const src = readFileSync(new URL("../src/content/schemas.ts", import.meta.url), "utf8");
   assert.doesNotMatch(src, /z\.string\(\)\.url\(/);
   assert.equal(
-    src.match(/\bz\.url\(\)/g)?.length, 6,
-    "sourceRef.url, mockPanel citation href, regulatoryRow.source, citedSource.href, corpusRef.url and platformAiEntry.source",
+    src.match(/\bz\.url\(\)/g)?.length, 7,
+    "sourceRef.url, mockPanel citation href, regulatoryRow.source, anchor.source, citedSource.href, corpusRef.url and platformAiEntry.source",
   );
   for (const [schema, value, label] of [
     [sourceRef, { ...SOURCE, url: "not a url" }, "source ref"],
     [mockPanel, { ...MOCK_PANEL, citations: [{ source: "Test", clause: "Test", href: "example.com/clause" }] }, "citation href"],
     [regulatoryFile, { rows: [{ ...ROW, source: "not a url" }] }, "regulatory source"],
+    [anchor, { ...ANCHOR, source: "not a url" }, "anchor source"],
     [citedSource, { ...SOURCES[0], href: "example.com/source" }, "cited source href"],
     [corpusRef, { ...CORPUS, url: "not a url" }, "corpus url"],
     [platformAiEntry, { ...ENTRY, source: "example.com/pricing" }, "platform AI source"],
@@ -438,6 +503,71 @@ test("regulatory rows need a URL source, both dates and non-empty jurisdictions 
   bad(regulatoryFile, { rows: [unreviewed] }, "row without lastReviewed");
   bad(regulatoryFile, { rows: [{ ...ROW, jurisdictions: [] }] }, "empty jurisdictions");
   bad(regulatoryFile, { rows: [{ ...ROW, id: "Test Row" }] }, "row id that is not a slug");
+});
+
+test("anchors: a complete anchor parses with its dates, and kind, status and check level are closed lists (go-global §5.3)", () => {
+  const data = ok(anchor, ANCHOR, "anchor");
+  for (const key of ["statusDate", "asAt", "lastReviewed"]) assert.ok(data[key] instanceof Date, key);
+  assert.deepEqual(anchorKind.options, ["law", "treaty", "international-standard", "supervisory-principles", "guidance", "professional-ethics"]);
+  assert.deepEqual(anchorStatus.options, ["in-force", "applies-from", "published", "draft", "not-in-force"]);
+  assert.deepEqual(checkLevel.options, ["P", "P*", "S", "UNVERIFIED"]);
+  assert.deepEqual([REVIEW_BY_STATUSES, DATED_STATUSES, FEATURABLE_LEVELS], [["applies-from", "draft", "not-in-force"], ["applies-from", "published"], ["P", "P*"]]);
+  bad(anchor, { ...ANCHOR, kind: "regulation" }, "unknown kind");
+  bad(anchor, { ...ANCHOR, status: "repealed" }, "unknown status");
+  bad(anchor, { ...ANCHOR, checkLevel: "p" }, "unknown check level");
+  bad(anchor, { ...ANCHOR, id: "Test Anchor" }, "anchor id that is not a slug");
+  bad(anchor, { ...ANCHOR, solutions: ["Test Solution"] }, "solution display name");
+  bad(anchor, { ...ANCHOR, asks: "Too short" }, "asks under 10 characters");
+  bad(anchor, { ...ANCHOR, evidence: "Too short" }, "evidence under 10 characters");
+  for (const key of ["name", "issuer", "kind", "binding", "status", "asks", "evidence", "source", "asAt", "lastReviewed", "solutions", "featured", "checkLevel"]) {
+    const { [key]: _, ...missing } = ANCHOR;
+    bad(anchor, missing, `anchor without ${key}`);
+  }
+});
+
+test("anchors: reviewBy where a date may move, statusDate where the chip prints one, and only P or P* featured (go-global §5.2, §5.3)", () => {
+  const RB = "2027-01-12";
+  for (const status of REVIEW_BY_STATUSES) {
+    const value = { ...ANCHOR, status, statusDate: "2027-12-02" };
+    badWith(anchor, value, "reviewBy", `anchor "test-anchor" needs a reviewBy: its status is ${status} (go-global §5.3)`);
+    assert.ok(ok(anchor, { ...value, reviewBy: RB }, `${status} with a reviewBy`).reviewBy instanceof Date);
+  }
+  for (const name of ["Test EU AI Act anchor", "Test GDPR Art 22"]) {
+    assert.match(name, REVIEW_BY_NAME);
+    badWith(anchor, { ...ANCHOR, name, status: "in-force" }, "reviewBy", 'anchor "test-anchor" needs a reviewBy: it names the EU AI Act or GDPR (go-global §5.3)');
+    ok(anchor, { ...ANCHOR, name, status: "in-force", reviewBy: RB }, `${name} with a reviewBy`);
+  }
+  for (const near of ["Test EUROPEAN AI Act", "Test GDPRS", "Test EU AI Actually"]) assert.doesNotMatch(near, REVIEW_BY_NAME);
+  ok(anchor, { ...ANCHOR, status: "in-force" }, "an in-force anchor with no reviewBy");
+  for (const status of DATED_STATUSES) {
+    const { statusDate, ...undated } = { ...ANCHOR, status, reviewBy: RB };
+    badWith(anchor, undated, "statusDate", `anchor "test-anchor" is ${status}, so it needs the statusDate its chip prints (go-global §5.2)`);
+  }
+  const { statusDate, ...inForce } = { ...ANCHOR, status: "in-force" };
+  ok(anchor, inForce, "an in-force anchor with no statusDate");
+  for (const level of ["S", "UNVERIFIED"]) {
+    badWith(anchor, { ...ANCHOR, checkLevel: level }, "featured", `anchor "test-anchor" is checkLevel ${level}: only P or P* anchors may be featured (go-global §5.3)`);
+    ok(anchor, { ...ANCHOR, checkLevel: level, featured: false }, `an unfeatured ${level} anchor`);
+  }
+  ok(anchor, { ...ANCHOR, checkLevel: "P*" }, "a featured P* anchor");
+});
+
+test("anchor files: one or more anchors, an optional shared row of four or five ids, and no id twice (go-global §5.2)", () => {
+  const second = { ...ANCHOR, id: "test-anchor-2" };
+  const SHARED = ["x1", "x4", "x6", "x7"];
+  assert.equal(ok(anchorFile, { anchors: [ANCHOR, second] }, "the shared file: no shared key").shared, undefined);
+  assert.deepEqual(ok(anchorFile, { shared: SHARED, anchors: [ANCHOR] }, "an industry file, four shared ids").shared, SHARED);
+  ok(anchorFile, { shared: [...SHARED, "x8"], anchors: [ANCHOR] }, "an industry file, five shared ids");
+  bad(anchorFile, { shared: SHARED.slice(0, 3), anchors: [ANCHOR] }, "three shared ids");
+  bad(anchorFile, { shared: [...SHARED, "x8", "x9"], anchors: [ANCHOR] }, "six shared ids");
+  bad(anchorFile, { shared: ["X1", "x4", "x6", "x7"], anchors: [ANCHOR] }, "a shared id that is not a slug");
+  bad(anchorFile, { anchors: [] }, "no anchors");
+  badWith(anchorFile, { anchors: [ANCHOR, ANCHOR] }, "anchors", 'anchor id "test-anchor" repeats');
+  badWith(anchorFile, { shared: ["x1", "x4", "x6", "x4"], anchors: [ANCHOR] }, "shared", 'shared id "x4" repeats');
+  badWith(
+    anchorFile, { shared: ["x1", "x4", "x6", "test-anchor"], anchors: [ANCHOR] }, "anchors",
+    '"test-anchor" is both a shared id and an anchor of this file: a chip shows once per page (go-global §5.2)',
+  );
 });
 
 test("kits need a source, dates and a /downloads/ pdf or docx path; lawyerReviewedAt may be null", () => {
@@ -680,6 +810,8 @@ const SERVICES = {
 };
 const CONTACT = {
   replyTime: "one test business day",
+  replyTimeBase: "test time (TST)",
+  timeZone: "Australia/Sydney",
   formEndpoint: "https://example.com/form",
   formProvider: { name: "Test Forms", country: "Test country" },
   redirectField: "_redirect",
@@ -698,6 +830,7 @@ const TRUST = {
   faq: [1, 2, 3, 4, 5].map((n) => ({
     q: `Test question ${n}?`, a: words(30 + n), part: n % 2 ? "A" : "B", ...(n % 2 ? {} : { term: "test-residency" }), asAt: "2026-09-15",
   })),
+  engagementSubProcessors: [],
   transparency: { statement: "Test statement", systems: [{ name: "Test system", purpose: "Test purpose", data: "Test data", human: "Test human", demo: "test-demo" }] },
   changes: [{ date: "2026-09-15", change: "Test change" }],
 };
@@ -712,6 +845,12 @@ const HOME = {
   trustPageLine: "Test sentence about the Trust page.",
 };
 const DOCUMENT = { title: "Test document", summary: "Test summary, twenty plus characters.", lastUpdated: "2026-09-01" };
+// The "For organisations outside Australia" lines (go-global §7.3): confirmed lines have no gate.
+const INTERNATIONAL = [
+  { id: "entity", text: "Test entity line, ten plus.", confirmed: true, gate: null },
+  { id: "dpa", text: "Test lawyer draft, ten plus.", confirmed: false, gate: "legal" },
+  { id: "representative", text: "Test owner line, ten plus.", confirmed: false, gate: "owner" },
+];
 
 test("page data: positioning holds the four pillars in spec §3.2 order", () => {
   ok(positioningData, POSITIONING, "positioning");
@@ -747,6 +886,32 @@ test("page data: contact takes a form endpoint URL or null, and real email addre
   ok(contactData, { ...CONTACT, deflection: CONTACT.deflection.slice(0, 1) }, "one shared contact mailbox");
   bad(contactData, { ...CONTACT, deflection: [] }, "no contact mailbox");
   bad(contactData, { ...CONTACT, subProcessors: CONTACT.subProcessors.slice(0, 1) }, "one sub-processor");
+});
+
+test("page data: contact names the reply time's base and Sydney's time zone (go-global §4.5, §8.4)", () => {
+  const data = ok(contactData, CONTACT, "contact");
+  assert.deepEqual([data.replyTimeBase, data.timeZone], ["test time (TST)", "Australia/Sydney"]);
+  for (const key of ["replyTimeBase", "timeZone"]) {
+    const { [key]: _, ...unset } = CONTACT;
+    bad(contactData, unset, `${key} left out`);
+  }
+  bad(contactData, { ...CONTACT, replyTimeBase: "TST" }, "a reply time base under 5 characters");
+  bad(contactData, { ...CONTACT, timeZone: "Europe/London" }, "a time zone other than Sydney's");
+});
+
+test("page data: the outside-Australia lines have known ids, each once, and a gate exactly when unconfirmed (go-global §7.3)", () => {
+  assert.deepEqual(INTERNATIONAL_IDS, ["entity", "delivery", "certifications", "dpa", "representative"]);
+  assert.deepEqual(ok(internationalData, INTERNATIONAL, "international lines").map((l) => l.gate), [null, "legal", "owner"]);
+  bad(internationalData, [], "no lines");
+  bad(internationalData, [{ ...INTERNATIONAL[0], id: "phone" }], "an unknown line id");
+  bad(internationalData, [{ ...INTERNATIONAL[0], text: "Too short" }], "a line under 10 characters");
+  bad(internationalData, [{ ...INTERNATIONAL[1], gate: "lawyer" }], "an unknown gate");
+  badWith(internationalData, [INTERNATIONAL[0], INTERNATIONAL[0]], "1.id", 'line id "entity" repeats');
+  badWith(internationalData, [{ ...INTERNATIONAL[0], gate: "owner" }], "0.gate", 'line "entity" is confirmed, so it names no gate');
+  badWith(
+    internationalData, [{ ...INTERNATIONAL[1], gate: null }], "0.gate",
+    'line "dpa" is not confirmed, so it names its gate: "owner" or "legal" (go-global §2.3)',
+  );
 });
 
 test("page data: the form provider is null until a form endpoint needs one (blueprint ruling 16, spec §10.2)", () => {
@@ -804,6 +969,18 @@ test("page data: a Part B Trust answer names the Part B term it rests on, and a 
   bad(trustData, withFaq(1, { term: "Test residency" }), "a term that is not a slug");
 });
 
+test("page data: Trust lists the services an engagement uses, each with its country and transfer mechanism (go-global §7.2)", () => {
+  const ROW = { service: "Test service", purpose: "Test purpose", country: "Test country", mechanism: "Test mechanism" };
+  assert.deepEqual(ok(trustData, TRUST, "trust with no engagement services").engagementSubProcessors, []);
+  assert.deepEqual(ok(trustData, { ...TRUST, engagementSubProcessors: [ROW] }, "trust with one engagement service").engagementSubProcessors, [ROW]);
+  const { engagementSubProcessors: _list, ...missing } = TRUST;
+  bad(trustData, missing, "trust without engagementSubProcessors");
+  for (const key of Object.keys(ROW)) {
+    const { [key]: _, ...row } = ROW;
+    bad(trustData, { ...TRUST, engagementSubProcessors: [row] }, `an engagement service without ${key}`);
+  }
+});
+
 test("page data: the Home FAQ asks the trust question exactly once (spec §8.1.10)", () => {
   assert.equal(HOME_TRUST_QUESTION, "Why should we trust you?");
   ok(homeData, HOME, "home");
@@ -842,8 +1019,11 @@ test("every page-data schema rejects unknown keys, at the top level and nested",
     [servicesData, { ...SERVICES, evaluationPartner: { ...SERVICES.evaluationPartner, cta: "Test" } }, "evaluation partner"],
     [contactData, { ...CONTACT, phone: "Test" }, "contact"],
     [contactData, { ...CONTACT, formProvider: { ...CONTACT.formProvider, region: "Test" } }, "contact form provider"],
+    [contactData, { ...CONTACT, meetingNote: "Test" }, "contact meeting note (go-global §8.4: none)"],
+    [internationalLine, { ...INTERNATIONAL[0], href: "https://example.com" }, "international line"],
     [trustData, { ...TRUST, certifications: [] }, "trust"],
     [trustData, { ...TRUST, partB: TRUST.partB.map((b) => ({ ...b, confirmedAt: "2026-09-15" })) }, "trust part B"],
+    [trustData, { ...TRUST, engagementSubProcessors: [{ service: "Test", purpose: "Test", country: "Test", mechanism: "Test", data: "Test" }] }, "trust engagement service"],
     [aboutData, { ...ABOUT, team: [] }, "about"],
     [homeData, { ...HOME, hero: "Test" }, "home"],
     [documentSchema, { ...DOCUMENT, author: "Test" }, "document"],

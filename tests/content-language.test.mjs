@@ -433,3 +433,23 @@ test("every occurrence of a proper name, in src/ and in both builds, is excepted
     assert.ok(claim.errors.length > 0, `${file}: a bare "CREST-accredited" claim passes check 04`);
   }
 });
+
+// ---------- go-global Part 4B: the "Rules that travel" anchor data ----------
+
+test("go-global §5.2: each industry page's anchor data passes the keep-off, held, agent, sprint, APRA-audit and tenancy rules", () => {
+  const dir = join(ROOT, "src/data/anchors");
+  const shared = new Map(readJson(join(dir, "shared.json")).anchors.map((a) => [a.id, a]));
+  const files = listFiles(dir, (rel) => !rel.includes("/") && rel.endsWith(".json") && rel !== "shared.json");
+  assert.equal(files.length, 9, "src/data/anchors/ doesn't hold the nine industries' files");
+  const out = [];
+  for (const file of files) {
+    const id = relPath(dir, file).slice(0, -".json".length);
+    const own = readJson(file);
+    for (const a of [...own.shared.map((s) => shared.get(s)), ...own.anchors]) {
+      for (const field of ["name", "issuer", "binding", "asks", "evidence"]) {
+        out.push(...sample([...KEEP_OFF, ...HELD, AGENT, SPRINT, APRA_AUDIT, TENANCY], a[field], `/industries/${id}/`).map((f) => `${id}/${a.id}.${field}: ${f}`));
+      }
+    }
+  }
+  assert.deepEqual(out, []);
+});

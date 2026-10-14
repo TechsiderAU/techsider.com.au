@@ -1,7 +1,8 @@
-// View builders for the company pages (spec §8.11): what the Trust page and the Legal hub may show.
+// View builders for the company pages (spec §8.11): what the Trust page, the Legal hub and the
+// "For organisations outside Australia" block (go-global §7.3) may show.
 // Pure TypeScript with no SiteContext: node tests run it on the page fixtures, and a Phase C route
 // passes it the typed data (src/data/trust.ts) or the documents mapped to their page hrefs.
-import type { TrustData } from "../../content/page-schemas.ts";
+import type { InternationalData, InternationalLine, TrustData } from "../../content/page-schemas.ts";
 
 type PartBTerm = TrustData["partB"][number];
 type TrustAnswer = TrustData["faq"][number];
@@ -23,6 +24,16 @@ export function trustView(trust: TrustData): TrustView {
   const confirmed = new Set(terms.map((term) => term.id));
   const faq = trust.faq.filter((f) => f.part === "A" || (f.term !== undefined && confirmed.has(f.term)));
   return { terms, faq };
+}
+
+/**
+ * go-global §7.3 (R1): the "For organisations outside Australia" lines a page shows: the confirmed
+ * ones, in data order; an unconfirmed line waits for its owner or legal gate. /contact/ leaves out
+ * the delivery line, because its hero already says it. With none to show, the page leaves the
+ * block out.
+ */
+export function internationalLines(lines: InternationalData, page: "contact" | "trust"): InternationalLine[] {
+  return lines.filter((line) => line.confirmed && !(page === "contact" && line.id === "delivery"));
 }
 
 export interface LegalDoc {

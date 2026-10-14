@@ -1,6 +1,7 @@
-// Page <title> and meta description rules (spec §11.3). Titles: a search title where one is set
-// (SEARCH_TITLES), else `{fullName} | Techsider`, or `AI for {Short Name} in Australia | Techsider`
-// on industry pages, unique and 60 characters or fewer.
+// Page <title> and meta description rules (spec §11.3; go-global §3.4). Titles: a search title where
+// one is set (SEARCH_TITLES), else `{fullName} | Techsider`, or `AI for {Short Name} | Techsider` on
+// industry pages, unique, 60 characters or fewer, and naming no country: the headquarters shows in
+// the footer and the structured data, and Google already reads the .com.au domain as Australian.
 // Descriptions: unique and 150–160 characters, written in nav.ts beside the page's names.
 // tests/meta.test.mjs holds every nav.ts page to these rules, and requires a description of every
 // live page. Node-importable: nav.ts has no imports.
@@ -20,33 +21,33 @@ function titleCase(name: string): string {
  * or fewer (tests/meta.test.mjs). The About and Contact titles name Techsider themselves.
  */
 const SEARCH_TITLES: Record<string, string> = {
-  "/solutions/": "AI Solutions for Australian Organisations | Techsider",
-  "/solutions/document-registers/": "Intelligent Document Processing in Australia | Techsider",
-  "/solutions/draft-for-approval/": "AI Workflow Automation in Australia | Techsider",
+  "/solutions/": "AI Solutions for Organisations | Techsider",
+  "/solutions/document-registers/": "Intelligent Document Processing | Techsider",
+  "/solutions/draft-for-approval/": "AI Workflow Automation | Techsider",
   "/solutions/knowledge-assistant/": "Internal AI Knowledge Assistant (RAG) | Techsider",
-  "/solutions/ai-evaluation/": "Independent AI and LLM Evaluation in Australia | Techsider",
-  "/solutions/ai-switch-on/": "Copilot & AI Implementation Consulting Australia | Techsider",
-  "/industries/": "AI Solutions by Industry in Australia | Techsider",
+  "/solutions/ai-evaluation/": "Independent AI and LLM Evaluation | Techsider",
+  "/solutions/ai-switch-on/": "Copilot & AI Implementation Consulting | Techsider",
+  "/industries/": "AI Solutions by Industry | Techsider",
   "/industries/accounting/": "AI Automation for Accounting Firms | Techsider",
   "/industries/legal-and-professional/": "AI for Law Firms and Professional Services | Techsider",
-  "/industries/government/": "AI Evaluation for Australian Government Agencies | Techsider",
-  "/industries/financial-services/": "AI Validation for APRA-Regulated Entities | Techsider",
-  "/industries/healthcare/": "AI Scribe Evaluation for Australian Healthcare | Techsider",
-  "/services/": "AI Consulting Services in Australia | Techsider",
+  "/industries/government/": "AI Evaluation for Government Agencies | Techsider",
+  "/industries/financial-services/": "AI Validation for Regulated Financial Firms | Techsider",
+  "/industries/healthcare/": "AI Scribe Evaluation for Healthcare | Techsider",
+  "/services/": "AI Consulting Services | Techsider",
   "/services/evaluation-partner/": "AI Evaluation Partner for Primes and Advisers | Techsider",
   "/resources/": "AI Resources, Demos and Tools | Techsider",
-  "/insights/": "AI Guides and Field Notes for Australian Teams | Techsider",
+  "/insights/": "AI Guides and Field Notes | Techsider",
   "/demos/": "AI Automation Demos and Sample Report | Techsider",
   "/resources/what-you-already-pay-for/": "What AI Features Does Your Software Include? | Techsider",
   "/resources/evaluation-method/": "How to Evaluate an AI System: Our Method | Techsider",
-  "/about/": "About Techsider | Australian AI Automation Company",
+  "/about/": "About Techsider | AI Automation Company, Sydney",
   "/contact/": "Contact Techsider | AI Automation Enquiries",
 };
 
 export function pageTitle(entry: PageEntry): string {
   if (SEARCH_TITLES[entry.path]) return SEARCH_TITLES[entry.path];
-  if (entry.path === "/") return `AI Automation Solutions in Australia | ${SITE.name}`;
-  if (entry.base === "/industries/") return `AI for ${titleCase(entry.shortName)} in Australia | ${SITE.name}`;
+  if (entry.path === "/") return `AI Automation Solutions | ${SITE.name}`;
+  if (entry.base === "/industries/") return `AI for ${titleCase(entry.shortName)} | ${SITE.name}`;
   return `${entry.fullName} | ${SITE.name}`;
 }
 

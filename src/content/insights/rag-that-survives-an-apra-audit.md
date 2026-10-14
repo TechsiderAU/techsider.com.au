@@ -6,6 +6,7 @@ publishDate: 2026-06-12
 type: article
 industries: [financial-services]
 solutions: [knowledge-assistant, ai-evaluation]
+region: au
 draft: false
 ---
 
@@ -39,4 +40,4 @@ Every query emits a trace: the question, the retrieved chunks and their scores, 
 
 ## Sovereignty is part of the design, not a deployment note
 
-For an APRA-regulated workload, where the data lives and who can touch it is a design input, not an afterthought. The pipeline runs inside your boundary, your documents aren't sent offshore, and they aren't used to train anyone's model. The sovereignty story and the audit story are the same story: control you can demonstrate.
+For an APRA-regulated workload, where the data lives and who can touch it is a design input, not an afterthought. The pipeline runs inside your boundary, in the cloud region you choose, and your documents aren't used to train anyone's model. Who can reach it is part of the same design: our team reaches it remotely from Sydney, under the data-transfer terms in your contract. The sovereignty story and the audit story are the same story: control you can demonstrate.

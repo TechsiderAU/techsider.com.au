@@ -41,6 +41,8 @@ export const demoFixture: DemoOf<"register"> = {
   title: "Fixture register demo",
   kind: "register",
   provenance: "illustrative",
+  // go-global §6.3: the gallery's register demo shows the "Australian example" label.
+  region: "au",
   data: {
     documents: [
       doc(1, "Fixture agreement A", "Fixture template A", [AGREEMENT_PAGE_ONE, ["Fixture landlord insurance: Fixture value current", "Fixture signed authority: Fixture value signed"]]),

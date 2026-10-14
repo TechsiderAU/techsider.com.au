@@ -6,6 +6,7 @@ publishDate: 2026-10-11
 type: article
 industries: [government]
 solutions: [ai-evaluation]
+region: au
 draft: false
 ---
 

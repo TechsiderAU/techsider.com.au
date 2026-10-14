@@ -2,6 +2,8 @@
 # The page's name, path, one-liner and meta description live in src/data/nav.ts. The industry tasks
 # fill byIndustry and matrix. `demo` names the hero's demo, src/data/demos/document-registers.json,
 # which /demos/document-registers/ also shows.
+# Region notes (onshoreNote) follow go-global §4.2: a note that names a region ends with the
+# remote-access sentence, and only a register we manage runs in an Australian region.
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: document-registers
 job: >-
@@ -65,10 +67,11 @@ genericPackage:
     At the end of the Two-Week Trial you see the error rate for each field on your own answer key,
     with every miss listed, and you decide whether to continue.
   onshoreNote: >-
-    Runs in your own Microsoft or AWS account, or in an environment we manage, with document reading
-    and model inference in an Australian region. The data note records the model provider's
-    retention, abuse-monitoring and human-review settings. If the model a job needs isn't offered in
-    an Australian region, you hear that before you decide.
+    Document reading and model inference run in the cloud region you choose, in your own Microsoft
+    or AWS account, or in an Australian region if we manage the register for you. The data note
+    records the model provider's retention, abuse-monitoring and human-review settings. If the model
+    you want isn't offered in your chosen region, you hear that before you decide. Our team reaches
+    the register remotely from Sydney, under the data-transfer terms in your contract.
 packages:
   - id: trust-deed-register
     name: Trust Deed & Client Structure Register
@@ -92,8 +95,8 @@ packages:
       A senior for about a day to build an answer key of 30–50 deeds they already know, and about
       half a day to check 50 output rows. Read-only access to where the deeds live.
     timeline: >-
-      5–6 weeks after Week 0. The Two-Week Trial runs in a quieter window: November to early
-      December, or April to May.
+      5–6 weeks after Week 0. The Two-Week Trial runs in a quieter window outside your peak tax season
+      (in Australia, November to early December or April to May).
     outOfScope:
       - "Interpreting a deed, or legal or tax advice: every flag is for the partner to decide"
       - Identity verification and customer due-diligence decisions, which stay with your compliance officer and your due-diligence tool
@@ -102,12 +105,15 @@ packages:
       After the Trial, you see the error rate for each field on deeds your seniors already know,
       with every miss listed, and you decide whether to run the rest.
     onshoreNote: >-
-      Deeds are read, and the model runs, in an Australian region: in your own Microsoft or AWS
-      account, or in an environment we manage. The data note names every processor, what each keeps
-      and for how long.
+      Deeds are read, and the model runs, in the cloud region you choose, in your own Microsoft or AWS
+      account, or in an Australian region if we manage the register for you. The data note names every
+      processor, what each keeps and for how long. If the model you want isn't offered in your chosen
+      region, you hear that before you decide. Our team reaches the register remotely from Sydney,
+      under the data-transfer terms in your contract.
   - id: management-agreement-register
     name: Management Agreement & Rent Roll Register
     status: launch
+    region: au
     onshore: true
     buyers: [mid-market]
     forWhom: >-
@@ -138,9 +144,12 @@ packages:
       After the Trial, you see the error rate for each field on agreements your senior staff already
       know, with every miss listed, and you decide whether to run the full portfolio.
     onshoreNote: >-
-      Agreements are read, and the model runs, in an Australian region: in your own Microsoft or AWS
-      account, or in an environment we manage. Before work starts, the data note maps every place
-      owner and tenant information will land, with the retention you set for each copy.
+      Agreements are read, and the model runs, in the cloud region you choose, in your own Microsoft or
+      AWS account, or in an Australian region if we manage the register for you. Before work starts,
+      the data note maps every place owner and tenant information will land, with the retention you
+      set for each copy. If the model you want isn't offered in your chosen region, you hear that
+      before you decide. Our team reaches the register remotely from Sydney, under the data-transfer
+      terms in your contract.
   - id: permit-conditions-register
     name: Approval & Permit Conditions Register
     status: on-request
@@ -150,12 +159,14 @@ packages:
   - id: trust-audit-prep-pack
     name: Trust Audit Prep Pack
     status: on-request
+    region: au
     oneLiner: >-
       Checks sampled disbursements against invoice and owner approval from read-only exports, and
       lists what's missing for your auditor. It isn't an audit, and it never touches the ledger.
   - id: bond-claim-evidence-pack
     name: Bond Claim Evidence Pack
     status: on-request
+    region: au
     oneLiner: >-
       Links each claimed item to its condition-report page, photo and receipt, in one draft a
       property manager checks.
@@ -164,7 +175,7 @@ packages:
     status: on-request
     oneLiner: >-
       Reads compliance certificates, such as smoke-alarm and pool certificates, into one register of
-      expiry dates. The rules for each state are checked when the package is scoped.
+      expiry dates. The rules for each state or jurisdiction are checked when the package is scoped.
   - id: lease-abstract-critical-dates
     name: Lease Abstract & Critical Dates
     status: on-request
@@ -181,9 +192,10 @@ packages:
     name: Credentialing & Referral Intake Registers
     status: on-request
     oneLiner: >-
-      Reads credentialing documents from outside Ahpra's register, such as college fellowships and
-      scope-of-practice letters, or referrals that arrive as PDFs or faxes, into a register a person
-      checks. Administrative only: a person makes every credentialing or referral decision.
+      Reads credentialing documents from outside the national practitioner register (Ahpra in
+      Australia), such as college fellowships and scope-of-practice letters, or referrals that arrive
+      as PDFs or faxes, into a register a person checks. Administrative only: a person makes every
+      credentialing or referral decision.
   - id: assessor-pre-screening-pack
     name: Pre-screening Pack for Assessors
     status: internal
@@ -212,9 +224,9 @@ howWeTest:
 whereItRuns:
   choices: [your-account, managed]
   note: >-
-    The register runs in your own Microsoft or AWS account in an Australian region, or in an
+    The register runs in your own Microsoft or AWS account, in the cloud region you choose, or in an
     Australian region we manage. It never runs inside a vendor's platform, and every processing step,
-    model inference included, is designed to run in an Australian region.
+    model inference included, is designed to run in the same region as the register.
 independencePolicy: false
 platformFirst: >-
   If your need is due diligence on one client at a time, check what your AML platform already reads:
@@ -228,7 +240,7 @@ dontDo:
 matrix:
   accounting: Trust deed and client structure register
   manufacturing: "Compliance dossiers, on request"
-  real-estate: "Management agreement register"
+  real-estate: "Management agreement register (Australia)"
   healthcare: "Credentialing and referral registers, on request"
   resources-and-energy: "Approval conditions register, on request"
 faq:

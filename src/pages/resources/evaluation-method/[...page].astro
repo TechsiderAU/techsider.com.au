@@ -30,7 +30,7 @@ const report: SampleReportData = data.data;
 const { Content } = await render(doc);
 ---
 <BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
-  <EvaluationMethodTemplate doc={doc.data} report={report} harnessUrl={null} site={siteContext(isPreview())}>
+  <EvaluationMethodTemplate doc={doc.data} report={report} harnessUrl={null} site={siteContext(isPreview())} region={data.region ?? null}>
     <Content />
   </EvaluationMethodTemplate>
 </BaseLayout>

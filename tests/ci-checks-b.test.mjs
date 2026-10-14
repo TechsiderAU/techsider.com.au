@@ -13,6 +13,7 @@ import { run as regulatoryKits } from "../scripts/ci/checks/08-regulatory-kits.m
 import { run as packageStatus } from "../scripts/ci/checks/10-package-status.mjs";
 import { CURRENCY, run as pricing } from "../scripts/ci/checks/11-pricing.mjs";
 import { CHECKS, formatReport, modeFromEnv, parseChecks, runAll } from "../scripts/ci/run-all.mjs";
+import { ONSHORE_PILLAR } from "../src/lib/fixed-copy.ts";
 import { allHtmlFiles, readDist, visibleText } from "./helpers.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -307,6 +308,32 @@ test("11: the currency rule catches A$, AU$ and bare $ figures, and leaves 'from
   assert.deepEqual(currency("Section 3, clause $ref, 30 dollars"), []);
 });
 
+test("11: the currency rule also catches €, £ and USD, EUR, GBP or AUD figures, each once, and leaves every 'from' form PRICING knows to it (go-global §10.2)", () => {
+  const currency = (text) => findAll(text, CURRENCY.re).map((h) => h.match);
+  assert.deepEqual(currency("€450, £ 1,200, EUR 900, 900 EUR, USD1200, 1,200.50 GBP and AUD 75"), ["€4", "£ 1", "EUR 9", "900 EUR", "USD1", "1,200.50 GBP", "AUD 7"]);
+  assert.deepEqual(currency("from €900, from £90, from USD 900, from EUR 9, from GBP 90, from AUD 900, from US$30, from NZ$ 5 and from S$9"), []);
+  assert.deepEqual(currency("from USD900, from AUD900 and from NZ $9"), ["USD9", "AUD9", "$9"]); // forms PRICING doesn't catch
+  assert.deepEqual(currency("$900 USD, € 900 EUR and AU$5 AUD"), ["$9", "€ 9", "AU$5"]);
+  assert.deepEqual(currency("Europe, an audit, the eurozone, USDA rules, 2 Aug 2028, EUR-Lex, Regulation 2024/1689 EUR-Lex"), []);
+});
+
+test("11: 'from AUD' is a price PRICING reports, once; an AUD figure without it is a currency figure; near misses pass (final review F33)", async () => {
+  const t = tree({
+    "src/content/solutions/fixture-solution.yaml": "scope: Fixture scope from AUD 9,000\n",
+    "dist/solutions/fixture-solution/index.html": page("<p>Fixture seats at AUD 12, or from AUD900</p>"),
+  });
+  const r = await pricing({ ...t, mode: "report" });
+  assert.deepEqual(sorted(r.errors.map(where)), sorted([
+    'src/content/solutions/fixture-solution.yaml:1: "from AUD 9"',
+    'dist/solutions/fixture-solution/index.html: "AUD 1"',
+    'dist/solutions/fixture-solution/index.html: "AUD9"',
+  ]));
+  assert.ok(r.errors.some((e) => e.includes('"from AUD 9" (pricing language (D4))')), r.errors.join("\n"));
+  assert.ok(r.errors.some((e) => e.includes('"AUD 1" (currency figure (D4))')), r.errors.join("\n"));
+  const currency = (text) => findAll(text, CURRENCY.re).map((h) => h.match);
+  assert.deepEqual(currency("An AUDIT 2026 note, an AUD-denominated budget and audits from 2024"), []);
+});
+
 test("11: offer copy without pricing passes; regulatory data, platform-ai.json and insights are out of scope", async () => {
   const t = tree({
     "src/content/solutions/fixture-solution.yaml": "scope: Fixture scope with referral fees, a tradie quote and fee earners\n",
@@ -350,6 +377,31 @@ test("11: pricing phrases and currency figures fail in every offer source and of
   assert.deepEqual(r.warnings, []);
 });
 
+test("11: euro, pound and currency-code figures fail in offer copy, and stay allowed in insights and regulatory data (go-global §10.2)", async () => {
+  const t = tree({
+    "src/content/solutions/fixture-solution.yaml": "scope: Fixture scope at €4,500\n",
+    "src/content/kits/fixture-kit.yaml": "summary: Fixture kit for 450 GBP\n",
+    "src/data/services.ts": 'export const services = [{ name: "Fixture service", note: "USD 900 a month" }];\n',
+    "src/data/regulatory/fixture-industry.json": { rows: [{ note: "Fixture fine up to €35 million or EUR 15 million" }] },
+    "src/content/insights/fixture-post.md": "The EU caps Fixture fines at €35 million.\n",
+    "dist/solutions/fixture-solution/index.html": page("<p>Fixture seats at £12 or 12 AUD</p>"),
+    "dist/contact/index.html": page("<p>Fixture plans from €900</p>"),
+    "dist/insights/fixture-post/index.html": page("<p>Fixture fines reach €35 million.</p>"),
+  });
+  const r = await pricing({ ...t, mode: "report" });
+  assert.deepEqual(sorted(r.errors.map(where)), sorted([
+    'src/content/solutions/fixture-solution.yaml:1: "€4"',
+    'src/content/kits/fixture-kit.yaml:1: "450 GBP"',
+    'src/data/services.ts:1: "USD 9"',
+    'dist/solutions/fixture-solution/index.html: "£1"',
+    'dist/solutions/fixture-solution/index.html: "12 AUD"',
+    'dist/contact/index.html: "from €9"',
+  ]));
+  assert.ok(r.errors.some((e) => e.includes('"from €9" (pricing language (D4))')), r.errors.join("\n"));
+  assert.ok(r.errors.some((e) => e.includes('"450 GBP" (currency figure (D4))')), r.errors.join("\n"));
+  assert.deepEqual(r.warnings, []);
+});
+
 test("11: banned-phrase-exceptions.json entries excuse a phrase only in the files and context they name", async () => {
   const t = tree({
     "src/data/banned-phrase-exceptions.json": [
@@ -383,7 +435,7 @@ test("11: an exception without a reason is reported and excuses nothing", async 
 
 // ---------- 10 and 11, hardened in Phase E (WB-10, WB-11) ----------
 
-const PILLAR = '<p data-onshore-pillar data-onshore="true">Your data stays onshore.</p>';
+const PILLAR = `<p data-onshore-pillar data-onshore="true">${ONSHORE_PILLAR}</p>`;
 const NOTE = "<p data-processing-note>We show you where your data is processed.</p>";
 const block = (id, body) => `<section id="${id}" data-package-tab data-package-status="launch" data-package-id="${id}">${body}</section>`;
 const onshoreSolution = {
@@ -424,12 +476,12 @@ test("10: on a solution's page each block shows the onshore pillar exactly when 
 test("10: the pillar's words outside a flagged pillar fail in any package block, the gallery's included (WB-10)", async () => {
   const t = tree({
     "dist/preview/templates/solution/index.html": page(`
-      <section data-package-tab data-package-status="launch"><p>Your data stays onshore.</p>${NOTE}</section>
+      <section data-package-tab data-package-status="launch"><p>${ONSHORE_PILLAR}</p>${NOTE}</section>
       <section data-package-tab data-package-status="launch">${PILLAR}</section>
-      <p>Your data stays onshore.</p>`),
+      <p>${ONSHORE_PILLAR}</p>`),
   });
   assert.deepEqual((await packageStatus({ ...t, mode: "report" })).errors, [
-    'dist/preview/templates/solution/index.html: a package block shows "Your data stays onshore." outside its [data-onshore-pillar] element',
+    `dist/preview/templates/solution/index.html: a package block shows "${ONSHORE_PILLAR}" outside its [data-onshore-pillar] element`,
   ]);
 });
 
@@ -480,7 +532,7 @@ test("the exception lists are well-formed, and every banned-phrase exception is 
 
 // ---------- run-all ----------
 
-test("run-all runs checks 01-08, 10 and 11 in order (09 is the build gate, 12 the Playwright axe suite)", async () => {
+test("run-all runs checks 01-08, 10, 11 and 13 in order (09 is the build gate, 12 the Playwright axe suite)", async () => {
   assert.deepEqual(CHECKS, [
     "01-slugs",
     "02-links",
@@ -492,6 +544,7 @@ test("run-all runs checks 01-08, 10 and 11 in order (09 is the build gate, 12 th
     "08-regulatory-kits",
     "10-package-status",
     "11-pricing",
+    "13-anchors-and-regions",
   ]);
   for (const id of CHECKS) {
     const mod = await import(new URL(`../scripts/ci/checks/${id}.mjs`, import.meta.url));
@@ -535,9 +588,9 @@ const verify = (args = [], mode = "report") =>
 test("the production build passes every check in report mode", () => {
   const r = verify();
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.match(r.stdout, /^verify: 10 checks against dist \(VERIFY_MODE=report\)$/m);
+  assert.match(r.stdout, /^verify: 11 checks against dist \(VERIFY_MODE=report\)$/m);
   for (const id of CHECKS) assert.match(r.stdout, new RegExp(`^ {2}(ok|warn) +${id}\\b`, "m"), id);
-  assert.match(r.stdout, /^verify: all 10 checks passed/m);
+  assert.match(r.stdout, /^verify: all 11 checks passed/m);
 });
 
 test("--checks picks checks by number or full id, in CHECKS order, and refuses anything else", () => {
@@ -589,7 +642,9 @@ test("run-all exits 1 and names the check when a built page breaks a rule", () =
   const html = readFileSync(home, "utf8");
   assert.ok(html.includes("</main>"));
   writeFileSync(home, html.replace("</main>", '<div data-package-status="internal">Fixture internal package</div></main>'));
-  const r = verify(["--dist", copy]);
+  // Check 10 alone: check 13 reads the real reviewBy dates against today's date, so from 2027-01-13 a
+  // full run would also fail it and change the count this test isn't about (final review F30).
+  const r = verify(["--dist", copy, "--checks", "10"]);
   assert.equal(r.status, 1, r.stdout + r.stderr);
   assert.match(r.stdout, /^ {2}FAIL 10-package-status \(1 error\)$/m);
   assert.match(r.stdout, /^ {9}x dist\/index\.html: an internal package renders: <div data-package-status="internal">$/m);

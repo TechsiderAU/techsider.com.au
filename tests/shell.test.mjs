@@ -3,8 +3,9 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readDist, allHtmlFiles } from "./helpers.mjs";
-import { footerColumns, noJsLinks } from "../src/data/nav.ts";
+import { readDist, allHtmlFiles, visibleText } from "./helpers.mjs";
+import { elementsWith } from "../scripts/ci/lib.mjs";
+import { footerColumns, hqLine, noJsLinks } from "../src/data/nav.ts";
 
 const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
 const pages = allHtmlFiles().filter((f) => f.endsWith("index.html"));
@@ -149,6 +150,17 @@ test("the footer carries the slogan with its proof line and the email", () => {
   assert.match(footer, /AI that ships\./);
   assert.match(footer, /Measured before it ships\./);
   assert.match(footer, /mailto:admin@techsider\.com\.au/);
+});
+
+test("every page's footer carries © and the year, then the HQ line in its [data-hq] span (go-global §3.2, S2)", () => {
+  assert.equal(hqLine(), "Headquartered in Sydney, Australia · Techsider Pty Ltd · ABN 12 636 205 868");
+  for (const f of pages) {
+    const footer = region(readDist(f), "footer");
+    const hq = elementsWith(footer, "data-hq");
+    assert.equal(hq.length, 1, `${f}: expected one [data-hq] in the footer, found ${hq.length}`);
+    assert.equal(visibleText(hq[0].inner).trim(), hqLine(), `${f}: the footer's HQ line`);
+    assert.match(footer, /©\s*\d{4}\s*<span data-hq[\s>]/, `${f}: the HQ line doesn't follow © and the year`);
+  }
 });
 
 test("the footer is one navigation landmark named Footer; its columns are headed lists, not navs (B6)", () => {

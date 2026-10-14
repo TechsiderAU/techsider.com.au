@@ -3,8 +3,8 @@
 // in tests/template-company.test.mjs.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { legalHubDocs, trustView } from "../src/lib/views/company.ts";
-import { trustFixture, trustNoTermsFixture } from "../src/fixtures/index.ts";
+import { internationalLines, legalHubDocs, trustView } from "../src/lib/views/company.ts";
+import { internationalFixture, trustFixture, trustNoTermsFixture } from "../src/fixtures/index.ts";
 
 const DOC = { title: "Fixture document", summary: "Fixture summary.", href: "/fixture/document/", lastUpdated: new Date("2026-09-01") };
 
@@ -30,6 +30,20 @@ test("trustView: with no confirmed term there is no Part B and no Part B answer"
   assert.deepEqual(view.terms, []);
   assert.deepEqual(view.faq, trustNoTermsFixture.faq.filter((f) => f.part === "A"));
   assert.ok(view.faq.length > 0, "the Part A answers still show");
+});
+
+test("internationalLines: the confirmed lines only, in data order; /contact/ leaves out the delivery line, which its hero says (go-global §7.3)", () => {
+  assert.deepEqual(internationalLines(internationalFixture, "trust"), internationalFixture.filter((l) => l.confirmed));
+  assert.deepEqual(internationalLines(internationalFixture, "trust").map((l) => l.id), ["entity", "delivery"]);
+  assert.deepEqual(internationalLines(internationalFixture, "contact").map((l) => l.id), ["entity"]);
+});
+
+test("internationalLines: no line to show, so the block is left out: an empty list, no confirmed line, or only the delivery line on /contact/", () => {
+  for (const page of ["contact", "trust"]) {
+    assert.deepEqual(internationalLines([], page), [], page);
+    assert.deepEqual(internationalLines(internationalFixture.filter((l) => !l.confirmed), page), [], page);
+  }
+  assert.deepEqual(internationalLines(internationalFixture.filter((l) => l.id === "delivery"), "contact"), []);
 });
 
 test("legalHubDocs: only documents whose page is shown, in order", () => {

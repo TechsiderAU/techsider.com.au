@@ -12,7 +12,7 @@ import { run as packageStatusCheck } from "../scripts/ci/checks/10-package-statu
 import { PREVIEW_PAGES } from "../src/fixtures/preview-pages.ts";
 import { fixtureSite, servicesFixture, solutionFixtures } from "../src/fixtures/index.ts";
 import { solutionLink } from "../src/lib/site.ts";
-import { ACCEPTANCE_TEST_LABEL, ONSHORE_PILLAR, PACKAGED_OFFER_DISCLAIMER, PROCESSING_NOTE } from "../src/lib/fixed-copy.ts";
+import { ACCEPTANCE_TEST_LABEL, ONSHORE_PILLAR, PACKAGED_OFFER_DISCLAIMER, PROCESSING_NOTE, REGION_LABEL } from "../src/lib/fixed-copy.ts";
 
 const DIST_PREVIEW = fileURLToPath(new URL("../dist-preview/", import.meta.url));
 const PAGES = {
@@ -152,7 +152,9 @@ test("packages: the generic package is the first full block, launch packages are
     for (const [i, p] of onRequest.entries()) {
       const li = listed[i];
       assert.ok(!("data-package-tab" in li.attrs));
-      assert.match(text(li.inner), /^\[ ?On request ?\]/);
+      // An Australia-only package's entry opens with its "Australia" label (go-global §3.3).
+      assert.match(text(li.inner), p.region ? new RegExp(`^${REGION_LABEL} \\[ ?On request ?\\]`) : /^\[ ?On request ?\]/);
+      assert.equal(li.attrs["data-region"], p.region, `${PAGES[id]}: ${p.id} data-region`);
       assert.ok(text(li.inner).includes(p.oneLiner), `${PAGES[id]}: no one-liner for ${p.id}`);
       const a = elements(li.inner, (tag) => tag.name === "a");
       assert.equal(a.length, 1);
@@ -172,7 +174,7 @@ test("packages: the generic package is the first full block, launch packages are
   }
 });
 
-test("every package block shows the §4.5 facts, its onshore note, the pillar or the processing note, and the disclaimer", () => {
+test("every package block shows the §4.5 facts, its region note, the pillar or the processing note (each linking to that note), and the disclaimer", () => {
   for (const id of IDS) {
     const data = solutionFixtures[id];
     const t = template(id);
@@ -195,6 +197,8 @@ test("every package block shows the §4.5 facts, its onshore note, the pillar or
       assert.ok(body.includes("Every package includes"), `${blockId}: no "Every package includes"`);
       const note = byId(block.inner, `${blockId}-onshore-note`);
       assert.equal(note.length, 1, `${blockId}: no #${blockId}-onshore-note`);
+      // go-global §4.2, D5: the note's visible label is "Region note"; its id keeps "onshore".
+      assert.deepEqual(elements(note[0].inner, (tag) => tag.name === "dt").map((dt) => text(dt.inner)), ["Region note"], `${blockId}: the note's label`);
       assert.ok(text(note[0].inner).includes(p.onshoreNote));
       const pillars = elementsWith(block.inner, "data-onshore-pillar");
       const processing = elementsWith(block.inner, "data-processing-note");
@@ -202,6 +206,10 @@ test("every package block shows the §4.5 facts, its onshore note, the pillar or
         assert.equal(pillars.length, 1, `${blockId}: onshore, but no pillar`);
         assert.equal(pillars[0].attrs["data-onshore"], "true");
         assert.equal(text(pillars[0].inner), ONSHORE_PILLAR);
+        // go-global §4.2 (R5): the badge links to the block's region note, which names the region and the remote access.
+        const badge = elements(pillars[0].inner, (tag) => tag.name === "a");
+        assert.equal(badge.length, 1, `${blockId}: the pillar doesn't link to its region note`);
+        assert.equal(badge[0].attrs.href, `#${blockId}-onshore-note`);
         assert.equal(processing.length, 0);
       } else {
         assert.equal(pillars.length, 0, `${blockId}: not onshore, but the pillar renders`);
@@ -219,6 +227,20 @@ test("every package block shows the §4.5 facts, its onshore note, the pillar or
     assert.equal(elementsWith(t, "data-onshore-pillar").length, packages.filter((p) => p.onshore).length, PAGES[id]);
   }
   assert.equal(elementsWith(template("fixture-solution-5"), "data-onshore-pillar").length, 0, "⑤ shows the onshore pillar");
+});
+
+test("go-global §3.3: an Australia-only package's block opens with the Australia label, and no other block has one", () => {
+  for (const id of IDS) {
+    const data = solutionFixtures[id];
+    const blocks = blocksIn(sectionOf(template(id), "packages").outer);
+    [data.genericPackage, ...byStatus(id, "launch")].forEach((p, i) => {
+      assert.equal(blocks[i].attrs["data-region"], p.region, `${PAGES[id]}: ${p.id} data-region`);
+      assert.deepEqual(elementsWith(blocks[i].inner, "data-region-label").map((l) => text(l.inner)), p.region ? [REGION_LABEL] : [], `${PAGES[id]}: ${p.id} label`);
+      if (p.region) assert.match(blocks[i].inner, /^\s*<span\b[^>]*\bdata-region-label="region"/, `${PAGES[id]}: ${p.id}: the label doesn't open the block`);
+    });
+  }
+  assert.ok(byStatus("fixture-solution", "launch").some((p) => p.region === "au"), "the gallery shows a labelled tab");
+  assert.ok(byStatus("fixture-solution", "on-request").some((p) => p.region === "au"), "the gallery shows a labelled on-request entry");
 });
 
 test("CI check 10 passes on dist-preview, where every solution page gives it blocks to check", async () => {
@@ -253,7 +275,7 @@ test("the ④ and ⑤ adaptations: Engagements and the independence policy on �
   assert.equal(elementsWith(sectionOf(four, "testing").inner, "data-acceptance-label").length, 0, "④ is the independent evaluation, so its #testing has no acceptance-test label");
 });
 
-test("where it runs: lettered choices with the shared copy, the solution's note, then the onshore note", () => {
+test("where it runs: lettered choices with the shared copy, the solution's note, then the region note", () => {
   for (const id of IDS) {
     const data = solutionFixtures[id];
     const s = sectionOf(template(id), "where-it-runs");
@@ -269,7 +291,10 @@ test("where it runs: lettered choices with the shared copy, the solution's note,
     }
     const body = text(s.inner);
     assert.ok(body.includes(data.whereItRuns.note));
-    assert.ok(body.indexOf("The onshore note") > body.indexOf(data.whereItRuns.note));
+    // go-global §4.2, D5: the shared list is headed "The region note".
+    const heads = elements(s.inner, (t) => t.name === "h3").map((h) => text(h.inner));
+    assert.ok(heads.includes("The region note") && !heads.includes("The onshore note"), `${PAGES[id]}: ${heads.join(" | ")}`);
+    assert.ok(body.indexOf("The region note") > body.indexOf(data.whereItRuns.note));
     for (const line of servicesFixture.onshoreNote) assert.ok(body.includes(line), `${PAGES[id]}: missing "${line}"`);
   }
 });

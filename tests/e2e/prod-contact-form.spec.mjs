@@ -2,7 +2,12 @@ import { test, expect } from "@playwright/test";
 import { CONTACT } from "../../src/data/contact.ts";
 import { withoutScripts } from "../support/no-scripts.mjs";
 
-// Intercept the real configured endpoint: no email or activation request leaves the test.
+// Intercept the real configured endpoint: no email or activation request leaves the test. The
+// browser runs in a fixed time zone, so the enquiry's timezone field is known: the zone with site
+// JavaScript, empty without it (go-global §8.1).
+const ZONE = "Pacific/Auckland";
+test.use({ timezoneId: ZONE });
+
 for (const javaScriptEnabled of [true, false]) {
   test.describe(`production contact form ${javaScriptEnabled ? "with" : "without"} site JavaScript`, () => {
 
@@ -36,6 +41,7 @@ for (const javaScriptEnabled of [true, false]) {
       await page.getByLabel("Name").fill("Contact Test");
       await page.getByLabel("Work email").fill("contact-test@example.com");
       await page.getByLabel("Organisation", { exact: true }).fill("Test Organisation");
+      await page.getByLabel("Country").selectOption("NZ");
       await page.getByLabel("Industry").selectOption("government");
       await page.getByLabel("Organisation size").selectOption({ index: 1 });
       await page.getByLabel("Interest").selectOption("ai-evaluation");
@@ -51,12 +57,13 @@ for (const javaScriptEnabled of [true, false]) {
       expect(submission.native).toBe(true);
       expect(submission.method).toBe("POST");
       expect(submission.fields).toMatchObject({
-        name: "Contact Test", email: "contact-test@example.com", organisation: "Test Organisation",
+        name: "Contact Test", email: "contact-test@example.com", organisation: "Test Organisation", country: "NZ",
         industry: "government", interest: "ai-evaluation", consent: "yes", _honey: "",
         _next: "https://techsider.com.au/contact/sent/", ...CONTACT.hiddenFields,
       });
       expect(submission.fields).not.toHaveProperty("_captcha");
       expect(submission.fields.discovery).toBe(javaScriptEnabled ? "ChatGPT" : "");
+      expect(submission.fields.timezone).toBe(javaScriptEnabled ? ZONE : "");
       expect(new URL(page.url()).search).toBe("");
     });
   });

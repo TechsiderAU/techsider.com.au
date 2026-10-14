@@ -2,7 +2,9 @@
 // The About page (spec §8.10), body only: a Phase C route loads the about and positioning data
 // and the insight cards, and wraps this in BaseLayout. The mission (the hero sub); SITE.summary,
 // the sentence that says what Techsider is (the Organization's JSON-LD and /llms.txt use it too);
-// who we serve and why control matters; the origin line in large type; the principles; how we work; a dated
+// who we serve and why control matters, then the HQ block (go-global §3.2: the [data-hq] line, the
+// ABN note with "ABN Lookup" linked to the ABR record, the delivery model and the disambiguation);
+// the origin line in large type; the principles; how we work; a dated
 // build log of real events, newest first; up to three insight cards; the closing prompt.
 // No names and no headcount: the data carries none, and nothing here adds any.
 import PageHero from "../components/page/PageHero.astro";
@@ -13,8 +15,9 @@ import type { AboutData, PositioningData } from "../content/page-schemas";
 import { formatDate, isoDate } from "../lib/dates";
 import type { SiteContext } from "../lib/site";
 import type { InsightCardView } from "../lib/views/insights";
-import { HOME_CLOSING } from "../lib/fixed-copy";
-import { CTAS, SITE } from "../data/nav";
+import { ABN_NOTE, DELIVERY_MODEL, DISAMBIGUATION, HOME_CLOSING } from "../lib/fixed-copy";
+import { abnLookupUrl } from "../lib/json-ld";
+import { CTAS, SITE, hqLine } from "../data/nav";
 
 interface Props {
   about: AboutData;
@@ -27,6 +30,14 @@ const { about, positioning, insights, site } = Astro.props;
 const buildLog = [...about.buildLog].sort((a, b) => b.date.getTime() - a.date.getTime());
 const cards = insights.slice(0, 3);
 const allInsightsHref = site.page("insights").href;
+// The HQ block's ABN note links its words "ABN Lookup" to the ABR record (go-global §3.2), and is
+// left out while SITE.abn is null, as the ABN is.
+const ABN_LINK_TEXT = "ABN Lookup";
+const abnAt = ABN_NOTE.lastIndexOf(ABN_LINK_TEXT);
+if (abnAt < 0) throw new Error(`AboutTemplate: ABN_NOTE no longer names "${ABN_LINK_TEXT}", so the ABR link has no words to sit on (go-global §3.2)`);
+const abnNote = SITE.abn === null
+  ? null
+  : { before: ABN_NOTE.slice(0, abnAt), after: ABN_NOTE.slice(abnAt + ABN_LINK_TEXT.length), href: abnLookupUrl(SITE.abn) };
 ---
 <div class="template" data-template="about">
   <PageHero title={`About ${SITE.name}.`} highlight={SITE.name} sub={about.mission} />
@@ -35,6 +46,12 @@ const allInsightsHref = site.page("insights").href;
     <p class="about-lead" data-summary>{SITE.summary}</p>
     <p class="about-text">{about.whoWeServe}</p>
     <p class="about-text">{about.whyControl}</p>
+    <div class="about-hq" data-about-hq>
+      <p class="about-hq-line" data-hq>{hqLine()}</p>
+      {abnNote && <p>{abnNote.before}<a href={abnNote.href} class="about-hq-link">{ABN_LINK_TEXT}</a>{abnNote.after}</p>}
+      <p>{DELIVERY_MODEL}</p>
+      <p>{DISAMBIGUATION}</p>
+    </div>
   </PageSection>
 
   <div id="origin" class="about-origin bg-carbon scanlines" data-origin>
@@ -109,6 +126,34 @@ const allInsightsHref = site.page("insights").href;
   .about-text {
     font-size: 1.0625rem;
     line-height: 1.65;
+  }
+  /* The HQ block (go-global §3.2): the company's facts in small type under a hairline. */
+  .about-hq {
+    display: grid;
+    gap: 0.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-bone-line);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--color-muted-dark);
+  }
+  .about-hq p {
+    margin: 0;
+  }
+  .about-hq-line {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-carbon);
+    overflow-wrap: anywhere;
+  }
+  /* A link inside running text: underlined, so it doesn't rely on colour (WCAG 1.4.1). */
+  .about-hq-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .about-hq-link:hover {
+    text-decoration-thickness: 2px;
   }
   /* The origin line: a carbon interlude in large type, content in the 80rem container. */
   .about-origin {

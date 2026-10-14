@@ -1,8 +1,9 @@
 ---
 // /preview/templates/contact-no-endpoint/: the contact page before the owner chooses a form
-// provider (formEndpoint: null): no form, and the email address leads. Fixtures are imported
-// statically (only src/preview/ may import them).
+// provider (formEndpoint: null): no form, and the email address leads. No outside-Australia line is
+// passed either, so that block is left out (go-global §7.3). Fixtures are imported statically
+// (only src/preview/ may import them).
 import ContactTemplate from "../../templates/ContactTemplate.astro";
 import { contactNoEndpointFixture, fixtureSite } from "../../fixtures/index.ts";
 ---
-<ContactTemplate contact={contactNoEndpointFixture} site={fixtureSite} />
+<ContactTemplate contact={contactNoEndpointFixture} international={[]} site={fixtureSite} />

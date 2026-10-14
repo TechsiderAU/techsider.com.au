@@ -6,11 +6,13 @@ import assert from "node:assert/strict";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { htmlFiles, listFiles, readText, relPath, startTags } from "../scripts/ci/lib.mjs";
-import { formatDate, isoDate } from "../src/lib/dates.ts";
+import { formatDate, formatMonthYear, formatShortDate, isoDate } from "../src/lib/dates.ts";
 
 const SRC = fileURLToPath(new URL("../src/", import.meta.url));
 const BUILDS = ["dist", "dist-preview"].map((d) => fileURLToPath(new URL(`../${d}/`, import.meta.url)));
-const FORMATS_A_DATE = /\.toLocaleDateString\(|\.toISOString\(\)\.slice\(|\bIntl\.DateTimeFormat\b/;
+// Reading the browser's time zone (ContactForm.astro's own inline script, go-global §8.1) turns no
+// date into text, so that one exact call is exempt.
+const FORMATS_A_DATE = /\.toLocaleDateString\(|\.toISOString\(\)\.slice\(|\bIntl\.DateTimeFormat\b(?!\(\)\.resolvedOptions\(\)\.timeZone)/;
 /** The files that show a date, each through the shared helpers. */
 const SHOWS_DATES = [
   "components/page/InsightCard.astro",
@@ -35,6 +37,22 @@ test("formatDate and isoDate print a content date in UTC", () => {
   assert.equal(isoDate(late), "2026-06-30");
 });
 
+test("formatShortDate and formatMonthYear print an anchor chip's dates in UTC, with three-letter months (go-global §5.2)", () => {
+  assert.equal(formatShortDate(new Date("2027-12-02")), "2 Dec 2027");
+  assert.equal(formatMonthYear(new Date("2026-10-01")), "Oct 2026");
+  // en-AU's own short months print "Sept", "June" and "July"; the chips always use three letters.
+  assert.equal(formatShortDate(new Date("2026-09-16")), "16 Sep 2026");
+  assert.equal(formatMonthYear(new Date("2026-06-18")), "Jun 2026");
+  assert.equal(formatMonthYear(new Date("2025-07-26")), "Jul 2025");
+  const late = new Date("2026-06-30T23:30:00Z"); // already 1 July in Sydney, still 30 June in UTC
+  assert.equal(formatShortDate(late), "30 Jun 2026");
+  assert.equal(formatMonthYear(late), "Jun 2026");
+  assert.deepEqual(
+    Array.from({ length: 12 }, (_, m) => formatMonthYear(new Date(Date.UTC(2026, m, 1)))),
+    ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m) => `${m} 2026`),
+  );
+});
+
 test("no file in src/ but src/lib/dates.ts turns a date into text (WB-14)", () => {
   const offenders = listFiles(SRC, (rel) => /\.(astro|ts|js|mjs)$/.test(rel) && rel !== "lib/dates.ts")
     .filter((file) => FORMATS_A_DATE.test(readText(file)))
@@ -42,6 +60,19 @@ test("no file in src/ but src/lib/dates.ts turns a date into text (WB-14)", () =
   assert.deepEqual(offenders, []);
   for (const rel of SHOWS_DATES) {
     assert.match(readText(join(SRC, rel)), /^import \{ formatDate(?:, isoDate)? \} from "(?:\.\.\/)+(?:lib\/)?dates(?:\.ts)?";$/m, rel);
+  }
+});
+
+test("FORMATS_A_DATE: reading the browser's time zone turns no date into text; every way of formatting one still counts (go-global §8.1)", () => {
+  assert.doesNotMatch("const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;", FORMATS_A_DATE);
+  for (const code of [
+    'new Intl.DateTimeFormat("en-AU").format(d)',
+    "Intl.DateTimeFormat().format(d)",
+    'Intl.DateTimeFormat("en").resolvedOptions().timeZone',
+    'd.toLocaleDateString("en-AU")',
+    "d.toISOString().slice(0, 10)",
+  ]) {
+    assert.match(code, FORMATS_A_DATE, code);
   }
 });
 

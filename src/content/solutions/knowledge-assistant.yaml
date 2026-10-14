@@ -3,13 +3,16 @@
 # fill byIndustry and matrix. `demo` names the hero's demo, src/data/demos/knowledge-assistant.json,
 # which /demos/knowledge-assistant/ also shows. The launch package shows its two audience variants
 # as the two tabs (spec §8.3).
+# Region notes (onshoreNote) follow go-global §4.2: a note that names a region ends with the
+# remote-access sentence, and only an assistant we manage runs in an Australian region. Microsoft,
+# not Techsider, sets where Microsoft 365 model calls are processed.
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: knowledge-assistant
 job: >-
   An internal AI knowledge assistant answers staff questions from an agreed collection of company documents. It shows the source and version, respects access permissions and declines unsupported questions.
 artefact: >-
   An assistant in the agreed workspace, plus a test report on your questions. Correct answers, wrong answers and unnecessary refusals are reported separately, with instructions for updating the documents.
-forLine: Manufacturers, independent schools, non-clinical health teams and councils
+forLine: Manufacturers, independent schools, non-clinical health teams and local government
 needProfiles:
   - title: The answer is in the manual, somewhere.
     body: >-
@@ -63,10 +66,13 @@ genericPackage:
     Before go-live, you see the pilot's results on 50–100 staff-written questions against the
     thresholds agreed in week 1, and you decide whether to roll it out.
   onshoreNote: >-
-    Delivered on the web, the search index and the model run in an Australian region, in your own
-    account or one we manage. Delivered inside Microsoft 365, Microsoft sets where model calls are
-    processed, and its published statement says they may run outside Australia; the data note quotes
-    it with its date.
+    Delivered on the web, the search index and the model run in the cloud region you choose, in your
+    own Microsoft or AWS account, or in an Australian region if we manage the assistant for you. If
+    the model you want isn't offered in your chosen region, you hear that before you decide.
+    Delivered inside Microsoft 365, Microsoft sets where model calls are processed, and its published
+    statement for your geography may allow processing outside it; the data note quotes it with its
+    date. Our team reaches the assistant remotely from Sydney, under the data-transfer terms in your
+    contract.
 packages:
   - id: sop-work-instruction-assistant
     name: SOP & Work-Instruction Assistant
@@ -99,18 +105,19 @@ packages:
       Before go-live, you see the pilot's results on 50–100 questions your crews wrote against the
       thresholds agreed in week 1, and you decide whether to roll it out.
     onshoreNote: >-
-      The search index and the model run in an Australian region, in your own Microsoft or AWS
-      account or in one we manage, and staff reach the assistant on the web from a phone, tablet or
-      desktop. If the model you want isn't offered in an Australian region, you hear that before you
-      decide.
+      The search index and the model run in the cloud region you choose, in your own Microsoft or AWS
+      account, or in an Australian region if we manage the assistant for you, and staff reach the
+      assistant on the web from a phone, tablet or desktop. If the model you want isn't offered in
+      your chosen region, you hear that before you decide. Our team reaches the assistant remotely
+      from Sydney, under the data-transfer terms in your contract.
   - id: policy-procedure-assistant
     name: Policy & Procedure Assistant
     status: launch
     onshore: false
     buyers: [mid-market, enterprise-government]
     forWhom: >-
-      Councils, independent schools, non-clinical health services and financial-services procedure
-      teams whose staff ask questions of a policy and procedure library.
+      Local government, independent schools, non-clinical health services and financial-services
+      procedure teams whose staff ask questions of a policy and procedure library.
     scope: >-
       One policy and procedure library for one staff group, delivered inside Microsoft 365 (Copilot,
       SharePoint or Teams) where you license it, otherwise on the web. Answers cite the policy,
@@ -134,8 +141,10 @@ packages:
       thresholds agreed in week 1, and you decide whether to roll it out.
     onshoreNote: >-
       Inside Microsoft 365, Microsoft sets where model calls are processed, and its published
-      statement says they may run outside Australia; the data note quotes it with its date. The parts
-      we build, such as a search index, run in an Australian region in your account or one we manage.
+      statement for your geography may allow processing outside it; the data note quotes it with its
+      date. The parts we build, such as a search index, run in your account in the region you choose,
+      or in ours in an Australian region. Our team reaches them remotely from Sydney, under the
+      data-transfer terms in your contract.
   - id: ask-the-firm-manual
     name: Ask the Firm Manual
     status: on-request
@@ -172,9 +181,10 @@ howWeTest:
 whereItRuns:
   choices: [your-account, managed, platform-you-license]
   note: >-
-    On the web, the assistant runs in your own Microsoft or AWS account in an Australian region, or
-    in one we manage. Inside Microsoft 365, it works through the Copilot you already license, and the
-    search index we build stays in an Australian region.
+    On the web, the assistant runs in your own Microsoft or AWS account, in the cloud region you
+    choose, or in an Australian region we manage. Inside Microsoft 365, it works through the Copilot
+    you already license. The search index we build runs in your account in the region you choose, or
+    in ours in an Australian region.
 independencePolicy: false
 platformFirst: >-
   If your staff have Microsoft Copilot licences, SharePoint's built-in AI can already answer from a
@@ -186,7 +196,7 @@ dontDo:
   - We don't answer from matter files or ERP data, or rebuild SOP answers already inside SafetyCulture (now Mitti).
   - We don't give clinical advice or build student-facing chat.
 matrix:
-  government: Council policy and procedure assistant
+  government: Local government policy assistant
   financial-services: Complaints and hardship procedures assistant
   accounting: Ask the Firm Manual, on request
   education: "Staff policy answers, section cited"
@@ -213,7 +223,8 @@ faq:
       Either way, you see the error rate before you rely on anything.
   - q: Where is our data processed?
     a: >-
-      It depends on where the assistant lives. On the web, the index and the model run in an
-      Australian region, in your account or ours. Inside Microsoft 365, Microsoft sets where model
-      calls are processed, and we show you what it publishes, including that they may run outside
-      Australia.
+      It depends on where the assistant lives. On the web, the index and the model run in your own
+      account in the cloud region you choose, or in ours in an Australian region. Inside Microsoft
+      365, Microsoft sets where model calls are processed, and we show you what it publishes for your
+      geography, including whether they may run outside it. Our team reaches the assistant remotely
+      from Sydney, under the data-transfer terms in your contract.

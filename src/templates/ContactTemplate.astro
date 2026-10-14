@@ -3,25 +3,35 @@
 // wraps this in BaseLayout. The H1; the enquiry form, only while a form endpoint is configured
 // (set once the owner chooses a form provider; until then #form is left out and #email leads); the
 // email address as plain text with a copy button; what happens next; and the deflection column.
-// The reply-time sentence reads contact.replyTime, written once: this page and /contact/sent/
-// show it, and no other page states a reply time.
+// The hero's sub says where the work is done from, then the reply-time sentence (go-global §3.2,
+// §4.5): replySentence() builds it from contact.replyTime and contact.replyTimeBase, and it is the
+// page's one [data-reply-time]. This page and /contact/sent/ state it; no other page states a reply
+// time.
+// "For organisations outside Australia" (go-global §7.3) follows what happens next: the lines
+// internationalLines() picks (confirmed ones, less the delivery line the hero says); with none,
+// the block is left out.
 // The copy button is the only JavaScript here: it is `hidden` in the markup, so a visitor without
 // JavaScript sees only the address, and the script shows it where the Clipboard API exists.
 import PageHero from "../components/page/PageHero.astro";
 import ContactForm from "../components/page/ContactForm.astro";
-import type { ContactData } from "../content/page-schemas";
+import type { ContactData, InternationalData } from "../content/page-schemas";
 import type { SiteContext } from "../lib/site";
-import { CONTACT_H1 } from "../lib/fixed-copy";
+import { CONTACT_BASE, CONTACT_H1, INTERNATIONAL_HEADING } from "../lib/fixed-copy";
+import { replySentence } from "../lib/reply-time";
+import { internationalLines } from "../lib/views/company";
 
 interface Props {
   contact: ContactData;
+  /** The "For organisations outside Australia" lines (go-global §7.3), all of them: the view picks. */
+  international: InternationalData;
   site: SiteContext;
 }
 
-const { contact, site } = Astro.props;
+const { contact, international, site } = Astro.props;
+const outside = internationalLines(international, "contact");
 ---
 <div class="template" data-template="contact">
-  <PageHero title={CONTACT_H1} highlight="fix" display={false} />
+  <PageHero title={CONTACT_H1} highlight="fix" display={false}><Fragment slot="sub">{CONTACT_BASE}{" "}<span data-reply-time>{replySentence(contact)}</span></Fragment></PageHero>
 
   <div class="contact-body surface-bone">
     <div class="contact-grid">
@@ -47,11 +57,18 @@ const { contact, site } = Astro.props;
       <div class="contact-side">
         <section id="next" class="contact-block" aria-labelledby="next-heading">
           <h2 id="next-heading" class="contact-heading">What happens next</h2>
-          <p class="contact-reply" data-reply-time>We reply within {contact.replyTime}.</p>
           <ol class="contact-steps">
             {contact.whatNext.map((step) => <li>{step}</li>)}
           </ol>
         </section>
+        {outside.length > 0 && (
+          <section id="outside-australia" class="contact-block" data-international aria-labelledby="outside-australia-heading">
+            <h2 id="outside-australia-heading" class="contact-heading">{INTERNATIONAL_HEADING}</h2>
+            <ul class="contact-international">
+              {outside.map((line) => <li data-international-line={line.id}>{line.text}</li>)}
+            </ul>
+          </section>
+        )}
         <section id="elsewhere" class="contact-block" aria-labelledby="elsewhere-heading">
           <h2 id="elsewhere-heading" class="contact-heading">Something else?</h2>
           <ul class="contact-deflection">
@@ -141,7 +158,6 @@ const { contact, site } = Astro.props;
   .contact-email,
   .contact-email-line,
   .contact-copy-status,
-  .contact-reply,
   .contact-deflect-body,
   .contact-deflect-email {
     margin: 0;
@@ -177,17 +193,20 @@ const { contact, site } = Astro.props;
     font-family: var(--font-mono);
     font-size: 0.875rem;
   }
-  .contact-reply {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    line-height: 1.5;
-  }
   .contact-steps {
     display: grid;
     gap: 0.5rem;
     margin: 0;
     padding-left: 1.5rem;
     list-style: decimal;
+    line-height: 1.5;
+  }
+  .contact-international {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style: square;
     line-height: 1.5;
   }
   .contact-deflection {

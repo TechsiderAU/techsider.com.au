@@ -5,7 +5,10 @@
 // The hero can't hold the checker itself: the vendors' feature texts name "agents", which spec §3.4
 // keeps off this mid-market page. It never carries data-checker, which marks a rendered checker.
 // The vendor names and the date come from src/data/platform-ai.json through Task 6's checkerView().
+// go-global §6.3: those facts are checked for Australian customers, so the root carries
+// data-region="au" and opens with the "Australian plans and vendor pages" label.
 import platformAi from "../../data/platform-ai.json";
+import RegionLabel from "../ui/RegionLabel.astro";
 import { platformAiFile } from "../../content/schemas";
 import type { SiteContext } from "../../lib/site";
 import { checkerView } from "../../lib/views/checker";
@@ -18,7 +21,8 @@ const { site } = Astro.props;
 const view = checkerView(platformAiFile.parse(platformAi), site);
 const checker = site.page("payFor");
 ---
-<div class="checker-summary" data-checker-summary>
+<div class="checker-summary" data-checker-summary data-region="au">
+  <RegionLabel kind="platform" />
   <p>Tick the software you already pay for. The checker shows the AI each vendor includes or sells as an add-on, whether each vendor says where it's processed, and what's left for a build.</p>
   <p>It runs in your browser, so nothing you tick is sent anywhere.</p>
   <p>Vendors covered: {view.vendors.map((group) => group.vendor).join(", ")}.</p>
@@ -35,6 +39,9 @@ const checker = site.page("payFor");
     min-width: 0;
     max-width: 62ch;
     overflow-wrap: anywhere;
+  }
+  .checker-summary > :global(.region-label) {
+    justify-self: start;
   }
   .checker-summary p {
     margin: 0;

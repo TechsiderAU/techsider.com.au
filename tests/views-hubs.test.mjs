@@ -8,7 +8,9 @@ import { readFileSync } from "node:fs";
 import { industriesHubView, matrixView, solutionsHubView } from "../src/lib/views/hubs.ts";
 import { industryView } from "../src/lib/views/industry.ts";
 import { JURISDICTION_SECTION } from "../src/content/schemas.ts";
-import { fixtureSite, industryFixtures, regulatoryFixtures, solutionFixtures, traceFixtures } from "../src/fixtures/index.ts";
+import {
+  anchorFixtures, fixtureSite, industryFixtures, regulatoryFixtures, sharedAnchorsFixture, solutionFixtures, traceFixtures,
+} from "../src/fixtures/index.ts";
 
 const site = fixtureSite;
 const solutions = solutionFixtures;
@@ -92,7 +94,7 @@ test("solutionsHubView: byBuyer lists every launch package under each buyer it n
     site.solutions.flatMap((s) =>
       launchOf(solutions[s.id])
         .filter((p) => p.buyers.includes(buyer))
-        .map((p) => ({ name: p.name, solution: { number: s.number, shortName: s.shortName }, href: `${s.href}#${p.id}` })),
+        .map((p) => ({ name: p.name, solution: { number: s.number, shortName: s.shortName }, href: `${s.href}#${p.id}`, region: p.region ?? null })),
     );
   assert.deepEqual(v.byBuyer.midMarket, expected("mid-market"));
   assert.deepEqual(v.byBuyer.enterprise, expected("enterprise-government"));
@@ -136,6 +138,7 @@ test("industriesHubView: nine deep cards in §5 order: hook, three use cases wit
         name: u.name,
         number: site.solutions.find((s) => s.id === u.solution).number,
         onRequest: u.status === "on-request",
+        region: null,
       })),
     );
     assert.equal(card.chips.length, 3, `${card.id}: chips`);
@@ -145,6 +148,20 @@ test("industriesHubView: nine deep cards in §5 order: hook, three use cases wit
   assert.deepEqual(v.cards.find((c) => c.id === "fixture-industry").useCases.map((u) => u.onRequest), [false, false, true]);
   assert.deepEqual(v.matrix, matrixView(solutions, site));
   assert.deepEqual(v.closing, { command: "talk_to_us", args: "--about=<industry>", label: "Talk to us", href: site.contact() });
+});
+
+test("go-global §3.3: a By buyer item and a flagship use case that name an Australia-only package carry region \"au\"", () => {
+  const v = solutionsHubView({ solutions, site });
+  assert.deepEqual(v.byBuyer.midMarket.filter((i) => i.region === "au").map((i) => i.name), ["Fixture Launch Package"]);
+  assert.deepEqual(v.byBuyer.enterprise.filter((i) => i.region === "au").map((i) => i.name), []);
+  const named = structuredClone(industries);
+  named["fixture-industry"].flagshipUseCases[0] = { name: "Fixture On-Request Package", solution: "fixture-solution", status: "on-request" };
+  const card = industriesHubView({ industries: named, solutions, site }).cards.find((c) => c.id === "fixture-industry");
+  assert.deepEqual(card.useCases.map((u) => [u.name, u.region]), [
+    ["Fixture On-Request Package", "au"],
+    ["Fixture use case B", null],
+    ["Fixture use case C", null],
+  ]);
 });
 
 test("industriesHubView: each chip links to its row anchor, per section in jurisdiction mode, or is text", () => {
@@ -169,6 +186,7 @@ test("industriesHubView: every chip anchor is a chip and a row of its industry p
   for (const card of v.cards.filter((c) => c.href !== null)) {
     const page = industryView({
       id: card.id, data: industries[card.id], rows: regulatoryFixtures[card.id].rows,
+      sharedAnchors: sharedAnchorsFixture, anchors: anchorFixtures[card.id],
       solutions, traces: traceFixtures, insights: [], site,
     });
     const blocks = page.mode === "single" ? [page.single] : page.sections;

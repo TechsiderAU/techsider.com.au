@@ -6,6 +6,7 @@ import SiteFooter from "../components/site/SiteFooter.astro";
 import { buildStamp } from "../lib/build-stamp";
 import SocialImageMeta from "../components/site/SocialImageMeta.astro";
 import { jsonLd, pageGraph, type JsonLdNode } from "../lib/json-ld";
+import { SITE } from "../data/nav";
 
 interface Props {
   /** The page's own <title> (spec §11.3): a route passes pageTitle(entry) from src/lib/meta.ts, a post its own. */
@@ -49,7 +50,7 @@ const structuredData = pageGraph(site, Astro.url.pathname, graph);
 ---
 
 <!doctype html>
-<html lang="en-AU" class="no-js">
+<html lang={SITE.lang} class="no-js">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

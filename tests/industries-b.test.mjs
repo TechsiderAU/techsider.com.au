@@ -58,7 +58,7 @@ const PACKAGES = {
 
 // The solution × industry matrix cells this task adds (spec §8.2: a 3–6-word example per cell).
 const MATRIX = {
-  "document-registers": { manufacturing: "Compliance dossiers, on request", "real-estate": "Management agreement register" },
+  "document-registers": { manufacturing: "Compliance dossiers, on request", "real-estate": "Management agreement register (Australia)" },
   "knowledge-assistant": { education: "Staff policy answers, section cited", manufacturing: "Multilingual SOP answers, page shown" },
   "draft-for-approval": { manufacturing: "Draft work requests, on request", "real-estate": "Shared inbox triage, on request" },
   "ai-evaluation": { education: "Evaluation of deployed staff AI" },
@@ -164,8 +164,11 @@ test("the three pages are live and built, each with its industry title and its o
   }
 });
 
-test("each page has one h1 (its promise), the spec §8.5 blocks in order and unique ids", () => {
-  const blocks = ["designed-around", "problem", "workflow", "packages", "regulatory-map", "scenario", "first-engagement", "insights", "faq", "contact"];
+test("each page has one h1 (its promise), the go-global §5.1 blocks in order and unique ids", () => {
+  const blocks = [
+    "rules-that-travel", "problem", "workflow", "packages", "scenario", "first-engagement", "australia", "designed-around", "regulatory-map",
+    "insights", "faq", "contact",
+  ];
   for (const id of IDS) {
     const page = html(id);
     const main = mainOf(page);
@@ -212,10 +215,10 @@ test("the scenario is labelled illustrative, and the FAQ answers exactly the con
   }
 });
 
-test("each page runs 900–1,400 words, counting the regulatory map and the FAQ (spec §8.5)", () => {
+test("each page runs 900–1,800 words, counting the regulatory map and the FAQ (spec §8.5; go-global §5.7)", () => {
   for (const id of IDS) {
     const n = pageWords(html(id));
-    assert.ok(n >= 900 && n <= 1400, `${id}: ${n} words`);
+    assert.ok(n >= 900 && n <= 1800, `${id}: ${n} words`);
   }
 });
 
@@ -273,4 +276,59 @@ test("Real estate: the Queensland trust-audit chip uses its row's words (C5-T5-F
   const chip = industry("real-estate").obligationChips.find((c) => c.row === "qld-trust-audit");
   assert.equal(chip.label, "Trust audits and unannounced checks, Qld");
   assert.ok(chip.label.length <= 40);
+});
+
+// ---------- go-global Part 4B: the "Rules that travel" anchor data ----------
+
+test("go-global §5.2: these pages' anchor data keeps mid-market language (spec §3.4, §5, D4; rulings 5, 8, 9)", () => {
+  const shared = new Map(readJson(`${ROOT}src/data/anchors/shared.json`).anchors.map((a) => [a.id, a]));
+  const textOf = (id) => {
+    const own = readJson(`${ROOT}src/data/anchors/${id}.json`);
+    return [...own.shared.map((s) => shared.get(s)), ...own.anchors].flatMap((a) => [a.name, a.issuer, a.binding, a.asks, a.evidence]).join(" ");
+  };
+  for (const id of IDS) {
+    const t = textOf(id);
+    assert.doesNotMatch(t, /\bagents?\b/i, `${id}: "agent" in its anchor data`);
+    assert.doesNotMatch(t, /\btenancy\b|\bsprint\b|APRA audit/i, id);
+    assert.doesNotMatch(t, /(?:\bAU?)?\$\s?\d|\bfrom\s+\$/i, `${id}: a currency figure`);
+    assert.doesNotMatch(t, /coming (?:soon|later)/i, id);
+  }
+  assert.doesNotMatch(textOf("manufacturing"), /\bfree\b|Sales Order/i, "manufacturing: 'free' or a vendor agent product (ruling 8)");
+  assert.doesNotMatch(textOf("real-estate"), /Connector|\btenants?\b/i, "real estate: the PropertyMe Connector (ruling 9), or 'tenant' where §5.2 says rental applications");
+  assert.doesNotMatch(textOf("education"), /\bRTOs?\b|\bASQA\b|ChatGPT Edu/, "education: RTOs or an unverified system (ruling 5)");
+});
+
+// ---------- go-global (spec §3.3, §5.5): copy that reads for any country, with Australian detail labelled ----------
+
+/** Every string in a value, however deep. */
+const allStrings = (v) => (typeof v === "string" ? [v] : Array.isArray(v) ? v.flatMap(allStrings) : v && typeof v === "object" ? Object.values(v).flatMap(allStrings) : []);
+
+test("go-global §3.3, §5.5: Education, Manufacturing and Real estate say where their facts and terms are Australian", () => {
+  const edu = industry("education");
+  assert.equal(edu.problem.from, "In Australia, full-time classroom teachers spent 6–9 hours a week on administrative tasks in 2023. Finding the current procedure means old handbooks, shared drives or emailing someone.");
+  assert.deepEqual(edu.dontDo, [
+    "We don't build student-facing tutors or chat tools.",
+    "We don't build anything that admits, grades or monitors students.",
+    "We don't compete with the AI chat tools education systems provide, such as NSWEduChat, SA's EdChat and cechat in Australia.",
+    "We don't write AI policies or privacy-policy wording.",
+  ]);
+  const mfg = industry("manufacturing");
+  assert.equal(mfg.problem.from, "In Australia, 9% of manufacturing businesses reported using AI in 2024–25, against 12% of all businesses. On the floor, answers come from binders and whoever has been on the line longest.");
+  assert.equal(mfg.firstEngagement.needFromYou[2], "5–10 floor staff, including a health and safety representative, writing test questions for about 1 hour each");
+  assert.equal(mfg.faq.find((f) => f.q === "Is it a GMP-validated system?").a, "No. On a GMP-regulated site (in Australia, that includes medicine, API and sunscreen sites), your quality team decides whether the assistant is part of a GMP activity and how to validate it. We supply the test evidence.");
+  assert.equal(industry("real-estate").problem.from, "In New South Wales, Australia, 330,256 new rental bonds were lodged in 2024–25, and 321,876 refunded. Senior property managers read agreements one PDF at a time.");
+  // Real estate's figure covers New South Wales only, so it opens with its state and is pinned exactly above.
+  for (const id of IDS.filter((id) => id !== "real-estate")) assert.match(industry(id).problem.from, /^In Australia, /, `${id}: the problem's Australian figure isn't labelled (spec §3.3)`);
+  assert.doesNotMatch(allStrings(mfg.firstEngagement).join(" "), /\bHSR\b/, "manufacturing: the Australian WHS acronym (spec §3.3)");
+});
+
+// ---------- the final whole-branch review (go-global, F19) ----------
+
+test("Education: the Rules paragraph's EU AI Act sentence says no more than Annex III point 3, where steering learning counts only as part of grading (final review F19)", () => {
+  const paragraph = industry("education").rulesThatTravel;
+  assert.ok(
+    paragraph.includes("The EU AI Act treats AI that admits students, grades their work (including to steer their learning) or monitors them during tests as high-risk from 2 December 2027 (as amended in July 2026)."),
+    paragraph,
+  );
+  assert.doesNotMatch(paragraph, /\bsteers their learning\b/);
 });

@@ -14,7 +14,7 @@ import { refId, solutionLink } from "../../lib/site";
 ---
 <DemoTemplate
   solution={solutionLink(fixtureSite, refId(demoFixture.solution))}
-  demo={{ title: demoFixture.title, kind: demoFixture.kind, provenance: demoFixture.provenance }}
+  demo={{ title: demoFixture.title, kind: demoFixture.kind, provenance: demoFixture.provenance, region: demoFixture.region ?? null }}
   report={null}
   site={fixtureSite}
 >

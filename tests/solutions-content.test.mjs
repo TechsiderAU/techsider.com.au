@@ -89,8 +89,10 @@ const CANON = {
   },
 };
 
-// Spec §3.2 onshore scope rule, per package id: true only where every processing step, model
-// inference included, runs in an Australian region under delivery choice (a) or (b).
+// The onshore scope rule (go-global §4.2), per package id: true only where every processing step,
+// model inference included, runs in the region the client chooses: in their own account under
+// delivery choice (a), in any cloud region, or managed by Techsider under (b), in an Australian
+// region. The package's region note says which. The flags themselves are unchanged (R5).
 const ONSHORE = {
   "one-document-family": true, "trust-deed-register": true, "management-agreement-register": true,
   "one-manual-one-team": false, "sop-work-instruction-assistant": true, "policy-procedure-assistant": false,
@@ -142,6 +144,68 @@ test("packages are the canonical set: ids, names, statuses and buyers, in order"
 test("onshore flags follow the §3.2 scope rule: ②'s Microsoft 365 variant and every ④ and ⑤ package are false", () => {
   const flags = Object.fromEntries(IDS.flatMap((id) => launchOf(DATA[id]).map((p) => [p.id, p.onshore])));
   assert.deepEqual(flags, ONSHORE);
+});
+
+// go-global §4.2, D4: a region note that names a region says where it runs, then ends with the
+// remote-access sentence. Remote access from Sydney is a transfer (EDPB Guidelines 05/2021, ICO),
+// so no note may read as "nothing leaves your region".
+const REMOTE_ACCESS_END = /Our team reaches (?:it|them|the register|the assistant|the automation) remotely from Sydney, under the data-transfer terms in your contract\.$/;
+const MODEL_AVAILABILITY = "If the model you want isn't offered in your chosen region, you hear that before you decide.";
+const NAMING_A_REGION = [
+  "one-document-family", "trust-deed-register", "management-agreement-register",
+  "one-manual-one-team", "sop-work-instruction-assistant", "policy-procedure-assistant",
+  "one-job-drafts-for-approval",
+];
+
+test("region notes: every note that names a region ends with the remote-access sentence (go-global §4.2, D4)", () => {
+  const naming = [];
+  for (const id of IDS) {
+    for (const p of launchOf(DATA[id])) {
+      if (!/\bregion\b/i.test(p.onshoreNote)) continue;
+      naming.push(p.id);
+      assert.ok(p.onshoreNote.includes("remotely from Sydney"), `${id} ${p.id}: names a region without "remotely from Sydney"`);
+      assert.match(p.onshoreNote, REMOTE_ACCESS_END, `${id} ${p.id}: the remote-access sentence isn't the note's last`);
+    }
+  }
+  // ④'s notes and ⑤'s name no region: the vendor or the client's environment sets the location,
+  // and the page's delivery choice carries the remote-access sentence (go-global §4.1).
+  assert.deepEqual(naming, NAMING_A_REGION);
+});
+
+// Where Techsider runs the model in the client's chosen region, the model on offer depends on that
+// region. Inside a licensed platform (policy-procedure-assistant, ④, ⑤) the vendor runs it.
+const WE_RUN_THE_MODEL = [
+  "one-document-family", "trust-deed-register", "management-agreement-register",
+  "one-manual-one-team", "sop-work-instruction-assistant", "one-job-drafts-for-approval",
+];
+
+test("region notes: where we run the model, the note says what happens when the model isn't offered in the chosen region (go-global §4.2)", () => {
+  const notes = Object.fromEntries(IDS.flatMap((id) => launchOf(DATA[id]).map((p) => [p.id, p.onshoreNote])));
+  for (const id of WE_RUN_THE_MODEL) {
+    assert.ok(notes[id].includes(MODEL_AVAILABILITY), `${id}: no model-availability sentence`);
+  }
+  for (const [id, note] of Object.entries(notes)) assert.doesNotMatch(note, /isn't (?:offered|available) in an Australian region/, id);
+});
+
+// go-global §4.2–§4.3, D3: managed systems run in an Australian region; everything else runs in the
+// region the client chooses. These are the only phrasings a solution page may use to name an
+// Australian region.
+const MANAGED_AU_REGION = /\bor in an Australian region (?:if we manage|we manage)\b|\bor in ours in an Australian region\b/g;
+
+test("a solution page names an Australian region only for what Techsider manages, and assumes no Australian customer (go-global §4.2, D3)", () => {
+  for (const id of IDS) {
+    for (const s of strings(DATA[id])) {
+      assert.doesNotMatch(s.replace(MANAGED_AU_REGION, ""), /\bAustralian region\b/, `${id}: an Australian region outside the managed option: "${s}"`);
+      assert.doesNotMatch(s, /\boutside Australia\b|\bfor Australian customers\b/, `${id}: "${s}"`);
+    }
+  }
+});
+
+test("each 'Where is our data processed?' answer says who sets the location; ②'s also carries the remote access (go-global §4.4)", () => {
+  const answer = (id) => DATA[id].faq.find((f) => f.q === "Where is our data processed?").a;
+  assert.match(answer("knowledge-assistant"), REMOTE_ACCESS_END);
+  assert.match(answer("knowledge-assistant"), /\bMicrosoft sets where model calls are processed\b/);
+  assert.match(answer("ai-switch-on"), /\bwhere each vendor sets the processing location\b/);
 });
 
 test("per-solution switches: ④ is 'Engagements' with the independence policy; ⑤ has no program", () => {
@@ -205,6 +269,37 @@ test("the honesty lines and fixed wording the spec and rulings require are prese
   assert.match(agentic.scope, /It is not an attack\./);
   // Spec §9.5: every page says plainly that there are no clients yet.
   for (const id of IDS) assert.ok(DATA[id].faq.some((f) => /\bno clients yet\b/.test(f.a)), `${id}: no "no clients yet" answer`);
+});
+
+test("go-global §3.3 vocabulary: shared solution copy speaks to any organisation, and names an Australian instrument only as Australia's (go-global §3.3, §3.5)", () => {
+  const pkg = (id, packageId) => DATA[id].packages.find((p) => p.id === packageId);
+  const ae = DATA["ai-evaluation"];
+  assert.equal(ae.forLine, "Government agencies, regulated financial institutions, law firms and health services");
+  assert.equal(ae.needProfiles[0].body, "Your Copilot agent or vendor tool is leaving pilot, and the official accountable for AI use wants evidence before a wider rollout. The report measures its failures on your own cases.");
+  assert.equal(ae.genericPackage.forWhom, "An agency, regulated financial institution, law firm or health service with one AI system it bought, licensed or had built elsewhere, and one use case to test before relying on it.");
+  assert.ok(ae.genericPackage.outOfScope.includes("Audit opinions: the report is findings, not an assurance opinion, and not an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia)"));
+  assert.ok(ae.genericPackage.outOfScope.includes("The decision to deploy: the official accountable for AI use makes it"));
+  const report = pkg("ai-evaluation", "independent-evaluation-report");
+  assert.equal(report.forWhom, "Agencies, regulated financial institutions and law firms with one AI system to test before it scales, such as a Copilot Studio agent leaving pilot or a contact-centre summary tool.");
+  assert.ok(report.outOfScope.includes("The decision to deploy: the official accountable for AI use makes it"));
+  assert.equal(pkg("ai-evaluation", "scribe-clinical-ai-evaluation").scope, "The health form of the Independent Evaluation Report: selection against the regulator and safety guidance that applies to you (in Australia: TGA, Ahpra and ACSQHC), local validation on your own specialties, omission audits and a monitoring plan for after go-live. We evaluate these products; we never build them.");
+  assert.equal(pkg("ai-evaluation", "model-change-regression").forWhom, "Organisations that rely on vendor AI with no audit rights or notice of model changes in the contract, such as contact-centre AI at a regulated financial institution.");
+  assert.equal(
+    ae.faq.find((f) => f.q === "Will your report tell us the system is safe to deploy?").a,
+    "No. You get findings, not an assurance opinion, and it isn't an ISAE 3000 engagement (ASAE 3000 in Australia). Each finding is rated to your risk matrix and mapped to the instrument you use. The official accountable for AI use decides whether to deploy, on measured evidence rather than a demo.",
+  );
+  assert.equal(DATA["knowledge-assistant"].forLine, "Manufacturers, independent schools, non-clinical health teams and local government");
+  assert.equal(pkg("knowledge-assistant", "policy-procedure-assistant").forWhom, "Local government, independent schools, non-clinical health services and financial-services procedure teams whose staff ask questions of a policy and procedure library.");
+  // The hub matrices print this cell (orchestrator decision 2); Government's use case keeps its product name.
+  assert.equal(DATA["knowledge-assistant"].matrix.government, "Local government policy assistant");
+  assert.doesNotMatch(copyOf("knowledge-assistant"), /\bcouncils?\b/i);
+  assert.equal(pkg("document-registers", "trust-deed-register").timeline, "5–6 weeks after Week 0. The Two-Week Trial runs in a quieter window outside your peak tax season (in Australia, November to early December or April to May).");
+  assert.equal(pkg("document-registers", "compliance-certificate-register").oneLiner, "Reads compliance certificates, such as smoke-alarm and pool certificates, into one register of expiry dates. The rules for each state or jurisdiction are checked when the package is scoped.");
+  assert.equal(pkg("document-registers", "credentialing-referral-registers").oneLiner, "Reads credentialing documents from outside the national practitioner register (Ahpra in Australia), such as college fellowships and scope-of-practice letters, or referrals that arrive as PDFs or faxes, into a register a person checks. Administrative only: a person makes every credentialing or referral decision.");
+  // No Australian label stands alone in ④: APRA's and the DTA's terms are gone, and ASAE is only ever Australia's form of ISAE.
+  const copy = copyOf("ai-evaluation");
+  assert.doesNotMatch(copy, /\bAPRA-regulated\b|\baccountable official\b/i);
+  assert.doesNotMatch(copy, /\bASAE 3000\b(?![^.]*\bin Australia\))/);
 });
 
 test("voice: need-profile titles are short declaratives ending in a period, and card copy runs one or two sentences", () => {
@@ -335,4 +430,27 @@ test("research holds: no platform or delivery claim the research leaves open", (
   const kitSentences = strings(DATA["ai-switch-on"]).flatMap((s) => s.split(/(?<=[.?!])\s+/)).filter((s) => /Safe-Use Kit/.test(s) && !s.endsWith("?"));
   assert.ok(kitSentences.length >= 4, "⑤ names the kits in its job, need profile, scope and inclusions");
   for (const s of kitSentences) assert.match(s, /\bwhere (one|a Safe-Use Kit\b[^.]*?) (is|has been) published\b/i, `⑤ offers a kit outright: "${s}"`);
+});
+
+test("go-global §3.3 and contract §5 rules 4–5: a matrix cell, a Safe-Use Kit line or an entry offer that names an Australia-only item says so inline", () => {
+  assert.equal(DATA["ai-evaluation"].matrix["resources-and-energy"], "Pre-contract tests; on-request SOCI evidence (Australia)");
+  assert.equal(DATA["draft-for-approval"].matrix.accounting, "ATO Letter Sorter (Australia), on request");
+  assert.equal(DATA["document-registers"].matrix["real-estate"], "Management agreement register (Australia)");
+  const switchOn = DATA["ai-switch-on"];
+  const adminHours = switchOn.packages.find((p) => p.id === "admin-hours-audit-switch-on");
+  assert.equal(switchOn.needProfiles[1].body, "In Australia, where a Safe-Use Kit for your industry is published, Switch-On applies it as is. Your own adviser approves any consent, engagement-letter or policy wording.");
+  // Final review F23: every line that offers a kit limits it to firms in Australia, where the kits' rules apply.
+  assert.equal(switchOn.genericPackage.scope, "Week 1: an Admin Hours Audit. Weeks 2–3: configure the AI features you already own; for firms in Australia, apply the Safe-Use Kit for your industry where one is published; and train staff. Day 30: an hours-saved report.");
+  assert.equal(switchOn.genericPackage.inclusions[3], "For firms in Australia, the Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry");
+  assert.equal(adminHours.scope, "The Admin Hours Audit takes 1 week and maps where staff hours go. Switch-On takes 2–3 weeks: it configures features you already own; for firms in Australia, it applies the relevant Safe-Use Kit as published, where one has been published; and it trains staff and measures the hours saved at day 30.");
+  assert.equal(adminHours.inclusions[3], "For firms in Australia, the Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry. Otherwise, your own AI policy applies.");
+  const kitOffers = strings(switchOn).flatMap((s) => s.split(/(?<=[.?!])\s+/)).filter((s) => /Safe-Use Kit/.test(s) && !s.endsWith("?"));
+  for (const s of kitOffers) assert.match(s, /\bin Australia\b/i, `⑤ offers a kit outside Australia: "${s}"`);
+  const offers = SERVICES.entryOffers.flatMap((o) => [o.entry, o.then]);
+  for (const s of [
+    "Accounting Safe-Use Kit (Australia), then a Trial of the Trust Deed & Client Structure Register",
+    "The full register; ATO Letter Sorter (Australia, on request); Run",
+    "A Trial of the Management Agreement & Rent Roll Register (Australia); on-request property packages",
+    "SOCI AI Risk Evidence (Australia, on request)",
+  ]) assert.ok(offers.some((o) => o.startsWith(s)), `services entry offers: "${s}"`);
 });

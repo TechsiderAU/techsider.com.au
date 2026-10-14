@@ -6,6 +6,7 @@ publishDate: 2026-10-11
 type: platform-guide
 industries: [legal-and-professional, accounting]
 solutions: [ai-switch-on]
+region: au
 draft: false
 ---
 

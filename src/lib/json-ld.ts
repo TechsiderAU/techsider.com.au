@@ -11,9 +11,11 @@
 // A page's own node is identified by the page's URL and a fragment ("#service", "#article").
 // Breadcrumb and FaqList emit their own BreadcrumbList and FAQPage beside the graph.
 // No node names a person (no founder, employee, member or Person author: spec §11.3), and no Service
-// carries offers or a price (D4: CI check 11 bans pricing language). tests/json-ld.test.mjs holds the
-// builders and every built page to this.
-import { SITE } from "../data/nav.ts";
+// carries offers or a price (D4: CI check 11 bans pricing language). The Organization and every
+// Service are served "Worldwide"; the full Organization carries the headquarters (SITE.hq, no street
+// address), a sales contact point and the site language (go-global §9.2). tests/json-ld.test.mjs
+// holds the builders and every built page to this.
+import { SITE, shownProfiles } from "../data/nav.ts";
 
 /** The site's origin: Astro.site in a layout or route, a string in a test. */
 export type SiteUrl = string | URL;
@@ -52,7 +54,8 @@ export const KNOWS_ABOUT = [
   "LLM Evaluation",
 ];
 
-const AUSTRALIA = { "@type": "Country", name: "Australia" };
+/** Where Techsider works (go-global §9.2): anywhere, as schema.org text, on the Organization, its contact point and every Service. */
+const AREA_SERVED = "Worldwide";
 const homeUrl = (site: SiteUrl): string => new URL("/", site).href;
 
 export function organizationId(site: SiteUrl): string {
@@ -76,19 +79,29 @@ export function organizationRef(site: SiteUrl): IdRef {
  * registered name, "if applicable and different from the name property", and nav.ts holds the name
  * there; the owner confirmed the registered entity and its ABN (spec §12 item 5). The logo is the carbon square:
  * logo.svg's bone letters would vanish on the white Google shows a logo on.
+ * Go-global §9.2: the address is the headquarters (locality, region and country from SITE.hq, never a
+ * street address); the contact point is the sales mailbox, for anywhere, in English; sameAs is the
+ * ABN Lookup record, then each profile the owner has given a URL (shownProfiles()). No
+ * hoursAvailable, numberOfEmployees or offers.
  */
 export function organization(site: SiteUrl, full: boolean): JsonLdNode {
   const node: JsonLdNode = { "@type": "Organization", "@id": organizationId(site), name: SITE.name, url: homeUrl(site) };
   if (!full) return node;
+  const { identifier, sameAs: abnRecord = [] } = abnProperties(SITE.abn);
+  const sameAs = [...abnRecord, ...shownProfiles().map((p) => p.url)];
   return {
     ...node,
     ...(SITE.legalName === SITE.name ? {} : { legalName: SITE.legalName }),
-    ...abnProperties(SITE.abn),
+    ...(identifier ? { identifier } : {}),
+    ...(sameAs.length > 0 ? { sameAs } : {}),
     description: SITE.summary,
     email: SITE.email,
     logo: new URL("/icon-512.png", site).href,
     slogan: `${SITE.slogan} ${SITE.proofLine}`,
-    areaServed: AUSTRALIA,
+    address: { "@type": "PostalAddress", addressLocality: SITE.hq.locality, addressRegion: SITE.hq.region, addressCountry: SITE.hq.country },
+    contactPoint: { "@type": "ContactPoint", contactType: "sales", email: SITE.email, areaServed: AREA_SERVED, availableLanguage: SITE.lang },
+    areaServed: AREA_SERVED,
+    knowsLanguage: SITE.lang,
     knowsAbout: KNOWS_ABOUT,
   };
 }
@@ -118,7 +131,7 @@ export function website(site: SiteUrl): JsonLdNode {
     "@id": websiteId(site),
     name: SITE.name,
     url: homeUrl(site),
-    inLanguage: "en-AU",
+    inLanguage: SITE.lang,
     publisher: organizationRef(site),
   };
 }
@@ -138,7 +151,7 @@ export function service(site: SiteUrl, input: { path: string; key: string; name:
     description: input.description,
     url,
     provider: organizationRef(site),
-    areaServed: AUSTRALIA,
+    areaServed: AREA_SERVED,
   };
 }
 
@@ -161,7 +174,7 @@ export function blogPosting(
     image: new URL(input.image, site).href,
     datePublished: input.published.toISOString(),
     ...(input.modified ? { dateModified: input.modified.toISOString() } : {}),
-    inLanguage: "en-AU",
+    inLanguage: SITE.lang,
     url,
     mainEntityOfPage: url,
     author: organizationRef(site),

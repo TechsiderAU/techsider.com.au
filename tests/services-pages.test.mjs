@@ -15,7 +15,7 @@ import { decodeEntities, elements, elementsWith, hrefsIn } from "../scripts/ci/l
 import { NAV_GROUPS, PAGES } from "../src/data/nav.ts";
 import { POSITIONING } from "../src/data/positioning.ts";
 import { SERVICES } from "../src/data/services.ts";
-import { ONSHORE_PILLAR, PROCESSING_NOTE, SERVICES_H1 } from "../src/lib/fixed-copy.ts";
+import { DELIVERY_MODEL, ONSHORE_PILLAR, PROCESSING_NOTE, SERVICES_H1 } from "../src/lib/fixed-copy.ts";
 import { pageDescription, pageTitle } from "../src/lib/meta.ts";
 import { pageAt } from "../src/lib/pages.ts";
 import { siteContext } from "../src/lib/site.ts";
@@ -50,22 +50,31 @@ const HEADCOUNT = /\b(?:\d+\+?|one|two|three|four|five|six|seven|eight|nine|ten|
 
 // ---------- the data and its owner-held wording ----------
 
-test("positioning: the sub-promise is ruling 12's safer wording; the origin line and pillar titles are spec §3.1–§3.2's", () => {
+test("positioning: the sub-promise is go-global §3.2's wording; the origin line and pillar titles are spec §3.1–§3.2's", () => {
   assert.equal(
     POSITIONING.subPromise,
-    "We design, build and run AI solutions for Australian organisations, from 40-person practices to federal agencies. In your environment, with your data onshore by default.",
+    "We design, build and run AI solutions, from 40-person practices to government agencies. In your environment, with your data kept in the region you choose.",
   );
   assert.equal(POSITIONING.originLine, "AI pilots are easy to start and hard to ship. We build the kind that survive scrutiny.");
   assert.deepEqual(POSITIONING.pillars.map((p) => p.title), [
-    "Cited, or it refuses.", "Measured before it ships.", "Your data stays onshore.", "You own what we build.",
+    "Cited, or it refuses.", "Measured before it ships.", "Your data stays in your region.", "You own what we build.",
   ]);
   assert.deepEqual(POSITIONING.pillars.map((p) => p.midMarket), [
     "Shows the page, or says it doesn't know.",
     "Tested the way you'd check a graduate's work.",
-    // Spec §3.2: "Your data stays in Australia." waits for §12 item 1 (the enquiry mailbox's region).
-    "What we build keeps your data in Australia.",
+    // go-global §4.1: the short form states only the region; no page renders midMarket today.
+    "What we build keeps your data in the region you choose.",
     "Yours to keep, or ours to run, with the exit built in.",
   ]);
+});
+
+test("positioning: the onshore pillar is go-global §4.1's: the region as the title, and a mechanism that names where systems run and the remote access", () => {
+  const onshore = POSITIONING.pillars.find((p) => p.id === "onshore");
+  assert.equal(onshore.title, ONSHORE_PILLAR, "the package badge and the pillar title are one line");
+  assert.equal(
+    onshore.mechanism,
+    "Systems we build for you run in your own Microsoft or AWS account, in the cloud region you choose. Systems we manage for you run in an Australian region. Our team reaches them remotely from Sydney, under the data-transfer terms in your contract. Every launch package carries a region note on where processing runs, including inside software you already license.",
+  );
 });
 
 test("owner markers: one commitment marker in each data module, and the sub-promise, team, independence and kit markers on their lines", () => {
@@ -124,6 +133,33 @@ test("services data: nothing about money, billing cadence or procurement size (D
   }
 });
 
+test("services data: the entry offers and the Evaluation Partner report answer use go-global §3.3's vocabulary (go-global §3.3, §3.5)", () => {
+  assert.deepEqual(SERVICES.entryOffers.map((o) => o.buyer), [
+    "Government agency (state)",
+    "Government agency (national)",
+    "Local government",
+    "Mid-tier regulated financial institution",
+    "Accounting practice (50–300 staff, or a network)",
+    "Residential property-management group (1,000+ managements)",
+    "Mid-size law firm",
+    "Manufacturer (50–1,000 staff)",
+    "Health service or GP group",
+    "Mid-tier miner, utility or renewables developer",
+    "Independent school or group",
+    "Prime, internal-audit co-source firm, law firm or SI",
+  ]);
+  // §3.5 changes only the seasonal window, and §3.3 may label the kit's name as Australian, so this pins
+  // the name at the start and the whole rewritten tail exactly.
+  const accounting = SERVICES.entryOffers.find((o) => o.buyer.startsWith("Accounting practice")).entry;
+  assert.ok(accounting.startsWith("Accounting Safe-Use Kit"), accounting);
+  assert.ok(accounting.endsWith(", then a Trial of the Trust Deed & Client Structure Register (outside your peak tax season)"), accounting);
+  assert.equal(
+    SERVICES.evaluationPartner.faq.find((f) => f.q === "What kind of report does the client get?").a,
+    "Findings rated to the client's risk matrix, with an explicit list of failures and the evidence behind each one. It is not an assurance opinion, and not an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia).",
+  );
+  for (const s of strings(SERVICES)) assert.doesNotMatch(s, /\bAPRA-regulated\b|\bCommonwealth agency\b|\bState agency\b|\bCouncil\b|\bNov–early Dec\b/, s);
+});
+
 test("services data: the go/no-go gate is a decision you make, and every §4.5 inclusion is listed once", () => {
   for (const s of strings(SERVICES).filter((x) => /go\/no-go|go or no-go/i.test(x))) {
     assert.doesNotMatch(s, /\b(?:balance|release|refund|credit)\b/i, `the gate carries a consequence: "${s}"`);
@@ -175,7 +211,7 @@ test("services data: the independence policy states spec §4.4's five points, ad
 
 test("services data: Run is managed or supported, with the exit pack and no escrow, and the FAQ denies nothing on request (spec §4.1, §4.2, O4)", () => {
   const run = SERVICES.services.find((s) => s.id === "run");
-  assert.match(run.what, /Managed in an Australian region, cancellable on 30 days' notice with an exit pack, or supported in your own account/);
+  assert.equal(run.what, "Managed in an Australian region, cancellable on 30 days' notice with an exit pack, or supported in your own account, in the cloud region you choose. Both re-test when the AI model or a vendor API changes.");
   assert.deepEqual(SERVICES.phases.map((p) => p.id), ["prove", "build", "run"]);
   const exit = SERVICES.phases[2].deliverables.join(" ");
   assert.match(exit, /exit pack: code, data, configuration and runbook/);
@@ -184,6 +220,42 @@ test("services data: Run is managed or supported, with the exit pack and no escr
   // Workspace, or critical infrastructure), so the FAQ never denies it outright.
   const notOffered = SERVICES.faq.find((f) => f.q === "What don't you offer?");
   assert.match(notOffered.a, /standalone AI platform or model gateway is on request only, as a Private Workspace/);
+});
+
+test("services data: every launch package names its delivery choice in its region note, and no line says 'onshore note' (go-global §4.2, D5)", () => {
+  assert.ok(SERVICES.standardInclusions.includes("The delivery choice that fits the package, named in its region note."));
+  for (const s of strings(SERVICES)) assert.doesNotMatch(s, /\bonshore note\b/i, s);
+});
+
+test("services data: the delivery choices and Run lines put your own account in the region you choose and managed systems in an Australian region, with the remote access (go-global §4.2–§4.3, D3, D4)", () => {
+  assert.deepEqual(SERVICES.deliveryChoices, [
+    {
+      id: "your-account",
+      title: "In your own Microsoft or AWS account",
+      body: "Runs in your own Microsoft or AWS account, in the cloud region you choose. Our team reaches it remotely from Sydney, under the data-transfer terms in your contract.",
+    },
+    {
+      id: "managed",
+      title: "Managed for you in an Australian region",
+      body: "We run it for you in an Australian region, with an exit pack of code, data, configuration and runbook. If you're outside Australia, your data is transferred to Australia under the terms in your contract.",
+    },
+    {
+      id: "platform-you-license",
+      title: "Inside a platform you already license",
+      body: "Runs inside software you already pay for, such as Microsoft Copilot, Xero or Dext, where the vendor sets the processing location. Where we build part of it, such as a retrieval index, that part runs in your own account in the region you choose, or in ours in an Australian region. Our team reaches it remotely from Sydney.",
+    },
+  ]);
+  // Spec §4.3: the shared body names no Australia-only product; PropertyMe and Karbon stay in the
+  // Australian industry content.
+  assert.doesNotMatch(SERVICES.deliveryChoices.map((c) => c.body).join(" "), /\bPropertyMe\b|\bKarbon\b/);
+  const run = SERVICES.phases.find((p) => p.id === "run");
+  assert.equal(run.summary, "Keep the system running: managed by us in an Australian region, or supported in your own account, in the cloud region you choose.");
+  assert.equal(run.deliverables[1], "Maintenance, whether we manage the system in an Australian region or support it in your own account, in the cloud region you choose");
+  assert.deepEqual(SERVICES.routes.midMarket.steps.find((s) => s.name === "Run"), {
+    name: "Run",
+    body: "Managed in an Australian region, or supported in your own account in the region you choose, with the exit built in.",
+  });
+  assert.equal(SERVICES.onshoreNote[2], "What happens when the newest model isn't available in your chosen region.");
 });
 
 // ---------- the two routes ----------
@@ -199,7 +271,7 @@ test("both pages are live, and both builds render them with their own title and 
       assert.doesNotMatch(head, /name="robots"/, `${name} ${path}: the page is noindex`);
     }
   }
-  assert.equal(pageTitle(pageAt(SERVICES_PATH)), "AI Consulting Services in Australia | Techsider");
+  assert.equal(pageTitle(pageAt(SERVICES_PATH)), "AI Consulting Services | Techsider");
   assert.equal(pageTitle(pageAt(PARTNER_PATH)), "AI Evaluation Partner for Primes and Advisers | Techsider");
 });
 
@@ -303,3 +375,21 @@ for (const { name, read, site } of BUILDS) {
     }
   });
 }
+
+test("/services/: where it runs heads the shared list \"The region note\" in both builds (go-global §4.2, D5)", () => {
+  for (const { name, read } of BUILDS) {
+    const where = byId(mainOf(read(fileOf(SERVICES_PATH))), "where-it-runs");
+    const heads = elements(where.inner, (t) => t.name === "h3").map((h) => text(h.inner));
+    assert.ok(heads.includes("The region note") && !heads.includes("The onshore note"), `${name}: ${heads.join(" | ")}`);
+  }
+});
+
+test("/services/: where it runs opens with the delivery model, outside the disclosure, in both builds (go-global D6, §4.5)", () => {
+  for (const { name, read } of BUILDS) {
+    const where = byId(mainOf(read(fileOf(SERVICES_PATH))), "where-it-runs");
+    const ledes = elements(where.inner, (t) => (t.attrs.class ?? "").split(/\s+/).includes("section-lede"));
+    assert.deepEqual(ledes.map((p) => text(p.inner)), [DELIVERY_MODEL], name);
+    const [details] = elements(where.inner, (t) => t.name === "details");
+    assert.ok(!text(details.inner).includes(DELIVERY_MODEL), `${name}: the delivery model sits inside the disclosure`);
+  }
+});

@@ -4,7 +4,12 @@
 // without its src/content/industries/<id>.yaml fails the build, as check 01 does; a planned one
 // shown only in a preview build is skipped until its task writes it. The page is built exactly as
 // the gallery's industry specimens build theirs (src/preview/specimens/industry-view.ts), from the
-// real collections: the industry, its regulatory rows, every solution and trace, and the insight cards.
+// real collections: the industry, its regulatory rows, its "Rules that travel" anchors
+// (src/data/anchors/shared.json and <id>.json), every solution and trace, and the insight cards.
+// The anchors come from getCollection, never getEntry, which warns on a missing id and so fails the
+// pristine build. getCollection warns too when the collection is empty, so shared.json is always
+// there. A missing src/data/anchors/<id>.json or shared.json fails the build, as a missing
+// regulatory file does.
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 import { getCollection, getEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
@@ -34,12 +39,19 @@ const path = `/industries/${entry.id}/`;
 const site = siteContext(isPreview());
 const regulatory = await getEntry("regulatory", entry.id);
 if (!regulatory) throw new Error(`${path}: src/data/regulatory/${entry.id}.json does not exist`);
+const anchorFiles = new Map((await getCollection("anchors")).map((e) => [e.id, e.data]));
+const sharedAnchors = anchorFiles.get("shared");
+if (!sharedAnchors) throw new Error(`${path}: src/data/anchors/shared.json does not exist`);
+const anchors = anchorFiles.get(entry.id);
+if (!anchors) throw new Error(`${path}: src/data/anchors/${entry.id}.json does not exist`);
 const solutions = Object.fromEntries((await getCollection("solutions")).map((s) => [s.id, s.data]));
 const traces = Object.fromEntries((await getCollection("traces")).map((t) => [t.id, t.data]));
 const view = industryView({
   id: entry.id,
   data: entry.data,
   rows: regulatory.data.rows,
+  sharedAnchors,
+  anchors,
   solutions,
   traces,
   insights: insightCards(await getCollection("insights"), site),

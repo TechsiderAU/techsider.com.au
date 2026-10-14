@@ -113,7 +113,8 @@ export function startTags(html) {
 
 /**
  * Every element whose start tag passes `predicate(tag)`, as
- * { name, attrs, outer, inner } (nested elements of the same name are balanced).
+ * { name, attrs, outer, inner, start, end } (nested elements of the same name are balanced).
+ * `start` and `end` are the offsets of `outer` in `html`, so `outer === html.slice(start, end)`.
  */
 export function elements(html, predicate) {
   const masked = mask(html);
@@ -136,7 +137,14 @@ export function elements(html, predicate) {
         }
       }
     }
-    out.push({ name: tag.name, attrs: tag.attrs, outer: html.slice(tag.start, close), inner: html.slice(tag.end, innerEnd) });
+    out.push({
+      name: tag.name,
+      attrs: tag.attrs,
+      outer: html.slice(tag.start, close),
+      inner: html.slice(tag.end, innerEnd),
+      start: tag.start,
+      end: close,
+    });
   }
   return out;
 }

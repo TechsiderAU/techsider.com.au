@@ -110,7 +110,7 @@ export const SITE = {
    * engines and AI assistants describe an organisation from statements that agree across sources.
    */
   summary:
-    "Techsider is an Australian AI automation company. It designs, builds and supports AI workflow automation, document processing and internal knowledge assistants that keep people in control, and independently evaluates AI bought or built elsewhere.",
+    "Techsider is an AI automation company headquartered in Sydney, Australia. It designs, builds and supports AI workflow automation, document processing and internal knowledge assistants that keep people in control, for organisations in Australia and internationally, and independently evaluates AI bought or built elsewhere.",
   slogan: "AI that ships.",
   proofLine: "Measured before it ships.",
   /**
@@ -119,6 +119,12 @@ export const SITE = {
    */
   // The owner confirmed one shared mailbox for security, privacy and media enquiries.
   securityContact: "admin@techsider.com.au" as string | null,
+  /** Where Techsider is headquartered (go-global §9.1): the [data-hq] line and the Organization's address. No street address. */
+  hq: { locality: "Sydney", region: "NSW", country: "AU" } as const,
+  /** The site language: <html lang>, JSON-LD inLanguage/knowsLanguage, the RSS <language> (go-global §3.4). */
+  lang: "en" as const,
+  /** Directory and social profiles (go-global §9.1, O7); owner-gated: only entries with a non-empty url render. */
+  profiles: [] as { name: string; url: string }[],
 };
 
 export function slugify(name: string): string {
@@ -128,6 +134,32 @@ export function slugify(name: string): string {
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/[\s-]+/g, "-");
+}
+
+/**
+ * Where Techsider is headquartered, in words: "Sydney, Australia" (go-global §3.2). The country's
+ * English name comes from Intl.DisplayNames, from SITE.hq.country, so the code is written once.
+ */
+export function hqPlace(site: typeof SITE = SITE): string {
+  const country = new Intl.DisplayNames("en", { type: "region" }).of(site.hq.country) ?? site.hq.country;
+  return `${site.hq.locality}, ${country}`;
+}
+
+/**
+ * The headquarters line (go-global §3.2): "Headquartered in Sydney, Australia · Techsider Pty Ltd ·
+ * ABN 12 636 205 868", the ABN part only while SITE.abn is set. The footer and About print it in a
+ * [data-hq] element and /llms.txt repeats it, so all three say it in the same words.
+ */
+export function hqLine(site: typeof SITE = SITE): string {
+  return [`Headquartered in ${hqPlace(site)}`, site.legalName, ...(site.abn ? [`ABN ${site.abn}`] : [])].join(" · ");
+}
+
+/**
+ * The directory and social profiles that render (go-global §9.1, O7): SITE.profiles entries with a
+ * URL, in order. The Organization's sameAs and /llms.txt's Profiles list read this, never the raw list.
+ */
+export function shownProfiles(site: typeof SITE = SITE): { name: string; url: string }[] {
+  return site.profiles.filter((p) => p.url.trim() !== "");
 }
 
 function page(group: Group, shortName: string, base: string, path: string, status: Status, fullName?: string, oneLiner?: string): PageEntry {
@@ -144,52 +176,52 @@ function describe(entry: PageEntry, description: string): PageEntry {
 
 // The business homepage leads with AI automation, connected systems and human control.
 const HOME = describe(page("home", "Home", "/", "/", "live", "Techsider"),
-  "AI automation for Australian organisations. We design, build and support workflows that connect your systems, process documents and keep people in control.");
+  "AI automation for organisations in nine industries. We design, build and support workflows that connect systems, process documents and keep people in control.");
 // Always built: GitHub Pages serves dist/404.html for any path it has no file for.
 const NOT_FOUND = describe(page("system", "Not found", "/", "/404", "live"),
   "No page lives at this address. It may be mistyped or out of date. Follow a link below to a section of the Techsider site, or report the broken link by email.");
 
 const SOLUTIONS_HUB = describe(page("solutions", "Solutions", "/", "/solutions/", "live"),
-  "Five AI solutions for Australian organisations: document registers, cited assistants, draft-for-approval automation, independent evaluation and AI switch-on.");
+  "Five AI solutions for organisations of any size: document registers, cited assistants, draft-for-approval automation, independent evaluation and AI switch-on.");
 const SOLUTIONS = [
   describe(page("solutions", "Document Registers", "/solutions/", "/solutions/document-registers/", "live", "AI Document Processing",
     "Turn documents into structured registers, with sources your team can check."),
-    "AI document processing for Australian teams. Extract deeds, agreements and other documents into a register, with source links and exceptions for human review."),
+    "AI document processing for your teams. Extract deeds, agreements and other documents into a register, with source links and exceptions for human review."),
   describe(page("solutions", "Knowledge Assistant", "/solutions/", "/solutions/knowledge-assistant/", "live", "Internal AI Knowledge Assistant",
     "Answers from company documents, with citations and staff access controls."),
     "An internal AI knowledge assistant for company documents. Help staff find answers in manuals and policies, with citations, permissions and checks before use."),
   describe(page("solutions", "Draft-for-Approval", "/solutions/", "/solutions/draft-for-approval/", "live", "AI Workflow Automation",
     "Connect a repeated task across your systems, with people approving the result."),
-    "AI workflow automation for Australian businesses. Connect repeated tasks across systems, prepare drafts and route exceptions, with people approving actions."),
+    "AI workflow automation for your business. Connect repeated tasks across systems, prepare drafts and route exceptions, with people approving each action."),
   describe(page("solutions", "AI Evaluation", "/solutions/", "/solutions/ai-evaluation/", "live", "Independent AI Evaluation",
     "Independent tests of AI you bought or had built elsewhere."),
     "Independent tests of AI you bought or had built elsewhere, on your own questions in your own environment, with every failure listed and a kit you can re-run."),
   describe(page("solutions", "AI Switch-On", "/solutions/", "/solutions/ai-switch-on/", "live", "AI Implementation & Adoption",
     "Put the AI in your existing software to work, with clear rules and training."),
-    "AI implementation and adoption for Australian businesses. Assess tools you already license, configure suitable features, train staff and measure the change."),
+    "AI implementation and adoption for your organisation. Assess tools you already license, configure suitable features, train staff and measure the change."),
 ];
 
 const INDUSTRIES_HUB = describe(page("industries", "Industries", "/", "/industries/", "live"),
   "Nine industry pages built on the same five solutions: the rules each industry works under, the systems it already runs, and where a first engagement starts.");
 const INDUSTRIES = [
   describe(page("industries", "Government", "/industries/", "/industries/government/", "live", "Government & public sector"),
-    "Independent evaluation of AI in government: measured tests on your own questions, with findings mapped to the DTA AI policy, NSW AIAF or Queensland's FAIRA."),
+    "Independent evaluation of AI in government: measured tests on your own questions, with each finding mapped to the AI policy and frameworks your agency follows."),
   describe(page("industries", "Financial services", "/industries/", "/industries/financial-services/", "live"),
-    "Independent validation of vendor AI for APRA-regulated entities and ASIC licensees: your own test set, re-run when the model may change, every failure listed."),
+    "Independent validation of vendor AI for regulated financial institutions: your own test set, re-run when the model may change, every failure listed for review."),
   describe(page("industries", "Accounting", "/industries/", "/industries/accounting/", "live"),
-    "AI automation for Australian accounting firms. Review documents, organise trust deed registers and assess existing software, with people checking results."),
+    "AI automation for accounting firms. Review documents, organise trust deed registers and assess your existing software, with people checking the results."),
   describe(page("industries", "Education", "/industries/", "/industries/education/", "live"),
-    "AI for Australian schools and universities: a staff policy assistant that cites its source, and independent evaluation of the AI tools you've already deployed."),
+    "AI for schools and universities: a staff policy assistant that cites its source, and an independent evaluation of the AI tools you've already deployed."),
   describe(page("industries", "Manufacturing", "/industries/", "/industries/manufacturing/", "live"),
-    "AI for Australian manufacturers: SOP answers in your crews' languages that cite the page, each language tested first, designed around WHS, FSANZ and TGA GMP."),
+    "AI for manufacturers: SOP answers in your crews' languages, citing the page, each language tested first, designed around workplace safety, food and GMP rules."),
   describe(page("industries", "Real estate", "/industries/", "/industries/real-estate/", "live", "Real estate & property"),
-    "AI for Australian property managers: a management agreement register where every field links to its page, read-only on your trust ledger, platform AI first."),
+    "AI for property managers: a management agreement register where every field links to its page, read-only on your trust ledger, with platform AI tried first."),
   describe(page("industries", "Healthcare", "/industries/", "/industries/healthcare/", "live", "Healthcare & life sciences"),
-    "Test AI scribes on your own scripted consultations before rollout and after each vendor update, counting omissions and additions. For Australian healthcare."),
+    "Test AI scribes on your own scripted consultations before rollout and after each vendor update, counting omissions and additions. For health services."),
   describe(page("industries", "Resources & energy", "/industries/", "/industries/resources-and-energy/", "live", "Resources, energy & utilities"),
-    "Turn approval conditions into a register you can check, answer crews from current procedures, and map AI use to SOCI rules. For Australian resources and energy."),
+    "Turn approval conditions into a register you can check, answer crews from current procedures, and map AI use to critical-infrastructure rules in your sector."),
   describe(page("industries", "Legal & professional", "/industries/", "/industries/legal-and-professional/", "live", "Legal & professional services"),
-    "AI for Australian legal and professional services. Evaluate vendor tools, organise internal knowledge and assess existing software, with clear review controls."),
+    "AI for law firms and professional services. Evaluate vendor tools, organise internal knowledge and assess existing software, with clear review controls."),
 ];
 
 const SERVICES_HUB = describe(page("services", "Services", "/", "/services/", "live", "Services",
@@ -200,9 +232,9 @@ const EVALUATION_PARTNER = describe(page("services", "Evaluation Partner", "/ser
   "Independent AI evaluation under your contract, for primes, internal-audit co-source firms, law firms and SIs, with findings rated to your client's risk matrix.");
 
 const RESOURCES_HUB = describe(page("resources", "Resources", "/", "/resources/", "live"),
-  "Free resources from Techsider for Australian teams putting AI to work in regulated industries: field notes on retrieval, evaluation and where models run.");
+  "Free resources from Techsider for teams putting AI to work in regulated industries: demos, tools and field notes on retrieval, evaluation and model hosting.");
 const INSIGHTS = describe(page("resources", "Insights", "/", "/insights/", "live", "Insights", "Field notes on shipping AI in regulated work."),
-  "Field notes on shipping AI in regulated Australian work: retrieval that cites its sources, evaluation before launch, and choosing where models are hosted.");
+  "Field notes and guides on shipping AI in regulated work: retrieval that cites its sources, evaluation before launch, and choosing where models are hosted.");
 // WB-4 (controller ruling 7): ①–③ are replays, ④ is a sample report and ⑤ the one client-side tool.
 const DEMOS = describe(page("demos", "Demos", "/", "/demos/", "live", "Demos", "Three replays, a sample report and a client-side tool. No live model."),
   "Canned replays on synthetic or public documents, an illustrative sample evaluation report, and a checker for the AI inside software you already pay for.");
@@ -229,7 +261,7 @@ const CONTACT = describe(page("contact", "Contact", "/", "/contact/", "live"),
   "Tell Techsider what you're trying to fix with AI. Send an enquiry or email us to discuss your workflow, a Fit Call and next steps for your organisation.");
 
 const PRIVACY = describe(page("legal", "Privacy", "/legal/", "/legal/privacy/", "planned", "Privacy policy"),
-  "How Techsider collects, uses, stores and discloses the personal information you send us, which services handle it, and how to ask about it or have it corrected.");
+  "How Techsider collects, uses, stores and discloses personal information, which privacy laws apply, which services handle it, and how to use your privacy rights.");
 const WEBSITE_TERMS = describe(page("legal", "Website terms", "/legal/", "/legal/website-terms/", "planned"),
   "The terms for using techsider.com.au: general information, not advice; what the canned demos are; who owns the content; and how links to other sites work.");
 // A gated route (spec §10.2): the form provider redirects here, so the page goes live in the same

@@ -22,16 +22,18 @@ import { EXCEPTIONS_FILE, SOURCE_FILE, WARN_PHRASES, scan } from "../scripts/ci/
 import { SCOPES as VERIFY_SCOPES } from "../scripts/ci/checks/07-verify-markers.mjs";
 import { documentSchema } from "../src/content/page-schemas.ts";
 import { makeKitSchema, plainRef } from "../src/content/schemas.ts";
-import { PAGES, SITE } from "../src/data/nav.ts";
+import { PAGES, SITE, hqLine } from "../src/data/nav.ts";
 import { ABOUT } from "../src/data/about.ts";
-import { CONTACT } from "../src/data/contact.ts";
+import { CONTACT, INTERNATIONAL } from "../src/data/contact.ts";
 import { POSITIONING } from "../src/data/positioning.ts";
 import { SERVICES } from "../src/data/services.ts";
 import { TRUST } from "../src/data/trust.ts";
-import { CONTACT_H1 } from "../src/lib/fixed-copy.ts";
+import { ENQUIRY_FIELDS, OPTIONAL_ENQUIRY_FIELDS } from "../src/lib/contact-form.ts";
+import { ABN_NOTE, CONTACT_BASE, CONTACT_H1, DELIVERY_MODEL, DISAMBIGUATION, INTERNATIONAL_HEADING } from "../src/lib/fixed-copy.ts";
 import { pageDescription, pageTitle } from "../src/lib/meta.ts";
+import { replySentence } from "../src/lib/reply-time.ts";
 import { siteContext } from "../src/lib/site.ts";
-import { trustView } from "../src/lib/views/company.ts";
+import { internationalLines, trustView } from "../src/lib/views/company.ts";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const DIST = join(ROOT, "dist");
@@ -146,6 +148,20 @@ test("About: the principles are the four pillars word for word, then vendor neut
   assert.doesNotMatch(team.body, /\d/, "the team line carries a number");
 });
 
+test("About: the entity sentence and who we serve are go-global's, word for word, and the range marker quotes the new range (go-global §3.1, §3.2)", () => {
+  assert.equal(
+    SITE.summary,
+    "Techsider is an AI automation company headquartered in Sydney, Australia. It designs, builds and supports AI workflow automation, document processing and internal knowledge assistants that keep people in control, for organisations in Australia and internationally, and independently evaluates AI bought or built elsewhere.",
+  );
+  assert.equal(
+    ABOUT.whoWeServe,
+    "Built for organisations in nine industries, from 40-person practices to government agencies: mid-market firms with no AI team of their own, and enterprise and government teams that need independent evidence about the AI they run.",
+  );
+  const lines = source("src/data/about.ts").split("\n").map((l) => l.trim());
+  const marker = lines.indexOf('// ⚑ owner: confirm the "40-person practices to government agencies" range reads as who the offer is for, not as clients (spec §1 criterion 6, §12 item 12)');
+  assert.ok(marker >= 0 && lines[marker + 1] === "whoWeServe:", "the range marker doesn't quote the new range on the line above whoWeServe");
+});
+
 test("About: the build log holds real, dated events from this repository's history only", () => {
   const shallow = execFileSync("git", ["rev-parse", "--is-shallow-repository"], { cwd: ROOT, encoding: "utf8" }).trim();
   assert.equal(shallow, "false", "a shallow clone can't evidence the build log: check out with fetch-depth: 0");
@@ -177,7 +193,7 @@ test("Trust: no Part B term is confirmed, so only Part A answers show; SOC 2 is 
   assert.deepEqual(terms, []);
   assert.ok(faq.length >= 5, `${faq.length} answers show; spec §8.11 needs a questionnaire`);
   assert.ok(faq.every((f) => f.part === "A"));
-  const soc = TRUST.faq.find((f) => f.q === "Do you hold SOC 2 or ISO 27001?");
+  const soc = TRUST.faq.find((f) => f.q === "Do you hold SOC 2, ISO 27001 or ISO/IEC 42001?");
   assert.ok(soc, "no SOC 2 question");
   assert.ok(soc.a.startsWith("No. "), "the SOC 2 answer doesn't open with a plain No");
   assert.equal(soc.part, "A");
@@ -203,14 +219,104 @@ test("kits: accounting, legal and property, each pending lawyer review, its down
   assert.doesNotMatch(withoutComments(source("src/content/kits/property.yaml")), /Connector|PropertyMe/, "no connector until index A3 is answered (blueprint ruling 9)");
 });
 
-test("documents: the privacy policy and website terms are drafts naming the entity for review; the evaluation method is published", () => {
+// go-global §7.1: the privacy policy is rewritten for readers inside and outside Australia and stays a
+// draft until a lawyer reviews it (O2). These pins hold its structure, the line each of r3's gaps
+// P1–P15 rests on and every owner marker, so the lawyer's text lands as a reviewed change here.
+const PRIVACY_REVIEW_MARKER = "<!-- ⚑ owner: a lawyer reviews this policy before it publishes and settles every marker below (go-global §7.1, O2). -->";
+const PRIVACY_MARKERS = [
+  PRIVACY_REVIEW_MARKER,
+  "<!-- ⚑ owner: add the registered office address to the paragraph above, or confirm with the lawyer that the email address is enough contact detail for a controller (go-global §7.1 P1). -->",
+  "<!-- ⚑ owner: if an EU or UK representative is appointed, add their name and contact details here (go-global §7.1 P7, O1). -->",
+  "<!-- ⚑ owner: confirm with the lawyer whether Techsider is an APP entity or opts in under s 6EA of the Privacy Act, then keep or reword the next sentence and the OAIC route under Complaints (go-global §7.1 P13, O3). -->",
+  "<!-- ⚑ owner: before any outreach starts, take the O1 advice on e-marketing law and confirm the sources, the first-message notice and the do-not-contact list below (go-global §7.1 P9, O1). -->",
+  "<!-- ⚑ owner: the lawyer chooses one lawful basis for each purpose below from the alternatives given, and deletes the others (go-global §7.1 P3, O2). -->",
+  "<!-- ⚑ owner: add how long GitHub and Cloudflare keep request logs, from their own documentation, or say they don't publish it (go-global §7.1 P12). -->",
+  "<!-- ⚑ owner: confirm each provider's storage country with the provider, not from DNS, in src/data/contact.ts and here, and add the transfer safeguard each one relies on (go-global §7.1 P6, O4). -->",
+  "<!-- ⚑ owner: set the retention period for enquiries and outreach records, for example a number of months after our last contact, and put it in the first sentence below (go-global §7.1 P8, O2). -->",
+  "<!-- ⚑ owner: add the measures that protect our mailbox and devices, such as multi-factor sign-in, or link the Trust page once it is live (go-global §7.1 P15). -->",
+];
+// The APP order (what we collect, how, why, who else, outside Australia, how long, access, complaints)
+// with the GDPR and UK GDPR sections set in.
+const PRIVACY_HEADINGS = [
+  "Who we are", "Which laws apply", "Personal information in client work", "What we collect", "How we collect it",
+  "People we contact first", "Why we use it, and on what basis", "What you need to give us", "Who else handles it",
+  "Disclosure outside Australia", "How long we keep it", "Security", "Access, correction and your other rights",
+  "Complaints", "Changes to this policy",
+];
+// [gap, a line the draft must hold word for word]; P7 and P13 are held by their markers.
+const PRIVACY_LINES = [
+  ["P1", `${SITE.legalName} (ABN ${SITE.abn}) is responsible for the personal information this policy covers.`],
+  ["P1", 'Where the GDPR or the UK GDPR applies, we are its "controller".'],
+  ["P2", "The Privacy Act 1988 (Cth) and its Australian Privacy Principles (APPs) govern how we handle personal information."],
+  ["P2", "If you're in the European Union or the United Kingdom, the GDPR or the UK GDPR may also apply to how we handle your personal information."],
+  ["P3", "- **Reading your enquiry.** Basis: steps you ask us to take before a possible contract, or our legitimate interest in answering business enquiries."],
+  ["P3", "Basis: our legitimate interest in telling organisations about our services, or your consent, where the e-marketing law that applies to you requires it."],
+  ["P3", "Ticking the box on the enquiry form records that you agree to how we handle your enquiry. It isn't consent to receive marketing from us."],
+  ["P4", "- ask us to restrict how we use your personal information;"],
+  ["P4", "- object to how we use it, including, at any time, to its use for direct marketing, which we then stop;"],
+  ["P4", "- ask for a copy of the information you gave us in a common electronic format, or ask us to send it to another organisation;"],
+  ["P4", "- withdraw any consent you gave, at any time, without affecting what we did before you withdrew it."],
+  ["P4", "We respond to each request within one month."],
+  ["P5", `please email ${SITE.email} first, so we can try to put it right. You can also complain to a regulator:`],
+  ["P5", "- **In Australia:** the Office of the Australian Information Commissioner, at [oaic.gov.au](https://www.oaic.gov.au/)."],
+  ["P5", "- **In the European Union:** the data protection supervisory authority in the EU country where you live or work, or where you think the problem happened."],
+  ["P5", "- **In the United Kingdom:** the Information Commissioner's Office, at [ico.org.uk](https://ico.org.uk/)."],
+  ["P6", 'These providers may store or access personal information outside Australia, so they may be what the APPs call "overseas recipients".'],
+  ["P6", `You can ask for a copy of the safeguard we rely on by emailing ${SITE.email}.`],
+  ["P8", "We keep an enquiry, our replies and any outreach messages while we're in touch with you, and delete them once we no longer need them to deal with you."],
+  ["P9", "Sometimes we contact people first, to tell their organisation about our services."],
+  ["P9", "- **Telling you:** our first message says who we are, why we're contacting you and where we found your details, and links to this policy."],
+  ["P9", `- **Opting out:** reply to say you'd rather not hear from us, or email ${SITE.email}, and we stop.`],
+  ["P10", "When we handle personal information for a client during an engagement, the client's own privacy notice and our contract with the client, including any data processing agreement, govern it. This policy doesn't."],
+  ["P11", "The enquiry form needs your name, email address, organisation, country, industry, organisation size, interest, message and agreement, so that we can reply to you."],
+  ["P11", "We don't make decisions about you by automated means alone."],
+  ["P12", "receive your IP address and the details of each request, such as the page asked for and your browser's type, so they can deliver the site and protect it from attack."],
+  ["P12", "- **Delivering this website and protecting it from attack, through the hosting logs described above.** Basis: our legitimate interest in running a secure website."],
+  ["P15", "This website is a set of static files with no database and no accounts, so the site itself stores no personal information."],
+  ["§8.1", "the enquiry form also sends your browser's time zone, so our reply suits your working hours."],
+];
+// go-global §8.1: how "What we collect" names each field the enquiry form posts.
+const FORM_FIELD_WORDS = {
+  name: "your name", email: "your email address", organisation: "your organisation", country: "your country",
+  industry: "your industry", size: "your organisation's size", interest: "what you'd like to talk about",
+  message: "whatever you write", consent: "your agreement to how we handle the enquiry",
+  discovery: "how you found us", timezone: "your browser's time zone",
+};
+// The preview /legal/privacy/ page's meta description (nav.ts), rewritten with the policy so the two agree.
+const PRIVACY_DESCRIPTION = "How Techsider collects, uses, stores and discloses personal information, which privacy laws apply, which services handle it, and how to use your privacy rights.";
+
+test("documents: the privacy policy and website terms are drafts held for a lawyer's review; the evaluation method is published", () => {
   for (const [id, draft] of [["privacy", true], ["website-terms", true], ["evaluation-method", false]]) {
     const data = documentSchema.parse(readFrontmatter(join(ROOT, `src/content/documents/${id}.md`)));
     assert.equal(data.draft, draft, id);
   }
-  for (const id of ["privacy", "website-terms"]) {
-    assert.match(source(`src/content/documents/${id}.md`), /<!-- ⚑ owner: [^>]*TECHSIDER PTY LTD, whose ABN is still to be confirmed \(spec §12 item 5\)\. -->/, id);
-  }
+  // go-global §7.4: the website terms don't change in this release; their governing-law and
+  // business-users points wait in the local lawyer brief, so their entity marker stays as it was.
+  assert.match(source("src/content/documents/website-terms.md"), /<!-- ⚑ owner: [^>]*TECHSIDER PTY LTD, whose ABN is still to be confirmed \(spec §12 item 5\)\. -->/, "website-terms");
+  // The privacy draft names the entity and its ABN itself (P1), so its review marker no longer waits on the ABN.
+  const privacy = source("src/content/documents/privacy.md");
+  assert.ok(privacy.includes(PRIVACY_REVIEW_MARKER), "privacy: the lawyer-review marker is missing");
+  assert.doesNotMatch(privacy, /ABN is still to be confirmed/, "privacy: SITE.abn is confirmed, so no marker may still wait for it");
+});
+
+test("documents: the privacy draft covers go-global §7.1 P1–P15 in the APP order, with an owner marker on each open point", () => {
+  const md = source("src/content/documents/privacy.md");
+  const body = bodyOf(md);
+  assert.deepEqual([...body.matchAll(/^## (.+)$/gm)].map((m) => m[1]), PRIVACY_HEADINGS);
+  for (const [gap, line] of PRIVACY_LINES) assert.ok(body.includes(line), `${gap}: the draft lacks "${line}"`);
+  // Every marker in the file, in order: the review marker, then one per open point (P1, P7, P13, P9, P3, P12, P6, P8, P15).
+  assert.deepEqual(md.split("\n").filter((line) => line.includes("⚑")), PRIVACY_MARKERS);
+  // P14: "outside Australia" in our own words; "overseas" only inside the APPs' own quoted term.
+  assert.equal(md.split('"overseas recipients"').length - 1, 1, 'the APP term "overseas recipients" is quoted once');
+  assert.doesNotMatch(md.replace('"overseas recipients"', ""), /\boverseas\b/i, "P14: say \"outside Australia\" in our own words");
+  // P6: each provider's country reads as the Trust page's table does, so the two can't disagree.
+  for (const s of CONTACT.subProcessors) assert.ok(body.includes(`- **${s.entity}:** ${s.country}.`), `P6: ${s.entity}'s country isn't "${s.country}"`);
+  // go-global §8.1: "What we collect" names every field the enquiry form posts, Country and time zone included.
+  assert.deepEqual(Object.keys(FORM_FIELD_WORDS).sort(), [...ENQUIRY_FIELDS, ...OPTIONAL_ENQUIRY_FIELDS].sort(), "a form field has no wording in the privacy draft");
+  const collected = body.slice(body.indexOf("## What we collect"), body.indexOf("## How we collect it"));
+  for (const [field, words] of Object.entries(FORM_FIELD_WORDS)) assert.ok(collected.includes(words), `"What we collect" doesn't disclose the ${field} field ("${words}")`);
+  // The page's meta description covers what the rewritten policy covers (pageDescription also holds it to 150–160 characters).
+  assert.equal(pageDescription(entryAt("/legal/privacy/")), PRIVACY_DESCRIPTION, "nav.ts: the privacy page's description");
 });
 
 test("evaluation method: every part of the published method (spec §4.1 ④, blueprint Task 7)", () => {
@@ -230,7 +336,8 @@ test("evaluation method: every part of the published method (spec §4.1 ④, blu
   ]);
   for (const line of [
     "findings, not an assurance opinion",
-    "It is not an ASAE 3000 or ASRE engagement.",
+    "It is not an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia).",
+    "mapped to the framework you already use, such as ISO/IEC 42001, the NIST AI RMF or your own model-risk template. In Australia: the DTA's AI use case impact assessment, the NSW AI Assessment Framework or a Queensland FAIRA.",
     "Techsider never does adversarial testing in-house. Where it's needed, it's done by a CREST-accredited tester you engage.",
     "a replay script that runs in your own cloud subscription",
     "Findings are rated to your risk matrix",
@@ -303,7 +410,7 @@ test("/contact/: the enquiry form, email fallback, reply time and next steps are
   assert.equal(tagged(main, "form").length, 1);
   assert.equal(one(main, "data-contact-form").attrs.action, CONTACT.formEndpoint);
   assert.equal(text(one(main, "data-email").inner), SITE.email);
-  assert.equal(text(one(main, "data-reply-time").inner), `We reply within ${CONTACT.replyTime}.`);
+  assert.equal(inlineText(one(main, "data-reply-time").inner), replySentence(CONTACT));
   assert.deepEqual(tagged(tagged(one(main, "id", "next").inner, "ol")[0].inner, "li").map((li) => text(li.inner)), CONTACT.whatNext);
   assert.deepEqual(tagged(one(main, "id", "elsewhere").inner, "a").map((a) => a.attrs.href), CONTACT.deflection.map((d) => `mailto:${d.email}`));
 });
@@ -316,7 +423,43 @@ test("the reply time is written once and shared by the contact and confirmation 
   assert.deepEqual(writing, ["src/data/contact.ts"]);
   const stating = allHtmlFiles().filter((f) => /\bwe reply within\b/i.test(visibleText(readDist(f)))).sort();
   assert.deepEqual(stating, ["contact/index.html", "contact/sent/index.html"]);
-  for (const f of stating) assert.ok(visibleText(readDist(f)).includes(`We reply within ${CONTACT.replyTime}.`), f);
+  // go-global §4.5: both pages state the one shared sentence, once.
+  for (const f of stating) {
+    const stamps = elementsWith(readDist(f), "data-reply-time");
+    assert.equal(stamps.length, 1, `${f}: ${stamps.length} reply-time statements`);
+    assert.equal(inlineText(stamps[0].inner), replySentence(CONTACT), f);
+  }
+});
+
+test("/contact/ states the reply time once, in the hero after the delivery line, with its Sydney time base (go-global §3.2, §4.5, R6, S4)", () => {
+  const html = readDist("contact/index.html");
+  const sentence = replySentence(CONTACT);
+  assert.equal(sentence, "We reply within two business days, Sydney time (AEST/AEDT).");
+  assert.equal(CONTACT_BASE, "Based in Sydney, delivered remotely.");
+  assert.equal(elementsWith(html, "data-reply-time").length, 1, "/contact/ has more than one reply-time statement");
+  const hero = one(mainOf(html), "data-page-hero");
+  assert.deepEqual(elements(hero.inner, (t) => t.attrs.class === "page-hero-sub").map((p) => inlineText(p.inner)), [
+    "Based in Sydney, delivered remotely. We reply within two business days, Sydney time (AEST/AEDT).",
+  ]);
+  assert.equal(inlineText(one(hero.inner, "data-reply-time").inner), sentence);
+  const visible = visibleText(html);
+  const times = (s) => visible.split(s).length - 1;
+  assert.deepEqual([times("We reply within"), times("Sydney time"), times(CONTACT.replyTime)], [1, 1, 1], "/contact/ states the reply time again elsewhere");
+  assert.doesNotMatch(text(one(mainOf(html), "id", "next").inner), /\bwe reply\b|\bbusiness days?\b/i, "#next still states the reply time");
+});
+
+test("/contact/: For organisations outside Australia shows the entity and certifications lines; the delivery line is the hero's; no unconfirmed line and no phone number (go-global §7.3, §8.2, R1)", () => {
+  const html = readDist("contact/index.html");
+  const main = mainOf(html);
+  const block = one(main, "id", "outside-australia");
+  assert.equal(text(one(block.inner, "id", "outside-australia-heading").inner), INTERNATIONAL_HEADING);
+  const lines = elementsWith(block.inner, "data-international-line").map((l) => [l.attrs["data-international-line"], text(l.inner)]);
+  assert.deepEqual(lines.map(([id]) => id), ["entity", "certifications"]);
+  assert.deepEqual(lines, internationalLines(INTERNATIONAL, "contact").map((l) => [l.id, l.text]));
+  const visible = visibleText(html);
+  assert.ok(!visible.includes(DELIVERY_MODEL), "the delivery line repeats the hero on /contact/");
+  for (const l of INTERNATIONAL.filter((x) => !x.confirmed)) assert.ok(!visible.includes(l.text), `the unconfirmed ${l.id} line renders`);
+  assert.deepEqual(tagged(main, "a").filter((a) => (a.attrs.href ?? "").startsWith("tel:")), [], "/contact/ lists a phone number");
 });
 
 test("/about/: the mission, who it's for, the origin line, the principles, how we work, the build log newest first, and a prompt to /contact/", () => {
@@ -334,9 +477,30 @@ test("/about/: the mission, who it's for, the origin line, the principles, how w
   assert.deepEqual(tagged(one(main, "id", "contact").inner, "a").map((a) => a.attrs.href), ["/contact/"]);
 });
 
+test("/about/: #who ends with the HQ block: the [data-hq] line, the ABN note linked to the ABN Lookup record, the delivery model and the disambiguation (go-global §3.2, D6, D18)", () => {
+  const main = mainOf(readDist("about/index.html"));
+  const block = one(one(main, "id", "who").inner, "data-about-hq");
+  assert.deepEqual(tagged(block.inner, "p").map((p) => inlineText(p.inner)), [
+    "Headquartered in Sydney, Australia · Techsider Pty Ltd · ABN 12 636 205 868",
+    "An ABN is an Australian Business Number; anyone can check ours on the public register at ABN Lookup.",
+    "Delivered remotely from Sydney; on-site visits by arrangement.",
+    "Techsider is not affiliated with other organisations named TechSider.",
+  ]);
+  // The rendered lines are the shared copy, not a second wording of it.
+  assert.deepEqual(tagged(block.inner, "p").map((p) => inlineText(p.inner)), [hqLine(), ABN_NOTE, DELIVERY_MODEL, DISAMBIGUATION]);
+  assert.equal(inlineText(one(block.inner, "data-hq").inner), hqLine());
+  assert.deepEqual(tagged(block.inner, "a").map((a) => [a.attrs.href, inlineText(a.inner)]), [["https://abr.business.gov.au/ABN/View?abn=12636205868", "ABN Lookup"]]);
+  assert.equal(elementsWith(main, "data-hq").length, 1, "one HQ line in <main>; the footer carries the other");
+});
+
 test("/resources/: a linked card for each resource this build shows, and no unlinked card (nothing 'coming soon')", () => {
   const main = mainOf(readDist("resources/index.html"));
   one(main, "data-template", "resources-hub");
+  // go-global §3.2: the hero speaks to any team.
+  const hero = one(main, "data-page-hero");
+  assert.deepEqual(elements(hero.inner, (t) => t.attrs.class === "page-hero-sub").map((p) => text(p.inner)), [
+    "Guides, demos and tools for teams deciding where AI fits: what the software you already pay for includes, how to test an AI system before anyone relies on it, and field notes on retrieval, evaluation and hosting.",
+  ]);
   const shown = siteContext(false).resources.filter((r) => r.href !== null);
   const cards = elementsWith(main, "data-resource");
   assert.deepEqual(cards.map((c) => c.attrs["data-resource"]), shown.map((r) => r.key));
@@ -356,6 +520,9 @@ test("preview /trust/: the three services in Part A, no Part B, only Part A answ
   assert.deepEqual(faq[0].mainEntity.map((q) => q.name), trustView(TRUST).faq.map((f) => f.q));
   assert.deepEqual(tagged(one(main, "id", "independence").inner, "li").map((li) => text(li.inner)), SERVICES.independence);
   assert.equal(elementsWith(main, "data-ai-system").length, TRUST.transparency.systems.length);
+  // go-global §7.3: the Trust page shows every confirmed line, the delivery line included.
+  const outside = one(main, "id", "outside-australia");
+  assert.deepEqual(elementsWith(outside.inner, "data-international-line").map((l) => l.attrs["data-international-line"]), ["entity", "delivery", "certifications"]);
 });
 
 test("preview /legal/: both drafts listed, each page rendering its body under Home › Legal", () => {
@@ -428,4 +595,61 @@ test("CI checks out the full history, so the build-log test can read the commits
   const ci = parseYaml(source(".github/workflows/ci.yml"));
   const checkout = ci.jobs.test.steps.find((s) => s.uses === "actions/checkout@v5");
   assert.equal(checkout.with?.["fetch-depth"], 0);
+});
+
+// go-global §4.1: About shows the onshore pillar with its mechanism, so the page that carries the
+// short region claim also carries the remote-access sentence.
+test("/about/: the onshore principle shows go-global §4.1's title and mechanism, remote access included", () => {
+  const principles = one(mainOf(readDist("about/index.html")), "id", "principles");
+  const onshore = POSITIONING.pillars.find((p) => p.id === "onshore");
+  const item = tagged(principles.inner, "li").find((li) => text(tagged(li.inner, "h3")[0].inner) === onshore.title);
+  assert.ok(item, `no principle titled "${onshore.title}"`);
+  assert.equal(text(tagged(item.inner, "p")[0].inner), onshore.mechanism);
+  assert.match(onshore.mechanism, /\bOur team reaches them remotely from Sydney, under the data-transfer terms in your contract\./);
+});
+
+// go-global §4.1–§4.4 and §7.2: the residency term and the answers that rest on it say where systems
+// run (your own account in the region you choose, or an Australian region when Techsider manages
+// it) and that the team reaches them remotely from Sydney. They stay unconfirmed, so /trust/ shows
+// none of them yet. The certification answer merges ISO/IEC 42001 into the one SOC 2 question.
+test("Trust: the residency term and its answers follow go-global §4.1–§4.4 and §7.2, remote access included, and stay unconfirmed", () => {
+  const residency = TRUST.partB.find((t) => t.id === "residency");
+  assert.equal(
+    residency.body,
+    "The systems Techsider builds for you process and store your data in the cloud region you choose, in your own Microsoft or AWS account; systems Techsider manages for you run in an Australian region. Techsider's team reaches them remotely from Sydney, under the data-transfer terms in your contract.",
+  );
+  assert.equal(residency.confirmed, false, "Trust Part B stays unconfirmed (go-global §4.4)");
+  const answer = (q) => {
+    const found = TRUST.faq.filter((f) => f.q === q);
+    assert.equal(found.length, 1, `"${q}"`);
+    return found[0];
+  };
+  const processed = answer("Where is our data processed during an engagement?");
+  assert.equal(
+    processed.a,
+    "In the cloud region you choose, for the systems Techsider builds for you in your own Microsoft or AWS account; systems Techsider manages for you run in an Australian region. Our team reaches them remotely from Sydney, under the data-transfer terms in your contract. Where the work runs inside software you already license, the vendor sets the processing location, and the data note states it with its source and date.",
+  );
+  assert.deepEqual([processed.part, processed.term], ["B", "residency"]);
+  const access = answer("Who can access our systems during an engagement?");
+  assert.equal(
+    access.a,
+    "Only the people doing the work, each with their own named access, limited to what the job needs. They reach your systems remotely from Sydney, under the data-transfer terms in your contract. Access is logged while the work runs, and it is removed when the engagement ends.",
+  );
+  assert.deepEqual([access.part, access.term], ["B", "access-logging"]);
+  const cert = answer("Do you hold SOC 2, ISO 27001 or ISO/IEC 42001?");
+  assert.equal(
+    cert.a,
+    "No. Techsider holds no ISO/IEC 27001 or ISO/IEC 42001 certification and no SOC 2 attestation report, and claims no alignment with any of them. What you can check instead is on this page: the services that handle website and email data and what each one touches, the independence policy that governs evaluation work, and how Techsider uses AI in its own work.",
+  );
+  assert.equal(cert.part, "A");
+  assert.equal(TRUST.faq.filter((f) => /\bSOC 2\b|\bISO\b/.test(f.q)).length, 1, "one certification question (go-global §7.2 merges them)");
+});
+
+// go-global §7.2, owner gate O4: the engagement table and its change notice wait for the owner's
+// first row; trust.ts holds none yet.
+test("preview /trust/: the engagement services table renders only once the owner lists a service (go-global §7.2, S6)", () => {
+  const main = mainOf(readPreviewDist("trust/index.html"));
+  const listed = TRUST.engagementSubProcessors.length > 0;
+  assert.equal(elementsWith(main, "id", "engagement-sub-processors").length, listed ? 1 : 0);
+  assert.equal(elementsWith(main, "data-change-notice").length, listed ? 1 : 0);
 });

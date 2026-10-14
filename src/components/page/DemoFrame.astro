@@ -12,15 +12,19 @@
 // vendor data".
 // The figcaption names the demo. The frame is a carbon island (bg-carbon): inside a bone section
 // it keeps carbon-surface colours and the lime focus ring.
+// `region` "au" (go-global §6.3): a demo built on Australian sources marks the figure
+// data-region="au" and shows the "Australian example" label after the badge and provenance label.
 import type { DemoData } from "../../content/schemas";
+import RegionLabel from "../ui/RegionLabel.astro";
 
 interface Props {
   title: string;
   badge: string;
   provenance: DemoData["provenance"];
+  region?: "au" | null;
 }
 
-const { title, badge, provenance } = Astro.props;
+const { title, badge, provenance, region = null } = Astro.props;
 if (!Astro.slots.has("transcript")) {
   throw new Error(`DemoFrame "${title}": fill the transcript slot. Every demo has a static no-JS transcript (spec §8.8).`);
 }
@@ -30,9 +34,10 @@ const hasEngine = Astro.slots.has("engine");
 // beside it (Phase D ledger ruling R6).
 const badgeLabels = provenance === "illustrative" && /^Illustrative\b/.test(badge);
 ---
-<figure class="demo-frame bg-carbon" data-demo-frame data-provenance={provenance}>
+<figure class="demo-frame bg-carbon" data-demo-frame data-provenance={provenance} data-region={region ?? undefined}>
   {badgeLabels ? <p class="demo-badge" data-demo-badge data-provenance-label>{badge}</p> : <p class="demo-badge" data-demo-badge>{badge}</p>}
   {provenance === "illustrative" && !badgeLabels && <p class="demo-provenance" data-provenance-label>Illustrative data</p>}
+  {region && <RegionLabel kind="example" />}
   {hasEngine && <div class="demo-engine" data-demo-engine><slot name="engine" /></div>}
   <div class="demo-transcript" data-demo-transcript><slot name="transcript" /></div>
   <figcaption class="demo-caption">{title}</figcaption>

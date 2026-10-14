@@ -7,11 +7,16 @@
 // Ids: blockId = pkg.id + idSuffix on the <section>, `${blockId}-heading` on its heading and
 // `${blockId}-onshore-note` on the onshore note. Inside a TabPanel, which owns the bare package
 // id, pass idSuffix "-block" so the ids stay unique.
-// Onshore scope rule (spec §3.2): ONSHORE_PILLAR only when pkg.onshore; otherwise PROCESSING_NOTE,
-// linking to this block's onshore note.
+// Onshore scope rule (go-global §4.2, R5): ONSHORE_PILLAR only when pkg.onshore, linking to this
+// block's region note, which names the region and the remote access; otherwise PROCESSING_NOTE,
+// linking to the same note. The note's visible label is "Region note"; its id keeps "onshore".
 // "Every package includes" lists the standard inclusions, less the test line for a package that
 // holds no test on your own examples (pkg.testInclusion false: ④'s configuration review).
+// An Australia-only package (pkg.region "au", go-global §3.3) marks its block data-region="au" and
+// opens it with the "Australia" label (RegionLabel), before the heading, which names the label
+// (`${blockId}-region-label`) in its aria-describedby.
 import Notice from "./Notice.astro";
+import RegionLabel from "../ui/RegionLabel.astro";
 import { ONSHORE_PILLAR, PACKAGED_OFFER_DISCLAIMER, PROCESSING_NOTE } from "../../lib/fixed-copy.ts";
 import { isTestInclusion, type PackageView } from "../../lib/views/offer.ts";
 
@@ -25,13 +30,15 @@ interface Props {
 const { pkg, standardInclusions, headingLevel = 3, idSuffix = "" } = Astro.props;
 const blockId = `${pkg.id}${idSuffix}`;
 const headingId = `${blockId}-heading`;
+const regionId = pkg.region ? `${blockId}-region-label` : undefined;
 const shared = pkg.testInclusion ? standardInclusions : standardInclusions.filter((line) => !isTestInclusion(line));
 ---
-<section id={blockId} class="package-block" aria-labelledby={headingId} data-package-tab data-package-status="launch" data-package-id={pkg.id}>
+<section id={blockId} class="package-block" aria-labelledby={headingId} data-package-tab data-package-status="launch" data-package-id={pkg.id} data-region={pkg.region ?? undefined}>
+  {pkg.region && <RegionLabel id={regionId} />}
   {headingLevel === 4 ? (
-    <h4 id={headingId} class="package-heading">{pkg.name}</h4>
+    <h4 id={headingId} class="package-heading" aria-describedby={regionId}>{pkg.name}</h4>
   ) : (
-    <h3 id={headingId} class="package-heading">{pkg.name}</h3>
+    <h3 id={headingId} class="package-heading" aria-describedby={regionId}>{pkg.name}</h3>
   )}
   <dl class="package-facts">
     <div class="package-fact package-fact-wide">
@@ -73,12 +80,12 @@ const shared = pkg.testInclusion ? standardInclusions : standardInclusions.filte
       </div>
     )}
     <div id={`${blockId}-onshore-note`} class="package-fact package-fact-wide" data-onshore-note>
-      <dt>Onshore note</dt>
+      <dt>Region note</dt>
       <dd>{pkg.onshoreNote}</dd>
     </div>
   </dl>
   {pkg.onshore ? (
-    <p class="package-pillar" data-onshore-pillar data-onshore="true">{ONSHORE_PILLAR}</p>
+    <p class="package-pillar" data-onshore-pillar data-onshore="true"><a href={`#${blockId}-onshore-note`}>{ONSHORE_PILLAR}</a></p>
   ) : (
     <p class="package-pillar" data-processing-note><a href={`#${blockId}-onshore-note`}>{PROCESSING_NOTE}</a></p>
   )}
@@ -99,6 +106,10 @@ const shared = pkg.testInclusion ? standardInclusions : standardInclusions.filte
     --package-line: var(--color-bone-line);
     --package-muted: var(--color-muted-dark);
     --package-accent: var(--color-acid-deep);
+  }
+  /* The block is a grid: the label keeps its own width instead of stretching across it. */
+  .package-block > :global(.region-label) {
+    justify-self: start;
   }
   .package-heading {
     margin: 0;

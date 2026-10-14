@@ -6,6 +6,7 @@ publishDate: 2026-09-29
 type: platform-guide
 industries: [real-estate]
 solutions: [ai-switch-on, document-registers]
+region: au
 draft: false
 # ⚑ owner: every commitment in this post must be in the standard engagement terms (spec §12 item 2)
 ---
@@ -52,7 +53,7 @@ Victoria and Queensland set how renter information is protected and when it must
 4. How long are outputs and logs kept, and do those periods fit the destruction dates above?
 5. Who approves before anything is sent, saved or changed?
 
-An Admin Hours Audit maps where your team's hours go first. Switch-On then configures the features you already own, and its onshore note records what each vendor publishes about where its AI runs, with the source and the date.
+An Admin Hours Audit maps where your team's hours go first. Switch-On then configures the features you already own, and its region note records what each vendor publishes about where its AI runs, with the source and the date.
 
 ## What these features don't do
 

@@ -1,9 +1,9 @@
 ---
 // /preview/templates/trust/: the Trust page from the trust, contact and services fixtures.
 // trustFixture holds one unconfirmed Part B item, which must not render, and neither must the
-// Part B answer that rests on it. Fixtures are imported statically (only src/preview/ may import
-// them).
+// Part B answer that rests on it, and internationalFixture's unconfirmed lines must not render
+// either (go-global §7.3). Fixtures are imported statically (only src/preview/ may import them).
 import TrustTemplate from "../../templates/TrustTemplate.astro";
-import { contactFixture, fixtureSite, servicesFixture, trustFixture } from "../../fixtures/index.ts";
+import { contactFixture, fixtureSite, internationalFixture, servicesFixture, trustFixture } from "../../fixtures/index.ts";
 ---
-<TrustTemplate trust={trustFixture} contact={contactFixture} services={servicesFixture} site={fixtureSite} />
+<TrustTemplate trust={trustFixture} contact={contactFixture} services={servicesFixture} international={internationalFixture} site={fixtureSite} />

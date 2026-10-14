@@ -7,6 +7,8 @@ export const TRACE_FIXTURE_ID = "fixture-trace";
 export const traceFixture: TraceData = {
   title: "Fixture trace: register extraction",
   provenance: "illustrative",
+  // go-global §6.3: the gallery's industry scenarios show the "Australian example" label.
+  region: "au",
   lines: [
     { t: "09:00:00", op: "fixture.load", detail: "Fixture document set opened" },
     { t: "09:00:01", op: "fixture.extract", detail: "Fixture fields read from agreement A" },

@@ -20,7 +20,7 @@ import { isPreview } from "../../data/nav";
 import { pageDescription, pageTitle } from "../../lib/meta";
 import { pageAt, shownIds } from "../../lib/pages";
 import { siteContext, solutionLink } from "../../lib/site";
-import { demoFor } from "../../lib/views/demos";
+import { demoFor, demoRegion } from "../../lib/views/demos";
 
 // Every shown demo page needs its demo file: demoFor() fails the build without one.
 export const getStaticPaths = (async () => {
@@ -36,7 +36,7 @@ const { demo }: Props = Astro.props;
 const page = pageAt(`/demos/${id}/`);
 const site = siteContext(isPreview());
 const solution = solutionLink(site, id);
-const meta = { title: demo.title, kind: demo.kind, provenance: demo.provenance };
+const meta = { title: demo.title, kind: demo.kind, provenance: demo.provenance, region: demoRegion(demo) };
 ---
 <BaseLayout title={pageTitle(page)} description={pageDescription(page)} canonicalPath={page.canonicalPath}>
   {demo.kind === "report" ? (

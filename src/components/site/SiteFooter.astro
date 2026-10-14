@@ -1,5 +1,5 @@
 ---
-import { footerColumns, legalLinks, resolveCta, CTAS, SITE, isPreview } from "../../data/nav";
+import { footerColumns, legalLinks, resolveCta, CTAS, SITE, hqLine, isPreview } from "../../data/nav";
 
 const preview = isPreview();
 const columns = footerColumns(preview);
@@ -41,7 +41,7 @@ const current = path.endsWith("/") ? path : `${path}/`;
     </div>
     <div class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-graphite pt-6 text-xs text-muted">
       {legal.map((l) => <a href={l.href} class="footer-link">{l.label}</a>)}
-      <span>© {year} {SITE.legalName}{SITE.abn && <Fragment> · ABN {SITE.abn}</Fragment>}</span>
+      <span>© {year} <span data-hq>{hqLine()}</span></span>
     </div>
   </div>
 </footer>

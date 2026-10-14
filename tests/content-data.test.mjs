@@ -6,11 +6,17 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { aboutData, contactData, homeData, positioningData, servicesData, trustData } from "../src/content/page-schemas.ts";
+import { aboutData, contactData, homeData, internationalData, positioningData, servicesData, trustData } from "../src/content/page-schemas.ts";
+import { CONTACT, INTERNATIONAL } from "../src/data/contact.ts";
+import { DELIVERY_MODEL } from "../src/lib/fixed-copy.ts";
+import { replySentence } from "../src/lib/reply-time.ts";
 
 const DATA_DIR = fileURLToPath(new URL("../src/data/", import.meta.url));
-/** src/data/*.ts modules that aren't page data: the page registry (names, paths, statuses, descriptions), with its own tests. */
-const NOT_PAGE_DATA = ["nav.ts"];
+/**
+ * src/data/*.ts modules that aren't page data, each with its own tests: the page registry (names,
+ * paths, statuses, descriptions) and the contact form's country codes (tests/countries.test.mjs).
+ */
+const NOT_PAGE_DATA = ["nav.ts", "countries.ts"];
 /** [file in src/data/, its export, the page-schemas.ts schema that validates it]. */
 const MODULES = [
   ["positioning.ts", "POSITIONING", positioningData],
@@ -34,3 +40,36 @@ for (const [file, name, schema] of MODULES) {
     assert.ok(parsed.success, parsed.success ? "" : `${file}: ${JSON.stringify(parsed.error.issues, null, 2)}`);
   });
 }
+
+test("contact.ts: INTERNATIONAL parses with internationalData, and only the entity, delivery and certifications lines are confirmed (go-global §7.3)", () => {
+  const parsed = internationalData.safeParse(INTERNATIONAL);
+  assert.ok(parsed.success, parsed.success ? "" : JSON.stringify(parsed.error.issues, null, 2));
+  assert.deepEqual(INTERNATIONAL.map((l) => [l.id, l.confirmed, l.gate]), [
+    ["entity", true, null], ["delivery", true, null], ["certifications", true, null],
+    ["dpa", false, "legal"], ["representative", false, "owner"],
+  ]);
+  const text = Object.fromEntries(INTERNATIONAL.map((l) => [l.id, l.text]));
+  assert.equal(text.entity, "Techsider Pty Ltd, ABN 12 636 205 868, headquartered in Sydney, Australia.");
+  assert.equal(text.delivery, DELIVERY_MODEL);
+  assert.equal(
+    text.certifications,
+    "We hold no ISO/IEC 27001 or ISO/IEC 42001 certification, no SOC 2 attestation report and no Cyber Essentials certificate.",
+  );
+  // The lawyer's draft (go-global §7.3, O2): written now, rendered only once a lawyer has reviewed it.
+  assert.equal(
+    text.dpa,
+    "We sign a data processing agreement. Our team reaches your systems from Australia, which counts as a transfer, so for personal data from the EU or UK the agreement includes the EU standard contractual clauses, or the UK IDTA or UK Addendum.",
+  );
+});
+
+test("replySentence builds the one reply-time sentence from CONTACT: the time, then its base (go-global §4.5, D7)", () => {
+  assert.equal(CONTACT.replyTimeBase, "Sydney time (AEST/AEDT)");
+  assert.equal(CONTACT.timeZone, "Australia/Sydney");
+  assert.equal(replySentence(CONTACT), "We reply within two business days, Sydney time (AEST/AEDT).");
+  // /llms.txt states it as a fact about Techsider.
+  assert.equal(replySentence(CONTACT, "Techsider"), "Techsider replies within two business days, Sydney time (AEST/AEDT).");
+  assert.equal(
+    replySentence({ replyTime: "one fixture business day", replyTimeBase: "fixture time (FXT)" }),
+    "We reply within one fixture business day, fixture time (FXT).",
+  );
+});

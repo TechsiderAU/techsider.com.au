@@ -6,9 +6,14 @@
 // - Part B, "Default commitments in every engagement contract": only the items the owner has
 //   confirmed are in the standard terms (spec §12 item 2), each tagged "Contract term". An
 //   unconfirmed item never renders, and with none confirmed the section is left out.
+// - "Services used in an engagement" (go-global §7.2, owner gate O4): the services an engagement
+//   uses, each with its country and transfer mechanism, then the change notice. It renders only
+//   once trust.engagementSubProcessors has a row; an empty list leaves out the section and notice.
 // - The independence policy (the Services data), the questionnaire FAQ (each answer dated and
 //   tagged Part A or Part B in a meta line that stays out of the FAQPage JSON-LD), the AI
 //   transparency statement with one card per system, and the dated log of changes.
+// - "For organisations outside Australia" (go-global §7.3) follows the independence policy: the
+//   confirmed lines internationalLines() picks, left out when none is confirmed.
 // - The questionnaire obeys the same gate as Part B: a Part B answer shows only while the term it
 //   rests on is confirmed (trustView in src/lib/views/company.ts), so no answer states a
 //   commitment the page doesn't, and a "Part B" tag always has a #part-b to point at.
@@ -17,20 +22,24 @@ import PageSection from "../components/page/PageSection.astro";
 import BracketChip from "../components/ui/BracketChip.astro";
 import DataTable from "../components/ui/DataTable.astro";
 import FaqList from "../components/ui/FaqList.astro";
-import type { ContactData, ServicesData, TrustData } from "../content/page-schemas";
+import type { ContactData, InternationalData, ServicesData, TrustData } from "../content/page-schemas";
 import { formatDate, isoDate } from "../lib/dates";
+import { ENGAGEMENT_SUBPROCESSORS_HEADING, ENGAGEMENT_SUBPROCESSORS_NOTICE, INTERNATIONAL_HEADING } from "../lib/fixed-copy";
 import type { SiteContext } from "../lib/site";
-import { trustView } from "../lib/views/company";
+import { internationalLines, trustView } from "../lib/views/company";
 
 interface Props {
   trust: TrustData;
   contact: ContactData;
   services: ServicesData;
+  /** The "For organisations outside Australia" lines (go-global §7.3), all of them: the view picks. */
+  international: InternationalData;
   site: SiteContext;
 }
 
-const { trust, contact, services } = Astro.props;
+const { trust, contact, services, international } = Astro.props;
 const { terms: confirmed, faq: answers } = trustView(trust);
+const outside = internationalLines(international, "trust");
 const faq = answers.map((item) => ({ q: item.q, a: item.a, meta: `Part ${item.part} · as at ${formatDate(item.asAt)}` }));
 const changes = [...trust.changes].sort((a, b) => b.date.getTime() - a.date.getTime());
 const SUB_PROCESSOR_COLUMNS = [
@@ -40,6 +49,13 @@ const SUB_PROCESSOR_COLUMNS = [
   { key: "data", label: "Data touched" },
 ];
 const subProcessors = contact.subProcessors.map((s) => ({ entity: s.entity, purpose: s.purpose, country: s.country, data: s.data }));
+const ENGAGEMENT_COLUMNS = [
+  { key: "service", label: "Service" },
+  { key: "purpose", label: "Purpose" },
+  { key: "country", label: "Country" },
+  { key: "mechanism", label: "Transfer mechanism" },
+];
+const engagementRows = trust.engagementSubProcessors.map((s) => ({ service: s.service, purpose: s.purpose, country: s.country, mechanism: s.mechanism }));
 ---
 <div class="template" data-template="trust">
   <PageHero title="Trust." highlight="Trust" />
@@ -83,11 +99,26 @@ const subProcessors = contact.subProcessors.map((s) => ({ entity: s.entity, purp
     </PageSection>
   )}
 
+  {engagementRows.length > 0 && (
+    <PageSection id="engagement-sub-processors" title={ENGAGEMENT_SUBPROCESSORS_HEADING}>
+      <DataTable caption="Engagement sub-processors" columns={ENGAGEMENT_COLUMNS} rows={engagementRows} rowHeader="service" />
+      <p class="trust-item-body" data-change-notice>{ENGAGEMENT_SUBPROCESSORS_NOTICE}</p>
+    </PageSection>
+  )}
+
   <PageSection id="independence" title="Independence policy" width="prose">
     <ul class="trust-list">
       {services.independence.map((line) => <li>{line}</li>)}
     </ul>
   </PageSection>
+
+  {outside.length > 0 && (
+    <PageSection id="outside-australia" title={INTERNATIONAL_HEADING} width="prose">
+      <ul class="trust-list" data-international>
+        {outside.map((line) => <li data-international-line={line.id}>{line.text}</li>)}
+      </ul>
+    </PageSection>
+  )}
 
   {faq.length > 0 && (
     <PageSection id="questions" title="Security and data questions" width="prose">

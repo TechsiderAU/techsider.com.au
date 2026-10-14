@@ -13,7 +13,9 @@
 //   case: a 60-character unbroken token in a chip label and a long constraint hook.
 // - insightFixtures are listed out of date order (the views sort them); the draft is the
 //   newest, so a view that forgets to drop drafts shows it.
-import type { IndustryData, InsightData, RegulatoryData, SolutionData, TraceData } from "../content/schemas.ts";
+// - anchorFixtures: one "Rules that travel" anchors file per industry (go-global §5.3, anchors.ts).
+import type { AnchorFileData, IndustryData, InsightData, RegulatoryData, SolutionData, TraceData } from "../content/schemas.ts";
+import { anchorFixture, gdprAnchorFixture, governmentAnchorFixture } from "./anchors.ts";
 import { governmentIndustryFixture, industryFixture } from "./industry.ts";
 import { governmentRegulatoryFixture, regulatoryFixture } from "./regulatory.ts";
 import { solutionFixture } from "./solution.ts";
@@ -304,6 +306,16 @@ export const regulatoryFixtures: Record<string, RegulatoryData> = Object.fromEnt
   Object.keys(industryFixtures).map((id) => [id, id === "fixture-government" ? governmentRegulatoryFixture : regulatoryFixture]),
 );
 
+/**
+ * One anchors file per industry (go-global §5.3): Government has its own, fixture-industry-3 is the
+ * five-chip Draft-for-Approval page, and the rest share anchorFixture.
+ */
+export const anchorFixtures: Record<string, AnchorFileData> = Object.fromEntries(
+  Object.keys(industryFixtures).map((id) => [
+    id, id === "fixture-government" ? governmentAnchorFixture : id === "fixture-industry-3" ? gdprAnchorFixture : anchorFixture,
+  ]),
+);
+
 export const traceFixtures: Record<string, TraceData> = {
   "fixture-trace": traceFixture,
   "fixture-hero-trace": heroTraceFixture,
@@ -349,6 +361,8 @@ export const insightFixtures: { id: string; body: string; data: InsightData }[] 
     type: "article",
     industries: ["fixture-industry", "fixture-government", "fixture-industry-9"],
     solutions: [],
+    // go-global §6.1: the one Australian fixture post, so the gallery's industry pages show a labelled card.
+    region: "au",
   }),
   insight("fixture-insight-scenario", {
     title: "Fixture reference scenario: an agency tests its fixture assistant",

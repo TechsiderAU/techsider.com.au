@@ -214,6 +214,18 @@ test("lib: elementsWith returns whole elements, balancing nested tags of the sam
   assert.equal(elementsWith(TRACE, "data-provenance", "illustrative").length, 1);
 });
 
+test("lib: elements gives each element's offsets in the page, so a caller can tell what holds what", () => {
+  const html = `<p>x</p><div data-x><div>inner <b>bold</b></div> tail</div><img data-x alt=""><!-- <div data-x> -->`;
+  const [div, img, ...rest] = elementsWith(html, "data-x");
+  assert.deepEqual(rest, [], "markup inside a comment is not an element");
+  assert.equal(div.start, html.indexOf("<div data-x>"));
+  assert.equal(html.slice(div.start, div.end), div.outer);
+  assert.equal(html.slice(img.start, img.end), '<img data-x alt="">');
+  const unclosed = "<section data-x><p>never closed";
+  const [open] = elementsWith(unclosed, "data-x");
+  assert.deepEqual([open.start, open.end], [0, unclosed.length]);
+});
+
 test("lib: phrases match whole words, any case, with hyphen and space interchangeable", () => {
   const re = phraseRegExp("cutting-edge");
   assert.equal("A Cutting Edge idea and a cutting-edge one".match(re).length, 2);
@@ -431,6 +443,107 @@ test("04: FAIL phrases in src/ and in built text fail, whatever the case or hyph
   ]);
 });
 
+test("04: the go-global overclaims fail: bare 'compliant', the alignment and conformity literals, and patterns (a)-(d) (go-global §4.6)", async () => {
+  assert.ok(banned.OVERCLAIM.some((p) => p.label === "compliant"), "compliant is a FAIL phrase");
+  assert.ok(!banned.WARN_PHRASES.some((p) => p.label === "compliant"), "compliant is no longer only a warning");
+  const res = await check(banned, {
+    "src/components/Hero.astro": [
+      "<p>A compliant pipeline, SOC 2 compliant.</p>",
+      "<p>Nothing leaves your region. Files are never sent outside the country.</p>",
+      "<p>Data doesn’t leave your jurisdiction; it is not moved from your region.</p>",
+      "<p>We comply with ISO/IEC 42001. Techsider fully complies with the EU AI Act.</p>",
+      "<p>Our evaluation reports conform to the NIST AI RMF. The pipeline conforms to ISO/IEC 42001.</p>",
+      "<p>Built ISO 42001-aligned and ISO/IEC 42001-aligned.</p>",
+      "<p>Aligned with ISO/IEC 42001, aligned to the NIST AI RMF, aligned with SOC 2 and aligned with SOC2.</p>",
+      "<p>EU AI Act-ready, AI Act ready and EU AI Act–ready.</p>",
+      "<p>EU AI Act‑ready, AI‐Act ready and AI Act—ready; aligned to ISO 27001, aligned with NIST and aligned with ISO42001.</p>",
+    ].join("\n"),
+    "dist/solutions/alpha-fixture/index.html": page("<p>Your data never leaves the region.</p>"),
+  });
+  assertErrors(res, [
+    /Hero\.astro:1: "compliant" \(overclaim\)/,
+    /Hero\.astro:1: "compliant" \(overclaim\)/,
+    /Hero\.astro:2: "Nothing leaves your region" \(overclaim\)/,
+    /Hero\.astro:2: "never sent outside the country" \(overclaim\)/,
+    /Hero\.astro:3: "doesn't leave your jurisdiction" \(overclaim\)/,
+    /Hero\.astro:3: "is not moved from your region" \(overclaim\)/,
+    /Hero\.astro:4: "We comply with" \(overclaim\)/,
+    /Hero\.astro:4: "Techsider fully complies with" \(overclaim\)/,
+    /Hero\.astro:5: "Our evaluation reports conform to" \(overclaim\)/,
+    /Hero\.astro:5: "conforms to" \(overclaim\)/,
+    /Hero\.astro:6: "ISO 42001-aligned" \(overclaim\)/,
+    /Hero\.astro:6: "ISO\/IEC 42001-aligned" \(overclaim\)/,
+    /Hero\.astro:7: "Aligned with ISO\/IEC 42001" \(overclaim\)/,
+    /Hero\.astro:7: "aligned to the NIST AI RMF" \(overclaim\)/,
+    /Hero\.astro:7: "aligned with SOC 2" \(overclaim\)/,
+    /Hero\.astro:7: "aligned with SOC2" \(overclaim\)/,
+    /Hero\.astro:8: "EU AI Act-ready" \(overclaim\)/,
+    /Hero\.astro:8: "AI Act ready" \(overclaim\)/,
+    /Hero\.astro:8: "EU AI Act–ready" \(overclaim\)/,
+    /Hero\.astro:9: "EU AI Act‑ready" \(overclaim\)/,
+    /Hero\.astro:9: "AI‐Act ready" \(overclaim\)/,
+    /Hero\.astro:9: "AI Act—ready" \(overclaim\)/,
+    /Hero\.astro:9: "aligned to ISO 27001" \(overclaim\)/,
+    /Hero\.astro:9: "aligned with NIST" \(overclaim\)/,
+    /Hero\.astro:9: "aligned with ISO42001" \(overclaim\)/,
+    /dist\/solutions\/alpha-fixture\/index\.html: "never leaves the region" \(overclaim\)/,
+  ]);
+});
+
+test("04: an alignment claim with the standard first, and a price 'from AUD', fail like their other forms; near misses pass (final review F33)", async () => {
+  const res = await check(banned, {
+    "src/components/Hero.astro": [
+      "<p>ISO 27001-aligned, ISO/IEC 27001 aligned, NIST-aligned and NIST AI RMF-aligned.</p>",
+      "<p>SOC 2-aligned, SOC2\u2011aligned and ISO42001-aligned.</p>",
+      "<p>Plans from AUD 9,000, or from aud 90.</p>",
+    ].join("\n"),
+  });
+  assertErrors(res, [
+    /Hero\.astro:1: "ISO 27001-aligned" \(overclaim\)/,
+    /Hero\.astro:1: "ISO\/IEC 27001 aligned" \(overclaim\)/,
+    /Hero\.astro:1: "NIST-aligned" \(overclaim\)/,
+    /Hero\.astro:1: "NIST AI RMF-aligned" \(overclaim\)/,
+    /Hero\.astro:2: "SOC 2-aligned" \(overclaim\)/,
+    /Hero\.astro:2: "SOC2\u2011aligned" \(overclaim\)/,
+    /Hero\.astro:2: "ISO42001-aligned" \(overclaim\)/,
+    /Hero\.astro:3: "from AUD 9" \(pricing language \(D4\)\)/,
+    /Hero\.astro:3: "from aud 9" \(pricing language \(D4\)\)/,
+  ]);
+  const near = await check(banned, {
+    "src/components/Hero.astro": [
+      "<p>Teams aligned on the goal, SOC 2 reports aligned with your control owners, NIST, aligned with your own risk register, and ISO 27001 alignment work.</p>",
+      "<p>From audits in 2024, from AUDIT 9 onwards, and an AUD-denominated budget.</p>",
+    ].join("\n"),
+  });
+  assertErrors(near, []);
+});
+
+test("04: the widened pricing rules fail: VAT, sales tax, and 'from' a price in any currency (go-global §10.2)", async () => {
+  const res = await check(banned, {
+    "src/content/solutions/alpha-fixture.yaml": { ...solution(), scope: "Ex VAT, excl. VAT, plus VAT or inc VAT.", note: "Including VAT and sales tax." },
+    "dist/solutions/alpha-fixture/index.html": page(
+      `<p>From €900, from £90, from USD 900, from US$30, from NZ$ 5 or from S$9.</p>`,
+    ),
+  });
+  assertErrors(res, [
+    /alpha-fixture\.yaml:\d+: "Ex VAT" \(pricing language \(D4\)\)/,
+    /alpha-fixture\.yaml:\d+: "excl\. VAT" \(pricing language/,
+    /alpha-fixture\.yaml:\d+: "plus VAT" \(pricing language/,
+    /alpha-fixture\.yaml:\d+: "inc VAT" \(pricing language/,
+    /alpha-fixture\.yaml:\d+: "Including VAT" \(pricing language/,
+    /alpha-fixture\.yaml:\d+: "sales tax" \(pricing language/,
+    /alpha-fixture\/index\.html: "From €9" \(pricing language/,
+    /alpha-fixture\/index\.html: "from £9" \(pricing language/,
+    /alpha-fixture\/index\.html: "from USD 9" \(pricing language/,
+    /alpha-fixture\/index\.html: "from US\$3" \(pricing language/,
+    /alpha-fixture\/index\.html: "from NZ\$ 5" \(pricing language/,
+    /alpha-fixture\/index\.html: "from S\$9" \(pricing language/,
+  ]);
+  // A bare amount is check 11's business, and only in offer copy: insights may cite fines.
+  const bare = await check(banned, { "src/content/insights/fixture-post.md": `${post()}\nFines can reach €35 million, or EUR 15 million for other breaches.\n` });
+  assertErrors(bare, []);
+});
+
 test("04: near misses pass, and src/fixtures/ is not scanned", async () => {
   const res = await check(banned, {
     "src/components/Hero.astro": "<p>A benchmark, working with your documents, uncertified claims avoided, frontiersman.</p>",
@@ -439,6 +552,21 @@ test("04: near misses pass, and src/fixtures/ is not scanned", async () => {
   assertErrors(res, []);
   const hit = await check(banned, { "src/components/Hero.astro": "<p>We look forward to working with Fixture Pty Ltd.</p>" });
   assertErrors(hit, [/"working with" \(implied clients/]);
+});
+
+test("04: go-global near misses pass: third-person duties, other places, 'compliance' and the site's own residency lines (go-global §4.6)", async () => {
+  const res = await check(banned, {
+    "src/components/Hero.astro": [
+      "<p>Providers must comply with the EU AI Act.</p>",
+      "<p>The key never leaves this module.</p>",
+      "<p>These duties don't apply where the holder complies with corresponding Privacy Act obligations (s 505BE).</p>",
+      "<p>Compliance teams decide; non-compliance is theirs to judge. Teams aligned on the goal.</p>",
+      "<p>Our team reaches it remotely from Sydney, under the data-transfer terms in your contract.</p>",
+      "<p>We map our evidence to them; we don't certify against them.</p>",
+    ].join("\n"),
+  });
+  assertErrors(res, []);
+  assert.deepEqual(res.warnings, []);
 });
 
 test("04: .js, .mjs, .jsx, .mdx and .yml sources, and the text of built XML (RSS, sitemaps), are scanned", async () => {

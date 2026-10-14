@@ -1,0 +1,56 @@
+{
+  "shared": ["x1", "x4", "x6", "x7", "x8"],
+  "anchors": [
+    {
+      "id": "eu-ai-act-annex-iii-5b",
+      "name": "EU AI Act Annex III 5(b): credit scoring",
+      "issuer": "European Union",
+      "kind": "law",
+      "binding": "Law in the EU: Regulation (EU) 2024/1689, as amended by Regulation (EU) 2026/1744.",
+      "status": "applies-from",
+      "statusDate": "2027-12-02",
+      "asks": "Credit scoring and creditworthiness assessment of individuals are high-risk uses from 2 December 2027 (as amended in July 2026). Whether screening rental applications falls in scope is your call, with legal advice.",
+      "evidence": "A description of each AI tool's role in decisions about people, for your legal team to classify.",
+      "source": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/annex-3",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "reviewBy": "2027-01-12",
+      "solutions": ["draft-for-approval"],
+      "featured": true,
+      "checkLevel": "P"
+    },
+    {
+      "id": "fatf-r22-property",
+      "name": "FATF Recommendation 22: buying and selling property",
+      "issuer": "Financial Action Task Force (FATF)",
+      "kind": "international-standard",
+      "binding": "International standards for countries (FATF Recommendations, as amended), with risk-based guidance for the real estate sector.",
+      "status": "in-force",
+      "asks": "Businesses that act for clients in buying or selling property must identify those clients and keep records. Leasing and property management are outside it.",
+      "evidence": "Registers of agreements and documents, each field linked to its page, for the staff who make the identity checks.",
+      "source": "https://www.fatf-gafi.org/en/publications/Fatfrecommendations/Guidance-rba-real-estate-sector.html",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["document-registers"],
+      "featured": true,
+      "checkLevel": "P*"
+    },
+    {
+      "id": "oecd-privacy-guidelines",
+      "name": "OECD Privacy Guidelines",
+      "issuer": "OECD",
+      "kind": "guidance",
+      "binding": "An OECD recommendation, adopted in 1980 and revised in 2013.",
+      "status": "published",
+      "statusDate": "2013-07-11",
+      "asks": "Collection limitation, data quality, purpose specification, use limitation, security safeguards, openness, individual participation and accountability. Restrictions on cross-border data flows should be proportionate to the risk.",
+      "evidence": "A deletion schedule for renter data, and a record of each deletion.",
+      "source": "https://legalinstruments.oecd.org/en/instruments/OECD-LEGAL-0188",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["document-registers"],
+      "featured": false,
+      "checkLevel": "S"
+    }
+  ]
+}

@@ -56,6 +56,22 @@ export function pageWords(html) {
   let main = html.slice(html.search(/<main\b/), html.indexOf("</main>"));
   const [insights] = elements(main, (t) => t.attrs.id === "insights");
   if (insights) main = main.replace(insights.outer, " ");
-  for (const hidden of elements(main, (t) => t.attrs["aria-hidden"] === "true")) main = main.replace(hidden.outer, " ");
-  return visibleText(main).split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
+  return countWords(main);
+}
+
+/**
+ * pageWords' count within the one element whose id is `id` (go-global §5.2, §5.4 block budgets):
+ * the same tokens, with its aria-hidden copies left out. Throws when no element has that id.
+ */
+export function blockWords(html, id) {
+  const [el] = elements(html, (t) => t.attrs.id === id);
+  if (!el) throw new Error(`blockWords: no element with id "${id}"`);
+  return countWords(el.outer);
+}
+
+/** Whitespace-separated tokens holding a letter or a digit, aria-hidden copies left out. */
+function countWords(fragment) {
+  let html = fragment;
+  for (const hidden of elements(html, (t) => t.attrs["aria-hidden"] === "true")) html = html.replace(hidden.outer, " ");
+  return visibleText(html).split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
 }

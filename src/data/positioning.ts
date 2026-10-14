@@ -3,15 +3,19 @@
 // the sub-promise and the four pillars; About renders the origin line.
 // - The pillars run cited, measured, onshore, ownership, as the schema requires. Each mechanism is
 //   a contract commitment (spec §4.2, §12 item 2), so it stays only if the standard terms hold it.
-// - The onshore pillar's plain version is the scoped one. Spec §3.2 allows "Your data stays in
-//   Australia." only once the owner confirms the enquiry mailbox is stored in Australia (§12 item 1).
+// - The onshore pillar (go-global §4.1) promises only where systems run and where data is stored and
+//   processed: the client's own account, in the cloud region they choose, or an Australian region
+//   when Techsider manages the system (D3). Remote access from a third country is a transfer (EDPB
+//   Guidelines 05/2021, the ICO), so the mechanism says the team reaches systems remotely from
+//   Sydney under the contract's transfer terms (D4). The title and midMarket state only the region,
+//   so every page that shows one also carries that sentence.
 // ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 import type { PositioningData } from "../content/page-schemas.ts";
 
 export const POSITIONING: PositioningData = {
   // ⚑ owner: confirm the sub-promise wording (spec §12 item 12)
   subPromise:
-    "We design, build and run AI solutions for Australian organisations, from 40-person practices to federal agencies. In your environment, with your data onshore by default.",
+    "We design, build and run AI solutions, from 40-person practices to government agencies. In your environment, with your data kept in the region you choose.",
   originLine: "AI pilots are easy to start and hard to ship. We build the kind that survive scrutiny.",
   pillars: [
     {
@@ -28,9 +32,9 @@ export const POSITIONING: PositioningData = {
     },
     {
       id: "onshore",
-      title: "Your data stays onshore.",
-      mechanism: "The systems we build or run for you are deployed in an Australian region, in your own account or managed by us. Every launch package carries an onshore note on where processing runs, including inside a platform you already license.",
-      midMarket: "What we build keeps your data in Australia.",
+      title: "Your data stays in your region.",
+      mechanism: "Systems we build for you run in your own Microsoft or AWS account, in the cloud region you choose. Systems we manage for you run in an Australian region. Our team reaches them remotely from Sydney, under the data-transfer terms in your contract. Every launch package carries a region note on where processing runs, including inside software you already license.",
+      midMarket: "What we build keeps your data in the region you choose.",
     },
     {
       id: "ownership",

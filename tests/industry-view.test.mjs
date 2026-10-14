@@ -1,13 +1,17 @@
-// industryView() (spec §8.5 and §5): row anchors, jurisdiction sections, recommended packages,
-// the site-context fallbacks and the build-failing data errors, over the fixtures. Pure data, so
-// no build is needed.
+// industryView() (spec §8.5 and §5; go-global §5): row anchors, jurisdiction sections, recommended
+// packages, the "Rules that travel" chips, the FAQ split, the site-context fallbacks and the
+// build-failing data errors, over the fixtures. Pure data, so no build is needed.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { JURISDICTION_SECTION, SECTION_ORDER, SECTION_TITLE } from "../src/content/schemas.ts";
+import { anchorChipLabel } from "../src/lib/anchors.ts";
 import { WORKS_METHOD_LABEL } from "../src/lib/fixed-copy.ts";
+import { AUTOMATION } from "../src/lib/marketing.ts";
 import { crumbs, industryLink, solutionLink } from "../src/lib/site.ts";
 import { industryView } from "../src/lib/views/industry.ts";
-import { fixtureSite, industryFixtures, regulatoryFixtures, solutionFixtures, traceFixtures } from "../src/fixtures/index.ts";
+import {
+  anchorFixtures, fixtureSite, industryFixtures, regulatoryFixtures, sharedAnchorsFixture, solutionFixtures, traceFixtures,
+} from "../src/fixtures/index.ts";
 
 const INDUSTRY = "fixture-industry";
 const GOVERNMENT = "fixture-government";
@@ -15,6 +19,8 @@ const input = (id, over = {}) => ({
   id,
   data: industryFixtures[id],
   rows: regulatoryFixtures[id].rows,
+  sharedAnchors: sharedAnchorsFixture,
+  anchors: anchorFixtures[id],
   solutions: solutionFixtures,
   traces: traceFixtures,
   insights: [],
@@ -137,7 +143,7 @@ test("hero, CTAs, breadcrumb, lead solutions, demo and closing come from the sit
   const lower = link.shortName.toLowerCase();
   const talk = { label: `Talk to us about AI for ${lower}`, href: fixtureSite.contact({ industry: INDUSTRY }) };
   const v = industryView(input(INDUSTRY));
-  assert.deepEqual([v.id, v.shortName, v.fullName, v.promise, v.constraintSet], [INDUSTRY, link.shortName, link.fullName, data.promise, data.constraintSet]);
+  assert.deepEqual([v.id, v.shortName, v.fullName, v.promise, v.heroSub], [INDUSTRY, link.shortName, link.fullName, data.promise, AUTOMATION.industries[link.shortName] ?? null]);
   assert.deepEqual(v.breadcrumb, crumbs(fixtureSite, ["industries", { label: link.shortName, path: link.path }]));
   assert.deepEqual(v.ctas, { primary: talk, secondary: { label: `See the ${lower} scenario`, href: "#scenario" } });
   assert.deepEqual(v.closing, { command: "talk_to_us", args: `--about=${INDUSTRY}`, label: talk.label, href: talk.href });
@@ -151,9 +157,37 @@ test("workflow stages keep their ids; each use case carries its solution, its on
   assert.deepEqual(v.workflow, data.workflow.map((stage) => ({
     id: stage.id,
     stage: stage.stage,
-    useCases: stage.useCases.map((u) => ({ name: u.name, solution: chipOf(fixtureSite, u.solution), onRequest: u.status === "on-request", note: u.note ?? null })),
+    useCases: stage.useCases.map((u) => ({ name: u.name, solution: chipOf(fixtureSite, u.solution), onRequest: u.status === "on-request", note: u.note ?? null, region: null })),
   })));
   assert.ok(v.workflow.some((s) => s.useCases.some((u) => u.onRequest)), "the fixture has an on-request use case");
+});
+
+test("a workflow use case that names an Australia-only package carries region \"au\"; any other name, null (go-global §3.3)", () => {
+  const data = structuredClone(industryFixtures[INDUSTRY]);
+  data.workflow[0].useCases[0] = { name: "Fixture Launch Package", solution: "fixture-solution", status: "launch" };
+  data.workflow[1].useCases[0] = { name: "Fixture Generic Package", solution: "fixture-solution", status: "launch" };
+  const v = industryView(input(INDUSTRY, { data }));
+  assert.deepEqual(v.workflow.map((s) => s.useCases.map((u) => [u.name, u.region])), [
+    [["Fixture Launch Package", "au"]],
+    [["Fixture Generic Package", null]],
+    [["Fixture use case C", null]],
+    [["Fixture use case D", null]],
+  ]);
+  const { "fixture-solution": _dropped, ...rest } = solutionFixtures;
+  const elsewhere = { ...data, packages: [{ solution: "fixture-solution-2", package: "fixture-assistant-generic" }] };
+  assert.throws(() => industryView(input(INDUSTRY, { data: elsewhere, solutions: rest })), /use case "Fixture Launch Package" names solution "fixture-solution", which isn't in solutions/);
+});
+
+test("recommended packages carry their package's region: the Australia-only ones \"au\", the rest null", () => {
+  const packages = industryView(input(INDUSTRY)).single.packages;
+  assert.deepEqual(packages.map((p) => [p.id, p.region]), [
+    ["fixture-generic-package", null],
+    ["fixture-launch-package", "au"],
+    ["fixture-on-request-package", "au"],
+  ]);
+  const local = industryView(input(GOVERNMENT)).sections.find((s) => s.id === "local").packages;
+  assert.equal(local.find((p) => p.id === "fixture-on-request-package").region, "au");
+  assert.equal(local.find((p) => p.id === "fixture-generic-package").region, null);
 });
 
 test("the scenario resolves its trace; problem, mock panel, limits, first engagement and FAQ pass through", () => {
@@ -166,7 +200,7 @@ test("the scenario resolves its trace; problem, mock panel, limits, first engage
   assert.equal(v.platformFirst, data.platformFirst ?? null);
   assert.deepEqual(v.dontDo, data.dontDo);
   assert.deepEqual(v.firstEngagement, data.firstEngagement);
-  assert.deepEqual(v.faq, data.faq);
+  assert.deepEqual(v.faq, data.faq.map(({ q, a }) => ({ q, a })));
 });
 
 test("related insights: cards referencing this industry, newest first, at most three", () => {
@@ -242,6 +276,10 @@ test("broken data fails the build: an unknown chip row, package or solution, an 
   assert.throws(() => industryView(input(INDUSTRY, stage(1, "problem"))), /stage id "problem" is also a section id/);
   assert.throws(() => industryView(input(INDUSTRY, stage(2, "state-packages"))), /stage id "state-packages" is also a section id/);
   assert.throws(() => industryView(input(INDUSTRY, stage(3, `reg-${rows[0].id}`))), /is also a section id or row anchor/);
+  // go-global §5.1: the Rules block, its shared-row label, the Australia band and #faq-au are page ids too.
+  for (const sid of ["rules-that-travel", "rules-that-travel-shared-label", "australia", "faq-au"]) {
+    assert.throws(() => industryView(input(INDUSTRY, stage(0, sid))), new RegExp(`stage id "${sid}" is also a section id`));
+  }
 });
 
 test("jurisdiction mode fails on a chip whose row sits in another section, and on a row with no jurisdiction", () => {
@@ -252,4 +290,66 @@ test("jurisdiction mode fails on a chip whose row sits in another section, and o
   assert.throws(() => industryView(input(GOVERNMENT, { rows: moved })), new RegExp(`chip "${escapeRe(chip.label)}" links to row "${chip.row}", which isn't in the local section's regulatory map`));
   const bare = rows.map((r, i) => (i === 0 ? { ...r, jurisdictions: undefined } : r));
   assert.throws(() => industryView(input(GOVERNMENT, { rows: bare })), new RegExp(`row "${rows[0].id}" names no jurisdiction`));
+});
+
+// ---------- go-global §5: the hero sub, "Rules that travel" and the FAQ split ----------
+
+test("heroSub is the industry's AUTOMATION line, and null for a short name that has none (go-global §5.1)", () => {
+  assert.equal(industryView(input(INDUSTRY)).heroSub, null, "the fixtures' short names have no AUTOMATION line");
+  const renamed = { ...fixtureSite, industries: fixtureSite.industries.map((i) => (i.id === INDUSTRY ? { ...i, shortName: "Manufacturing" } : i)) };
+  assert.equal(industryView(input(INDUSTRY, { site: renamed })).heroSub, AUTOMATION.industries.Manufacturing);
+  assert.equal("constraintSet" in industryView(input(INDUSTRY)), false, "the constraint set never reaches the page (go-global §13)");
+});
+
+test("rules: the paragraph, the Everywhere row in the industry file's shared order, then its featured anchors in data order (go-global §5.2)", () => {
+  const chip = (a, scope) => ({ id: a.id, name: a.name, label: anchorChipLabel(a), href: a.source, scope });
+  const shared = new Map(sharedAnchorsFixture.anchors.map((a) => [a.id, a]));
+  for (const id of [INDUSTRY, GOVERNMENT, "fixture-industry-3"]) {
+    const anchors = anchorFixtures[id];
+    const v = industryView(input(id));
+    assert.equal(v.rules.paragraph, industryFixtures[id].rulesThatTravel, id);
+    assert.deepEqual(v.rules.shared, anchors.shared.map((sid) => chip(shared.get(sid), "shared")), id);
+    assert.deepEqual(v.rules.sector, anchors.anchors.filter((a) => a.featured).map((a) => chip(a, "sector")), id);
+  }
+  assert.equal(industryView(input("fixture-industry-3")).rules.shared.length, 5, "the GDPR fixture's five-chip shared row");
+  assert.ok(anchorFixtures[INDUSTRY].anchors.some((a) => !a.featured), "the fixture holds an unfeatured anchor");
+  const ids = industryView(input(INDUSTRY)).rules.sector.map((c) => c.id);
+  for (const a of anchorFixtures[INDUSTRY].anchors.filter((x) => !x.featured)) assert.ok(!ids.includes(a.id), `${a.id} is unfeatured but renders`);
+});
+
+test("rules: no paragraph gives null, and empty anchor files give empty rows (Part 4A's transitional pages)", () => {
+  const data = industryFixtures[INDUSTRY];
+  const { rulesThatTravel: _dropped, ...noParagraph } = data;
+  assert.equal(industryView(input(INDUSTRY, { data: noParagraph })).rules.paragraph, null);
+  const empty = industryView(input(INDUSTRY, { sharedAnchors: { anchors: [] }, anchors: { anchors: [] } })).rules;
+  assert.deepEqual(empty, { paragraph: data.rulesThatTravel, shared: [], sector: [] });
+});
+
+test("rules: broken anchor data fails the build", () => {
+  const anchors = anchorFixtures[INDUSTRY];
+  const withShared = (last) => ({ anchors: { ...anchors, shared: [...anchors.shared.slice(0, -1), last] } });
+  const unfeatured = sharedAnchorsFixture.anchors.find((a) => !a.featured);
+  assert.ok(unfeatured, "the shared fixture holds an unfeatured anchor");
+  assert.throws(() => industryView(input(INDUSTRY, withShared("fixture-no-such-anchor"))), /shared anchor "fixture-no-such-anchor" isn't in src\/data\/anchors\/shared\.json/);
+  assert.throws(() => industryView(input(INDUSTRY, withShared(unfeatured.id))), new RegExp(`shared anchor "${unfeatured.id}" isn't featured in src/data/anchors/shared\\.json`));
+  const featured = anchors.anchors.find((a) => a.featured);
+  const four = ["a", "b", "c", "d"].map((k) => ({ ...featured, id: `fixture-sector-four-${k}` }));
+  assert.throws(() => industryView(input(INDUSTRY, { anchors: { ...anchors, anchors: four } })), /4 featured sector anchors; the sector row shows at most 3/);
+  assert.throws(
+    () => industryView(input(INDUSTRY, { anchors: { ...anchors, anchors: [{ ...featured, id: anchors.shared[0] }] } })),
+    new RegExp(`sector anchor "${anchors.shared[0]}" is also in the shared row`),
+  );
+});
+
+test("FAQs: faq is every question in data order, faqNeutral the untagged ones, faqAu the region au ones, none carrying region (go-global §5.6)", () => {
+  for (const id of [INDUSTRY, GOVERNMENT]) {
+    const data = industryFixtures[id];
+    const v = industryView(input(id));
+    const strip = ({ q, a }) => ({ q, a });
+    assert.deepEqual(v.faq, data.faq.map(strip), id);
+    assert.deepEqual(v.faqNeutral, data.faq.filter((f) => f.region === undefined).map(strip), id);
+    assert.deepEqual(v.faqAu, data.faq.filter((f) => f.region === "au").map(strip), id);
+    assert.ok(v.faqNeutral.length > 0 && v.faqAu.length > 0, `${id}: the fixture has both kinds`);
+    assert.equal(v.faqNeutral.length + v.faqAu.length, v.faq.length, id);
+  }
 });

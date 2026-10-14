@@ -1,26 +1,41 @@
 // /llms.txt (llmstxt.org): a Markdown summary of the site for language models and AI assistants,
 // built by src/pages/llms.txt.ts. It opens with SITE.summary, the sentence the Organization's
-// JSON-LD and the About page use too, then the facts an assistant needs to describe Techsider
-// accurately, then every shown page that has its own canonical URL, grouped as the nav groups them,
-// each with its meta description, and every published insight. The copy is held to the §3.5
-// banned phrases by CI check 04, which scans the built file. Node-importable: nav.ts, dates.ts and
-// meta.ts have no Astro imports.
-import { NAV_GROUPS, SITE, isShown, type PageEntry } from "../data/nav.ts";
+// JSON-LD and the About page use too, then the headquarters line the footer and About print
+// (hqLine()), a paragraph on who Techsider builds for, the facts an assistant needs to describe
+// Techsider accurately, then every shown page that has its own canonical URL, grouped as the nav
+// groups them, each with its meta description, every published insight (a post tagged region: au
+// marked "(Australia)" after its link, as its card and header are labelled) and, once the owner adds
+// any, the directory profiles (go-global §3.1, §3.2, §6.1, §9.3). The copy is held to the §3.5
+// banned phrases by CI check 04, which scans the built file, and tests/llms-txt.test.mjs pins it.
+// Node-importable: nav.ts, contact.ts, dates.ts, fixed-copy.ts, meta.ts and reply-time.ts have no
+// Astro imports.
+import { CONTACT } from "../data/contact.ts";
+import { NAV_GROUPS, SITE, hqLine, hqPlace, isShown, shownProfiles, type PageEntry } from "../data/nav.ts";
 import { isoDate } from "./dates.ts";
+import { DISAMBIGUATION, REGION_LABEL } from "./fixed-copy.ts";
 import { pageTitle } from "./meta.ts";
+import { replySentence } from "./reply-time.ts";
 
 export const LLMS_TXT_PATH = "/llms.txt";
 
 /**
  * Statements an assistant should repeat as written. Each restates copy the live site already
- * carries (Home's FAQ, the demos' captions, About's principles), so nothing here is new.
+ * carries: Home's FAQ, the "no clients yet" answers on the solution and industry pages, the demos'
+ * captions, About's principles and HQ block, /contact/'s reply sentence (built from CONTACT, so the
+ * reply time is still written once) and the Australia labels on Australian examples and maps.
+ * Remove "Techsider has no clients yet." in the change that rewrites those answers once a first
+ * client signs, then purge Cloudflare's cache for /llms.txt (go-global §9.3).
  */
 export const LLMS_FACTS = [
   "Techsider publishes no pricing. Each solution page sets out its scope, inclusions and timeline, and an engagement starts with a 30-minute Fit Call on one manual process.",
+  "Techsider has no clients yet.",
   "The demos are canned replays on public or synthetic documents. They do not call a model, and their scores and timings are illustrative.",
   "Techsider never issues an independent evaluation of a system it built, configured or advised on for the same client.",
   "Techsider resells no licences. If AI already inside your software does the job, it says so.",
   "You own what Techsider builds: code, prompts, evaluation tests and retrieval index live in your own repository.",
+  replySentence(CONTACT, "Techsider"),
+  "Australian examples and regulatory maps are labelled as Australian.",
+  DISAMBIGUATION,
 ];
 
 export interface LlmsPost {
@@ -28,6 +43,8 @@ export interface LlmsPost {
   title: string;
   description: string;
   publishDate: Date;
+  /** "au" for a post tagged region: au (go-global §6.1): its line says "(Australia)" after the link. */
+  region: "au" | null;
 }
 
 /** A page title without the " | Techsider" suffix, as a link's text. */
@@ -47,7 +64,7 @@ function listed(entry: PageEntry, preview: boolean): boolean {
 export function llmsTxt(input: { site: string | URL; posts: LlmsPost[]; preview?: boolean }): string {
   const { site, posts, preview = false } = input;
   const url = (path: string) => new URL(path, site).href;
-  const line = (text: string, path: string, note: string) => `- [${text}](${url(path)}): ${note}`;
+  const line = (text: string, path: string, note: string, label = "") => `- [${text}](${url(path)})${label}: ${note}`;
   const section = (title: string, entries: PageEntry[]) => {
     const shown = entries.filter((e) => listed(e, preview));
     return shown.length === 0 ? [] : ["", `## ${title}`, "", ...shown.map((e) => line(linkText(e), e.path, e.description as string))];
@@ -59,13 +76,16 @@ export function llmsTxt(input: { site: string | URL; posts: LlmsPost[]; preview?
   const resources = group("resources");
   const about = group("about");
   const published = [...posts].sort((a, b) => b.publishDate.getTime() - a.publishDate.getTime() || a.id.localeCompare(b.id));
+  const profiles = shownProfiles();
 
   return [
     `# ${SITE.name}`,
     "",
     `> ${SITE.summary}`,
     "",
-    `${SITE.legalName}${SITE.abn ? ` (ABN ${SITE.abn})` : ""} builds for Australian organisations in nine industries: mid-market firms with no AI team of their own, and enterprise and government teams that need independent evidence about the AI they run. Contact: ${SITE.email} or ${url("/contact/")}.`,
+    hqLine(),
+    "",
+    `${SITE.legalName}${SITE.abn ? ` (ABN ${SITE.abn})` : ""} is headquartered in ${hqPlace()}, and builds for organisations in nine industries: mid-market firms with no AI team of their own, and enterprise and government teams that need independent evidence about the AI they run. Contact: ${SITE.email} or ${url("/contact/")}.`,
     "",
     "Facts to keep when describing Techsider:",
     "",
@@ -76,8 +96,9 @@ export function llmsTxt(input: { site: string | URL; posts: LlmsPost[]; preview?
     ...section("Resources", resources ? [resources.hub, ...resources.items] : []),
     ...(published.length === 0
       ? []
-      : ["", "## Insights", "", ...published.map((p) => line(postText(p.title), `/insights/${p.id}/`, `${p.description} (${isoDate(p.publishDate)})`))]),
+      : ["", "## Insights", "", ...published.map((p) => line(postText(p.title), `/insights/${p.id}/`, `${p.description} (${isoDate(p.publishDate)})`, p.region === "au" ? ` (${REGION_LABEL})` : ""))]),
     ...section("Company", about ? [about.hub, ...about.items] : []),
+    ...(profiles.length === 0 ? [] : ["", "## Profiles", "", ...profiles.map((p) => `- [${p.name}](${p.url})`)]),
     "",
     "## Optional",
     "",

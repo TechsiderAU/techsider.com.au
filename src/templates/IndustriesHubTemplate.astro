@@ -3,7 +3,8 @@
 // solutions, calls industriesHubView() and wraps this in BaseLayout. A hero; nine deep cards
 // (constraint hook, three flagship use cases with their solution numbers, each on-request one
 // labelled "On request", three obligation chips linking to their regulatory-map rows); the
-// solution × industry matrix; the closing prompt.
+// solution × industry matrix; the closing prompt. The chips are Australian obligations, so their
+// row sits in a [data-region="au"] wrapper that opens with the "Australia" label (go-global §5.1).
 // Every link comes from the view: a null href renders as plain text, never as a dead link.
 import { AUTOMATION } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
@@ -11,6 +12,7 @@ import PageSection from "../components/page/PageSection.astro";
 import ChipRow from "../components/page/ChipRow.astro";
 import DataTable from "../components/ui/DataTable.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
+import RegionLabel from "../components/ui/RegionLabel.astro";
 import type { IndustriesHubView } from "../lib/views/hubs";
 
 interface Props {
@@ -34,10 +36,13 @@ const { view } = Astro.props;
             <details class="industry-details"><summary>Use cases and requirements</summary>
             <ul class="industry-card-uses">
               {card.useCases.map((useCase) => (
-                <li><span class="industry-card-number">{useCase.number}</span> <span>{useCase.name}{useCase.onRequest && " "}{useCase.onRequest && <span class="industry-card-on-request">On request</span>}</span></li>
+                <li data-region={useCase.region ?? undefined}><span class="industry-card-number">{useCase.number}</span> <span>{useCase.name}{useCase.region && " "}{useCase.region && <RegionLabel />}{useCase.onRequest && " "}{useCase.onRequest && <span class="industry-card-on-request">On request</span>}</span></li>
               ))}
             </ul>
-            <ChipRow id={`industry-${card.id}-chips`} label="Designed around" chips={card.chips} />
+            <div class="industry-region" data-region="au">
+              <RegionLabel />
+              <ChipRow id={`industry-${card.id}-chips`} label="Designed around" chips={card.chips} />
+            </div>
             </details>
           </article>
         </li>
@@ -64,7 +69,8 @@ const { view } = Astro.props;
 <style>
   .industry-details summary { min-height: 44px; display: list-item; cursor: pointer; font-size: .875rem; font-weight: 500; }
   .industry-details[open] summary { margin-bottom: 1rem; }
-  .industry-details :global(.chip-row) { margin-top: 1rem; }
+  .industry-region { display: grid; justify-items: start; gap: 0.25rem; margin-top: 1rem; }
+  .industry-region > :global(.chip-row) { justify-self: stretch; }
   /* The cards share hairlines: the one hairline cell grid on this page, on bone only (spec §6.4). */
   .industry-cards {
     display: grid;

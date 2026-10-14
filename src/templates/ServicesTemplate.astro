@@ -23,7 +23,7 @@ import DataTable from "../components/ui/DataTable.astro";
 import FaqList from "../components/ui/FaqList.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
 import type { ServicesData } from "../content/page-schemas";
-import { DELIVERY_LETTER, SERVICES_H1 } from "../lib/fixed-copy";
+import { DELIVERY_LETTER, DELIVERY_MODEL, SERVICES_H1 } from "../lib/fixed-copy";
 import type { PageKey, SiteContext } from "../lib/site";
 
 interface Props {
@@ -107,7 +107,7 @@ const choices = services.deliveryChoices
     </details>
   </PageSection>
 
-  <PageSection id="where-it-runs" title="Where it runs">
+  <PageSection id="where-it-runs" title="Where it runs" lede={DELIVERY_MODEL}>
     <details class="services-details"><summary>View deployment and data locations</summary>
     <div class="services-detail-body">
     <ol class="delivery-choices">
@@ -119,7 +119,7 @@ const choices = services.deliveryChoices
       ))}
     </ol>
     <div class="services-note">
-      <h3 class="services-subhead">The onshore note</h3>
+      <h3 class="services-subhead">The region note</h3>
       <ul class="services-list" data-onshore-note>
         {services.onshoreNote.map((item) => <li>{item}</li>)}
       </ul>

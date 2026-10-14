@@ -28,6 +28,8 @@ export const pendingKitFixture: KitData = {
   ...kitFixture,
   title: "Fixture safe-use kit awaiting review",
   summary: "Fixture summary: a starter kit whose fixture lawyer review is not done yet.",
+  // go-global §3.3: one gallery kit carries the "Australia" label; the reviewed kit doesn't.
+  region: "au",
   lawyerReviewedAt: null,
   download: "/downloads/fixture-pending-kit.pdf",
 };

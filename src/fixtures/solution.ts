@@ -2,6 +2,9 @@
 // Covers every package state: a launch generic package (onshore), two launch packages
 // (the first isn't onshore), an on-request package and an internal one (never rendered).
 // Two launch packages, as in spec §4.1's Document Registers, give the Tabs specimen two tabs.
+// The first launch package and the on-request package are Australia-only (region "au", go-global
+// §3.3), so the gallery shows the "Australia" label on a tab, an on-request entry, the industry
+// cards and the Solutions hub's By buyer list; the generic package shows none.
 // byIndustry names fixture-industry-9, the one industry whose gallery href is null, so the
 // solution specimen shows a "By industry" chip as plain text. src/fixtures/sets.ts holds the
 // four other fixture solutions.
@@ -52,6 +55,7 @@ export const solutionFixture: SolutionData = {
       gate: "Fixture gate: the fixture reviewer signs off the test report",
       onshoreNote: "Fixture onshore note: data residency follows the fixture platform settings",
       precondition: "Fixture precondition: an export from the fixture records system exists",
+      region: "au",
     },
     {
       id: "fixture-second-launch-package",
@@ -76,6 +80,7 @@ export const solutionFixture: SolutionData = {
       name: "Fixture On-Request Package",
       status: "on-request",
       oneLiner: "Fixture one-liner: available on request for larger fixture document sets.",
+      region: "au",
     },
     {
       id: "fixture-internal-package",

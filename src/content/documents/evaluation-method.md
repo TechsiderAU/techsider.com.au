@@ -42,7 +42,7 @@ A false answer is a confident answer that is wrong, incomplete or unsupported by
 
 ## Every failure, listed
 
-The report lists every failure, not only a score: the input, the output, the expected answer and its source, the category and the rating. Findings are rated to your risk matrix and mapped to the framework you already use, such as the DTA's AI use case impact assessment, the NSW AI Assessment Framework, a Queensland FAIRA or your own model-risk template.
+The report lists every failure, not only a score: the input, the output, the expected answer and its source, the category and the rating. Findings are rated to your risk matrix and mapped to the framework you already use, such as ISO/IEC 42001, the NIST AI RMF or your own model-risk template. In Australia: the DTA's AI use case impact assessment, the NSW AI Assessment Framework or a Queensland FAIRA.
 
 ## Evidence you can re-run
 
@@ -51,7 +51,7 @@ You keep a reproducible evidence bundle:
 - the versioned test set and its labels;
 - the model and deployment identifiers, prompts and parameters, where the platform exposes them;
 - timestamps, raw outputs and grader outputs, with hashes;
-- a replay script that runs in your own cloud subscription. The graders run there too, so test data and results stay with you; the system under test handles each question where its vendor runs it, and the report records the vendor's published processing location, with its date.
+- a replay script that runs in your own cloud subscription. The graders run there too, so test data and results stay with you. Our team reaches your subscription remotely from Sydney, under the data-transfer terms in your contract. The system under test handles each question where its vendor runs it, and the report records the vendor's published processing location, with its date.
 
 The harness and the question set are handed over, with a training session for your data, risk or second-line team, so you can re-run the test without us.
 
@@ -61,7 +61,7 @@ When the model changes, or may have changed, the same test set runs again and th
 
 ## What the report is, and what it isn't
 
-The report sets out findings, not an assurance opinion. It is not an ASAE 3000 or ASRE engagement. Techsider never issues an Independent Evaluation Report on a system it built, configured or advised on for the same client.
+The report sets out findings, not an assurance opinion. It is not an ISAE 3000 or ISRE engagement (ASAE 3000 or ASRE in Australia). Techsider never issues an Independent Evaluation Report on a system it built, configured or advised on for the same client.
 
 ## Adversarial testing
 

@@ -1,0 +1,57 @@
+{
+  "shared": ["x1", "x4", "x6", "x7"],
+  "anchors": [
+    {
+      "id": "ccbe-genai-guide",
+      "name": "CCBE guide on generative AI for lawyers",
+      "issuer": "Council of Bars and Law Societies of Europe (CCBE)",
+      "kind": "guidance",
+      "binding": "Guidance for lawyers from the Council of Bars and Law Societies of Europe.",
+      "status": "published",
+      "statusDate": "2025-10-02",
+      "asks": "Guidance for lawyers on the use of generative AI, published on 2 October 2025 and cited in the CCBE's 2026 technical guide.",
+      "evidence": "A test of the tool on your own matters, listing every wrong or made-up citation.",
+      "source": "https://www.ccbe.eu/fileadmin/speciality_distribution/public/documents/IT_LAW/ITL_Guides_recommendations/EN_ITL_20251002_CCBE-guide-on-the-use-of-the-use-of-generative-AI-for-lawyers.pdf",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-14",
+      "solutions": ["ai-evaluation", "ai-switch-on"],
+      "featured": true,
+      "checkLevel": "P*"
+    },
+    {
+      "id": "ccbe-technical-guide",
+      "name": "CCBE technical guide on AI tools",
+      "issuer": "Council of Bars and Law Societies of Europe (CCBE)",
+      "kind": "guidance",
+      "binding": "Guidance for lawyers from the CCBE, Edition 2026.",
+      "status": "published",
+      "statusDate": "2026-03-27",
+      "asks": "Explains hosting options, from on-premises and colocation to cloud infrastructure and vendor SaaS, so lawyers can choose tools that protect client confidentiality. A lawyer must understand the essential functioning of the tools they use.",
+      "evidence": "A note of where each AI tool processes your data, quoting the vendor's published statement with its date.",
+      "source": "https://www.ccbe.eu/fileadmin/speciality_distribution/public/documents/IT_LAW/ITL_Guides_recommendations/EN_ITL_20260327_CCBE-technical-guide-on-the-use-of-AI-tools-and-models-by-lawyers.pdf",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["ai-evaluation", "knowledge-assistant"],
+      "featured": true,
+      "checkLevel": "P"
+    },
+    {
+      "id": "eu-ai-act-annex-iii-8a",
+      "name": "EU AI Act Annex III 8(a): AI for courts",
+      "issuer": "European Union",
+      "kind": "law",
+      "binding": "Law in the EU: Regulation (EU) 2024/1689, as amended by Regulation (EU) 2026/1744.",
+      "status": "applies-from",
+      "statusDate": "2027-12-02",
+      "asks": "AI that helps a judicial authority, or alternative dispute resolution, to research and interpret facts and the law is high-risk from 2 December 2027 (as amended in July 2026). Use by law firms is not in this category.",
+      "evidence": "A description of what each AI tool does and who uses it, for your legal team to classify.",
+      "source": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/annex-3",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "reviewBy": "2027-01-12",
+      "solutions": ["ai-evaluation"],
+      "featured": true,
+      "checkLevel": "P"
+    }
+  ]
+}

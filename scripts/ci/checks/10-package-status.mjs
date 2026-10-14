@@ -11,6 +11,10 @@
 // solution's own page (solutions/<id>/), every block's data-package-id names a launch package
 // in src/content/solutions/<id>.yaml, and the block shows the pillar exactly when that package
 // has onshore: true. Gallery pages render fixtures, so only the markup rules apply there.
+// What onshore: true means (go-global §4.2): every step runs in the region the client chooses, in
+// their own account in any cloud region, or managed by Techsider in an Australian region. The
+// package's region note (#<block id>-onshore-note, labelled "Region note") says which and ends with
+// the remote-access sentence, and the pillar links to it. The rules above don't change with the wording.
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ONSHORE_PILLAR } from "../../../src/lib/fixed-copy.ts";

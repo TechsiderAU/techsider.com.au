@@ -8,6 +8,7 @@ import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, idsIn, startTags } from "../scripts/ci/lib.mjs";
 import { industriesHubView, solutionsHubView } from "../src/lib/views/hubs.ts";
 import { fixtureSite, industryFixtures, solutionFixtures } from "../src/fixtures/index.ts";
+import { REGION_LABEL } from "../src/lib/fixed-copy.ts";
 
 const SOLUTIONS_HUB = "preview/templates/solutions-hub/index.html";
 const INDUSTRIES_HUB = "preview/templates/industries-hub/index.html";
@@ -144,6 +145,9 @@ test("solutions-hub: By buyer lists each buyer's launch packages with their solu
       const links = tagged(lis[i].inner, "a");
       assert.deepEqual(links.map((a) => [a.attrs.href, text(a.inner)]), item.href ? [[item.href, item.name]] : []);
       assert.ok(text(lis[i].inner).includes(`${item.solution.number} ${item.solution.shortName}`), `${item.name}: no solution label`);
+      // An Australia-only package opens its item with the "Australia" label (go-global §3.3).
+      assert.equal(lis[i].attrs["data-region"], item.region ?? undefined, `${item.name}: data-region`);
+      assert.deepEqual(elementsWith(lis[i].inner, "data-region-label").map((l) => text(l.inner)), item.region ? [REGION_LABEL] : [], `${item.name}: label`);
     });
   }
   const more = tagged(panel.inner, "a").filter((a) => text(a.inner).startsWith("How engagements run"));
@@ -193,7 +197,7 @@ test("industries-hub: nine deep cards: heading link, hook, three numbered use ca
     // inlineText, not text: the number, name and label must be separated by real spaces in the markup.
     assert.deepEqual(
       uses.map((li) => inlineText(li.inner)),
-      card.useCases.map((u) => (u.onRequest ? `${u.number} ${u.name} On request` : `${u.number} ${u.name}`)),
+      card.useCases.map((u) => `${u.number} ${u.name}${u.region ? ` ${REGION_LABEL}` : ""}${u.onRequest ? " On request" : ""}`),
     );
     // "On request" is a text label, never a colour alone (spec §5, §6.6).
     uses.forEach((li, k) => {

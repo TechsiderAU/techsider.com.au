@@ -5,6 +5,8 @@
 # (spec §8.3). Every package is onshore: false, because the vendor sets where processing runs.
 # Kits are named, never described as reviewed, and offered only "where one is published": they stay
 # unpublished until a lawyer reviews them (plan Global Constraints, Kits; research index A1).
+# Its region notes (onshoreNote) name no region, so they carry no remote-access sentence; the
+# platform-you-license delivery choice on the page does (go-global §4.2, §4.3).
 # ⚑ owner: every commitment in this file must be in the standard engagement terms (spec §12 item 2)
 demo: ai-switch-on
 job: >-
@@ -19,8 +21,8 @@ needProfiles:
       them. Switch-On finds the ones you own, sets them up and trains your staff.
   - title: You need ground rules before staff use it.
     body: >-
-      Where a Safe-Use Kit for your industry is published, Switch-On applies it as is. Your own
-      adviser approves any consent, engagement-letter or policy wording.
+      In Australia, where a Safe-Use Kit for your industry is published, Switch-On applies it as is.
+      Your own adviser approves any consent, engagement-letter or policy wording.
   - title: You want to know it saved time.
     body: >-
       The Audit sets a baseline of where staff hours go. Day 30 measures the hours saved against it,
@@ -40,14 +42,14 @@ genericPackage:
     A firm of 20–300 staff with no IT team, whose software already includes AI features it hasn't
     set up or measured.
   scope: >-
-    Week 1: an Admin Hours Audit. Weeks 2–3: configure the AI features you already own, apply the
-    Safe-Use Kit for your industry where one is published, and train staff. Day 30: an hours-saved
-    report.
+    Week 1: an Admin Hours Audit. Weeks 2–3: configure the AI features you already own; for firms in
+    Australia, apply the Safe-Use Kit for your industry where one is published; and train staff.
+    Day 30: an hours-saved report.
   inclusions:
     - An hours map of where staff time goes, and which of it the tools you own could take on
     - A build, queue or park call on everything else
     - Set-up of the AI features you already license, directly or with your IT provider
-    - The Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry
+    - For firms in Australia, the Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry
     - Staff training
     - An hours-saved report at day 30, measured against the Audit baseline in your own units
   clientTime: >-
@@ -77,13 +79,14 @@ packages:
       the AI they already license set up with ground rules and measured.
     scope: >-
       The Admin Hours Audit takes 1 week and maps where staff hours go. Switch-On takes 2–3 weeks: it
-      configures features you already own, applies the relevant Safe-Use Kit as published, where one
-      has been published, trains staff and measures the hours saved at day 30.
+      configures features you already own; for firms in Australia, it applies the relevant Safe-Use
+      Kit as published, where one has been published; and it trains staff and measures the hours
+      saved at day 30.
     inclusions:
       - The Audit's hours map, with build, queue or park for each task
       - The baseline any later build is measured against
       - Set-up of the AI already in your practice, property or office software, such as Karbon AI's email summaries and suggested replies, or Reply with AiMe on PropertyMe's Advanced or Premier plan
-      - "The Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry. Otherwise, your own AI policy applies."
+      - "For firms in Australia, the Safe-Use Kit for accounting, legal or property, applied as is, where one is published for your industry. Otherwise, your own AI policy applies."
       - Staff training, and the day-30 hours-saved report
     clientTime: >-
       An operations lead for about 3 hours a week, admin access or your IT provider's help, and 2–3
@@ -99,14 +102,15 @@ packages:
       either way.
     onshoreNote: >-
       Every feature Switch-On sets up runs inside a platform you already license, where the vendor
-      sets the processing location. Many vendors don't publish where AI processing runs for
-      Australian customers, and the data note says so vendor by vendor, with the date it was checked.
+      sets the processing location. The data note goes vendor by vendor: what each publishes about
+      where its AI processing runs, or that it publishes none, with the date it was checked.
   - id: private-workspace
     name: Private Workspace
     status: on-request
     oneLiner: >-
-      A private AI workspace in an Australian region, in your account or managed by us, for firms whose
-      data rules bar the general AI tools they have and who hold no suitable licence.
+      A private AI workspace in your account in the region you choose, or in ours in an Australian
+      region, for firms whose data rules bar the general AI tools they have and who hold no suitable
+      licence.
   - id: citation-verification-log
     name: Citation Verification & AI-Use Disclosure Log
     status: on-request
@@ -123,8 +127,8 @@ whereItRuns:
   choices: [platform-you-license]
   note: >-
     Switch-On works only inside platforms you already license, so each vendor sets where your data
-    is processed. The Private Workspace, on request, is the option for work that has to stay in an
-    Australian region.
+    is processed. The Private Workspace, on request, is the option for work that has to stay in a
+    particular region.
 independencePolicy: false
 platformFirst: >-
   Check what you already pay for before you buy anything new: many practice, property and office
@@ -148,9 +152,9 @@ faq:
       saved measured at day 30.
   - q: Where is our data processed?
     a: >-
-      Inside the platforms you already license, where each vendor sets the processing location. Many
-      vendors don't publish where AI processing runs for Australian customers. The data note tells
-      you, vendor by vendor, what each publishes and when it was checked.
+      Inside the platforms you already license, where each vendor sets the processing location. The
+      data note tells you, vendor by vendor, what each publishes about that location, or that it
+      publishes none, and when it was checked.
   - q: What is a Safe-Use Kit?
     a: >-
       A starter set for accounting, legal or property teams, such as consent wording, a one-page AI

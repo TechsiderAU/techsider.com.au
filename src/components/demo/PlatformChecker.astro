@@ -15,6 +15,9 @@
 // points to the full table: every page that renders this renders PlatformFacts too.
 // `headingLevel` is the results heading's level, and its blocks' headings sit one below it: 3 inside
 // a PageSection, 2 straight under a page's h1. The ids are fixed, so a page holds one checker.
+// go-global §6.3: every fact it reads is checked for Australian customers, so the root carries
+// data-region="au" and opens with the "Australian plans and vendor pages" label.
+import RegionLabel from "../ui/RegionLabel.astro";
 import type { CheckerView } from "../../lib/views/checker";
 import { EMPTY_STATUS } from "../../scripts/checker";
 
@@ -27,7 +30,8 @@ const { view, headingLevel } = Astro.props;
 const Heading = `h${headingLevel}` as "h2" | "h3";
 const Block = `h${headingLevel + 1}` as "h3" | "h4";
 ---
-<div class="checker" data-checker>
+<div class="checker" data-checker data-region="au">
+  <RegionLabel kind="platform" />
   <p class="checker-nojs" data-checker-nojs>The checker runs in your browser, so it needs JavaScript. Every vendor fact it reads is in the table on this page.</p>
 
   <fieldset class="checker-form" data-checker-form hidden>
@@ -154,6 +158,9 @@ const Block = `h${headingLevel + 1}` as "h3" | "h4";
     gap: 2rem;
     min-width: 0;
     overflow-wrap: anywhere;
+  }
+  .checker > :global(.region-label) {
+    align-self: flex-start;
   }
   :global(.surface-bone) .checker {
     --checker-line: var(--color-bone-line);

@@ -8,6 +8,11 @@ export const plainRef: RefFactory = () => z.string().regex(/^[a-z0-9-]+$/);
 export const slug = z.string().regex(/^[a-z0-9-]+$/);
 export const jurisdiction = z.enum(["cth", "nsw", "vic", "qld", "local"]);
 export const faqItem = z.strictObject({ q: z.string().min(5), a: z.string().min(20) });
+/** go-global §3.3, §5.6, §6.1: marks Australia-only data. */
+export const auRegion = z.literal("au");
+/** go-global §5.6: an industry FAQ; region "au" moves it into #faq-au. The shared faqItem (above) is unchanged. */
+export const industryFaqItem = z.strictObject({ q: z.string().min(5), a: z.string().min(20), region: auRegion.optional() });
+export type IndustryFaqItem = z.infer<typeof industryFaqItem>;
 export const sourceRef = z.strictObject({ label: z.string().min(3), url: z.url(), asAt: z.coerce.date() });
 export const metric = z.strictObject({ value: z.number(), unit: z.string().optional() });
 export const provenance = z.enum(["measured", "illustrative"]);
@@ -32,10 +37,13 @@ export const launchPackage = z.strictObject({
   // false where the package holds no test on your own examples (④'s Agentic AI Control Evaluation
   // is a configuration review): its block leaves out the standard inclusion that promises one.
   testInclusion: z.literal(false).optional(),
+  // go-global §3.3: "au" on a package offered only in Australia, which renders an "Australia" label.
+  region: auRegion.optional(),
 });
 export const listedPackage = z.strictObject({
   id: slug, name: z.string(), status: z.enum(["on-request", "internal"]), oneLiner: z.string(),
   precondition: z.string().optional(),
+  region: auRegion.optional(), // go-global §3.3, as on a launch package
 });
 export const solutionPackage = z.discriminatedUnion("status", [launchPackage, listedPackage]);
 
@@ -118,14 +126,21 @@ export const makeIndustrySchema = (ref: RefFactory) => z.strictObject({
   packages: z.array(z.strictObject({ solution: ref("solutions"), package: slug, jurisdiction: jurisdiction.optional() })).min(3),
   platformFirst: z.string().optional(),
   dontDo: z.array(z.string()).min(1),
+  // go-global §5.2: the "Rules that travel" paragraph, 140 words or fewer with its travel sentence.
+  rulesThatTravel: z.string().min(1),
   problem: z.strictObject({ from: z.string(), to: z.string(), source: sourceRef }),
   workflow: z.array(z.strictObject({ id: slug, stage: z.string(), useCases: z.array(useCase(ref)).min(1) })).length(4),
   mockPanel,
   scenario: z.strictObject({ title: z.string(), problem: z.string(), approach: z.string(), measure: z.array(z.string()).min(1), shipsFirst: z.string(), trace: slug }),
   firstEngagement: z.strictObject({ needFromYou: z.array(z.string()).min(1), youGet: z.array(z.string()).min(1), exitRamp: z.string() }),
-  faq: z.array(faqItem).min(5).max(7),
+  faq: z.array(industryFaqItem).min(5).max(7),
   jurisdictions: z.array(jurisdiction).min(1).optional(),
-}).superRefine(industrySections);
+}).superRefine(industrySections).superRefine((d, ctx) => {
+  // go-global §5.6: the page's #faq renders the untagged questions, so it always has one.
+  if (d.faq.every((f) => f.region === "au")) {
+    ctx.addIssue({ code: "custom", path: ["faq"], message: 'every FAQ is tagged region "au": keep at least one untagged FAQ for #faq (go-global §5.6)' });
+  }
+});
 
 export const regulatoryRow = z.strictObject({
   id: slug, obligation: z.string(), meaning: z.string(), design: z.string(), evidence: z.string(),
@@ -134,13 +149,81 @@ export const regulatoryRow = z.strictObject({
 });
 export const regulatoryFile = z.strictObject({ rows: z.array(regulatoryRow).min(1) });
 
+// go-global §5.2, §5.3: the "Rules that travel" anchors, src/data/anchors/*.json (the `anchors`
+// collection). An anchor is an international or cross-border instrument a page maps its evidence
+// to, never an obligation row: those are the Australian regulatoryRow files above. shared.json holds
+// the cross-industry anchors; each industry's file lists the shared ids its "Everywhere" row shows,
+// then its own sector anchors. src/data/anchors/README.md has the rules in full.
+export const anchorKind = z.enum(["law", "treaty", "international-standard", "supervisory-principles", "guidance", "professional-ethics"]);
+export const anchorStatus = z.enum(["in-force", "applies-from", "published", "draft", "not-in-force"]);
+/** The research's check levels: P primary read; P* primary blocked, corroborated; S secondary only; UNVERIFIED never ships. */
+export const checkLevel = z.enum(["P", "P*", "S", "UNVERIFIED"]);
+export type AnchorStatus = z.infer<typeof anchorStatus>;
+export type CheckLevel = z.infer<typeof checkLevel>;
+// Typed as readonly arrays of the full union (not `as const` tuples): a tuple's .includes() accepts
+// only its own members, so passing a.status / a.checkLevel would be TS2345 and fail `astro check`.
+/** Statuses whose anchor needs a reviewBy; EU AI Act and GDPR anchors need one too (REVIEW_BY_NAME). */
+export const REVIEW_BY_STATUSES: readonly AnchorStatus[] = ["applies-from", "draft", "not-in-force"];
+export const REVIEW_BY_NAME = /\b(?:EU AI Act|GDPR)\b/;
+/** Statuses whose chip label prints statusDate (src/lib/anchors.ts). */
+export const DATED_STATUSES: readonly AnchorStatus[] = ["applies-from", "published"];
+/** Check levels that may be featured (render). */
+export const FEATURABLE_LEVELS: readonly CheckLevel[] = ["P", "P*"];
+
+export const anchor = z.strictObject({
+  id: slug, name: z.string().min(3), issuer: z.string().min(2), kind: anchorKind,
+  binding: z.string().min(3), // one plain line, in the source's own terms
+  status: anchorStatus, statusDate: z.coerce.date().optional(),
+  asks: z.string().min(10),
+  evidence: z.string().min(10), // an artefact Techsider produces; never a conformity claim
+  source: z.url(), // the primary URL; the chip links here
+  asAt: z.coerce.date(), lastReviewed: z.coerce.date(),
+  reviewBy: z.coerce.date().optional(),
+  solutions: z.array(slug), // solution ids (tests check each exists)
+  featured: z.boolean(),
+  checkLevel,
+}).superRefine((a, ctx) => {
+  const issue = (path: string, message: string) => ctx.addIssue({ code: "custom", path: [path], message });
+  if (a.reviewBy === undefined && (REVIEW_BY_STATUSES.includes(a.status) || REVIEW_BY_NAME.test(a.name))) {
+    const why = REVIEW_BY_STATUSES.includes(a.status) ? `its status is ${a.status}` : "it names the EU AI Act or GDPR";
+    issue("reviewBy", `anchor "${a.id}" needs a reviewBy: ${why} (go-global §5.3)`);
+  }
+  if (a.statusDate === undefined && DATED_STATUSES.includes(a.status)) {
+    issue("statusDate", `anchor "${a.id}" is ${a.status}, so it needs the statusDate its chip prints (go-global §5.2)`);
+  }
+  if (a.featured && !FEATURABLE_LEVELS.includes(a.checkLevel)) {
+    issue("featured", `anchor "${a.id}" is checkLevel ${a.checkLevel}: only P or P* anchors may be featured (go-global §5.3)`);
+  }
+});
+
+export const anchorFile = z.strictObject({
+  /** Industry files only: shared.json ids for this page's "Everywhere" row, in order. */
+  shared: z.array(slug).min(4).max(5).optional(),
+  anchors: z.array(anchor).min(1),
+}).superRefine((f, ctx) => {
+  const issue = (path: string, message: string) => ctx.addIssue({ code: "custom", path: [path], message });
+  const twice = (ids: string[]) => [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
+  const ids = f.anchors.map((a) => a.id);
+  for (const id of twice(ids)) issue("anchors", `anchor id "${id}" repeats`);
+  for (const id of twice(f.shared ?? [])) issue("shared", `shared id "${id}" repeats`);
+  for (const id of ids.filter((x) => f.shared?.includes(x))) {
+    issue("anchors", `"${id}" is both a shared id and an anchor of this file: a chip shows once per page (go-global §5.2)`);
+  }
+});
+
+export type AnchorKind = z.infer<typeof anchorKind>;
+export type AnchorData = z.infer<typeof anchor>;
+export type AnchorFileData = z.infer<typeof anchorFile>;
+
 export const makeKitSchema = (ref: RefFactory) => z.strictObject({
   industry: ref("industries"), title: z.string(), summary: z.string(), contents: z.array(z.string()).min(1),
   source: sourceRef, asAt: z.coerce.date(), lawyerReviewedAt: z.coerce.date().nullable(), download: z.string().regex(/^\/downloads\/[a-z0-9-]+\.(pdf|docx)$/),
+  region: auRegion.optional(), // go-global §3.3: an Australia-only Safe-Use Kit
 });
 
 export const traceLine = z.strictObject({ t: z.string().regex(/^\d{2}:\d{2}:\d{2}$/), op: z.string(), detail: z.string(), metric: metric.optional() });
-export const traceFile = z.strictObject({ title: z.string(), provenance, run: z.string().optional(), lines: z.array(traceLine).min(1) })
+// region "au": a trace built on Australian sources, labelled "Australian example" (go-global §6.3).
+export const traceFile = z.strictObject({ title: z.string(), provenance, run: z.string().optional(), lines: z.array(traceLine).min(1), region: auRegion.optional() })
   .refine((t) => t.provenance !== "measured" || !!t.run, { message: "measured traces need a run path" });
 
 // Demo data (spec §9.1, §9.3): one data schema per demo kind; makeDemoSchema, after sampleReport
@@ -313,6 +396,7 @@ export type DemoKind = z.infer<typeof demoKind>;
 /** One replayed or reported demo kind's entry: the fields every such demo shares, and that kind's data. */
 const demoEntry = <K extends DemoKind, D extends z.ZodType>(ref: RefFactory, kind: K, data: D) => z.strictObject({
   solution: ref("solutions"), title: z.string(), kind: z.literal(kind), provenance, run: z.string().optional(), data,
+  region: auRegion.optional(), // go-global §6.3: a demo built on Australian sources ("Australian example")
 });
 /**
  * The ⑤ checker's provenance (controller ruling 6). Its data is real, dated vendor facts, each with
@@ -339,6 +423,9 @@ export const makeInsightSchema = (ref: RefFactory) => z.strictObject({
   type: z.enum(["article", "reference-scenario", "platform-guide"]),
   industries: z.array(ref("industries")).default([]), solutions: z.array(ref("solutions")).default([]),
   illustrative: z.boolean().default(false), draft: z.boolean().default(false),
+  // go-global §6.1, §6.5: region "au" labels a post whose subject is Australian; reviewBy dates a
+  // post whose claims rest on dates that may move.
+  region: auRegion.optional(), reviewBy: z.coerce.date().optional(),
 }).refine((i) => i.type !== "reference-scenario" || i.illustrative, {
   message: "reference scenarios must set illustrative: true", path: ["illustrative"],
 });

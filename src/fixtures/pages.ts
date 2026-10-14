@@ -11,7 +11,7 @@
 // - servicesFixture's "evaluation-partner" service carries the one id ServicesTemplate links to a
 //   page of its own, so the gallery shows a linked service card beside the plain ones.
 import type {
-  AboutData, ContactData, DocumentData, HomeData, PositioningData, ServicesData, TrustData,
+  AboutData, ContactData, DocumentData, HomeData, InternationalData, PositioningData, ServicesData, TrustData,
 } from "../content/page-schemas.ts";
 import { HOME_TRUST_QUESTION } from "../lib/fixed-copy.ts";
 
@@ -131,6 +131,8 @@ export const servicesFixture: ServicesData = {
 
 export const contactFixture: ContactData = {
   replyTime: "one fixture business day",
+  replyTimeBase: "fixture time (FXT)",
+  timeZone: "Australia/Sydney",
   formEndpoint: "https://example.com/fixture/form",
   formProvider: { name: "Fixture Forms", country: "Fixture country A" },
   redirectField: "fixture-redirect",
@@ -154,6 +156,18 @@ export const contactFixture: ContactData = {
 
 /** No form endpoint yet (the owner hasn't chosen a provider): the contact page leads with the email address. */
 export const contactNoEndpointFixture: ContactData = { ...contactFixture, formEndpoint: null };
+
+/**
+ * The "For organisations outside Australia" lines (go-global §7.3): one confirmed line, the
+ * confirmed delivery line that /contact/ leaves out (its hero says it), and one unconfirmed line per
+ * gate, which must never render.
+ */
+export const internationalFixture: InternationalData = [
+  { id: "entity", text: "Fixture entity line: Fixture Company Pty Ltd, headquartered in a fixture city.", confirmed: true, gate: null },
+  { id: "delivery", text: "Fixture delivery line: delivered remotely from the fixture city.", confirmed: true, gate: null },
+  { id: "dpa", text: "Fixture legal line: a fixture agreement awaiting a lawyer's review, so it must never render.", confirmed: false, gate: "legal" },
+  { id: "representative", text: "Fixture owner line: a fixture representative the owner hasn't confirmed, so it must never render.", confirmed: false, gate: "owner" },
+];
 
 const asAt = new Date("2026-09-15");
 
@@ -204,16 +218,21 @@ export const trustFixture: TrustData = {
       { name: "Fixture drafting aid", purpose: "Fixture purpose: drafts fixture notes", data: "Fixture data: fixture notes only", human: "Fixture human: a person edits every fixture draft" },
     ],
   },
+  // go-global §7.2: one engagement service, so the gallery's Trust page shows the table and its notice.
+  engagementSubProcessors: [
+    { service: "Fixture hosting service", purpose: "Fixture purpose: runs the fixture system for an engagement", country: "Fixture country C", mechanism: "Fixture mechanism: the fixture transfer clauses" },
+  ],
   changes: [
     { date: new Date("2026-09-15"), change: "Fixture change: fixture Part A re-checked." },
     { date: new Date("2026-08-01"), change: "Fixture change: fixture page published." },
   ],
 };
 
-/** No Part B term confirmed yet: the Trust page leaves out Part B and every Part B answer. */
+/** No Part B term confirmed and no engagement service listed yet: the Trust page leaves out Part B, every Part B answer and the engagement table (go-global §7.2). */
 export const trustNoTermsFixture: TrustData = {
   ...trustFixture,
   partB: trustFixture.partB.map((term) => ({ ...term, confirmed: false })),
+  engagementSubProcessors: [],
 };
 
 export const aboutFixture: AboutData = {

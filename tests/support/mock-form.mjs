@@ -15,6 +15,9 @@
 //   success; the 422 body is this local mock's supported validation shape, not verified vendor
 //   behaviour. It lets tests exercise field errors; the chosen provider needs its own check.
 // - A filled `_gotcha` honeypot is answered as a success and never delivered.
+// - Every field it accepts is delivered as posted, as a provider's email lists every field: the
+//   required ENQUIRY_FIELDS (country among them, go-global §8.1), the optional discovery and
+//   timezone answers, which may be empty, and the provider's own fields.
 // - GET /__log?organisation=<name> lists what was delivered and what was dropped as spam for that
 //   organisation, so tests running in parallel each read their own enquiries. GET / answers
 //   Playwright's readiness check.

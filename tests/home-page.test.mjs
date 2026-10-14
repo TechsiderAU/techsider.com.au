@@ -60,10 +60,12 @@ for (const [build, { read, dir, site }] of Object.entries(BUILDS)) {
       assert.equal(one(template.inner, "id", id).attrs["aria-labelledby"], `${id}-heading`);
     }
     assert.deepEqual((await checkAnchors({dist:dir})).errors, []);
-    assert.equal(pageTitle(HOME_PAGE), "AI Automation Solutions in Australia | Techsider");
+    assert.equal(pageTitle(HOME_PAGE), "AI Automation Solutions | Techsider");
     assert.ok(HOME_PAGE.description.includes("AI automation"));
     const hero = one(main, "data-page-hero");
     assert.ok(text(hero.inner).includes(AUTOMATION.sub));
+    // go-global §3.2, S2: the eyebrow names no country.
+    assert.deepEqual(elements(hero.inner, (t) => t.attrs.class === "page-hero-eyebrow").map((e) => text(e.inner)), ["AI automation, wherever you operate"]);
     assert.deepEqual(tagged(hero.inner, "a").map(a=>[text(a.inner),a.attrs.href]), [["Talk about your workflow",site.contact()],["Explore solutions","#services"]]);
     const services = one(main,"id","services");
     const capabilities = elementsWith(services.inner,"data-capability");
@@ -97,6 +99,12 @@ for (const [build, { read, dir, site }] of Object.entries(BUILDS)) {
     for(const figure of art.slice(1)) assert.equal(tagged(figure.inner,"img")[0].attrs.loading,"lazy");
   });
 }
+
+test("the hero's illustrative trace speaks to any public-sector reader, not a state agency (go-global §3.5)", () => {
+  const trace = JSON.parse(readFileSync(join(ROOT, "src/data/traces/home-hero.json"), "utf8"));
+  assert.equal(trace.lines[0].detail, "Question received from a fictional public-sector agency officer");
+  assert.doesNotMatch(JSON.stringify(trace), /\bstate agency\b/i);
+});
 
 test("#insights: the newest three posts while the newest is 45 days old or less at build time, otherwise only the All insights link (spec §8.1 block 9)", () => {
   const posts = listFiles(join(ROOT, "src/content/insights"), (rel) => rel.endsWith(".md"))

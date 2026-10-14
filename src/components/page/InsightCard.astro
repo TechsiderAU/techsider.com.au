@@ -5,8 +5,12 @@
 // industry chips sit above that stretched link, so each chip is its own target. An industry whose
 // page isn't shown has a null href and renders as a plain-text chip.
 // Dates are shown in UTC: content dates are calendar dates, parsed as UTC midnight.
+// An Australian post (card.region "au", go-global §6.1) marks its card data-region="au" and opens
+// it with the "Australia" label (RegionLabel), above the type tag. The title link names the label in
+// its aria-describedby, so the label reaches screen-reader users who move by links or headings.
 import type { InsightCardView } from "../../lib/views/insights";
 import BracketChip from "../ui/BracketChip.astro";
+import RegionLabel from "../ui/RegionLabel.astro";
 import { formatDate, isoDate } from "../../lib/dates";
 
 interface Props {
@@ -16,11 +20,14 @@ interface Props {
 
 const { card, level = 3 } = Astro.props;
 const Heading = `h${level}` as "h2" | "h3";
+/** The label's id: a post's card appears once on a page. */
+const regionId = card.region ? `insight-${card.id}-region-label` : undefined;
 ---
-<article class="insight-card" data-insight-card>
+<article class="insight-card" data-insight-card data-region={card.region ?? undefined}>
+  {card.region && <RegionLabel id={regionId} />}
   <p class="insight-card-meta"><BracketChip label={card.typeLabel.toLowerCase()} /> · <time datetime={isoDate(card.date)}>{formatDate(card.date)}</time> · {card.minutes} min read</p>
   <Heading class:list={["insight-card-title", `insight-card-title-${level}`]}>
-    <a href={card.href} class="insight-card-link">{card.title}</a>
+    <a href={card.href} class="insight-card-link" aria-describedby={regionId}>{card.title}</a>
   </Heading>
   <p class="insight-card-description">{card.description}</p>
   {card.industries.length > 0 && (
@@ -44,6 +51,10 @@ const Heading = `h${level}` as "h2" | "h3";
     overflow-wrap: anywhere;
     border: 1px solid var(--color-graphite);
     border-radius: 8px;
+  }
+  /* The card is a flex column: the label keeps its own width instead of stretching across it. */
+  .insight-card > :global(.region-label) {
+    align-self: flex-start;
   }
   .insight-card-meta {
     margin: 0;

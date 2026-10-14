@@ -57,7 +57,7 @@ test("patterns the pre-check can't evaluate are rejected loudly", () => {
 test("every content and data directory exists and carries a README", () => {
   for (const dir of [
     "src/content/solutions", "src/content/industries", "src/content/kits", "src/content/documents",
-    "src/data/regulatory", "src/data/demos", "src/data/traces", "src/data/runs",
+    "src/data/regulatory", "src/data/anchors", "src/data/demos", "src/data/traces", "src/data/runs",
   ]) {
     const readme = join(ROOT, dir, "README.md");
     assert.ok(existsSync(readme), `${dir}/README.md is missing`);

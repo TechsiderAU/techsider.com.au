@@ -10,11 +10,13 @@ import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readPreviewDist, visibleText } from "./helpers.mjs";
 import { decodeEntities, elements, elementsWith, idsIn, startTags } from "../scripts/ci/lib.mjs";
-import { CONTACT_H1, EXTRA_INTERESTS, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../src/lib/fixed-copy.ts";
+import { CONTACT_BASE, CONTACT_H1, ENGAGEMENT_SUBPROCESSORS_HEADING, ENGAGEMENT_SUBPROCESSORS_NOTICE, EXTRA_INTERESTS, INTERNATIONAL_HEADING, MESSAGE_PLACEHOLDER, ORG_SIZES } from "../src/lib/fixed-copy.ts";
+import { countryOptions } from "../src/data/countries.ts";
+import { replySentence } from "../src/lib/reply-time.ts";
 import { insightCards } from "../src/lib/views/insights.ts";
 import { trustView } from "../src/lib/views/company.ts";
 import {
-  aboutFixture, contactFixture, contactNoEndpointFixture, documentFixtures, fixtureSite, insightFixtures,
+  aboutFixture, contactFixture, contactNoEndpointFixture, documentFixtures, fixtureSite, insightFixtures, internationalFixture,
   positioningFixture, servicesFixture, trustFixture, trustNoTermsFixture,
 } from "../src/fixtures/index.ts";
 import { renderAstro } from "./support/render-astro.mjs";
@@ -33,7 +35,8 @@ const PAGES = {
 };
 // The hubs the 404 offers, in order; only the ones the SiteContext shows are listed.
 const NOT_FOUND_HUBS = ["home", "solutions", "industries", "services", "resources", "insights", "demos", "about"];
-const REPLY_SENTENCE = `We reply within ${contactFixture.replyTime}.`;
+// go-global §4.5: "We reply within one fixture business day, fixture time (FXT)."
+const REPLY_SENTENCE = replySentence(contactFixture);
 const TEMPLATES_DIR = fileURLToPath(new URL("../dist-preview/preview/templates/", import.meta.url));
 
 const page = (kind) => readPreviewDist(`preview/templates/${kind}/index.html`);
@@ -149,7 +152,7 @@ test("about: at most three insight cards, newest first, then All insights; the p
 
 test("trust: the blocks in order, and Part A dated with the sub-processor table from the contact data", () => {
   const main = mainOf(page("trust"));
-  assert.deepEqual(blockIds(main), ["part-a", "part-b", "independence", "questions", "ai-transparency", "changes"]);
+  assert.deepEqual(blockIds(main), ["part-a", "part-b", "engagement-sub-processors", "independence", "outside-australia", "questions", "ai-transparency", "changes"]);
   const partA = one(main, "id", "part-a");
   assert.equal(text(one(partA.inner, "id", "part-a-heading").inner), "Our website and email today");
   const asAt = one(partA.inner, "data-as-at");
@@ -251,6 +254,55 @@ test("trust: a Part B answer resting on an unconfirmed term never renders, on th
   }
 });
 
+test("trust: For organisations outside Australia follows the independence policy with every confirmed line, delivery included; no unconfirmed line renders (go-global §7.3)", () => {
+  const html = page("trust");
+  const block = one(mainOf(html), "id", "outside-australia");
+  assert.equal(text(one(block.inner, "id", "outside-australia-heading").inner), INTERNATIONAL_HEADING);
+  assert.equal(elementsWith(block.inner, "data-international").length, 1, "no [data-international] list");
+  assert.deepEqual(
+    elementsWith(block.inner, "data-international-line").map((l) => [l.attrs["data-international-line"], text(l.inner)]),
+    internationalFixture.filter((l) => l.confirmed).map((l) => [l.id, l.text]),
+  );
+  for (const l of internationalFixture.filter((x) => !x.confirmed)) assert.ok(!visibleText(html).includes(l.text), `the ${l.id} line renders`);
+});
+
+test("contact-no-endpoint and trust-no-terms: with no line to show, neither the block nor its heading renders (go-global §7.3)", () => {
+  for (const kind of ["contact-no-endpoint", "trust-no-terms"]) {
+    const html = page(kind);
+    assert.equal(elementsWith(html, "id", "outside-australia").length, 0, `${kind}: #outside-australia renders`);
+    assert.equal(elementsWith(html, "data-international-line").length, 0, `${kind}: a line renders`);
+    assert.ok(!visibleText(html).includes(INTERNATIONAL_HEADING), `${kind}: the heading renders with no line under it`);
+  }
+});
+
+test("trust: the engagement sub-processor table lists each service, purpose, country and transfer mechanism, then the change notice (go-global §7.2)", () => {
+  const main = mainOf(page("trust"));
+  const section = one(main, "id", "engagement-sub-processors");
+  assert.equal(text(one(section.inner, "id", "engagement-sub-processors-heading").inner), ENGAGEMENT_SUBPROCESSORS_HEADING);
+  const table = tagged(section.inner, "table");
+  assert.equal(table.length, 1);
+  assert.deepEqual(tagged(tagged(table[0].inner, "thead")[0].inner, "th").map((th) => text(th.inner)), ["Service", "Purpose", "Country", "Transfer mechanism"]);
+  // DataTable repeats each column label inside its cell for the stacked layout; read the value alone.
+  const cellValue = (cell) => {
+    const [label] = withClass(cell.inner, "dt-label");
+    return text(label ? cell.inner.replace(label.outer, "") : cell.inner);
+  };
+  const rows = tagged(tagged(table[0].inner, "tbody")[0].inner, "tr");
+  assert.deepEqual(
+    rows.map((row) => elements(row.inner, (t) => t.name === "th" || t.name === "td").map(cellValue)),
+    trustFixture.engagementSubProcessors.map((s) => [s.service, s.purpose, s.country, s.mechanism]),
+  );
+  assert.equal(text(one(section.inner, "data-change-notice").inner), ENGAGEMENT_SUBPROCESSORS_NOTICE);
+});
+
+test("trust-no-terms: with no engagement service listed, the table and its change notice are absent (go-global §7.2, S6)", () => {
+  assert.deepEqual(trustNoTermsFixture.engagementSubProcessors, []);
+  const main = mainOf(page("trust-no-terms"));
+  assert.equal(elementsWith(main, "id", "engagement-sub-processors").length, 0);
+  assert.equal(elementsWith(main, "data-change-notice").length, 0);
+  assert.ok(!visibleText(main).includes(ENGAGEMENT_SUBPROCESSORS_HEADING), "the table's heading renders with no row");
+});
+
 test("trust-no-terms: with no confirmed term, #part-b and every Part B answer are absent; Part A stays", () => {
   assert.ok(trustNoTermsFixture.partB.every((t) => !t.confirmed), "the fixture confirms a term");
   const html = page("trust-no-terms");
@@ -343,13 +395,17 @@ test("contact: a plain POST form to the endpoint, with native validation on requ
     elements(form.inner, (t) => ["input", "select", "textarea"].includes(t.name)).map((c) => [c.attrs.name, c]),
   );
   // The stand-in provider's hidden fields, the enquiry fields, then the honeypot under the provider's name.
-  assert.deepEqual(Object.keys(controls), ["_redirect", "_append", "name", "email", "organisation", "industry", "size", "interest", "message", "discovery", "consent", "_gotcha"]);
+  assert.deepEqual(Object.keys(controls), ["_redirect", "_append", "name", "email", "organisation", "country", "industry", "size", "interest", "message", "discovery", "consent", "_gotcha", "timezone"]);
   assert.equal(controls.discovery.name, "select");
   assert.ok(!("required" in controls.discovery.attrs));
+  // go-global §8.1: the browser's time zone, empty until the form's own script fills it, never required.
+  const zone = controls.timezone;
+  assert.deepEqual([zone.name, zone.attrs.type, zone.attrs.value, "data-timezone" in zone.attrs, "required" in zone.attrs], ["input", "hidden", "", true, false]);
   const expect = {
     name: { tag: "input", type: "text", autocomplete: "name" },
     email: { tag: "input", type: "email", autocomplete: "email" },
     organisation: { tag: "input", type: "text", autocomplete: "organization" },
+    country: { tag: "select", autocomplete: "country" },
     industry: { tag: "select" },
     size: { tag: "select" },
     interest: { tag: "select" },
@@ -366,16 +422,43 @@ test("contact: a plain POST form to the endpoint, with native validation on requ
   }
 });
 
-test("contact: the selects offer the nine industries and Other, the organisation sizes, and the five solutions plus the extra interests", () => {
+test("contact: the selects offer every country by its English name, the nine industries and Other, the organisation sizes, and the five solutions plus the extra interests", () => {
   const form = one(mainOf(page("contact")), "data-contact-form");
   const options = (name) => {
     const select = elements(form.inner, (t) => t.name === "select" && t.attrs.name === name)[0];
     return tagged(select.inner, "option").map((o) => [o.attrs.value, text(o.inner)]);
   };
   const placeholder = ["", "Choose one"];
+  // go-global §8.1: every code in src/data/countries.ts, named by Intl and sorted by name, and no
+  // country chosen for the visitor.
+  assert.deepEqual(options("country"), [placeholder, ...countryOptions().map((o) => [o.value, o.label])]);
+  const country = elements(form.inner, (t) => t.name === "select" && t.attrs.name === "country")[0];
+  assert.equal(tagged(country.inner, "option").filter((o) => "selected" in o.attrs).length, 0, "a country is preselected");
   assert.deepEqual(options("industry"), [placeholder, ...fixtureSite.industries.map((i) => [i.id, i.shortName]), ["other", "Other"]]);
   assert.deepEqual(options("size"), [placeholder, ...ORG_SIZES.map((s) => [s, s])]);
   assert.deepEqual(options("interest"), [placeholder, ...fixtureSite.solutions.map((s) => [s.id, s.shortName]), ...EXTRA_INTERESTS.map((e) => [e.id, e.label])]);
+});
+
+test("contact: How did you find us? stays optional, and offers directories, more AI assistants and our own outreach as answers (go-global §8.1)", () => {
+  const form = one(mainOf(page("contact")), "data-contact-form");
+  const select = elements(form.inner, (t) => t.name === "select" && t.attrs.name === "discovery")[0];
+  assert.ok(!("required" in select.attrs));
+  assert.deepEqual(tagged(select.inner, "option").map((o) => [o.attrs.value, text(o.inner)]), [
+    ["", "Prefer not to say"],
+    ["Google Search", "Google Search"],
+    ["Bing Search", "Bing Search"],
+    ["ChatGPT", "ChatGPT"],
+    ["Microsoft Copilot", "Microsoft Copilot"],
+    ["Perplexity", "Perplexity"],
+    ["Gemini or Google AI Mode", "Gemini or Google AI Mode"],
+    ["Claude", "Claude"],
+    ["Other AI assistant", "Other AI assistant"],
+    ["Directory listing", "Directory listing"],
+    ["LinkedIn", "LinkedIn"],
+    ["Referral", "Referral"],
+    ["Techsider contacted me", "Techsider contacted me"],
+    ["Other", "Other"],
+  ]);
 });
 
 test("contact: every visible control has a visible <label for>; the consent and the collection notice link to the privacy policy (WB-12)", () => {
@@ -408,6 +491,8 @@ test("contact: an unavailable privacy policy uses a visible enquiry notice witho
   const notice = one(inline, "id", "enquiry-privacy");
   assert.ok(text(notice.inner).includes(contactFixture.formProvider.name));
   assert.ok(text(notice.inner).includes(contactFixture.emailProvider.name));
+  // go-global §8.1: the notice the consent box points to also names the time zone the form records.
+  assert.ok(text(notice.inner).includes("We also record your browser's time zone, so our reply suits your working hours."));
   const shown = { ...unavailable, page: (id) => ({ ...unavailable.page(id), href: id === "privacy" ? "/privacy/" : unavailable.page(id).href }) };
   const html = await renderAstro(component, { contact: contactFixture, site: shown });
   assert.match(html, /data-contact-form/);
@@ -434,7 +519,7 @@ test("contact: the collection notice names both providers, directly above the Se
   const { formProvider: f, emailProvider: e } = contactFixture;
   assert.equal(
     inlineText(notice.inner),
-    `Your enquiry is sent via ${f.name} to our ${e.name} mailbox. See our privacy policy.`,
+    `Your enquiry is sent via ${f.name} to our ${e.name} mailbox. We also record your browser's time zone, so our reply suits your working hours. See our privacy policy.`,
   );
   const button = tagged(form.inner, "button");
   assert.equal(button.length, 1);
@@ -447,7 +532,7 @@ test("contact: the collection notice names both providers, directly above the Se
 
 test("contact: the email address is plain text with a hidden copy button and a polite status; then what next and the deflection column", () => {
   const main = mainOf(page("contact"));
-  const order = ["form", "email", "next", "elsewhere"].map((id) => main.indexOf(`id="${id}"`));
+  const order = ["form", "email", "next", "outside-australia", "elsewhere"].map((id) => main.indexOf(`id="${id}"`));
   assert.ok(order.every((at, i) => at > 0 && (i === 0 || at > order[i - 1])), `blocks out of order: ${order}`);
   const email = one(main, "id", "email");
   assert.equal(text(one(email.inner, "id", "email-heading").inner), "Email us");
@@ -466,12 +551,45 @@ test("contact: the email address is plain text with a hidden copy button and a p
 
   const next = one(main, "id", "next");
   assert.equal(text(one(next.inner, "id", "next-heading").inner), "What happens next");
-  assert.equal(text(one(next.inner, "data-reply-time").inner), REPLY_SENTENCE);
+  // go-global §3.2, R6: the reply time moved to the hero, so #next lists the steps only.
+  assert.equal(elementsWith(next.inner, "data-reply-time").length, 0, "#next still states the reply time");
   assert.deepEqual(tagged(tagged(next.inner, "ol")[0].inner, "li").map((li) => text(li.inner)), contactFixture.whatNext);
   const elsewhere = one(main, "id", "elsewhere");
   assert.equal(text(one(elsewhere.inner, "id", "elsewhere-heading").inner), "Something else?");
   assert.deepEqual(tagged(elsewhere.inner, "h3").map((h) => text(h.inner)), contactFixture.deflection.map((d) => d.title));
   assert.deepEqual(tagged(elsewhere.inner, "a").map((a) => a.attrs.href), contactFixture.deflection.map((d) => `mailto:${d.email}`));
+});
+
+test("contact: the hero's sub is the delivery line, then the one reply-time sentence with its time base (go-global §3.2, §4.5, R6)", () => {
+  assert.equal(REPLY_SENTENCE, "We reply within one fixture business day, fixture time (FXT).");
+  for (const kind of ["contact", "contact-no-endpoint"]) {
+    const html = page(kind);
+    const hero = one(mainOf(html), "data-page-hero");
+    const subs = withClass(hero.inner, "page-hero-sub");
+    assert.equal(subs.length, 1, `${kind}: ${subs.length} hero subs`);
+    assert.equal(inlineText(subs[0].inner), `${CONTACT_BASE} ${REPLY_SENTENCE}`, kind);
+    assert.equal(inlineText(one(subs[0].inner, "data-reply-time").inner), REPLY_SENTENCE, kind);
+    assert.equal(elementsWith(html, "data-reply-time").length, 1, `${kind}: more than one reply-time statement`);
+    assert.equal(withClass(hero.inner, "page-hero-slot").length, 0, `${kind}: the sub slot spilled into the hero's default slot`);
+  }
+});
+
+test("contact: For organisations outside Australia shows the confirmed lines, less the delivery line the hero says; no unconfirmed line renders (go-global §7.3)", () => {
+  const html = page("contact");
+  const block = one(mainOf(html), "id", "outside-australia");
+  assert.equal(block.name, "section");
+  assert.ok("data-international" in block.attrs);
+  assert.equal(block.attrs["aria-labelledby"], "outside-australia-heading");
+  const heading = one(block.inner, "id", "outside-australia-heading");
+  assert.equal(heading.name, "h2");
+  assert.equal(text(heading.inner), INTERNATIONAL_HEADING);
+  assert.deepEqual(
+    elementsWith(block.inner, "data-international-line").map((l) => [l.attrs["data-international-line"], text(l.inner)]),
+    internationalFixture.filter((l) => l.confirmed && l.id !== "delivery").map((l) => [l.id, l.text]),
+  );
+  for (const l of internationalFixture.filter((x) => !x.confirmed || x.id === "delivery")) {
+    assert.ok(!visibleText(html).includes(l.text), `the ${l.id} line renders on the contact page`);
+  }
 });
 
 test("contact-no-endpoint: no form at all, and the email address leads", () => {
@@ -498,10 +616,15 @@ test("sent: the reply-time sentence, what happens next and the email address as 
   assert.equal(tagged(email.inner, "a").length, 0);
 });
 
-test("the reply time is stated on the contact and sent pages only", () => {
+test("the reply time is stated on the contact and sent pages only, once each, as the shared sentence (go-global §4.5, R6)", () => {
   const kinds = readdirSync(TEMPLATES_DIR, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
   const stating = kinds.filter((kind) => visibleText(mainOf(page(kind))).includes(contactFixture.replyTime));
   assert.deepEqual(stating, ["contact", "contact-no-endpoint", "sent"]);
+  for (const kind of stating) {
+    const html = page(kind);
+    assert.equal(visibleText(html).split(contactFixture.replyTime).length - 1, 1, `${kind} states the reply time more than once`);
+    assert.equal(inlineText(one(html, "data-reply-time").inner), REPLY_SENTENCE, kind);
+  }
 });
 
 test("not-found: a card for every shown hub, then Report this link with the address as plain text", () => {

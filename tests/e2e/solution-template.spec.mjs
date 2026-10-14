@@ -79,6 +79,17 @@ test("the processing note in a tab links to that package's onshore note and keep
   await expect(page.locator(`#${offshore.id}-block-onshore-note`)).toBeInViewport();
 });
 
+test("the region badge in a tab links to that package's region note and keeps the tab selected (go-global §4.2, R5)", async ({ page }) => {
+  const onshore = launchOf(ONE).find((p) => p.onshore);
+  expect(onshore, "the ① fixture has an onshore launch package").toBeTruthy();
+  await page.setViewportSize(WIDE);
+  await open(page, `${PAGES[ONE]}#${onshore.id}`);
+  await page.locator(`#${onshore.id}-block [data-onshore-pillar] a`).click();
+  await expect(page).toHaveURL(new RegExp(`#${onshore.id}-block-onshore-note$`));
+  await expect(page.locator(`#${onshore.id}-tab`)).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(`#${onshore.id}-block-onshore-note`)).toBeInViewport();
+});
+
 for (const vp of [WIDE, NARROW]) {
   test(`without JavaScript every package is a visible stacked block, and #package-id lands on it, at ${vp.width}px`, async ({ browser }) => {
     const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: vp });

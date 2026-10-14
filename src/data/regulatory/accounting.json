@@ -35,7 +35,7 @@
       "obligation": "Privacy Act APPs 6 and 11: personal information entered into AI products",
       "meaning": "For practices the APPs cover (generally turnover over $3m; smaller ones only in listed cases), putting personal information into an AI product is a use or disclosure under APP 6, and APP 11 requires reasonable security steps.",
       "design": "Where the provider offers the setting, tools are set so it doesn't train on what you enter.",
-      "evidence": "An onshore note stating where inference runs and what the provider retains",
+      "evidence": "A region note stating where inference runs and what the provider retains",
       "source": "https://www.oaic.gov.au/privacy/privacy-guidance-for-organisations-and-government-agencies/guidance-on-privacy-and-the-use-of-commercially-available-ai-products",
       "asAt": "2025-01-17",
       "lastReviewed": "2026-09-29"

@@ -1,35 +1,45 @@
 ---
-// Industry page template (spec §8.5). Body only: a Phase C route loads the industry, its
-// regulatory rows, the solutions, the traces and the insight cards, calls industryView()
-// (src/lib/views/industry.ts) and renders this inside BaseLayout. Every link comes from the view,
-// so a page that isn't shown yet renders as plain text.
-// - Single mode (eight industries): blocks 2, 5 and 6 render once, as #designed-around,
-//   #packages and #regulatory-map.
-// - Jurisdiction mode (Government): #designed-around holds jump links, then #commonwealth,
-//   #state and #local each repeat blocks 2, 5 and 6 as h3 sub-blocks with their own ids and
-//   row anchors. #packages keeps the page-wide half of block 5 (lead solutions, "Use your
-//   platform's AI first", "What we don't do", the demo link) once, after the workflow.
+// Industry page template (spec §8.5, as amended by go-global §5). Body only: a Phase C route loads
+// the industry, its regulatory rows, its "Rules that travel" anchors, the solutions, the traces and
+// the insight cards, calls industryView() (src/lib/views/industry.ts) and renders this inside
+// BaseLayout. Every link comes from the view, so a page that isn't shown yet renders as plain text.
+// Block order (go-global §5.1): the hero, #rules-that-travel, #problem, #workflow, #packages,
+// #scenario, #first-engagement, the Australia band (#australia), #insights, #faq, #contact.
+// - The Australia band (go-global §5.4) is one bone section marked data-region="au": its h2 and
+//   intro line, then the existing Australian blocks one heading level lower, with their ids and
+//   data hooks unchanged. CI check 13 fails any [data-regulatory-row] or [data-jurisdiction-section]
+//   outside it, and an industry page whose #rules-that-travel doesn't come before it.
+// - Single mode (eight industries): the band holds #designed-around and #regulatory-map (h3).
+// - Jurisdiction mode (Government): the band's #designed-around holds jump links, then
+//   #commonwealth, #state and #local (h3) each repeat Designed around, the packages and the map as
+//   h4 sub-blocks with their own ids and row anchors. #packages keeps the page-wide half of block 5
+//   (lead solutions, "Use your platform's AI first", "What we don't do", the demo link) once, after
+//   the workflow.
+// - FAQs (go-global §5.6): #faq shows the untagged questions and emits the page's one FAQPage over
+//   the full list, in data order; the region "au" questions render in the band as #faq-au, with no
+//   JSON-LD of their own.
 // - The scenario is a carbon section marked data-provenance="illustrative" whose first child is
 //   the fixed label, marked data-provenance-label: CI check 06 reads it, and not the trace panel's
 //   own label nested below it. Its container is padding, not a wrapper element.
-import { AUTOMATION } from "../lib/marketing";
 import PageHero from "../components/page/PageHero.astro";
 import PageSection from "../components/page/PageSection.astro";
 import ChipRow from "../components/page/ChipRow.astro";
 import CtaLinks from "../components/page/CtaLinks.astro";
 import Notice from "../components/page/Notice.astro";
 import InsightCard from "../components/page/InsightCard.astro";
+import RulesBlock from "../components/page/RulesBlock.astro";
 import BracketChip from "../components/ui/BracketChip.astro";
 import DataTable from "../components/ui/DataTable.astro";
 import FaqList from "../components/ui/FaqList.astro";
 import MockPanel from "../components/ui/MockPanel.astro";
 import PromptBlock from "../components/ui/PromptBlock.astro";
+import RegionLabel from "../components/ui/RegionLabel.astro";
 import SectionHeader from "../components/ui/SectionHeader.astro";
 import TabPanel from "../components/ui/TabPanel.astro";
 import Tabs from "../components/ui/Tabs.astro";
 import TracePanel from "../components/ui/TracePanel.astro";
 import { formatDate, isoDate } from "../lib/dates";
-import { NOT_LEGAL_ADVICE, SCENARIO_LABEL } from "../lib/fixed-copy";
+import { AU_BAND_HEADING, AU_BAND_INTRO, NOT_LEGAL_ADVICE, SCENARIO_LABEL } from "../lib/fixed-copy";
 import type { IndustryView, RegulatoryBlockView } from "../lib/views/industry";
 
 interface Props {
@@ -70,70 +80,12 @@ const mapRows = (b: RegulatoryBlockView) =>
     art="workflow"
     display={false}
     eyebrow="industry"
-    sub={AUTOMATION.industries[view.shortName] ?? view.constraintSet}
+    sub={view.heroSub ?? undefined}
     breadcrumb={view.breadcrumb}
     ctas={view.ctas}
   />
 
-  <PageSection id="designed-around" title="Designed around">
-    {view.single ? (
-      <div class="ind-stack">
-        <ChipRow id="designed-around-obligations" labelledBy="designed-around-heading" chips={obligationChips(view.single)} />
-        <ChipRow id="designed-around-systems" label="Works alongside" chips={systemChips(view.single)} />
-      </div>
-    ) : (
-      <ul class="ind-jumps" aria-labelledby="designed-around-heading">
-        {view.sections.map((s) => (
-          <li><BracketChip label={s.title} href={`#${s.id}`} /></li>
-        ))}
-      </ul>
-    )}
-  </PageSection>
-
-  {view.sections.map((s) => (
-    <section id={s.id} class="ind-band surface-bone" aria-labelledby={`${s.id}-heading`} data-jurisdiction-section={s.id}>
-      <SectionHeader id={`${s.id}-heading`} title={s.title} />
-      <section id={`${s.id}-designed-around`} class="ind-sub" aria-labelledby={`${s.id}-designed-around-heading`}>
-        <SectionHeader id={`${s.id}-designed-around-heading`} title="Designed around" level={3} />
-        <div class="ind-stack">
-          <ChipRow id={`${s.id}-obligations`} labelledBy={`${s.id}-designed-around-heading`} chips={obligationChips(s)} />
-          <ChipRow id={`${s.id}-systems`} label="Works alongside" chips={systemChips(s)} />
-        </div>
-      </section>
-      <section id={`${s.id}-packages`} class="ind-sub" aria-labelledby={`${s.id}-packages-heading`}>
-        <SectionHeader id={`${s.id}-packages-heading`} title={packagesTitle} level={3} />
-        <ul class="ind-cards">
-          {s.packages.map((p) => (
-            <li>
-              <article class="ind-card" data-package-status={p.status}>
-                <h4 class="ind-card-title">{p.href ? <a href={p.href}>{p.name}</a> : p.name}</h4>
-                <p class="ind-meta">
-                  <BracketChip label={solutionLabel(p.solution)} href={p.solution.href ?? undefined} />
-                  {p.status === "on-request" && <span class="ind-tag">On request</span>}
-                </p>
-                <p class="ind-card-summary">{p.summary}</p>
-              </article>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section id={`${s.id}-regulatory-map`} class="ind-sub" aria-labelledby={`${s.id}-regulatory-map-heading`}>
-        <SectionHeader id={`${s.id}-regulatory-map-heading`} title="Regulatory map" level={3} />
-        <div>
-          <DataTable
-            caption={`Regulatory map: ${s.title}`}
-            columns={mapColumns(s.id === "state")}
-            rows={mapRows(s)}
-            rowHeader="obligation"
-            rowIds={s.rows.map((r) => r.anchor)}
-            rowMarker="data-regulatory-row"
-          />
-          <p class="ind-reviewed">Last reviewed <time datetime={isoDate(s.lastReviewed)}>{formatDate(s.lastReviewed)}</time></p>
-          <Notice text={NOT_LEGAL_ADVICE} />
-        </div>
-      </section>
-    </section>
-  ))}
+  <RulesBlock rules={view.rules} />
 
   <PageSection id="problem" title="The problem" width="prose">
     <div class="ind-problem">
@@ -154,8 +106,8 @@ const mapRows = (b: RegulatoryBlockView) =>
         <TabPanel id={stage.id} label={stage.stage}>
           <ul class="ind-usecases">
             {stage.useCases.map((u) => (
-              <li class="ind-usecase">
-                <p class="ind-usecase-name">{u.name}</p>
+              <li class="ind-usecase" data-region={u.region ?? undefined}>
+                <p class="ind-usecase-name">{u.name}{u.region && <Fragment> <RegionLabel /></Fragment>}</p>
                 <p class="ind-meta">
                   <BracketChip label={solutionLabel(u.solution)} href={u.solution.href ?? undefined} />
                   {u.onRequest && <span class="ind-tag">On request</span>}
@@ -179,8 +131,8 @@ const mapRows = (b: RegulatoryBlockView) =>
         <ul class="ind-cards">
           {view.single.packages.map((p) => (
             <li>
-              <article class="ind-card" data-package-status={p.status}>
-                <h3 class="ind-card-title">{p.href ? <a href={p.href}>{p.name}</a> : p.name}</h3>
+              <article class="ind-card" data-package-status={p.status} data-region={p.region ?? undefined}>{p.region && <RegionLabel id={`${p.id}-card-region-label`} />}
+                <h3 class="ind-card-title" aria-describedby={p.region && !p.href ? `${p.id}-card-region-label` : undefined}>{p.href ? <a href={p.href} aria-describedby={p.region ? `${p.id}-card-region-label` : undefined}>{p.name}</a> : p.name}</h3>
                 <p class="ind-meta">
                   <BracketChip label={solutionLabel(p.solution)} href={p.solution.href ?? undefined} />
                   {p.status === "on-request" && <span class="ind-tag">On request</span>}
@@ -207,23 +159,9 @@ const mapRows = (b: RegulatoryBlockView) =>
     </div>
   </PageSection>
 
-  {view.single && (
-    <PageSection id="regulatory-map" title="Regulatory map">
-      <DataTable
-        caption="Regulatory map"
-        columns={mapColumns(false)}
-        rows={mapRows(view.single)}
-        rowHeader="obligation"
-        rowIds={view.single.rows.map((r) => r.anchor)}
-        rowMarker="data-regulatory-row"
-      />
-      <p class="ind-reviewed">Last reviewed <time datetime={isoDate(view.single.lastReviewed)}>{formatDate(view.single.lastReviewed)}</time></p>
-      <Notice text={NOT_LEGAL_ADVICE} />
-    </PageSection>
-  )}
-
-  <section id="scenario" class="ind-band ind-scenario" aria-labelledby="scenario-heading" data-provenance="illustrative">
+  <section id="scenario" class="ind-band ind-scenario" aria-labelledby="scenario-heading" data-provenance="illustrative" data-region={view.scenario.trace.region}>
     <p class="ind-scenario-label" data-provenance-label>{SCENARIO_LABEL}</p>
+    {view.scenario.trace.region && <RegionLabel kind="example" />}
     <SectionHeader id="scenario-heading" title={view.scenario.title} />
     <ol class="ind-steps">
       <li class="ind-step">
@@ -269,6 +207,92 @@ const mapRows = (b: RegulatoryBlockView) =>
     </div>
   </PageSection>
 
+  <section id="australia" class="ind-band ind-au surface-bone" data-region="au" aria-labelledby="australia-heading">
+    <SectionHeader id="australia-heading" title={AU_BAND_HEADING} lede={AU_BAND_INTRO} />
+
+    <PageSection id="designed-around" title="Designed around" level={3}>
+      {view.single ? (
+        <div class="ind-stack">
+          <ChipRow id="designed-around-obligations" labelledBy="designed-around-heading" chips={obligationChips(view.single)} />
+          <ChipRow id="designed-around-systems" label="Works alongside" chips={systemChips(view.single)} />
+        </div>
+      ) : (
+        <ul class="ind-jumps" aria-labelledby="designed-around-heading">
+          {view.sections.map((s) => (
+            <li><BracketChip label={s.title} href={`#${s.id}`} /></li>
+          ))}
+        </ul>
+      )}
+    </PageSection>
+
+    {view.sections.map((s) => (
+      <section id={s.id} class="ind-jurisdiction" aria-labelledby={`${s.id}-heading`} data-jurisdiction-section={s.id}>
+        <SectionHeader id={`${s.id}-heading`} title={s.title} level={3} />
+        <section id={`${s.id}-designed-around`} class="ind-sub" aria-labelledby={`${s.id}-designed-around-heading`}>
+          <SectionHeader id={`${s.id}-designed-around-heading`} title="Designed around" level={4} />
+          <div class="ind-stack">
+            <ChipRow id={`${s.id}-obligations`} labelledBy={`${s.id}-designed-around-heading`} chips={obligationChips(s)} />
+            <ChipRow id={`${s.id}-systems`} label="Works alongside" chips={systemChips(s)} />
+          </div>
+        </section>
+        <section id={`${s.id}-packages`} class="ind-sub" aria-labelledby={`${s.id}-packages-heading`}>
+          <SectionHeader id={`${s.id}-packages-heading`} title={packagesTitle} level={4} />
+          <ul class="ind-cards">
+            {s.packages.map((p) => (
+              <li>
+                <article class="ind-card" data-package-status={p.status} data-region={p.region ?? undefined}>{p.region && <RegionLabel id={`${s.id}-${p.id}-card-region-label`} />}
+                  <h5 class="ind-card-title" aria-describedby={p.region && !p.href ? `${s.id}-${p.id}-card-region-label` : undefined}>{p.href ? <a href={p.href} aria-describedby={p.region ? `${s.id}-${p.id}-card-region-label` : undefined}>{p.name}</a> : p.name}</h5>
+                  <p class="ind-meta">
+                    <BracketChip label={solutionLabel(p.solution)} href={p.solution.href ?? undefined} />
+                    {p.status === "on-request" && <span class="ind-tag">On request</span>}
+                  </p>
+                  <p class="ind-card-summary">{p.summary}</p>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section id={`${s.id}-regulatory-map`} class="ind-sub" aria-labelledby={`${s.id}-regulatory-map-heading`}>
+          <SectionHeader id={`${s.id}-regulatory-map-heading`} title="Regulatory map" level={4} />
+          <div>
+            <DataTable
+              caption={`Regulatory map: ${s.title}`}
+              columns={mapColumns(s.id === "state")}
+              rows={mapRows(s)}
+              rowHeader="obligation"
+              rowIds={s.rows.map((r) => r.anchor)}
+              rowMarker="data-regulatory-row"
+            />
+            <p class="ind-reviewed">Last reviewed <time datetime={isoDate(s.lastReviewed)}>{formatDate(s.lastReviewed)}</time></p>
+            <Notice text={NOT_LEGAL_ADVICE} />
+          </div>
+        </section>
+      </section>
+    ))}
+
+    {view.single && (
+      <PageSection id="regulatory-map" title="Regulatory map" level={3}>
+        <DataTable
+          caption="Regulatory map"
+          columns={mapColumns(false)}
+          rows={mapRows(view.single)}
+          rowHeader="obligation"
+          rowIds={view.single.rows.map((r) => r.anchor)}
+          rowMarker="data-regulatory-row"
+        />
+        <p class="ind-reviewed">Last reviewed <time datetime={isoDate(view.single.lastReviewed)}>{formatDate(view.single.lastReviewed)}</time></p>
+        <Notice text={NOT_LEGAL_ADVICE} />
+      </PageSection>
+    )}
+
+    {view.faqAu.length > 0 && (
+      <section id="faq-au" class="ind-faq-au" aria-labelledby="faq-au-heading">
+        <SectionHeader id="faq-au-heading" title="Questions" level={3} />
+        <FaqList items={view.faqAu} ld={false} />
+      </section>
+    )}
+  </section>
+
   {view.insights.length > 0 && (
     <PageSection id="insights" title="Related insights">
       <ul class="ind-insights">
@@ -280,7 +304,7 @@ const mapRows = (b: RegulatoryBlockView) =>
   )}
 
   <PageSection id="faq" title="Questions">
-    <FaqList items={view.faq} />
+    <FaqList items={view.faqNeutral} ldItems={view.faq} />
   </PageSection>
 
   <div id="contact" class="ind-closing">
@@ -289,7 +313,7 @@ const mapRows = (b: RegulatoryBlockView) =>
 </div>
 
 <style>
-  /* The hand-written carbon and bone bands (jurisdiction sections, scenario) keep the page-kit
+  /* The hand-written carbon and bone bands (the scenario, the Australia band) keep the page-kit
      rhythm: full-bleed background, content within the 80rem container, 4rem vertical rhythm
      (6rem from 64rem). The container is padding, so the section's own children line up with
      every PageSection's content. */
@@ -307,11 +331,36 @@ const mapRows = (b: RegulatoryBlockView) =>
       padding-block: 6rem;
     }
   }
-  /* A jurisdiction section straight after another bone band (the Designed around jump links, or
-     the previous jurisdiction) has no top padding, as PageSection does: two paddings on one bone
-     surface read as an empty band (WB-5, WB-13). */
+  /* The Australia band straight after another bone band (A first engagement) has no top padding,
+     as PageSection does: two paddings on one bone surface read as an empty band (WB-13). */
   :global(:where(.page-section, .ind-band).surface-bone) + .ind-band.surface-bone {
     padding-top: 0;
+  }
+
+  /* The Australia band (go-global §5.4). Its blocks are sub-blocks of the band, 3rem apart, inside
+     the band's own container: a nested PageSection (Designed around, the regulatory map) drops its
+     section padding and its gutters here. Each jurisdiction section keeps one rhythm step above its
+     heading, as it had when it was a band of its own (WB-5). */
+  .ind-au > :global(.page-section),
+  .ind-faq-au {
+    margin-top: 3rem;
+    padding-block: 0;
+  }
+  .ind-au :global(.page-section-inner) {
+    max-width: none;
+    padding-inline: 0;
+  }
+  .ind-jurisdiction {
+    padding-top: 4rem;
+  }
+  @media (min-width: 64rem) {
+    .ind-jurisdiction {
+      padding-top: 6rem;
+    }
+  }
+  .ind-faq-au {
+    display: grid;
+    gap: 1.5rem;
   }
   .ind-sub {
     display: grid;
@@ -351,6 +400,12 @@ const mapRows = (b: RegulatoryBlockView) =>
     padding: 1.25rem;
     border: 1px solid var(--color-bone-line);
     border-radius: 8px;
+  }
+  /* go-global §3.3, §6.3: the "Australia" and "Australian example" labels keep their own width in
+     the card and scenario grids. */
+  .ind-card > :global(.region-label),
+  .ind-scenario > :global(.region-label) {
+    justify-self: start;
   }
   .ind-card-title {
     margin: 0;

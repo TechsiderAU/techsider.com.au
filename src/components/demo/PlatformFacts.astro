@@ -6,7 +6,11 @@
 // vendor pages don't state a location starts "Not published" (platform-ai.md's convention).
 // On /resources/what-you-already-pay-for/ it fills PayForTemplate's `fallback` slot; on the ⑤ demo
 // page it is the DemoFrame's static transcript.
+// go-global §6.3: every fact is checked for Australian customers, so the root carries
+// data-region="au" and opens with the "Australian plans and vendor pages" label; the date stays in
+// the "Vendor facts as at" line.
 import DataTable from "../ui/DataTable.astro";
+import RegionLabel from "../ui/RegionLabel.astro";
 import type { CheckerView } from "../../lib/views/checker";
 
 interface Props {
@@ -24,7 +28,8 @@ const columns = [
   { key: "checked", label: "Checked" },
 ];
 ---
-<div class="facts" data-platform-facts>
+<div class="facts" data-platform-facts data-region="au">
+  <RegionLabel kind="platform" />
   <p class="facts-lede">The checker runs in your browser and makes no network calls: what you tick stays on this page. It reads the vendor facts below, which are built into the page. Each row links to the vendor page that lists the feature and its plans.</p>
   <p class="facts-as-at" data-facts-as-at>Vendor facts as at <time datetime={view.asAt.iso}>{view.asAt.text}</time></p>
   {view.vendors.map((g) => (
@@ -40,6 +45,9 @@ const columns = [
     flex-direction: column;
     gap: 2rem;
     min-width: 0;
+  }
+  .facts > :global(.region-label) {
+    align-self: flex-start;
   }
   .facts-lede,
   .facts-as-at {

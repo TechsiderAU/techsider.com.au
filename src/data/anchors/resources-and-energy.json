@@ -1,0 +1,71 @@
+{
+  "shared": ["x1", "x4", "x6", "x7"],
+  "anchors": [
+    {
+      "id": "iso-14001-2026",
+      "name": "ISO 14001:2026",
+      "issuer": "ISO",
+      "kind": "international-standard",
+      "binding": "A voluntary international standard, certifiable by a certification body; it replaces ISO 14001:2015.",
+      "status": "published",
+      "statusDate": "2026-04-15",
+      "asks": "Determine your compliance obligations, including the conditions attached to your permits and approvals, and evaluate whether you are meeting them.",
+      "evidence": "A register of every approval condition, each linked to its source clause, with its error rate measured on your own documents.",
+      "source": "https://www.iso.org/news/2026/04/iso-14001-2026-published",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["document-registers"],
+      "featured": true,
+      "checkLevel": "P*"
+    },
+    {
+      "id": "iec-62443",
+      "name": "IEC 62443: operational technology security",
+      "issuer": "ISA and IEC",
+      "kind": "international-standard",
+      "binding": "A series of international standards from ISA and IEC, in force as a series.",
+      "status": "in-force",
+      "asks": "Zones and conduits, security programmes for asset owners, and requirements for suppliers. AI that reads operational technology data, or runs close to the systems that operate a plant or network, falls within their scope.",
+      "evidence": "A design note recording what the assistant reads and that it is read-only, for your security team to review against your zones and conduits.",
+      "source": "https://www.isa.org/news-press-releases/2025/december/update-to-isa-iec-62443-series-includes-guidance-o",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["knowledge-assistant"],
+      "featured": true,
+      "checkLevel": "P"
+    },
+    {
+      "id": "joint-ot-ai-principles",
+      "name": "Joint principles for AI in operational technology",
+      "issuer": "Cyber security agencies of seven countries, led by CISA and ASD's ACSC",
+      "kind": "guidance",
+      "binding": "Joint guidance from national cyber security agencies.",
+      "status": "published",
+      "statusDate": "2025-12-03",
+      "asks": "Four principles: understand AI risks; assess AI use in operational technology, including the business case and data security; set up governance and continuously test and evaluate AI models; and build in safety and security, including oversight and incident response.",
+      "evidence": "A test set and a re-test report for the assistant, run before go-live and after each model or document change.",
+      "source": "https://www.cisa.gov/resources-tools/resources/principles-secure-integration-artificial-intelligence-operational-technology",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["knowledge-assistant", "ai-evaluation"],
+      "featured": true,
+      "checkLevel": "P*"
+    },
+    {
+      "id": "gistm",
+      "name": "Global Industry Standard on Tailings Management",
+      "issuer": "ICMM, UNEP and PRI",
+      "kind": "international-standard",
+      "binding": "An industry standard for mine tailings facilities.",
+      "status": "in-force",
+      "asks": "A documented governance system for each tailings facility, reviewed independently, which depends on current, controlled records.",
+      "evidence": "A register of each facility's documents and conditions, each linked to its source page.",
+      "source": "https://www.icmm.com/en-gb/research/tailings-management/2025/tailings-progress-report",
+      "asAt": "2026-10-12",
+      "lastReviewed": "2026-10-12",
+      "solutions": ["document-registers"],
+      "featured": false,
+      "checkLevel": "P"
+    }
+  ]
+}

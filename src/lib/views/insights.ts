@@ -18,6 +18,8 @@ export interface InsightCardView {
   minutes: number;
   /** One chip per industry reference: the industry's id (industry pages match cards on it), its short name and its link. */
   industries: { id: string; label: string; href: string | null }[];
+  /** go-global §6.1: "au" when the post is about an Australian rule, regulator, framework, platform or market (its frontmatter says region: au), else null. InsightCard labels it "Australia". */
+  region: "au" | null;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -43,6 +45,7 @@ export function insightCards(posts: { id: string; body?: string; data: InsightDa
         const industry = industryLink(site, refId(ref));
         return { id: industry.id, label: industry.shortName, href: industry.href };
       }),
+      region: post.data.region ?? null,
     }))
     .sort(newestFirst);
 }

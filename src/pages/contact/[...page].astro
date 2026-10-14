@@ -1,12 +1,13 @@
 ---
 // /contact/ (spec §8.11, §10.2): ContactTemplate over the contact data (src/data/contact.ts). Live
 // from Phase C. The form renders once src/data/contact.ts has the owner's form endpoint; until then
-// the page leads with the email address.
+// the page leads with the email address. INTERNATIONAL holds the "For organisations outside
+// Australia" lines (go-global §7.3).
 import type { GetStaticPaths } from "astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ContactTemplate from "../../templates/ContactTemplate.astro";
 import { isPreview } from "../../data/nav";
-import { CONTACT } from "../../data/contact";
+import { CONTACT, INTERNATIONAL } from "../../data/contact";
 import { pageDescription, pageTitle } from "../../lib/meta";
 import { pageAt, singletonPaths } from "../../lib/pages";
 import { siteContext } from "../../lib/site";
@@ -16,5 +17,5 @@ export const getStaticPaths = (() => singletonPaths("/contact/")) satisfies GetS
 const entry = pageAt("/contact/");
 ---
 <BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
-  <ContactTemplate contact={CONTACT} site={siteContext(isPreview())} />
+  <ContactTemplate contact={CONTACT} international={INTERNATIONAL} site={siteContext(isPreview())} />
 </BaseLayout>
