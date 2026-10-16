@@ -98,7 +98,7 @@ export function careersView(
   // named place. Any other shape, such as other unconfirmed wording or a list of places, fails the
   // build, so the owner rewords the row or the clause instead of publishing a sentence that misreads.
   const UNCONFIRMED = /^Not yet confirmed/i;
-  const NOT_ONE_PLACE = /confirm|pending|\btb[cd]\b|\bto be\b|[,;\/&]|\band\b/i;
+  const NOT_ONE_PLACE = /confirm|pending|\btb[cd]\b|\bto be\b|[,;\/&]|\b(and|or)\b/i;
   if (!UNCONFIRMED.test(row.country) && NOT_ONE_PLACE.test(row.country)) {
     throw new Error(`careersView: ${row.entity}'s storage country "${row.country}" is neither one place nor "Not yet confirmed…", so the notice can't state it (careers spec §4.6)`);
   }

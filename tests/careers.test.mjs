@@ -338,7 +338,7 @@ test("careersView: the storage clause follows the Trust table's row for the emai
   assert.match(careersView(CAREERS, siteContext(false), providerOnly).notice.paragraphs[1], /outside Australia; the countries are not yet confirmed\./);
   // Any other shape of the row's country fails the build instead of misreading (carried minor M11).
   const withCountry = (country) => ({ ...CONTACT, subProcessors: CONTACT.subProcessors.map((s) => s.entity === "Lark Suite" ? { ...s, country } : s) });
-  for (const country of ["Storage countries not yet confirmed", "To be confirmed", "Confirmation pending", "Singapore and the United States", "Singapore, Japan"]) {
+  for (const country of ["Storage countries not yet confirmed", "To be confirmed", "Confirmation pending", "Singapore and the United States", "Singapore or Japan", "Singapore, Japan"]) {
     assert.throws(() => careersView(CAREERS, siteContext(false), withCountry(country)), /neither one place nor "Not yet confirmed/, country);
   }
   assert.match(careersView(CAREERS, siteContext(false), withCountry("Not yet confirmed with Lark Suite")).notice.paragraphs[1], /outside Australia; the countries are not yet confirmed\./);
