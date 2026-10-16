@@ -1,7 +1,7 @@
 // The company page templates (spec §8.10, §8.11, §10.2) as the preview build renders them from
 // the page-data fixtures: About, Trust (with and without a confirmed Part B term), the Legal hub, a
-// legal document, Contact (with and without a form endpoint), the message-sent page and the 404
-// body, at /preview/templates/<kind>/.
+// legal document, Careers, Contact (with and without a form endpoint), the message-sent page and
+// the 404 body, at /preview/templates/<kind>/.
 // Run `npm run build:preview` first. tests/e2e/template-company.spec.mjs covers the behaviour in
 // a browser (the copy button, native validation, the POST, keyboard order, axe, 320px).
 import { test } from "node:test";
@@ -28,6 +28,7 @@ const PAGES = {
   "trust-no-terms": { template: "trust", h1: "Trust.", highlight: "Trust" },
   "legal-hub": { template: "legal-hub", h1: "Legal.", highlight: "Legal" },
   "legal-document": { template: "document", h1: documentFixtures[0].data.title, highlight: null },
+  careers: { template: "careers", h1: "Fixture careers: own the work, grow the firm.", highlight: "Fixture" },
   contact: { template: "contact", h1: CONTACT_H1, highlight: "fix" },
   "contact-no-endpoint": { template: "contact", h1: CONTACT_H1, highlight: "fix" },
   sent: { template: "sent", h1: "Message sent.", highlight: "sent" },

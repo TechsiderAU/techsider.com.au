@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 
 // The company pages Phase C Task 7 writes but keeps planned: Trust, the Legal hub, the two legal
 // drafts and the Safe-Use Kits page. Only the preview build (dist-preview/) has them;
-// tests/e2e/prod-company.spec.mjs covers the live About, Contact and Resources pages in dist/.
+// tests/e2e/prod-company.spec.mjs covers the live About, Contact, Resources and Careers pages in dist/.
 const PAGES = ["/trust/", "/legal/", "/legal/privacy/", "/legal/website-terms/", "/resources/safe-use-kits/"];
 const WCAG = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import { careersData } from "../src/content/page-schemas.ts";
 import { CAREERS } from "../src/data/careers.ts";
 import { CONTACT } from "../src/data/contact.ts";
+import { fixtureSite } from "../src/fixtures/index.ts";
 import { SITE, slugify } from "../src/data/nav.ts";
 import { siteContext } from "../src/lib/site.ts";
 import { careersView } from "../src/lib/views/careers.ts";
@@ -319,7 +320,7 @@ test("careersView: the notice and the apply opening are filled from SITE, CONTAC
 });
 
 test("careersView: every address comes from the SiteContext, never a literal, so the gallery shows its fixture address (spec §3)", () => {
-  const site = { ...siteContext(false), email: "fixture@example.com" };
+  const site = fixtureSite;
   const view = careersView(CAREERS, site, CONTACT);
   assert.equal(view.roles.cards[3].mailto, "mailto:fixture@example.com?subject=Application%3A%20AI%20Governance%20%26%20Risk%20Specialist");
   assert.deepEqual(view.sections.map((s) => s.mailto), view.roles.cards.map((c) => c.mailto));
@@ -577,7 +578,8 @@ test("README: the Sydney gate sits between Australian content and the demos, wit
   const heading = "### When someone outside Sydney first reaches a client's systems";
   assert.ok(readme.includes(heading));
   const start = readme.indexOf(heading);
-  assert.ok(readme.indexOf("### Australian content, labelled") < start, "the gate comes after Australian content, labelled");
+  const headingsBefore = [...readme.slice(0, start).matchAll(/^#{2,3} .+$/gm)].map((m) => m[0]);
+  assert.equal(headingsBefore.at(-1), "### Australian content, labelled", "the gate comes directly after Australian content, labelled");
   const end = readme.indexOf("\n### ", start + heading.length);
   assert.equal(readme.slice(end + 1).split("\n")[0], "### Demos and the checker", "the gate comes directly before Demos and the checker");
   const gate = readme.slice(start, end);

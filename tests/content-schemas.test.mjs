@@ -12,9 +12,10 @@ import {
   anchor, anchorFile, anchorKind, anchorStatus, checkLevel, REVIEW_BY_STATUSES, REVIEW_BY_NAME, DATED_STATUSES, FEATURABLE_LEVELS,
 } from "../src/content/schemas.ts";
 import {
-  positioningData, servicesData, contactData, deflectionItem, trustData, aboutData, homeData, documentSchema,
+  positioningData, servicesData, contactData, deflectionItem, trustData, aboutData, homeData, documentSchema, careersData,
   INTERNATIONAL_IDS, internationalLine, internationalData,
 } from "../src/content/page-schemas.ts";
+import { CAREERS } from "../src/data/careers.ts";
 import { HOME_TRUST_QUESTION } from "../src/lib/fixed-copy.ts";
 import { ENQUIRY_FIELDS } from "../src/lib/contact-form.ts";
 
@@ -1045,6 +1046,11 @@ test("every page-data schema rejects unknown keys, at the top level and nested",
     [aboutData, { ...ABOUT, team: [] }, "about"],
     [homeData, { ...HOME, hero: "Test" }, "home"],
     [documentSchema, { ...DOCUMENT, author: "Test" }, "document"],
+    [careersData, { ...CAREERS, team: "Test" }, "careers"],
+    [careersData, { ...CAREERS, hero: { ...CAREERS.hero, primary: { ...CAREERS.hero.primary, target: "Test" } } }, "careers hero link"],
+    [careersData, { ...CAREERS, firm: { ...CAREERS.firm, principles: CAREERS.firm.principles.map((p) => ({ ...p, icon: "Test" })) } }, "careers firm principle"],
+    [careersData, { ...CAREERS, apply: { ...CAREERS.apply, form: "Test" } }, "careers apply"],
+    [careersData, { ...CAREERS, notice: { ...CAREERS.notice, id: "Test" } }, "careers notice"],
   ];
   for (const [schema, value, label] of cases) {
     const issues = bad(schema, value, `${label} with an unknown key`);
