@@ -1,10 +1,11 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-// The live company pages in the production build (dist/, prod-chromium only): About, Contact and the
-// Resources hub (Phase C Task 7). /contact/ has no form endpoint until Phase E, so it leads with the
-// email address as plain text; the copy button needs JavaScript. Spec check 12 names /contact/ for axe.
-const PAGES = ["/about/", "/contact/", "/resources/"];
+// The live company pages in the production build (dist/, prod-chromium only): About, Contact, the
+// Resources hub (Phase C Task 7) and Careers. /contact/ has no form endpoint until Phase E, so it
+// leads with the email address as plain text; the copy button needs JavaScript. Spec check 12
+// names /contact/ for axe.
+const PAGES = ["/about/", "/contact/", "/resources/", "/careers/"];
 const EMAIL = "admin@techsider.com.au";
 const WCAG = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
