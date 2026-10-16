@@ -12,9 +12,10 @@ import {
   anchor, anchorFile, anchorKind, anchorStatus, checkLevel, REVIEW_BY_STATUSES, REVIEW_BY_NAME, DATED_STATUSES, FEATURABLE_LEVELS,
 } from "../src/content/schemas.ts";
 import {
-  positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema,
+  positioningData, servicesData, contactData, deflectionItem, trustData, aboutData, homeData, documentSchema, careersData,
   INTERNATIONAL_IDS, internationalLine, internationalData,
 } from "../src/content/page-schemas.ts";
+import { CAREERS } from "../src/data/careers.ts";
 import { HOME_TRUST_QUESTION } from "../src/lib/fixed-copy.ts";
 import { ENQUIRY_FIELDS } from "../src/lib/contact-form.ts";
 
@@ -888,6 +889,22 @@ test("page data: contact takes a form endpoint URL or null, and real email addre
   bad(contactData, { ...CONTACT, subProcessors: CONTACT.subProcessors.slice(0, 1) }, "one sub-processor");
 });
 
+test("page data: a contact deflection item ends in exactly one of an email or a link to the careers page (careers spec §4.7)", () => {
+  const base = { title: "Test title", body: "Test body" };
+  const link = { pageKey: "careers", label: "Test label" };
+  const message = "a deflection item has exactly one of email or link (careers spec §4.7)";
+  ok(deflectionItem, { ...base, email: "test@example.com" }, "an email item");
+  assert.deepEqual(ok(deflectionItem, { ...base, link }, "a link item").link, link);
+  badWith(deflectionItem, { ...base, email: "test@example.com", link }, "", message);
+  badWith(deflectionItem, base, "", message);
+  bad(deflectionItem, { ...base, link: { ...link, pageKey: "about" } }, "a link to a page other than careers");
+  bad(deflectionItem, { ...base, link: { pageKey: "careers" } }, "a link without a label");
+  // contactData holds every item to it.
+  ok(contactData, { ...CONTACT, deflection: [...CONTACT.deflection, { ...base, link }] }, "contact with a careers link item");
+  badWith(contactData, { ...CONTACT, deflection: [...CONTACT.deflection, { ...base, email: "test@example.com", link }] }, "deflection.3", message);
+  badWith(contactData, { ...CONTACT, deflection: [...CONTACT.deflection, base] }, "deflection.3", message);
+});
+
 test("page data: contact names the reply time's base and Sydney's time zone (go-global §4.5, §8.4)", () => {
   const data = ok(contactData, CONTACT, "contact");
   assert.deepEqual([data.replyTimeBase, data.timeZone], ["test time (TST)", "Australia/Sydney"]);
@@ -1020,6 +1037,8 @@ test("every page-data schema rejects unknown keys, at the top level and nested",
     [contactData, { ...CONTACT, phone: "Test" }, "contact"],
     [contactData, { ...CONTACT, formProvider: { ...CONTACT.formProvider, region: "Test" } }, "contact form provider"],
     [contactData, { ...CONTACT, meetingNote: "Test" }, "contact meeting note (go-global §8.4: none)"],
+    [deflectionItem, { title: "Test", body: "Test", email: "test@example.com", phone: "Test" }, "contact deflection item"],
+    [deflectionItem, { title: "Test", body: "Test", link: { pageKey: "careers", label: "Test", href: "/test/" } }, "contact deflection link"],
     [internationalLine, { ...INTERNATIONAL[0], href: "https://example.com" }, "international line"],
     [trustData, { ...TRUST, certifications: [] }, "trust"],
     [trustData, { ...TRUST, partB: TRUST.partB.map((b) => ({ ...b, confirmedAt: "2026-09-15" })) }, "trust part B"],
@@ -1027,6 +1046,11 @@ test("every page-data schema rejects unknown keys, at the top level and nested",
     [aboutData, { ...ABOUT, team: [] }, "about"],
     [homeData, { ...HOME, hero: "Test" }, "home"],
     [documentSchema, { ...DOCUMENT, author: "Test" }, "document"],
+    [careersData, { ...CAREERS, team: "Test" }, "careers"],
+    [careersData, { ...CAREERS, hero: { ...CAREERS.hero, primary: { ...CAREERS.hero.primary, target: "Test" } } }, "careers hero link"],
+    [careersData, { ...CAREERS, firm: { ...CAREERS.firm, principles: CAREERS.firm.principles.map((p) => ({ ...p, icon: "Test" })) } }, "careers firm principle"],
+    [careersData, { ...CAREERS, apply: { ...CAREERS.apply, form: "Test" } }, "careers apply"],
+    [careersData, { ...CAREERS, notice: { ...CAREERS.notice, id: "Test" } }, "careers notice"],
   ];
   for (const [schema, value, label] of cases) {
     const issues = bad(schema, value, `${label} with an unknown key`);

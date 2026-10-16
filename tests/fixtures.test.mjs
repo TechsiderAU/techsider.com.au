@@ -12,7 +12,7 @@ import {
   anchorFile, anchorKind, anchorStatus,
 } from "../src/content/schemas.ts";
 import {
-  positioningData, servicesData, contactData, trustData, aboutData, homeData, documentSchema, internationalData,
+  positioningData, servicesData, contactData, trustData, aboutData, careersData, homeData, documentSchema, internationalData,
 } from "../src/content/page-schemas.ts";
 import { HOME_TRUST_QUESTION } from "../src/lib/fixed-copy.ts";
 import * as all from "../src/fixtures/index.ts";
@@ -26,7 +26,7 @@ const {
   heroTraceFixture, solutionFixtures, industryFixtures, regulatoryFixtures, traceFixtures, insightFixtures,
   FIXTURE_NOW, FIXTURE_STALE_NOW,
   positioningFixture, servicesFixture, contactFixture, contactNoEndpointFixture, trustFixture, trustNoTermsFixture, aboutFixture,
-  homeFixture, documentFixtures,
+  careersFixture, homeFixture, documentFixtures,
   sharedAnchorsFixture, anchorFixture, gdprAnchorFixture, governmentAnchorFixture, anchorFixtures,
   internationalFixture,
 } = all;
@@ -60,6 +60,7 @@ const CASES = [
   ["trustFixture", trustData, trustFixture],
   ["trustNoTermsFixture", trustData, trustNoTermsFixture],
   ["aboutFixture", aboutData, aboutFixture],
+  ["careersFixture", careersData, careersFixture],
   ["homeFixture", homeData, homeFixture],
   ["sharedAnchorsFixture", anchorFile, sharedAnchorsFixture],
   ["anchorFixture", anchorFile, anchorFixture],

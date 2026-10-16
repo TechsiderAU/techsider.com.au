@@ -40,7 +40,7 @@ export interface IndustryLink {
 export type PageKey =
   | "home" | "solutions" | "industries" | "services" | "evaluationPartner"
   | "resources" | "insights" | "demos" | "safeUseKits" | "payFor" | "evaluationMethod"
-  | "about" | "trust" | "legal" | "privacy" | "websiteTerms" | "contact" | "sent";
+  | "about" | "trust" | "legal" | "privacy" | "websiteTerms" | "careers" | "contact" | "sent";
 
 export interface PageLink {
   readonly key: PageKey;
@@ -96,6 +96,7 @@ const PAGE_PATHS: Record<PageKey, string> = {
   legal: "/legal/",
   privacy: "/legal/privacy/",
   websiteTerms: "/legal/website-terms/",
+  careers: "/careers/",
   contact: "/contact/",
   sent: "/contact/sent/",
 };

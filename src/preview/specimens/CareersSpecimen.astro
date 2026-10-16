@@ -1,0 +1,10 @@
+---
+// /preview/templates/careers/: the careers page from the careers fixture, through careersView with
+// the gallery's SiteContext (so every address is the fixture address) and the contact fixture's
+// email provider and sub-processor table. Fixtures are imported statically (only src/preview/ may
+// import them).
+import CareersTemplate from "../../templates/CareersTemplate.astro";
+import { careersView } from "../../lib/views/careers";
+import { careersFixture, contactFixture, fixtureSite } from "../../fixtures/index.ts";
+---
+<CareersTemplate view={careersView(careersFixture, fixtureSite, contactFixture)} site={fixtureSite} />

@@ -1,0 +1,24 @@
+---
+// /careers/ (careers spec §3, §9): CareersTemplate over the careers view, which careersView builds
+// from the careers data (src/data/careers.ts), this build's SiteContext and the contact data's
+// email provider and sub-processor table (src/data/contact.ts). Live from the careers release.
+import type { GetStaticPaths } from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import CareersTemplate from "../../templates/CareersTemplate.astro";
+import { isPreview } from "../../data/nav";
+import { CAREERS } from "../../data/careers";
+import { CONTACT } from "../../data/contact";
+import { pageDescription, pageTitle } from "../../lib/meta";
+import { pageAt, singletonPaths } from "../../lib/pages";
+import { siteContext } from "../../lib/site";
+import { careersView } from "../../lib/views/careers";
+
+export const getStaticPaths = (() => singletonPaths("/careers/")) satisfies GetStaticPaths;
+
+const entry = pageAt("/careers/");
+const site = siteContext(isPreview());
+const view = careersView(CAREERS, site, CONTACT);
+---
+<BaseLayout title={pageTitle(entry)} description={pageDescription(entry)}>
+  <CareersTemplate view={view} site={site} />
+</BaseLayout>

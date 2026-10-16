@@ -6,7 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { aboutData, contactData, homeData, internationalData, positioningData, servicesData, trustData } from "../src/content/page-schemas.ts";
+import { aboutData, careersData, contactData, homeData, internationalData, positioningData, servicesData, trustData } from "../src/content/page-schemas.ts";
 import { CONTACT, INTERNATIONAL } from "../src/data/contact.ts";
 import { DELIVERY_MODEL } from "../src/lib/fixed-copy.ts";
 import { replySentence } from "../src/lib/reply-time.ts";
@@ -25,6 +25,7 @@ const MODULES = [
   ["contact.ts", "CONTACT", contactData],
   ["trust.ts", "TRUST", trustData],
   ["home.ts", "HOME", homeData],
+  ["careers.ts", "CAREERS", careersData],
 ];
 
 test("every page-data module in src/data/ is listed here with its schema", () => {

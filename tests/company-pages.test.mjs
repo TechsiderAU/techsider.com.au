@@ -38,7 +38,8 @@ import { internationalLines, trustView } from "../src/lib/views/company.ts";
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const DIST = join(ROOT, "dist");
 const DIST_PREVIEW = join(ROOT, "dist-preview");
-const LIVE = ["/about/", "/contact/", "/resources/"];
+// The careers release adds /careers/ (careers spec §3); tests/careers.test.mjs checks its content.
+const LIVE = ["/about/", "/contact/", "/resources/", "/careers/"];
 const PLANNED = ["/trust/", "/legal/", "/legal/privacy/", "/legal/website-terms/", "/resources/safe-use-kits/"];
 // Every source file this task writes, for the banned-phrase scan.
 const SOURCES = [
@@ -48,6 +49,8 @@ const SOURCES = [
   "src/pages/about/[...page].astro", "src/pages/contact/[...page].astro", "src/pages/resources/[...page].astro",
   "src/pages/trust/[...page].astro", "src/pages/legal/[...page].astro", "src/pages/legal/privacy/[...page].astro",
   "src/pages/legal/website-terms/[...page].astro", "src/pages/resources/safe-use-kits/[...page].astro",
+  // The careers release (careers spec §9): its copy and its route.
+  "src/data/careers.ts", "src/pages/careers/[...page].astro",
 ];
 // Each About build-log entry, in ABOUT.buildLog order, with the subjects of the commits that
 // evidence it. Every subject must be in this repository's history, dated (Australia/Sydney) on the
@@ -89,6 +92,7 @@ const text = (html) => visibleText(html).trim();
 // Text as a browser shows it inline: tags dropped without adding spaces ("<span>fix</span>." → "fix.").
 const inlineText = (html) => decodeEntities(html.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
 const tagged = (html, name) => elements(html, (t) => t.name === name);
+const withClass = (html, cls) => elements(html, (t) => (t.attrs.class ?? "").split(/\s+/).includes(cls));
 const titleOf = (html) => decodeEntities(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "");
 const descriptionOf = (html) => decodeEntities(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "");
 const jsonLd = (html) => [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
@@ -183,8 +187,15 @@ test("Contact: the configured form provider is included in the services handling
   assert.equal(CONTACT.formProvider.name, "FormSubmit");
   assert.equal(CONTACT.emailProvider.name, "Lark Suite");
   assert.deepEqual(CONTACT.subProcessors.map((s) => s.entity), ["GitHub Pages", "Cloudflare", "Lark Suite", "FormSubmit"]);
-  assert.equal(CONTACT.deflection.length, 1, "other enquiries share one contact block");
-  assert.ok(CONTACT.deflection.every((d) => d.email === SITE.email), "a deflection address isn't the site's mailbox");
+  // The shared contact block, then the pointer to the careers page (careers spec §4.7).
+  assert.deepEqual(CONTACT.deflection.map((d) => d.title), ["Security, privacy and media", "Careers"]);
+  assert.equal(CONTACT.deflection.filter((d) => d.email !== undefined).length, 1, "other enquiries share one contact block");
+  assert.ok(CONTACT.deflection.every((d) => d.email === undefined || d.email === SITE.email), "a deflection address isn't the site's mailbox");
+  assert.deepEqual(
+    CONTACT.deflection[1],
+    { title: "Careers", body: "Looking for a role? Our roles, and how to apply, are on the careers page.", link: { pageKey: "careers", label: "See the roles" } },
+    "the Careers item is careers spec §4.7's, with a link and no email",
+  );
 });
 
 test("Trust: no Part B term is confirmed, so only Part A answers show; SOC 2 is a plain No; insurance isn't mentioned", () => {
@@ -229,6 +240,9 @@ const PRIVACY_MARKERS = [
   "<!-- ⚑ owner: if an EU or UK representative is appointed, add their name and contact details here (go-global §7.1 P7, O1). -->",
   "<!-- ⚑ owner: confirm with the lawyer whether Techsider is an APP entity or opts in under s 6EA of the Privacy Act, then keep or reword the next sentence and the OAIC route under Complaints (go-global §7.1 P13, O3). -->",
   "<!-- ⚑ owner: before any outreach starts, take the O1 advice on e-marketing law and confirm the sources, the first-message notice and the do-not-contact list below (go-global §7.1 P9, O1). -->",
+  "<!-- ⚑ owner: confirm the 12-month retention period for applications with the lawyer (careers spec §4.6). -->",
+  "<!-- ⚑ owner: if references or background checks are ever used, add what is collected, from whom, and with what consent (careers spec §6). -->",
+  "<!-- ⚑ owner: the lawyer confirms the lawful basis for applications from people in the EU or UK, and which recipients outside Australia this section must name (careers spec §6). -->",
   "<!-- ⚑ owner: the lawyer chooses one lawful basis for each purpose below from the alternatives given, and deletes the others (go-global §7.1 P3, O2). -->",
   "<!-- ⚑ owner: add how long GitHub and Cloudflare keep request logs, from their own documentation, or say they don't publish it (go-global §7.1 P12). -->",
   "<!-- ⚑ owner: confirm each provider's storage country with the provider, not from DNS, in src/data/contact.ts and here, and add the transfer safeguard each one relies on (go-global §7.1 P6, O4). -->",
@@ -236,12 +250,13 @@ const PRIVACY_MARKERS = [
   "<!-- ⚑ owner: add the measures that protect our mailbox and devices, such as multi-factor sign-in, or link the Trust page once it is live (go-global §7.1 P15). -->",
 ];
 // The APP order (what we collect, how, why, who else, outside Australia, how long, access, complaints)
-// with the GDPR and UK GDPR sections set in.
+// with the GDPR and UK GDPR sections set in, and the careers spec's applicant section (§6) after the
+// people we contact first.
 const PRIVACY_HEADINGS = [
   "Who we are", "Which laws apply", "Personal information in client work", "What we collect", "How we collect it",
-  "People we contact first", "Why we use it, and on what basis", "What you need to give us", "Who else handles it",
-  "Disclosure outside Australia", "How long we keep it", "Security", "Access, correction and your other rights",
-  "Complaints", "Changes to this policy",
+  "People we contact first", "When you apply for a role", "Why we use it, and on what basis", "What you need to give us",
+  "Who else handles it", "Disclosure outside Australia", "How long we keep it", "Security",
+  "Access, correction and your other rights", "Complaints", "Changes to this policy",
 ];
 // [gap, a line the draft must hold word for word]; P7 and P13 are held by their markers.
 const PRIVACY_LINES = [
@@ -274,6 +289,18 @@ const PRIVACY_LINES = [
   ["P12", "- **Delivering this website and protecting it from attack, through the hosting logs described above.** Basis: our legitimate interest in running a secure website."],
   ["P15", "This website is a set of static files with no database and no accounts, so the site itself stores no personal information."],
   ["§8.1", "the enquiry form also sends your browser's time zone, so our reply suits your working hours."],
+  // careers spec §6: the applicant section mirrors the careers page's notice (§4.6 P1–P3).
+  ["careers", `When you apply for a role, you email your application to ${SITE.email}.`],
+  ["careers", "We collect what you send: your name, contact details, CV, note and links, and anything else you choose to include."],
+  ["careers", "If you don't include your contact details and CV, we can't consider your application."],
+  ["careers", `Applications arrive in our ${CONTACT.emailProvider.name} mailbox, and only the people who handle applications and decide on roles see them.`],
+  ["careers", `${CONTACT.emailProvider.name}, and some of those people, may handle your information outside Australia;`],
+  ["careers", "We keep applications for 12 months after we decide, then delete them, or sooner if you ask."],
+  ["careers", "We don't use AI to score or reject applications; a person reads every one."],
+  ["careers", `To see, correct or delete your application, or to withdraw it, email ${SITE.email}.`],
+  ["careers", '- **When you apply for a role:** the details listed under "When you apply for a role" below.'],
+  ["careers", "- **Assessing applications for a role, and contacting applicants about them.** Basis: steps you ask us to take before a possible contract, or our legitimate interest in recruiting."],
+  ["careers", 'We keep applications for the period set out under "When you apply for a role" above.'],
 ];
 // go-global §8.1: how "What we collect" names each field the enquiry form posts.
 const FORM_FIELD_WORDS = {
@@ -304,7 +331,8 @@ test("documents: the privacy draft covers go-global §7.1 P1–P15 in the APP or
   const body = bodyOf(md);
   assert.deepEqual([...body.matchAll(/^## (.+)$/gm)].map((m) => m[1]), PRIVACY_HEADINGS);
   for (const [gap, line] of PRIVACY_LINES) assert.ok(body.includes(line), `${gap}: the draft lacks "${line}"`);
-  // Every marker in the file, in order: the review marker, then one per open point (P1, P7, P13, P9, P3, P12, P6, P8, P15).
+  // Every marker in the file, in order: the review marker, then one per open point (P1, P7, P13, P9, the
+  // careers spec's three applicant markers, P3, P12, P6, P8, P15).
   assert.deepEqual(md.split("\n").filter((line) => line.includes("⚑")), PRIVACY_MARKERS);
   // P14: "outside Australia" in our own words; "overseas" only inside the APPs' own quoted term.
   assert.equal(md.split('"overseas recipients"').length - 1, 1, 'the APP term "overseas recipients" is quoted once');
@@ -382,7 +410,7 @@ test("each planned company page has its own [...page].astro route in src/pages/,
   }
 });
 
-test("production builds the live company pages only; the preview builds all eight", () => {
+test("production builds the live company pages only; the preview builds all nine", () => {
   for (const path of LIVE) assert.ok(existsSync(join(DIST, fileOf(path))), `dist/${fileOf(path)} is missing`);
   for (const path of PLANNED) assert.equal(existsSync(join(DIST, fileOf(path))), false, `dist/${fileOf(path)} is built while planned`);
   for (const path of [...LIVE, ...PLANNED]) assert.ok(existsSync(join(DIST_PREVIEW, fileOf(path))), `dist-preview/${fileOf(path)} is missing`);
@@ -412,7 +440,15 @@ test("/contact/: the enquiry form, email fallback, reply time and next steps are
   assert.equal(text(one(main, "data-email").inner), SITE.email);
   assert.equal(inlineText(one(main, "data-reply-time").inner), replySentence(CONTACT));
   assert.deepEqual(tagged(tagged(one(main, "id", "next").inner, "ol")[0].inner, "li").map((li) => text(li.inner)), CONTACT.whatNext);
-  assert.deepEqual(tagged(one(main, "id", "elsewhere").inner, "a").map((a) => a.attrs.href), CONTACT.deflection.map((d) => `mailto:${d.email}`));
+  // The shared mailbox, then the Careers item's link to /careers/ (careers spec §4.7).
+  const elsewhere = one(main, "id", "elsewhere");
+  assert.deepEqual(tagged(elsewhere.inner, "h3").map((h) => text(h.inner)), ["Security, privacy and media", "Careers"]);
+  assert.deepEqual(tagged(elsewhere.inner, "a").map((a) => a.attrs.href), ["mailto:admin@techsider.com.au", "/careers/"]);
+  assert.deepEqual(tagged(elsewhere.inner, "a").map((a) => text(a.inner)), ["admin@techsider.com.au", "See the roles"]);
+  assert.deepEqual(
+    withClass(elsewhere.inner, "contact-deflect-body").map((p) => text(p.inner)),
+    CONTACT.deflection.map((d) => d.body),
+  );
 });
 
 test("the reply time is written once and shared by the contact and confirmation pages", () => {
