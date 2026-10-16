@@ -3,7 +3,7 @@ import { deliveryChoice, faqItem, slug } from "./schemas.ts";
 import { HOME_TRUST_QUESTION } from "../lib/fixed-copy.ts";
 import { ENQUIRY_FIELDS, OPTIONAL_ENQUIRY_FIELDS } from "../lib/contact-form.ts";
 // Typed page data for the singleton pages (Services, Evaluation Partner, Contact, Trust, About,
-// Home) and the positioning copy they share. Phase C writes the data in src/data/*.ts; long
+// Careers, Home) and the positioning copy they share. Phase C writes the data in src/data/*.ts; long
 // prose (the legal documents and the evaluation method) is the `documents` markdown collection.
 // Like schemas.ts, every object is strict, and the file imports only astro/zod and plain modules,
 // so Node tests and CI checks can import it.
@@ -169,6 +169,30 @@ export const aboutData = z.strictObject({
   buildLog: z.array(z.strictObject({ date: z.coerce.date(), event: z.string() })).min(1),
 });
 
+// The careers page (careers spec §4, §9). A role's id is its anchor, and careersView in
+// src/lib/views/careers.ts checks it is slugify(title). The list bounds keep a copy edit from
+// growing a card past what the page lays out. The apply opening and the notice hold tokens that
+// the view fills.
+const careersRole = z.strictObject({
+  id: slug, title: z.string(), label: z.string().optional(), tagline: z.string(), description: z.string(),
+  tags: z.array(z.string()).min(3).max(6), responsibilities: z.array(z.string()).min(5).max(6),
+  bring: z.array(z.string()).min(5).max(6), terms: z.string(),
+});
+export const careersData = z.strictObject({
+  hero: z.strictObject({
+    eyebrow: z.string(), title: z.string(), highlight: z.string(), sub: z.string(),
+    primary: z.strictObject({ label: z.string(), href: z.string().startsWith("#") }),
+    secondary: z.strictObject({ label: z.string(), href: z.string().startsWith("#") }),
+  }),
+  firm: z.strictObject({ heading: z.string(), paragraphs: z.array(z.string()).length(2), principles: z.array(titled).length(3) }),
+  roles: z.strictObject({ heading: z.string(), lede: z.string(), where: z.string(), items: z.array(careersRole).min(1).max(8) }),
+  apply: z.strictObject({
+    heading: z.string(), opening: z.string(), sendHeading: z.string(), send: z.array(z.string()).min(1),
+    leaveOut: z.string(), rightToWork: z.string(), nextHeading: z.string(), next: z.string(),
+  }),
+  notice: z.strictObject({ heading: z.string(), paragraphs: z.array(z.string()).length(3) }),
+});
+
 // `trustPageLine` ends the trust answer, and only while /trust/ is shown: homeView() appends it
 // then, so the answer never names a page the build doesn't have (spec §8.1.10).
 export const homeData = z.strictObject({ heroTrace: slug, faq: z.array(faqItem).min(4), trustPageLine: z.string().min(20) })
@@ -189,5 +213,6 @@ export type InternationalLine = z.infer<typeof internationalLine>;
 export type InternationalData = z.infer<typeof internationalData>;
 export type TrustData = z.infer<typeof trustData>;
 export type AboutData = z.infer<typeof aboutData>;
+export type CareersData = z.infer<typeof careersData>;
 export type HomeData = z.infer<typeof homeData>;
 export type DocumentData = z.infer<typeof documentSchema>;
