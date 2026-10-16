@@ -59,6 +59,7 @@ const PAGE_PATH: Record<PageKey, string> = {
   legal: `${GALLERY}/legal-hub/`,
   privacy: `${GALLERY}/legal-document/`,
   websiteTerms: `${GALLERY}/legal-document/`,
+  careers: `${GALLERY}/careers/`,
   contact: `${GALLERY}/contact/`,
   sent: `${GALLERY}/sent/`,
 };

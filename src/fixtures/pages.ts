@@ -1,7 +1,7 @@
 // Preview-only fixtures: the rules are in src/fixtures/index.ts.
 // Page data for the singleton templates (src/content/page-schemas.ts): positioning, Services and
-// Evaluation Partner, Contact (with and without a form endpoint), Trust, About and Home, plus the
-// documents collection (a legal document and the evaluation method, bodies as rendered HTML).
+// Evaluation Partner, Contact (with and without a form endpoint), Trust, About, Careers and Home,
+// plus the documents collection (a legal document and the evaluation method, bodies as rendered HTML).
 // - trustFixture has one Part B item that is not confirmed: it must never render (spec §8.11), and
 //   neither must the Part B answer that rests on it. trustNoTermsFixture confirms no term at all,
 //   so the Trust page drops Part B and every Part B answer.
@@ -11,7 +11,7 @@
 // - servicesFixture's "evaluation-partner" service carries the one id ServicesTemplate links to a
 //   page of its own, so the gallery shows a linked service card beside the plain ones.
 import type {
-  AboutData, ContactData, DocumentData, HomeData, InternationalData, PositioningData, ServicesData, TrustData,
+  AboutData, CareersData, ContactData, DocumentData, HomeData, InternationalData, PositioningData, ServicesData, TrustData,
 } from "../content/page-schemas.ts";
 import { HOME_TRUST_QUESTION } from "../lib/fixed-copy.ts";
 
@@ -255,6 +255,120 @@ export const aboutFixture: AboutData = {
     { date: new Date("2026-09-01"), event: "Fixture event: the fixture evaluation method published." },
     { date: new Date("2026-07-01"), event: "Fixture event: the fixture site rebuilt." },
   ],
+};
+
+/**
+ * The careers page (careers spec §3, §4), rendered through careersView with fixtureSite and
+ * contactFixture. Two roles, so the gallery shows a card with a label and one without:
+ * - each id is slugify(title), as careersView requires; the second title carries "&" and "(AI)",
+ *   so its anchor and its encoded mailto subject take the production roles' hardest shape, and one
+ *   of its tags is a long unbroken token for the 320px checks;
+ * - the second role has the most tags, responsibilities and bring items careersData allows;
+ * - the hero's two calls to action point at the two role sections, whose ids are fixture ids, so
+ *   they land in the gallery while every string here stays visibly fictional;
+ * - the apply opening keeps the words CareersTemplate links to the notice, and the opening and the
+ *   notice keep careersView's tokens, which it fills from SITE, contactFixture and fixtureSite.
+ */
+export const careersFixture: CareersData = {
+  hero: {
+    eyebrow: "Fixture careers",
+    title: "Fixture careers: own the work, grow the firm.",
+    highlight: "Fixture",
+    sub: "Fixture sub: a fictional firm forming a fictional team, open to fixture applicants.",
+    primary: { label: "Fixture: see the first fixture role", href: "#fixture-role-one" },
+    secondary: { label: "Fixture: see the second fixture role", href: "#fixture-role-two-and-fixture-ai" },
+  },
+  firm: {
+    heading: "Fixture firm heading",
+    paragraphs: [
+      "Fixture paragraph one: the fixture firm is built like a fictional professional firm.",
+      "Fixture paragraph two: a fixture structure line that says what the fixture role title means.",
+    ],
+    principles: [
+      { title: "Fixture principle: own it.", body: "Fixture body: the fixture person who scopes the work answers for it." },
+      { title: "Fixture principle: measure it.", body: "Fixture body: fixture thresholds agreed before fixture testing." },
+      { title: "Fixture principle: check it.", body: "Fixture body: a fixture person checks every fixture draft." },
+    ],
+  },
+  roles: {
+    heading: "Fixture roles heading",
+    lede: "Fixture lede: each fixture application is a fixture expression of interest.",
+    where: "Fixture where-you-work line: remote, from a fixture place.",
+    items: [
+      {
+        id: "fixture-role-one",
+        title: "Fixture Role One",
+        label: "Fixture label",
+        tagline: "Fixture tagline: understand the fixture problem.",
+        description: "Fixture description: work inside a fixture team, build the fixture system and stay accountable for it.",
+        tags: ["Fixture tag A", "Fixture tag B", "Fixture tag C"],
+        responsibilities: [
+          "Fixture responsibility one: run fixture discovery.",
+          "Fixture responsibility two: build the fixture system.",
+          "Fixture responsibility three: write the fixture tests.",
+          "Fixture responsibility four: hand the fixture system over.",
+          "Fixture responsibility five: turn fixture lessons into fixture patterns.",
+        ],
+        bring: [
+          "Fixture bring one: fixture systems shipped.",
+          "Fixture bring two: fixture engineering.",
+          "Fixture bring three: fixture client conversations.",
+          "Fixture bring four: fixture testing habits.",
+          "Fixture bring five: fixture judgement.",
+        ],
+        terms: "Fixture terms line: how the first fixture role works.",
+      },
+      {
+        id: "fixture-role-two-and-fixture-ai",
+        title: "Fixture Role Two & Fixture (AI)",
+        tagline: "Fixture tagline: find the fixture buyer.",
+        description: "Fixture description: make the fixture firm easy to find, with every fixture claim checked before it is published.",
+        tags: [
+          "Fixture tag D",
+          "Fixture tag E",
+          "Fixture tag: averyverylongunbrokenfixturetokenforthethreetwentypixelcheck",
+          "Fixture tag F",
+          "Fixture tag G",
+          "Fixture tag H",
+        ],
+        responsibilities: [
+          "Fixture responsibility one: own the fixture positioning.",
+          "Fixture responsibility two: run the fixture insights programme.",
+          "Fixture responsibility three: grow fixture visibility.",
+          "Fixture responsibility four: plan fixture campaigns.",
+          "Fixture responsibility five: check every fixture claim.",
+          "Fixture responsibility six: track what fixture work produces.",
+        ],
+        bring: [
+          "Fixture bring one: fixture marketing experience.",
+          "Fixture bring two: fixture writing.",
+          "Fixture bring three: fixture search experience.",
+          "Fixture bring four: fixture analytics.",
+          "Fixture bring five: fixture curiosity.",
+          "Fixture bring six: fixture discipline.",
+        ],
+        terms: "Fixture terms line: how the second fixture role works.",
+      },
+    ],
+  },
+  apply: {
+    heading: "Fixture apply heading",
+    opening: "Fixture opening: email {email} with the fixture role in the subject line, and read the applicant privacy notice below.",
+    sendHeading: "Fixture send heading",
+    send: ["Fixture item: a fixture CV.", "Fixture item: a short fixture note.", "Fixture item: links to fixture work."],
+    leaveOut: "Fixture leave-out line: no fixture identity documents.",
+    rightToWork: "Fixture right-to-work line: the fixture right to work.",
+    nextHeading: "Fixture next heading",
+    next: "Fixture next step: a fixture person reads every fixture application.",
+  },
+  notice: {
+    heading: "Fixture notice heading",
+    paragraphs: [
+      "Fixture notice one: {legalName}{abnPart}, headquartered in {hq}, collects what you send with a fixture application.",
+      "Fixture notice two: fixture applications arrive in the {provider} mailbox; {storage}.",
+      "Fixture notice three: to see or withdraw a fixture application, email {email}.",
+    ],
+  },
 };
 
 export const homeFixture: HomeData = {

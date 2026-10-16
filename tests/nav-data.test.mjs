@@ -5,7 +5,7 @@ import {
   slugify, visibleGroups, noJsLinks, footerLabel, footerColumns, legalLinks, resolveCta, hqLine, hqPlace, shownProfiles,
 } from "../src/data/nav.ts";
 
-// Spec §7.1, every page that ships at launch.
+// Spec §7.1, every page that ships at launch, plus /careers/ (careers spec §3).
 const EXPECTED = [
   "/", "/404",
   "/solutions/", "/solutions/document-registers/", "/solutions/knowledge-assistant/",
@@ -18,7 +18,7 @@ const EXPECTED = [
   "/demos/", "/demos/document-registers/", "/demos/knowledge-assistant/", "/demos/draft-for-approval/",
   "/demos/ai-evaluation/", "/demos/ai-switch-on/",
   "/insights/", "/about/", "/trust/", "/legal/", "/legal/privacy/", "/legal/website-terms/",
-  "/contact/", "/contact/sent/",
+  "/careers/", "/contact/", "/contact/sent/",
 ];
 
 // Spec §7.2 `group`: the section a page belongs to (breadcrumbs, BreadcrumbList, CI check 1).
@@ -61,6 +61,7 @@ const GROUP_OF = {
   "/legal/": "legal",
   "/legal/privacy/": "legal",
   "/legal/website-terms/": "legal",
+  "/careers/": "about",
   "/contact/": "contact",
   "/contact/sent/": "contact",
 };
@@ -115,7 +116,8 @@ test("industry footer labels read 'AI for {short name}'", () => {
 // Each task that flips pages live extends this pin. After Phase D Task 7: every hub, every solution
 // and industry page, Services, Evaluation Partner, Insights, About and Contact (Phase C); the
 // evaluation method (Task 5), the checker (Task 6), and the Demos hub and the five demo pages (Task 7).
-test("the live pages after Phase D Task 7", () => {
+// The careers release adds /careers/ (careers spec §3).
+test("the live pages after Phase D Task 7 and the careers release", () => {
   const [solutions, industries] = NAV_GROUPS.map((g) => g.items.map((p) => p.path));
   const demos = PAGES.filter((p) => p.base === "/demos/").map((p) => p.path);
   assert.equal(demos.length, 5);
@@ -128,7 +130,7 @@ test("the live pages after Phase D Task 7", () => {
       "/services/", "/services/evaluation-partner/",
       "/resources/", "/insights/", "/resources/what-you-already-pay-for/", "/resources/evaluation-method/",
       "/demos/", ...demos,
-      "/about/", "/contact/", "/contact/sent/",
+      "/about/", "/careers/", "/contact/", "/contact/sent/",
     ].sort(),
   );
 });
@@ -155,19 +157,22 @@ test("production nav shows only live pages; preview shows every group", () => {
   const industries = prod.find((g) => g.id === "industries");
   assert.equal(industries.hubHref, "/industries/");
   assert.deepEqual(industries.items.map((i) => i.path), NAV_GROUPS[1].items.map((i) => i.path));
-  // Phase C Task 7: every hub is live, and About lists only Contact. Phase D adds the evaluation
-  // method (Task 5), the checker (Task 6) and the Demos hub (Task 7) to Resources; the Safe-Use Kits
-  // wait for a lawyer's review (spec §12 item 6).
+  // Phase C Task 7: every hub is live, and About lists only Contact; the careers release puts
+  // Careers before it (careers spec §7). Phase D adds the evaluation method (Task 5), the checker
+  // (Task 6) and the Demos hub (Task 7) to Resources; the Safe-Use Kits wait for a lawyer's review
+  // (spec §12 item 6).
   assert.deepEqual(prod.map((g) => g.hubHref), ["/solutions/", "/industries/", "/services/", "/resources/", "/about/"]);
   const byId = Object.fromEntries(prod.map((g) => [g.id, g]));
   assert.deepEqual(byId.resources.items.map((i) => i.path), ["/insights/", "/demos/", "/resources/what-you-already-pay-for/", "/resources/evaluation-method/"]);
-  assert.deepEqual(byId.about.items.map((i) => i.path), ["/contact/"], "Trust and Legal wait for the owner (spec §12)");
+  assert.deepEqual(byId.about.items.map((i) => i.path), ["/careers/", "/contact/"], "Trust and Legal wait for the owner (spec §12)");
   assert.deepEqual(byId.resources.anchors, []);
   assert.equal(byId.services.anchors.length, 3);
   const pre = visibleGroups(true);
   assert.deepEqual(pre.map((g) => g.id), ["solutions", "industries", "services", "resources", "about"]);
   assert.equal(pre[0].hubHref, "/solutions/");
   assert.equal(pre[2].anchors.length, 3);
+  // In the preview build the About menu lists every item, Careers between Legal and Contact.
+  assert.deepEqual(pre.find((g) => g.id === "about").items.map((i) => i.path), ["/trust/", "/legal/", "/careers/", "/contact/"]);
 });
 
 test("SITE names the headquarters without a street address, the site language and the owner-gated profiles (go-global §9.1)", () => {
@@ -210,10 +215,13 @@ test("no-JS links, footer and legal row only point at shown pages", () => {
     { label: "What you already pay for", href: "/resources/what-you-already-pay-for/" },
     { label: "Evaluation method", href: "/resources/evaluation-method/" },
   ]);
+  // The careers release adds Careers between About and Contact (careers spec §7).
   assert.deepEqual(prod.find((c) => c.title === "Company").links, [
     { label: "About", href: "/about/" },
+    { label: "Careers", href: "/careers/" },
     { label: "Contact", href: "/contact/" },
   ]);
+  assert.deepEqual(footerColumns(true).find((c) => c.title === "Company").links.map((l) => l.href), ["/about/", "/trust/", "/legal/", "/careers/", "/contact/"]);
   assert.deepEqual(legalLinks(false), [], "the legal documents are drafts until reviewed (spec §12 item 5)");
   assert.equal(footerColumns(true).length, 5);
 });

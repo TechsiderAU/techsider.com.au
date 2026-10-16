@@ -1,10 +1,11 @@
 // The careers page (careers spec §3, §4, §10): its copy in src/data/careers.ts, the careersData
 // schema that validates it, and careersView, which numbers the roles, derives each anchor and
-// per-role email subject, and fills the applicant notice from the site's own records. Every
+// per-role email subject, and fills the applicant notice from the site's own records; then the
+// built page, its place in the menu, footer, /llms.txt and sitemap, and its gallery specimen. Every
 // visible string is pinned here exactly as spec §4 gives it, so a copy edit shows up as a diff.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { careersData } from "../src/content/page-schemas.ts";
@@ -13,6 +14,8 @@ import { CONTACT } from "../src/data/contact.ts";
 import { SITE, slugify } from "../src/data/nav.ts";
 import { siteContext } from "../src/lib/site.ts";
 import { careersView } from "../src/lib/views/careers.ts";
+import { visibleText } from "./helpers.mjs";
+import { decodeEntities, elements, hrefsIn } from "../scripts/ci/lib.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 
@@ -356,4 +359,198 @@ test("careersView: fails the build on an empty, duplicated or mis-slugged role l
   assert.throws(() => careersView(withRoles([{ ...CAREERS.roles.items[3], title: "AI Governance and Risk Lead" }]), siteContext(false), CONTACT), /slugify/i);
   // The notice is three paragraphs.
   assert.throws(() => careersView(withNotice(CAREERS.notice.paragraphs.slice(0, 2)), siteContext(false), CONTACT), /three paragraphs/i);
+});
+
+// ---------------------------------------------------------------------------------------------
+// The built page (dist/careers/index.html) and where the site links to it. Run `npm run build`
+// (and `npm run build:preview` for the gallery page) first.
+// ---------------------------------------------------------------------------------------------
+
+const BUILT = join(ROOT, "dist/careers/index.html");
+const GALLERY_PAGE = join(ROOT, "dist-preview/preview/templates/careers/index.html");
+/** Text as a browser shows it inline: tags dropped without adding spaces, entities decoded, whitespace collapsed. */
+const textOf = (html) => decodeEntities(html.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
+const mainOf = (html) => html.slice(html.indexOf("<main"), html.indexOf("</main>"));
+const byId = (html, id) => elements(html, (t) => t.attrs.id === id);
+const tagged = (html, name) => elements(html, (t) => t.name === name);
+
+/** The built page, asserted present rather than skipped when the build is missing. */
+function builtPage() {
+  assert.ok(existsSync(BUILT), "dist/careers/index.html is missing: run `npm run build` first");
+  const html = readFileSync(BUILT, "utf8");
+  return { html, main: mainOf(html) };
+}
+
+test("built page: spec §3's sections in order, one h1 with 'firm' highlighted, and the full heading outline", () => {
+  const { main } = builtPage();
+  // section order
+  const ids = [...main.matchAll(/<section[^>]*\sid="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ids.filter((id) => ["firm", "roles", "forward-deployed-engineer", "marketing-strategist-ai", "client-service-officer", "ai-governance-and-risk-specialist", "apply"].includes(id)),
+    ["firm", "roles", "forward-deployed-engineer", "marketing-strategist-ai", "client-service-officer", "ai-governance-and-risk-specialist", "apply"]);
+  // h1 and highlight
+  assert.equal(textOf(main.match(/<h1[\s\S]*?<\/h1>/)[0]), "Own the work. Grow with the firm.");
+  assert.equal((main.match(/<h1\b/g) ?? []).length, 1, "one h1");
+  assert.deepEqual([...main.matchAll(/class="[^"]*\bhl\b[^"]*"[^>]*>([^<]*)</g)].map((m) => m[1]), ["firm"]);
+  // Every heading, in order, at its level (spec §3's table): headings never skip a level.
+  const outline = elements(main, (t) => /^h[1-6]$/.test(t.name)).map((h) => `h${h.name[1]} ${textOf(h.inner)}`);
+  assert.deepEqual(outline, [
+    "h1 Own the work. Grow with the firm.",
+    "h2 Built like a professional firm", "h3 Own the result.", "h3 Measure before you claim.", "h3 Use AI with care.",
+    "h2 Where you could contribute", ...ROLES.map((r) => `h3 ${r.title}`),
+    ...ROLES.flatMap((r) => [`h2 ${r.title}`, "h3 Responsibilities", "h3 What you bring"]),
+    "h2 How to apply", "h3 What to send", "h3 What happens next", "h3 Applicant privacy notice",
+  ]);
+  const levels = outline.map((h) => Number(h[1]));
+  assert.deepEqual(levels.flatMap((l, i) => (i > 0 && l > levels[i - 1] + 1 ? [i] : [])), [], "a heading skips a level");
+});
+
+test("built page: the hero's eyebrow, sub and two calls to action, and the breadcrumb Home › About › Careers", () => {
+  const { main } = builtPage();
+  const hero = elements(main, (t) => "data-page-hero" in t.attrs)[0];
+  assert.ok(hero, "no hero");
+  // The eyebrow's brackets are aria-hidden decoration; its words are spec §4.1's.
+  const eyebrow = elements(hero.inner, (t) => t.attrs.class === "page-hero-eyebrow")[0];
+  assert.equal(textOf(eyebrow.inner.replace(/<span aria-hidden="true"[^>]*>[^<]*<\/span>/g, "")), "Careers");
+  assert.equal(textOf(elements(hero.inner, (t) => t.attrs.class === "page-hero-sub")[0].inner), CAREERS.hero.sub);
+  const ctas = elements(hero.inner, (t) => "data-cta-links" in t.attrs)[0];
+  assert.deepEqual(tagged(ctas.inner, "a").map((a) => [textOf(a.inner), a.attrs.href]), [["See the roles", "#roles"], ["How to apply", "#apply"]]);
+  const crumb = elements(main, (t) => t.name === "nav" && t.attrs["aria-label"] === "Breadcrumb")[0];
+  assert.deepEqual(tagged(crumb.inner, "li").map((li) => textOf(li.inner).replace(/^\/\s*/, "")), ["Home", "About", "Careers"]);
+  assert.deepEqual(hrefsIn(crumb.inner), ["/", "/about/"]);
+  const list = [...main.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1])).find((j) => j["@type"] === "BreadcrumbList");
+  assert.deepEqual(list.itemListElement.map((i) => [i.name, i.item]), [
+    ["Home", "https://techsider.com.au/"], ["About", "https://techsider.com.au/about/"], ["Careers", "https://techsider.com.au/careers/"],
+  ]);
+});
+
+test("built page: the firm's two paragraphs and three principles, the lede and the where-you-work line", () => {
+  const { main } = builtPage();
+  const firm = textOf(byId(main, "firm")[0].inner);
+  for (const s of [...CAREERS.firm.paragraphs, ...CAREERS.firm.principles.flatMap((p) => [p.title, p.body])]) assert.ok(firm.includes(s), s);
+  const roles = textOf(byId(main, "roles")[0].inner);
+  for (const s of [CAREERS.roles.lede, CAREERS.roles.where]) assert.ok(roles.includes(s), s);
+});
+
+test("built page: four cards numbered 01–04, each with its copy, its anchor and its mailto, and both links described by the card title", () => {
+  const { html, main } = builtPage();
+  // cards: numbers, hrefs, mailtos, aria-describedby on the repeated links
+  for (const [n, id, subject] of [["01", "forward-deployed-engineer", "Forward%20Deployed%20Engineer"], ["02", "marketing-strategist-ai", "Marketing%20Strategist%20(AI)"], ["03", "client-service-officer", "Client%20Service%20Officer"], ["04", "ai-governance-and-risk-specialist", "AI%20Governance%20%26%20Risk%20Specialist"]]) {
+    assert.ok(main.includes(`>${n}<`), `card ${n} shows its number`);
+    assert.match(main, new RegExp(`<a[^>]*href="#${id}"[^>]*aria-describedby="[^"]+"`));
+    assert.ok(main.includes(`href="mailto:admin@techsider.com.au?subject=Application%3A%20${subject}"`), `${id} mailto`);
+  }
+  // every aria-describedby resolves to an element on the page
+  for (const m of main.matchAll(/aria-describedby="([^"]+)"/g)) for (const ref of m[1].split(/\s+/)) assert.ok(html.includes(`id="${ref}"`), `aria-describedby ${ref} resolves`);
+  // Each card, in order: its number, title, label (the Forward Deployed Engineer only), tagline,
+  // description, the tags joined by " · ", then "Read the role" and "Apply by email".
+  const roles = byId(main, "roles")[0].inner;
+  const cards = tagged(tagged(roles, "ol")[0].inner, "li");
+  assert.equal(cards.length, 4);
+  for (const [i, card] of cards.entries()) {
+    const r = ROLES[i];
+    const expected = [String(i + 1).padStart(2, "0"), r.title, ...(r.label ? [r.label] : []), r.tagline, r.description, r.tags.join(" · "), "Read the role Apply by email"];
+    assert.equal(visibleText(card.inner).trim().replace(/\s+/g, " "), expected.join(" "), r.id);
+  }
+  // The repeated link texts name their role through aria-describedby: a card's links point at its
+  // title, a role section's Apply link at its heading. No hidden text (go-global F16).
+  const titleOf = (id) => textOf(byId(html, id)[0]?.inner ?? "");
+  const links = tagged(main, "a");
+  const named = (label) => links.filter((a) => textOf(a.inner) === label).map((a) => [a.attrs.href, titleOf(a.attrs["aria-describedby"])]);
+  assert.deepEqual(named("Read the role"), ROLES.map((r) => [`#${r.id}`, r.title]));
+  assert.deepEqual(named("Apply by email"), [...ROLES.map((r, i) => [MAILTOS[i], r.title]), ...ROLES.map((r, i) => [MAILTOS[i], r.title])]);
+  assert.ok(!/class="[^"]*\bsr-only\b/.test(main), "no visually hidden text");
+});
+
+test("built page: each role section has its label, tagline, two lists, its terms line and its two links", () => {
+  const { main } = builtPage();
+  for (const [i, r] of ROLES.entries()) {
+    const section = byId(main, r.id)[0];
+    assert.ok(section, r.id);
+    assert.equal(section.attrs["aria-labelledby"], `${r.id}-heading`);
+    const text = textOf(section.inner);
+    for (const s of [r.tagline, r.terms]) assert.ok(text.includes(s), `${r.id}: ${s}`);
+    assert.equal(text.includes("Partner track"), r.label === "Partner track", `${r.id}: label`);
+    assert.deepEqual(tagged(section.inner, "h3").map((h) => textOf(h.inner)), ["Responsibilities", "What you bring"]);
+    assert.deepEqual(tagged(section.inner, "ul").map((ul) => tagged(ul.inner, "li").map((li) => textOf(li.inner))), [r.responsibilities, r.bring]);
+    assert.deepEqual(tagged(section.inner, "a").map((a) => [textOf(a.inner), a.attrs.href]), [["Apply by email", MAILTOS[i]], ["How we handle applications", "#applicant-privacy"]]);
+  }
+});
+
+test("built page: How to apply, with the plain address, and the applicant notice with every token filled", () => {
+  const { main } = builtPage();
+  // privacy links, notice, plain email
+  assert.ok((main.match(/href="#applicant-privacy"/g) ?? []).length >= 6, "How we handle applications links (after the cards, each role, the apply opening)");
+  assert.ok(main.includes('id="applicant-privacy"'));
+  assert.ok(textOf(main.slice(main.indexOf('id="apply"'))).includes("admin@techsider.com.au"));
+  // Exactly six: "How we handle applications" after the cards and in each role section, and the
+  // opening's "read the applicant privacy notice below".
+  const links = tagged(main, "a");
+  assert.deepEqual(links.filter((a) => a.attrs.href === "#applicant-privacy").map((a) => textOf(a.inner)), [
+    ...Array(5).fill("How we handle applications"), "read the applicant privacy notice below",
+  ]);
+  const apply = byId(main, "apply")[0].inner;
+  const paragraphs = (html) => tagged(html, "p").map((p) => textOf(p.inner));
+  assert.ok(paragraphs(apply).includes("Email admin@techsider.com.au with the role in the subject line. Each role's Apply by email link fills it in for you. Before you send it, read the applicant privacy notice below."));
+  assert.ok(!hrefsIn(apply).some((h) => h.startsWith("mailto:")), "the address in How to apply is plain text, not a link");
+  assert.deepEqual(tagged(tagged(apply, "ul")[0].inner, "li").map((li) => textOf(li.inner)), CAREERS.apply.send);
+  for (const s of [CAREERS.apply.leaveOut, CAREERS.apply.rightToWork, CAREERS.apply.next]) assert.ok(paragraphs(apply).includes(s), s);
+  // The notice: its h3, then P1–P3 with the tokens filled; it never reuses the enquiry form's notice.
+  const notice = byId(main, "applicant-privacy")[0];
+  assert.deepEqual(tagged(notice.inner, "h3").map((h) => [h.attrs.id, textOf(h.inner)]), [["applicant-privacy-heading", "Applicant privacy notice"]]);
+  assert.deepEqual(paragraphs(notice.inner), [P1, P2, P3]);
+  assert.ok(!main.includes("data-collection-notice") && !main.includes('id="enquiry-privacy"'));
+});
+
+test("built page: no JobPosting, the one minimal Organization, and its title and description from nav.ts", () => {
+  const { html } = builtPage();
+  // no JobPosting, one Organization
+  assert.ok(!/"JobPosting"/.test(html));
+  assert.equal((html.match(/"@type":"Organization"/g) ?? []).length, 1);
+  assert.equal(html.match(/<title>([^<]*)<\/title>/)[1], "Careers | Techsider");
+  assert.equal(
+    decodeEntities(html.match(/<meta name="description" content="([^"]*)"/)[1]),
+    "Careers at Techsider: Forward Deployed Engineers join on the partner track, alongside roles in marketing strategy, client service, and AI governance and risk.",
+  );
+});
+
+test("built page: no partner-terms, size, reach or reply-time word in <main>, the title or the description (spec §5, §10)", () => {
+  const { html, main } = builtPage();
+  // word scan on <main>, title and description
+  const visible = [textOf(main), visibleText(main), html.match(/<title>([^<]*)<\/title>/)[1], decodeEntities(html.match(/<meta name="description" content="([^"]*)"/)[1])].join(" ");
+  for (const w of [/co-?founder/i, /\bfounder\b/i, /\bequity\b/i, /\bprofit/i, /\bsalary\b/i, /\bbuy[- ]in\b/i, /\binvest/i, /\bshares\b/i, /\bshareholding\b/i, /ownership percentage/i, /\bvesting\b/i, /\bvaluation\b/i, /\bunlimited\b/i, /\bheadcount\b/i, /\bsenior\b/i, /\bclearances?\b/i, /\bworldwide\b/i, /\bglobal\b/i, /\binternational\b/i, /\boverseas\b/i, /we reply within/i])
+    assert.doesNotMatch(visible, w);
+  // AI policies and registers are never a drafting duty: the one mention is the evidence clients'
+  // teams draw on for "impact assessments and AI registers" (spec §5, §12 R2).
+  const text = textOf(main);
+  assert.doesNotMatch(text, /AI polic/i);
+  assert.equal((text.match(/AI register/gi) ?? []).length, 1);
+  assert.ok(text.includes("impact assessments and AI registers"));
+});
+
+test("placement: /careers/ is in the About menu, the footer's Company column, /llms.txt's Company section and the sitemap (spec §7)", () => {
+  const llms = readFileSync(join(ROOT, "dist/llms.txt"), "utf8");
+  assert.ok(llms.includes("(https://techsider.com.au/careers/)"));
+  const company = llms.slice(llms.indexOf("## Company"), llms.indexOf("\n## ", llms.indexOf("## Company") + 1));
+  // The link text is the page title without " | Techsider", and the note its meta description.
+  assert.ok(company.includes("\n- [Careers](https://techsider.com.au/careers/): Careers at Techsider: Forward Deployed Engineers join on the partner track, alongside roles in marketing strategy, client service, and AI governance and risk.\n"), "Company section");
+  assert.deepEqual([...company.matchAll(/\]\((https:[^)]+)\)/g)].map((m) => m[1]), ["https://techsider.com.au/about/", "https://techsider.com.au/careers/", "https://techsider.com.au/contact/"]);
+  assert.ok(readFileSync(join(ROOT, "dist/sitemap-0.xml"), "utf8").includes("<loc>https://techsider.com.au/careers/</loc>"));
+  const home = readFileSync(join(ROOT, "dist/index.html"), "utf8");
+  const footer = tagged(home, "footer")[0];
+  assert.ok(hrefsIn(footer.outer).includes("/careers/"), "the footer links /careers/");
+  const company2 = hrefsIn(footer.outer);
+  assert.deepEqual(company2.slice(company2.indexOf("/about/"), company2.indexOf("/about/") + 3), ["/about/", "/careers/", "/contact/"], "Company column order");
+  assert.deepEqual(hrefsIn(byId(home, "nav-panel-about")[0].outer), ["/careers/", "/contact/", "/about/"], "the About menu: Careers and Contact, then the hub");
+});
+
+test("gallery: the careers specimen shows the fixture address, never the real one (careers Review Focus 5)", () => {
+  assert.ok(existsSync(GALLERY_PAGE), "dist-preview/preview/templates/careers/index.html is missing: run `npm run build:preview` first");
+  const html = readFileSync(GALLERY_PAGE, "utf8");
+  const main = mainOf(html);
+  assert.ok(main.includes('data-template="careers"'));
+  // The gallery's shell (its footer) is the real site's; the template in <main> shows only the fixture address.
+  assert.ok(!main.includes(SITE.email), "the real address is in the careers specimen");
+  const mailtos = hrefsIn(main).filter((h) => h.startsWith("mailto:"));
+  assert.ok(mailtos.length > 0 && mailtos.every((h) => h.startsWith("mailto:fixture@example.com?subject=Application%3A%20Fixture")), mailtos.join(", "));
+  assert.ok(textOf(byId(main, "apply")[0].inner).includes("fixture@example.com"));
 });

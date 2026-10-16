@@ -1,0 +1,294 @@
+---
+// The careers page (careers spec §3, §9), body only: the /careers/ route builds the view with
+// careersView (src/lib/views/careers.ts) and wraps this in BaseLayout, and the gallery renders it
+// from the careers fixture. It renders spec §3's structure from the view alone: the hero, with the
+// breadcrumb Home › About › Careers; how the firm is built, its principles in the About page's
+// hairline cell grid; the roles as numbered cards, then the where-you-work line; one section per
+// role; and how to apply, which ends with the applicant privacy notice (#applicant-privacy).
+// Each card repeats the link texts "Read the role" and "Apply by email", and each role section
+// repeats "Apply by email", so every such link names its role through aria-describedby (the card's
+// h3, or the section's h2), never through hidden text (go-global F16). The address is the
+// SiteContext's, as plain text in How to apply, so the gallery shows its fixture address.
+// Copy rules: careers spec §5. This file's own words are the link texts and sub-headings spec §3
+// names, and its comments quote no watched phrase.
+import PageHero from "../components/page/PageHero.astro";
+import PageSection from "../components/page/PageSection.astro";
+import SectionHeader from "../components/ui/SectionHeader.astro";
+import { crumbs, type SiteContext } from "../lib/site";
+import type { CareersView } from "../lib/views/careers";
+
+interface Props {
+  view: CareersView;
+  site: SiteContext;
+}
+
+const { view, site } = Astro.props;
+const NOTICE_ID = "applicant-privacy";
+const NOTICE_HREF = `#${NOTICE_ID}`;
+const HANDLING_LABEL = "How we handle applications";
+// The apply opening's closing words link to the notice (careers spec §4.5).
+const NOTICE_LINK_TEXT = "read the applicant privacy notice below";
+const noticeAt = view.apply.opening.lastIndexOf(NOTICE_LINK_TEXT);
+if (noticeAt < 0) {
+  throw new Error(`CareersTemplate: the apply opening no longer says "${NOTICE_LINK_TEXT}", so the link to the notice has no words to sit on (careers spec §4.5)`);
+}
+const opening = {
+  before: view.apply.opening.slice(0, noticeAt),
+  after: view.apply.opening.slice(noticeAt + NOTICE_LINK_TEXT.length),
+};
+const cardTitleId = (id: string) => `${id}-card-title`;
+---
+<div class="template" data-template="careers">
+  <PageHero
+    eyebrow={view.hero.eyebrow}
+    title={view.hero.title}
+    highlight={view.hero.highlight}
+    sub={view.hero.sub}
+    breadcrumb={crumbs(site, ["about", "careers"])}
+    ctas={{ primary: view.hero.primary, secondary: view.hero.secondary }}
+  />
+
+  <PageSection id="firm" title={view.firm.heading}>
+    <div class="careers-prose">
+      {view.firm.paragraphs.map((paragraph) => <p class="careers-text">{paragraph}</p>)}
+    </div>
+    <ul class="careers-grid careers-principles">
+      {view.firm.principles.map((principle) => (
+        <li class="careers-cell">
+          <h3 class="careers-cell-title">{principle.title}</h3>
+          <p class="careers-cell-body">{principle.body}</p>
+        </li>
+      ))}
+    </ul>
+  </PageSection>
+
+  <PageSection id="roles" title={view.roles.heading} lede={view.roles.lede}>
+    <ol class="careers-grid careers-cards">
+      {view.roles.cards.map((card) => (
+        <li class="careers-cell careers-card">
+          <p class="careers-number" aria-hidden="true">{card.number}</p>
+          <h3 id={cardTitleId(card.id)} class="careers-cell-title">{card.title}</h3>
+          {card.label && <p class="careers-label">{card.label}</p>}
+          <p class="careers-tagline">{card.tagline}</p>
+          <p class="careers-cell-body">{card.description}</p>
+          <p class="careers-tags">{card.tags.join(" · ")}</p>
+          <p class="careers-links">
+            <a href={card.href} class="careers-link" aria-describedby={cardTitleId(card.id)}>Read the role</a>
+            <a href={card.mailto} class="careers-link" aria-describedby={cardTitleId(card.id)}>Apply by email</a>
+          </p>
+        </li>
+      ))}
+    </ol>
+    <div class="careers-prose">
+      <p class="careers-text">{view.roles.where}</p>
+      <p class="careers-links"><a href={NOTICE_HREF} class="careers-link">{HANDLING_LABEL}</a></p>
+    </div>
+  </PageSection>
+
+  {view.sections.map((section) => (
+    <PageSection id={section.id} title={section.title} width="prose">
+      <div class="careers-intro">
+        {section.label && <p class="careers-label">{section.label}</p>}
+        <p class="careers-tagline careers-tagline-lead">{section.tagline}</p>
+      </div>
+      <div class="careers-block">
+        <SectionHeader id={`${section.id}-responsibilities-heading`} title="Responsibilities" level={3} />
+        <ul class="careers-list">
+          {section.responsibilities.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <div class="careers-block">
+        <SectionHeader id={`${section.id}-bring-heading`} title="What you bring" level={3} />
+        <ul class="careers-list">
+          {section.bring.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <p class="careers-terms">{section.terms}</p>
+      <p class="careers-links">
+        <a href={section.mailto} class="careers-link" aria-describedby={`${section.id}-heading`}>Apply by email</a>
+        <a href={NOTICE_HREF} class="careers-link">{HANDLING_LABEL}</a>
+      </p>
+    </PageSection>
+  ))}
+
+  <PageSection id="apply" title={view.apply.heading} width="prose">
+    <p class="careers-text">{opening.before}<a href={NOTICE_HREF} class="careers-inline-link">{NOTICE_LINK_TEXT}</a>{opening.after}</p>
+    <div class="careers-block">
+      <SectionHeader id="apply-send-heading" title={view.apply.sendHeading} level={3} />
+      <ul class="careers-list">
+        {view.apply.send.map((item) => <li>{item}</li>)}
+      </ul>
+      <p class="careers-text">{view.apply.leaveOut}</p>
+      <p class="careers-text">{view.apply.rightToWork}</p>
+    </div>
+    <div class="careers-block">
+      <SectionHeader id="apply-next-heading" title={view.apply.nextHeading} level={3} />
+      <p class="careers-text">{view.apply.next}</p>
+    </div>
+    <section id={NOTICE_ID} class="careers-block careers-notice" aria-labelledby={`${NOTICE_ID}-heading`}>
+      <SectionHeader id={`${NOTICE_ID}-heading`} title={view.notice.heading} level={3} />
+      {view.notice.paragraphs.map((paragraph) => <p class="careers-text">{paragraph}</p>)}
+    </section>
+  </PageSection>
+</div>
+
+<style>
+  .careers-text,
+  .careers-cell-body,
+  .careers-tagline,
+  .careers-label,
+  .careers-tags,
+  .careers-number,
+  .careers-links,
+  .careers-terms {
+    margin: 0;
+  }
+  .careers-prose {
+    display: grid;
+    gap: 1rem;
+    max-width: 48rem;
+  }
+  .careers-text {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    overflow-wrap: break-word;
+  }
+  /* The principles and the role cards share hairlines: the About page's hairline cell grid, on
+     bone. Each cell draws its own border and overlaps its neighbours by 1px, so a short last row
+     leaves no empty cell; the list's 1px end padding holds the last column's and row's overlap. */
+  .careers-grid {
+    display: grid;
+    margin: 0;
+    padding: 0 1px 1px 0;
+    list-style: none;
+  }
+  @media (min-width: 40rem) {
+    .careers-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .careers-principles {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .careers-cell {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0 -1px -1px 0;
+    padding: 1.5rem 1.25rem;
+    border: 1px solid var(--color-bone-line);
+    overflow-wrap: anywhere;
+  }
+  /* A card's links sit at its foot, so the links of cards in one row line up. */
+  .careers-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .careers-card .careers-links {
+    margin-top: auto;
+  }
+  .careers-cell-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .careers-cell-body {
+    line-height: 1.55;
+    color: var(--color-muted-dark);
+  }
+  /* The card number is decorative (aria-hidden): the ordered list already gives the order. */
+  .careers-number {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-muted-dark);
+  }
+  .careers-label {
+    justify-self: start;
+    align-self: flex-start;
+    padding: 0.125rem 0.5rem;
+    border: 1px solid var(--color-carbon);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-carbon);
+  }
+  .careers-tagline {
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .careers-tagline-lead {
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    line-height: 1.45;
+  }
+  .careers-tags {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--color-muted-dark);
+    overflow-wrap: anywhere;
+  }
+  .careers-intro,
+  .careers-block {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+  }
+  .careers-list {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style: square;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+  }
+  /* How the role works: the line a reader checks, set apart by a carbon rule. */
+  .careers-terms {
+    padding-left: 1rem;
+    border-left: 2px solid var(--color-carbon);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    overflow-wrap: break-word;
+  }
+  .careers-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+  }
+  .careers-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    max-width: 100%;
+    font-weight: 600;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--color-muted-dark);
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+  }
+  .careers-link:hover {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+  /* A link inside running text: underlined, so it doesn't rely on colour (WCAG 1.4.1). */
+  .careers-inline-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .careers-inline-link:hover {
+    text-decoration-thickness: 2px;
+  }
+  /* The applicant notice closes How to apply under a hairline. */
+  .careers-notice {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-bone-line);
+  }
+</style>

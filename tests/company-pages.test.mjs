@@ -38,7 +38,8 @@ import { internationalLines, trustView } from "../src/lib/views/company.ts";
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const DIST = join(ROOT, "dist");
 const DIST_PREVIEW = join(ROOT, "dist-preview");
-const LIVE = ["/about/", "/contact/", "/resources/"];
+// The careers release adds /careers/ (careers spec §3); tests/careers.test.mjs checks its content.
+const LIVE = ["/about/", "/contact/", "/resources/", "/careers/"];
 const PLANNED = ["/trust/", "/legal/", "/legal/privacy/", "/legal/website-terms/", "/resources/safe-use-kits/"];
 // Every source file this task writes, for the banned-phrase scan.
 const SOURCES = [
@@ -48,6 +49,8 @@ const SOURCES = [
   "src/pages/about/[...page].astro", "src/pages/contact/[...page].astro", "src/pages/resources/[...page].astro",
   "src/pages/trust/[...page].astro", "src/pages/legal/[...page].astro", "src/pages/legal/privacy/[...page].astro",
   "src/pages/legal/website-terms/[...page].astro", "src/pages/resources/safe-use-kits/[...page].astro",
+  // The careers release (careers spec §9): its copy and its route.
+  "src/data/careers.ts", "src/pages/careers/[...page].astro",
 ];
 // Each About build-log entry, in ABOUT.buildLog order, with the subjects of the commits that
 // evidence it. Every subject must be in this repository's history, dated (Australia/Sydney) on the
@@ -382,7 +385,7 @@ test("each planned company page has its own [...page].astro route in src/pages/,
   }
 });
 
-test("production builds the live company pages only; the preview builds all eight", () => {
+test("production builds the live company pages only; the preview builds all nine", () => {
   for (const path of LIVE) assert.ok(existsSync(join(DIST, fileOf(path))), `dist/${fileOf(path)} is missing`);
   for (const path of PLANNED) assert.equal(existsSync(join(DIST, fileOf(path))), false, `dist/${fileOf(path)} is built while planned`);
   for (const path of [...LIVE, ...PLANNED]) assert.ok(existsSync(join(DIST_PREVIEW, fileOf(path))), `dist-preview/${fileOf(path)} is missing`);

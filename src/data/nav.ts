@@ -259,6 +259,10 @@ const LEGAL = describe(page("legal", "Legal", "/", "/legal/", "planned"),
   "Techsider's legal documents: the privacy policy for the information you send us, and the terms for using techsider.com.au, each with the date it last changed.");
 const CONTACT = describe(page("contact", "Contact", "/", "/contact/", "live"),
   "Tell Techsider what you're trying to fix with AI. Send an enquiry or email us to discuss your workflow, a Fit Call and next steps for your organisation.");
+// The careers page (careers spec §3): in the About section, listed in the About menu and the footer's
+// Company column beside Contact.
+const CAREERS = describe(page("about", "Careers", "/", "/careers/", "live"),
+  "Careers at Techsider: Forward Deployed Engineers join on the partner track, alongside roles in marketing strategy, client service, and AI governance and risk.");
 
 const PRIVACY = describe(page("legal", "Privacy", "/legal/", "/legal/privacy/", "planned", "Privacy policy"),
   "How Techsider collects, uses, stores and discloses personal information, which privacy laws apply, which services handle it, and how to use your privacy rights.");
@@ -302,7 +306,7 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   { id: "resources", label: "Resources", hub: RESOURCES_HUB, allLabel: "All resources", layout: "rows", items: RESOURCES_ITEMS, anchors: [] },
-  { id: "about", label: "About", hub: ABOUT, allLabel: "About Techsider", layout: "rows", items: [TRUST, LEGAL, CONTACT], anchors: [] },
+  { id: "about", label: "About", hub: ABOUT, allLabel: "About Techsider", layout: "rows", items: [TRUST, LEGAL, CAREERS, CONTACT], anchors: [] },
 ];
 
 export const PAGES: PageEntry[] = [
@@ -311,7 +315,7 @@ export const PAGES: PageEntry[] = [
   INDUSTRIES_HUB, ...INDUSTRIES,
   SERVICES_HUB, EVALUATION_PARTNER,
   RESOURCES_HUB, INSIGHTS, DEMOS, SAFE_USE_KITS, PAY_FOR, EVAL_METHOD, ...DEMO_PAGES,
-  ABOUT, TRUST, LEGAL, PRIVACY, WEBSITE_TERMS, CONTACT, CONTACT_SENT,
+  ABOUT, TRUST, LEGAL, PRIVACY, WEBSITE_TERMS, CAREERS, CONTACT, CONTACT_SENT,
 ];
 
 export const EXEMPT_PATHS = ["/", "/404"];
@@ -366,7 +370,7 @@ export function footerColumns(preview: boolean): FooterColumn[] {
     { title: "Industries", links: linksFor(INDUSTRIES, preview, footerLabel) },
     { title: "Services", links: linksFor([SERVICES_HUB, EVALUATION_PARTNER], preview) },
     { title: "Resources", links: linksFor(RESOURCES_ITEMS, preview) },
-    { title: "Company", links: linksFor([ABOUT, TRUST, LEGAL, CONTACT], preview) },
+    { title: "Company", links: linksFor([ABOUT, TRUST, LEGAL, CAREERS, CONTACT], preview) },
   ];
   return columns.filter((c) => c.links.length > 0);
 }

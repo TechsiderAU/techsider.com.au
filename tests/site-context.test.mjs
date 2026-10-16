@@ -24,7 +24,8 @@ const PAGE_PATHS = {
   evaluationPartner: "/services/evaluation-partner/", resources: "/resources/", insights: "/insights/",
   demos: "/demos/", safeUseKits: "/resources/safe-use-kits/", payFor: "/resources/what-you-already-pay-for/",
   evaluationMethod: "/resources/evaluation-method/", about: "/about/", trust: "/trust/", legal: "/legal/",
-  privacy: "/legal/privacy/", websiteTerms: "/legal/website-terms/", contact: "/contact/", sent: "/contact/sent/",
+  privacy: "/legal/privacy/", websiteTerms: "/legal/website-terms/", careers: "/careers/", contact: "/contact/",
+  sent: "/contact/sent/",
 };
 const RESOURCE_KEYS = ["insights", "demos", "safeUseKits", "payFor", "evaluationMethod"];
 const navAt = (path) => PAGES.find((p) => p.path === path);
@@ -76,10 +77,11 @@ test("production: planned pages get a null href, and contact links reach the liv
   // After Phase D Task 7: every hub, every solution and industry page, Services, Evaluation Partner,
   // Insights, About and Contact (Phase C); the evaluation method (Task 5), the checker (Task 6), and
   // the Demos hub and every demo page (Task 7). The Safe-Use Kits wait for a lawyer's review (spec §12
-  // item 6); Trust and Legal wait for the owner (spec §12).
+  // item 6); Trust and Legal wait for the owner (spec §12). The careers release adds Careers
+  // (careers spec §3).
   assert.deepEqual(
     Object.keys(PAGE_PATHS).filter((key) => site.page(key).href !== null),
-    ["home", "solutions", "industries", "services", "evaluationPartner", "resources", "insights", "demos", "payFor", "evaluationMethod", "about", "contact", "sent"],
+    ["home", "solutions", "industries", "services", "evaluationPartner", "resources", "insights", "demos", "payFor", "evaluationMethod", "about", "careers", "contact", "sent"],
   );
   assert.ok(site.solutions.every((s) => s.href !== null), "a solution page is hidden");
   assert.ok(site.industries.every((i) => i.href !== null), "an industry page is hidden");
@@ -216,7 +218,7 @@ test("fixtureSite: pages open their template page, privacy is not shown, and con
     home: "home", solutions: "solutions-hub", industries: "industries-hub", services: "services",
     evaluationPartner: "evaluation-partner", resources: "resources-hub", demos: "demos-hub",
     safeUseKits: "safe-use-kits", payFor: "pay-for", evaluationMethod: "evaluation-method", about: "about",
-    trust: "trust", legal: "legal-hub", websiteTerms: "legal-document", contact: "contact", sent: "sent",
+    trust: "trust", legal: "legal-hub", websiteTerms: "legal-document", careers: "careers", contact: "contact", sent: "sent",
   };
   for (const [key, kind] of Object.entries(gallery)) {
     assert.equal(fixtureSite.page(key).href, `/preview/templates/${kind}/`, key);
