@@ -240,6 +240,9 @@ const PRIVACY_MARKERS = [
   "<!-- ⚑ owner: if an EU or UK representative is appointed, add their name and contact details here (go-global §7.1 P7, O1). -->",
   "<!-- ⚑ owner: confirm with the lawyer whether Techsider is an APP entity or opts in under s 6EA of the Privacy Act, then keep or reword the next sentence and the OAIC route under Complaints (go-global §7.1 P13, O3). -->",
   "<!-- ⚑ owner: before any outreach starts, take the O1 advice on e-marketing law and confirm the sources, the first-message notice and the do-not-contact list below (go-global §7.1 P9, O1). -->",
+  "<!-- ⚑ owner: confirm the 12-month retention period for applications with the lawyer (careers spec §4.6). -->",
+  "<!-- ⚑ owner: if references or background checks are ever used, add what is collected, from whom, and with what consent (careers spec §6). -->",
+  "<!-- ⚑ owner: the lawyer confirms the lawful basis for applications from people in the EU or UK, and which recipients outside Australia this section must name (careers spec §6). -->",
   "<!-- ⚑ owner: the lawyer chooses one lawful basis for each purpose below from the alternatives given, and deletes the others (go-global §7.1 P3, O2). -->",
   "<!-- ⚑ owner: add how long GitHub and Cloudflare keep request logs, from their own documentation, or say they don't publish it (go-global §7.1 P12). -->",
   "<!-- ⚑ owner: confirm each provider's storage country with the provider, not from DNS, in src/data/contact.ts and here, and add the transfer safeguard each one relies on (go-global §7.1 P6, O4). -->",
@@ -247,12 +250,13 @@ const PRIVACY_MARKERS = [
   "<!-- ⚑ owner: add the measures that protect our mailbox and devices, such as multi-factor sign-in, or link the Trust page once it is live (go-global §7.1 P15). -->",
 ];
 // The APP order (what we collect, how, why, who else, outside Australia, how long, access, complaints)
-// with the GDPR and UK GDPR sections set in.
+// with the GDPR and UK GDPR sections set in, and the careers spec's applicant section (§6) after the
+// people we contact first.
 const PRIVACY_HEADINGS = [
   "Who we are", "Which laws apply", "Personal information in client work", "What we collect", "How we collect it",
-  "People we contact first", "Why we use it, and on what basis", "What you need to give us", "Who else handles it",
-  "Disclosure outside Australia", "How long we keep it", "Security", "Access, correction and your other rights",
-  "Complaints", "Changes to this policy",
+  "People we contact first", "When you apply for a role", "Why we use it, and on what basis", "What you need to give us",
+  "Who else handles it", "Disclosure outside Australia", "How long we keep it", "Security",
+  "Access, correction and your other rights", "Complaints", "Changes to this policy",
 ];
 // [gap, a line the draft must hold word for word]; P7 and P13 are held by their markers.
 const PRIVACY_LINES = [
@@ -285,6 +289,15 @@ const PRIVACY_LINES = [
   ["P12", "- **Delivering this website and protecting it from attack, through the hosting logs described above.** Basis: our legitimate interest in running a secure website."],
   ["P15", "This website is a set of static files with no database and no accounts, so the site itself stores no personal information."],
   ["§8.1", "the enquiry form also sends your browser's time zone, so our reply suits your working hours."],
+  // careers spec §6: the applicant section mirrors the careers page's notice (§4.6 P1–P3).
+  ["careers", `When you apply for a role, you email your application to ${SITE.email}.`],
+  ["careers", "We collect what you send: your name, contact details, CV, note and links, and anything else you choose to include."],
+  ["careers", "If you don't include your contact details and CV, we can't consider your application."],
+  ["careers", `Applications arrive in our ${CONTACT.emailProvider.name} mailbox, and only the people who handle applications and decide on roles see them.`],
+  ["careers", `${CONTACT.emailProvider.name}, and some of those people, may handle your information outside Australia;`],
+  ["careers", "We keep applications for 12 months after we decide, then delete them, or sooner if you ask."],
+  ["careers", "We don't use AI to score or reject applications; a person reads every one."],
+  ["careers", `To see, correct or delete your application, or to withdraw it, email ${SITE.email}.`],
 ];
 // go-global §8.1: how "What we collect" names each field the enquiry form posts.
 const FORM_FIELD_WORDS = {
@@ -315,7 +328,8 @@ test("documents: the privacy draft covers go-global §7.1 P1–P15 in the APP or
   const body = bodyOf(md);
   assert.deepEqual([...body.matchAll(/^## (.+)$/gm)].map((m) => m[1]), PRIVACY_HEADINGS);
   for (const [gap, line] of PRIVACY_LINES) assert.ok(body.includes(line), `${gap}: the draft lacks "${line}"`);
-  // Every marker in the file, in order: the review marker, then one per open point (P1, P7, P13, P9, P3, P12, P6, P8, P15).
+  // Every marker in the file, in order: the review marker, then one per open point (P1, P7, P13, P9, the
+  // careers spec's three applicant markers, P3, P12, P6, P8, P15).
   assert.deepEqual(md.split("\n").filter((line) => line.includes("⚑")), PRIVACY_MARKERS);
   // P14: "outside Australia" in our own words; "overseas" only inside the APPs' own quoted term.
   assert.equal(md.split('"overseas recipients"').length - 1, 1, 'the APP term "overseas recipients" is quoted once');

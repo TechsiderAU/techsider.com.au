@@ -15,7 +15,9 @@ import { SITE, slugify } from "../src/data/nav.ts";
 import { siteContext } from "../src/lib/site.ts";
 import { careersView } from "../src/lib/views/careers.ts";
 import { visibleText } from "./helpers.mjs";
-import { decodeEntities, elements, hrefsIn } from "../scripts/ci/lib.mjs";
+import { decodeEntities, elements, hrefsIn, result } from "../scripts/ci/lib.mjs";
+import { scan } from "../scripts/ci/checks/04-banned-phrases.mjs";
+import { OFFER_FILES, OFFER_RULES } from "../scripts/ci/checks/11-pricing.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 
@@ -553,4 +555,40 @@ test("gallery: the careers specimen shows the fixture address, never the real on
   const mailtos = hrefsIn(main).filter((h) => h.startsWith("mailto:"));
   assert.ok(mailtos.length > 0 && mailtos.every((h) => h.startsWith("mailto:fixture@example.com?subject=Application%3A%20Fixture")), mailtos.join(", "));
   assert.ok(textOf(byId(main, "apply")[0].inner).includes("fixture@example.com"));
+});
+
+/** Spec §8: the three from/to phrase pairs the Sydney gate makes in one commit. */
+const SYDNEY_GATE_PAIRS = [
+  ["remotely from Sydney, under the data-transfer terms in your contract", "remotely, from the countries your contract names, under its data-transfer terms"],
+  ["remotely from Sydney.", "remotely, from the countries your contract names."],
+  ["Delivered remotely from Sydney; on-site visits by arrangement.", "Delivered remotely from Sydney and the countries your contract names; on-site visits by arrangement."],
+];
+
+test("README: the Sydney gate sits between Australian content and the demos, with its trigger and the three from/to pairs verbatim (spec §8)", () => {
+  const readme = readFileSync(join(ROOT, "README.md"), "utf8");
+  const heading = "### When someone outside Sydney first reaches a client's systems";
+  assert.ok(readme.includes(heading));
+  const start = readme.indexOf(heading);
+  assert.ok(readme.indexOf("### Australian content, labelled") < start, "the gate comes after Australian content, labelled");
+  const end = readme.indexOf("\n### ", start + heading.length);
+  assert.equal(readme.slice(end + 1).split("\n")[0], "### Demos and the checker", "the gate comes directly before Demos and the checker");
+  const gate = readme.slice(start, end);
+  assert.ok(gate.includes("the first time a person working outside Sydney gets access to a client's systems"), "the trigger");
+  for (const s of [
+    "remotely from Sydney, under the data-transfer terms in your contract", "remotely, from the countries your contract names, under its data-transfer terms",
+    "remotely, from the countries your contract names.", "Delivered remotely from Sydney; on-site visits by arrangement.",
+    "Delivered remotely from Sydney and the countries your contract names; on-site visits by arrangement.",
+  ]) assert.ok(readme.includes(s), s);
+  // Each pair is one line of the gate, in backticks, the old phrase before the new one.
+  for (const [from, to] of SYDNEY_GATE_PAIRS) {
+    const line = gate.split("\n").find((l) => l.includes(`\`${from}\``) && l.includes(`\`${to}\``)) ?? "";
+    assert.ok(line && line.indexOf(`\`${from}\``) < line.indexOf(`\`${to}\``), `the gate doesn't change \`${from}\` to \`${to}\``);
+  }
+});
+
+test("check 11 reads careers.ts as offer copy, so a pricing phrase or currency figure in it fails the build (spec §5, §9)", () => {
+  assert.ok(OFFER_FILES.includes("src/data/careers.ts"), "11-pricing.mjs OFFER_FILES leaves out careers.ts");
+  const r = result();
+  scan(readFileSync(join(ROOT, "src/data/careers.ts"), "utf8"), "src/data/careers.ts", [], r, { lines: true, phrases: OFFER_RULES });
+  assert.deepEqual(r.errors, []);
 });

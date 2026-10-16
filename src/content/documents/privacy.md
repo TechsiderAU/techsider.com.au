@@ -1,7 +1,7 @@
 ---
 title: Privacy policy
 summary: How Techsider collects, uses, stores and discloses personal information, which privacy laws apply, and how to use your rights or make a complaint.
-lastUpdated: 2026-10-13
+lastUpdated: 2026-10-16
 draft: true
 ---
 
@@ -56,6 +56,18 @@ Sometimes we contact people first, to tell their organisation about our services
 - **Why:** to introduce our services to your organisation and, if you're interested, to discuss them with you.
 - **Telling you:** our first message says who we are, why we're contacting you and where we found your details, and links to this policy.
 - **Opting out:** reply to say you'd rather not hear from us, or email admin@techsider.com.au, and we stop. We then keep only your email address, on a do-not-contact list, so that we don't contact you again.
+
+## When you apply for a role
+
+<!-- ⚑ owner: confirm the 12-month retention period for applications with the lawyer (careers spec §4.6). -->
+<!-- ⚑ owner: if references or background checks are ever used, add what is collected, from whom, and with what consent (careers spec §6). -->
+<!-- ⚑ owner: the lawyer confirms the lawful basis for applications from people in the EU or UK, and which recipients outside Australia this section must name (careers spec §6). -->
+
+When you apply for a role, you email your application to admin@techsider.com.au. We collect what you send: your name, contact details, CV, note and links, and anything else you choose to include. We use it to assess your application and to contact you about it. If you don't include your contact details and CV, we can't consider your application.
+
+Applications arrive in our Lark Suite mailbox, and only the people who handle applications and decide on roles see them. Lark Suite, and some of those people, may handle your information outside Australia; where Lark Suite stores it is listed under "Disclosure outside Australia" below. We keep applications for 12 months after we decide, then delete them, or sooner if you ask.
+
+We don't use AI to score or reject applications; a person reads every one. To see, correct or delete your application, or to withdraw it, email admin@techsider.com.au. If you're unhappy with how we've handled it, email us first so we can try to put it right. You can also complain to one of the regulators listed under "Complaints" below.
 
 ## Why we use it, and on what basis
 

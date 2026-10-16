@@ -1,7 +1,8 @@
 // Spec §11.5 check 11 (D4): no pricing in offer copy. Check 04's §3.5 pricing list
 // (including "from $<n>", in any currency it knows) and any currency figure fail in:
 // - the offer sources: src/content/solutions/, src/content/kits/ and src/data/demos/
-//   (every file but README.md and dotfiles), src/data/services.ts and src/data/contact.ts;
+//   (every file but README.md and dotfiles), src/data/services.ts, src/data/contact.ts and
+//   src/data/careers.ts (careers spec §5);
 // - the visible text of the built offer pages: /, /solutions/**, /services/** (with
 //   Evaluation Partner) and /contact/**, and, in the preview build, the gallery's templates
 //   of those pages (WB-11): home*, solution*, services, evaluation-partner, contact* and sent.
@@ -30,7 +31,7 @@ export const CURRENCY = {
 };
 export const OFFER_RULES = [...PRICING, CURRENCY];
 export const OFFER_DIRS = ["src/content/solutions", "src/content/kits", "src/data/demos"];
-export const OFFER_FILES = ["src/data/services.ts", "src/data/contact.ts"];
+export const OFFER_FILES = ["src/data/services.ts", "src/data/contact.ts", "src/data/careers.ts"];
 export const OFFER_PAGES = /^(index\.html|(solutions|services|contact)\/.+\.html)$/;
 /** The gallery's offer templates, which only the preview build has: the same rule as the pages they preview. */
 export const GALLERY_OFFER_PAGES = /^preview\/templates\/(home[a-z-]*|solutions?[a-z-]*|services|evaluation-partner|contact[a-z-]*|sent)\/index\.html$/;

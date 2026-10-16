@@ -196,6 +196,27 @@ Techsider is headquartered in Sydney and builds for organisations in any country
 - **Region notes.** A region note that names a region says where the package runs: in the client's own Microsoft or AWS account, in the cloud region they choose, or in an Australian region when Techsider manages it. It also says the team reaches the system remotely from Sydney, under the data-transfer terms in the contract. The AI Evaluation and AI Switch-On notes name no region, because the client's own environment or the platform's vendor sets where processing runs. A package flagged `onshore: true` shows the badge "Your data stays in your region.", linked to its note.
 - **The identity sweep.** `tests/global-identity.test.mjs` reads every page of `dist/`, `<head>` and JSON-LD included, and fails on any of the eight go-global S1 strings, such as "Australian organisations", outside the allowed contexts in `tests/support/s1-scan.mjs`: `data-region="au"` wrappers, the HQ line (`data-hq`), region labels, `SITE.summary`, `/legal/` pages, the contact form's privacy notice, and the search and sharing tags of a post tagged `region: au`. It keeps no list of known violations: fix the copy, or move Australia-only content into its wrapper.
 
+### When someone outside Sydney first reaches a client's systems
+
+The site says the team reaches client systems remotely from Sydney. That stays in the copy while it's true, and this gate (approach A of the careers spec of October 2026) sets when and how it changes:
+
+1. **The trigger:** the first time a person working outside Sydney gets access to a client's systems.
+2. **The replacements**, all made in one commit:
+   - Wherever `remotely from Sydney, under the data-transfer terms in your contract` appears, it becomes `remotely, from the countries your contract names, under its data-transfer terms`.
+   - The bare `remotely from Sydney.` in `src/data/services.ts` becomes `remotely, from the countries your contract names.`
+   - `Delivered remotely from Sydney; on-site visits by arrangement.` (`DELIVERY_MODEL`, `src/lib/fixed-copy.ts`) becomes `Delivered remotely from Sydney and the countries your contract names; on-site visits by arrangement.`
+   - The mechanism of the "Your data stays in your region." pillar (`src/data/positioning.ts`, id `onshore`) gets the same phrase change.
+   - If anyone outside Australia gets access, the held data processing agreement line in `src/data/contact.ts` ("Our team reaches your systems from Australia") changes too.
+3. **Finding every copy:** `grep -rn -e "from Sydney" -e "from Australia" src tests README.md`. Every hit in a test is a pin that changes in the same commit. They include:
+   - `tests/residency-commitments.test.mjs`, including its "remotely from Sydney" FAQ guard;
+   - `tests/fixed-copy.test.mjs`;
+   - `tests/company-pages.test.mjs`;
+   - `tests/services-pages.test.mjs`;
+   - `tests/solutions-content.test.mjs` (`REMOTE_ACCESS_END`);
+   - `tests/industries-a.test.mjs`;
+   - `tests/readme.test.mjs`.
+4. **What stays:** `CONTACT_BASE`, "Based in Sydney, delivered remotely.", remains true and doesn't change.
+
 ### Demos and the checker
 
 Every demo is a canned replay, the sample report or a client-side tool: no demo, and not the checker, calls a model or any other network endpoint (spec §8.7, §9.1). Each solution has one demo file, `src/data/demos/<solution id>.json`, which `makeDemoSchema()` in `src/content/schemas.ts` validates by its `kind`:
