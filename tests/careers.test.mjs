@@ -289,11 +289,11 @@ test("careersView: cards numbered 01–04 in data order, each with its anchor an
   assert.ok(!("label" in view.roles.cards[1]), "a role without a label gives a card without one");
 });
 
-test("careersView: one section per role, in order, with its lists, its terms and the same anchor and mailto as its card", () => {
+test("careersView: one section per role, in order, with its number, lists and terms, and the same anchor and mailto as its card", () => {
   const view = careersView(CAREERS, siteContext(false), CONTACT);
   assert.deepEqual(view.sections, ROLES.map((r, i) => ({
-    id: r.id, href: `#${r.id}`, mailto: MAILTOS[i], title: r.title, ...(r.label ? { label: r.label } : {}),
-    tagline: r.tagline, tags: r.tags, responsibilities: r.responsibilities, bring: r.bring, terms: r.terms,
+    number: String(i + 1).padStart(2, "0"), id: r.id, href: `#${r.id}`, mailto: MAILTOS[i], title: r.title, ...(r.label ? { label: r.label } : {}),
+    tagline: r.tagline, responsibilities: r.responsibilities, bring: r.bring, terms: r.terms,
   })));
 });
 
@@ -335,6 +335,12 @@ test("careersView: the storage clause follows the Trust table's row for the emai
   // The provider's own country field isn't what the clause reads: the Trust table's row is.
   const providerOnly = { ...CONTACT, emailProvider: { ...CONTACT.emailProvider, country: "Singapore" } };
   assert.match(careersView(CAREERS, siteContext(false), providerOnly).notice.paragraphs[1], /outside Australia; the countries are not yet confirmed\./);
+  // Any other shape of the row's country fails the build instead of misreading (carried minor M11).
+  const withCountry = (country) => ({ ...CONTACT, subProcessors: CONTACT.subProcessors.map((s) => s.entity === "Lark Suite" ? { ...s, country } : s) });
+  for (const country of ["Storage countries not yet confirmed", "To be confirmed", "Confirmation pending", "Singapore and the United States", "Singapore, Japan"]) {
+    assert.throws(() => careersView(CAREERS, siteContext(false), withCountry(country)), /neither one place nor "Not yet confirmed/, country);
+  }
+  assert.match(careersView(CAREERS, siteContext(false), withCountry("Not yet confirmed with Lark Suite")).notice.paragraphs[1], /outside Australia; the countries are not yet confirmed\./);
 });
 
 test("careersView: the ABN part drops while SITE.abn is null, as hqLine() does (spec §4.6)", () => {
@@ -357,6 +363,8 @@ test("careersView: fails the build on an empty, duplicated or mis-slugged role l
   // A stray brace is a token left unfilled; an unknown token in the apply opening fails too.
   assert.throws(() => careersView(withNotice([CAREERS.notice.paragraphs[0], "A { stray brace.", CAREERS.notice.paragraphs[2]]), siteContext(false), CONTACT), /token/i);
   assert.throws(() => careersView({ ...CAREERS, apply: { ...CAREERS.apply, opening: "Email {mail}." } }, siteContext(false), CONTACT), /unknown token \{mail\}/);
+  // An inherited key is still an unknown token (carried minor M2).
+  assert.throws(() => careersView(withNotice(["{constructor}", CAREERS.notice.paragraphs[1], CAREERS.notice.paragraphs[2]]), siteContext(false), CONTACT), /unknown token \{constructor\} in notice paragraph 1/);
   // A role whose title drifts from its id fails, so the anchor always matches the heading.
   assert.throws(() => careersView(withRoles([{ ...CAREERS.roles.items[3], title: "AI Governance and Risk Lead" }]), siteContext(false), CONTACT), /slugify/i);
   // The notice is three paragraphs.

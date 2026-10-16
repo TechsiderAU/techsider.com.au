@@ -3,7 +3,9 @@
 // It numbers the roles, derives each role's anchor and per-role email subject from the SiteContext's
 // address, and fills the apply opening and the applicant notice from SITE, CONTACT and the
 // SiteContext. A role list or a token that would put a broken page live throws, so the build fails.
-// Copy rules: careers spec §5. This file holds no copy, and its messages quote no watched phrase.
+// Copy rules: careers spec §5. Its only words are the derived phrases spec §3 and §4.6 give (the
+// storage clause, the ABN part and the email subject's prefix), and its messages quote no watched
+// phrase.
 import type { CareersData, ContactData } from "../../content/page-schemas.ts";
 import { SITE, hqPlace, slugify } from "../../data/nav.ts";
 import type { SiteContext } from "../site.ts";
@@ -28,8 +30,8 @@ export interface RoleCard {
   tags: string[];
 }
 
-/** One role's own section (careers spec §3), with the same anchor and mailto as its card. */
-export interface RoleSection extends Omit<RoleCard, "number" | "description"> {
+/** One role's own section (careers spec §3, §9), with the same number, anchor and mailto as its card. Its tags show only on the card. */
+export interface RoleSection extends Omit<RoleCard, "description" | "tags"> {
   responsibilities: string[];
   bring: string[];
   /** The "How the role works" line. */
@@ -61,7 +63,7 @@ const TOKEN = /\{([a-zA-Z]+)\}/g;
 /** Fills each {token} from `values`; an unknown token, or a brace left after filling, throws. */
 function fill(text: string, values: Record<string, string>, where: string): string {
   const out = text.replace(TOKEN, (m, k: string) => {
-    if (!(k in values)) throw new Error(`careersView: unknown token ${m} in ${where} (careers spec §4.6)`);
+    if (!Object.hasOwn(values, k)) throw new Error(`careersView: unknown token ${m} in ${where} (careers spec §4.6)`);
     return values[k];
   });
   if (/[{}]/.test(out)) throw new Error(`careersView: an unfilled token is left in ${where} (careers spec §4.6)`);
@@ -92,7 +94,15 @@ export function careersView(
 
   const row = contact.subProcessors.find((s) => s.entity === contact.emailProvider.name);
   if (!row) throw new Error(`careersView: no sub-processor row for ${contact.emailProvider.name} (careers spec §4.6)`);
-  const storage = /^Not yet confirmed/i.test(row.country) ? "the countries are not yet confirmed" : `its storage country is ${row.country}`;
+  // The clause reads two shapes of the row's country (careers spec §4.6): "Not yet confirmed…", or one
+  // named place. Any other shape, such as other unconfirmed wording or a list of places, fails the
+  // build, so the owner rewords the row or the clause instead of publishing a sentence that misreads.
+  const UNCONFIRMED = /^Not yet confirmed/i;
+  const NOT_ONE_PLACE = /confirm|pending|\btb[cd]\b|\bto be\b|[,;\/&]|\band\b/i;
+  if (!UNCONFIRMED.test(row.country) && NOT_ONE_PLACE.test(row.country)) {
+    throw new Error(`careersView: ${row.entity}'s storage country "${row.country}" is neither one place nor "Not yet confirmed…", so the notice can't state it (careers spec §4.6)`);
+  }
+  const storage = UNCONFIRMED.test(row.country) ? "the countries are not yet confirmed" : `its storage country is ${row.country}`;
   const values: Record<string, string> = {
     legalName: SITE.legalName,
     abnPart: SITE.abn ? ` (ABN ${SITE.abn})` : "",
@@ -109,10 +119,10 @@ export function careersView(
     title: r.title,
     ...(r.label !== undefined ? { label: r.label } : {}),
     tagline: r.tagline,
-    tags: r.tags,
   });
-  const cards: RoleCard[] = items.map((r, i) => ({ number: String(i + 1).padStart(2, "0"), ...common(r), description: r.description }));
-  const sections: RoleSection[] = items.map((r) => ({ ...common(r), responsibilities: r.responsibilities, bring: r.bring, terms: r.terms }));
+  const numberOf = (i: number) => String(i + 1).padStart(2, "0");
+  const cards: RoleCard[] = items.map((r, i) => ({ number: numberOf(i), ...common(r), description: r.description, tags: r.tags }));
+  const sections: RoleSection[] = items.map((r, i) => ({ number: numberOf(i), ...common(r), responsibilities: r.responsibilities, bring: r.bring, terms: r.terms }));
 
   const [p1, p2, p3] = data.notice.paragraphs.map((p, i) => fill(p, values, `notice paragraph ${i + 1}`));
   return {
