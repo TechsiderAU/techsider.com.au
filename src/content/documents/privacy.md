@@ -33,6 +33,7 @@ When we handle personal information for a client during an engagement, the clien
 - **When you email us or submit an enquiry:** your name, your email address, your organisation, and whatever you write. The enquiry form also asks for your country, your industry, your organisation's size, what you'd like to talk about, and your agreement to how we handle the enquiry, and optionally how you found us.
 - **When your browser runs JavaScript:** the enquiry form also sends your browser's time zone, so our reply suits your working hours. Without JavaScript, the form still works and sends no time zone.
 - **When we contact you first:** the details listed under "People we contact first" below.
+- **When you apply for a role:** the details listed under "When you apply for a role" below.
 - **When you visit this website:** nothing, from the site itself. It sets no cookies and loads no analytics or tracking scripts. The services that host it, GitHub Pages and Cloudflare, receive your IP address and the details of each request, such as the page asked for and your browser's type, so they can deliver the site and protect it from attack.
 
 Cloudflare adds a script to display our email address while protecting it from automated harvesting. The address needs JavaScript to display; the contact form can submit without JavaScript. This email-decoding script is not an analytics tool.
@@ -79,6 +80,7 @@ We use personal information only for the purposes below, and we don't sell it. W
 - **Replying, discussing the work you ask about, and keeping a record of that conversation.** Basis: steps you ask us to take before a possible contract, or our legitimate interest in answering business enquiries and keeping a record of them.
 - **Delivering this website and protecting it from attack, through the hosting logs described above.** Basis: our legitimate interest in running a secure website.
 - **Contacting people at organisations first, about our services.** Basis: our legitimate interest in telling organisations about our services, or your consent, where the e-marketing law that applies to you requires it.
+- **Assessing applications for a role, and contacting applicants about them.** Basis: steps you ask us to take before a possible contract, or our legitimate interest in recruiting.
 
 Ticking the box on the enquiry form records that you agree to how we handle your enquiry. It isn't consent to receive marketing from us.
 
@@ -116,7 +118,7 @@ Where the GDPR or the UK GDPR applies, our disclosures to these providers can be
 
 <!-- ⚑ owner: set the retention period for enquiries and outreach records, for example a number of months after our last contact, and put it in the first sentence below (go-global §7.1 P8, O2). -->
 
-We keep an enquiry, our replies and any outreach messages while we're in touch with you, and delete them once we no longer need them to deal with you. If the conversation leads to work, our contract with your organisation sets how long we keep the records of that work.
+We keep an enquiry, our replies and any outreach messages while we're in touch with you, and delete them once we no longer need them to deal with you. If the conversation leads to work, our contract with your organisation sets how long we keep the records of that work. We keep applications for the period set out under "When you apply for a role" above.
 
 ## Security
 

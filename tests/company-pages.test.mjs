@@ -298,6 +298,9 @@ const PRIVACY_LINES = [
   ["careers", "We keep applications for 12 months after we decide, then delete them, or sooner if you ask."],
   ["careers", "We don't use AI to score or reject applications; a person reads every one."],
   ["careers", `To see, correct or delete your application, or to withdraw it, email ${SITE.email}.`],
+  ["careers", '- **When you apply for a role:** the details listed under "When you apply for a role" below.'],
+  ["careers", "- **Assessing applications for a role, and contacting applicants about them.** Basis: steps you ask us to take before a possible contract, or our legitimate interest in recruiting."],
+  ["careers", 'We keep applications for the period set out under "When you apply for a role" above.'],
 ];
 // go-global §8.1: how "What we collect" names each field the enquiry form posts.
 const FORM_FIELD_WORDS = {
