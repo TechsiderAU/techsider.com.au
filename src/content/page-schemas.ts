@@ -62,6 +62,16 @@ export const servicesData = z.strictObject({
 /** A field name a form provider reads ("_redirect", "_append", "_gotcha"): a token, safe as a name attribute. */
 const providerField = z.string().regex(/^[A-Za-z_][A-Za-z0-9_-]*$/);
 
+/**
+ * One item of the contact page's "Something else?" column (careers spec §4.7). It ends in a mailbox
+ * (`email`) or a link to another page (`link`), never both and never neither. The page renders the
+ * link as plain text while that page isn't shown.
+ */
+export const deflectionItem = z.strictObject({
+  title: z.string(), body: z.string(), email: z.email().optional(),
+  link: z.strictObject({ pageKey: z.enum(["careers"]), label: z.string() }).optional(),
+}).refine((d) => (d.email === undefined) !== (d.link === undefined), { message: "a deflection item has exactly one of email or link (careers spec §4.7)" });
+
 export const contactData = z.strictObject({
   replyTime: z.string(), // written once: /contact/ and /contact/sent/ read it, and no other page states a reply time (spec §8.11)
   // The time base the reply sentence names (go-global §4.5): src/lib/reply-time.ts builds the one
@@ -90,7 +100,7 @@ export const contactData = z.strictObject({
   emailProvider: z.strictObject({ name: z.string(), country: z.string() }),
   subProcessors: z.array(z.strictObject({ entity: z.string(), purpose: z.string(), country: z.string(), data: z.string() })).min(2),
   whatNext: z.array(z.string()).min(3),
-  deflection: z.array(z.strictObject({ title: z.string(), body: z.string(), email: z.email() })).min(1),
+  deflection: z.array(deflectionItem).min(1),
 }).refine((c) => c.formEndpoint === null || c.formProvider !== null, {
   message: "a form endpoint needs its form provider: the collection notice names it (spec §10.2)", path: ["formProvider"],
 }).superRefine((c, ctx) => {

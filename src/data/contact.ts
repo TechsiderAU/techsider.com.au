@@ -68,6 +68,8 @@ export const CONTACT: ContactData = {
   // ⚑ owner: a security contact address for security.txt (spec §12 item 7); every request goes to the one mailbox until then
   deflection: [
     { title: "Security, privacy and media", body: "For security reports, privacy requests or media enquiries, email us with the details.", email: SITE.email },
+    // Job seekers go to the careers page, which says how to apply (careers spec §4.7).
+    { title: "Careers", body: "Looking for a role? Our roles, and how to apply, are on the careers page.", link: { pageKey: "careers", label: "See the roles" } },
   ],
 };
 

@@ -3,6 +3,8 @@
 // wraps this in BaseLayout. The H1; the enquiry form, only while a form endpoint is configured
 // (set once the owner chooses a form provider; until then #form is left out and #email leads); the
 // email address as plain text with a copy button; what happens next; and the deflection column.
+// Each deflection item ends in its mailbox or, for Careers, a link to its page (careers spec §4.7):
+// plain text while that page isn't shown.
 // The hero's sub says where the work is done from, then the reply-time sentence (go-global §3.2,
 // §4.5): replySentence() builds it from contact.replyTime and contact.replyTimeBase, and it is the
 // page's one [data-reply-time]. This page and /contact/sent/ state it; no other page states a reply
@@ -29,6 +31,8 @@ interface Props {
 
 const { contact, international, site } = Astro.props;
 const outside = internationalLines(international, "contact");
+// The page a link item points to: its href is null while that page isn't shown.
+const deflection = contact.deflection.map((item) => ({ ...item, linkHref: item.link ? site.page(item.link.pageKey).href : null }));
 ---
 <div class="template" data-template="contact">
   <PageHero title={CONTACT_H1} highlight="fix" display={false}><Fragment slot="sub">{CONTACT_BASE}{" "}<span data-reply-time>{replySentence(contact)}</span></Fragment></PageHero>
@@ -72,11 +76,14 @@ const outside = internationalLines(international, "contact");
         <section id="elsewhere" class="contact-block" aria-labelledby="elsewhere-heading">
           <h2 id="elsewhere-heading" class="contact-heading">Something else?</h2>
           <ul class="contact-deflection">
-            {contact.deflection.map((item) => (
+            {deflection.map((item) => (
               <li class="contact-deflect">
                 <h3 class="contact-deflect-title">{item.title}</h3>
                 <p class="contact-deflect-body">{item.body}</p>
-                <p class="contact-deflect-email"><a href={`mailto:${item.email}`} class="contact-link">{item.email}</a></p>
+                {item.email !== undefined && <p class="contact-deflect-email"><a href={`mailto:${item.email}`} class="contact-link">{item.email}</a></p>}
+                {item.link !== undefined && (
+                  <p class="contact-deflect-email">{item.linkHref === null ? item.link.label : <a href={item.linkHref} class="contact-link">{item.link.label}</a>}</p>
+                )}
               </li>
             ))}
           </ul>

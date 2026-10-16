@@ -92,6 +92,7 @@ const text = (html) => visibleText(html).trim();
 // Text as a browser shows it inline: tags dropped without adding spaces ("<span>fix</span>." → "fix.").
 const inlineText = (html) => decodeEntities(html.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
 const tagged = (html, name) => elements(html, (t) => t.name === name);
+const withClass = (html, cls) => elements(html, (t) => (t.attrs.class ?? "").split(/\s+/).includes(cls));
 const titleOf = (html) => decodeEntities(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "");
 const descriptionOf = (html) => decodeEntities(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "");
 const jsonLd = (html) => [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
@@ -186,8 +187,15 @@ test("Contact: the configured form provider is included in the services handling
   assert.equal(CONTACT.formProvider.name, "FormSubmit");
   assert.equal(CONTACT.emailProvider.name, "Lark Suite");
   assert.deepEqual(CONTACT.subProcessors.map((s) => s.entity), ["GitHub Pages", "Cloudflare", "Lark Suite", "FormSubmit"]);
-  assert.equal(CONTACT.deflection.length, 1, "other enquiries share one contact block");
-  assert.ok(CONTACT.deflection.every((d) => d.email === SITE.email), "a deflection address isn't the site's mailbox");
+  // The shared contact block, then the pointer to the careers page (careers spec §4.7).
+  assert.deepEqual(CONTACT.deflection.map((d) => d.title), ["Security, privacy and media", "Careers"]);
+  assert.equal(CONTACT.deflection.filter((d) => d.email !== undefined).length, 1, "other enquiries share one contact block");
+  assert.ok(CONTACT.deflection.every((d) => d.email === undefined || d.email === SITE.email), "a deflection address isn't the site's mailbox");
+  assert.deepEqual(
+    CONTACT.deflection[1],
+    { title: "Careers", body: "Looking for a role? Our roles, and how to apply, are on the careers page.", link: { pageKey: "careers", label: "See the roles" } },
+    "the Careers item is careers spec §4.7's, with a link and no email",
+  );
 });
 
 test("Trust: no Part B term is confirmed, so only Part A answers show; SOC 2 is a plain No; insurance isn't mentioned", () => {
@@ -415,7 +423,15 @@ test("/contact/: the enquiry form, email fallback, reply time and next steps are
   assert.equal(text(one(main, "data-email").inner), SITE.email);
   assert.equal(inlineText(one(main, "data-reply-time").inner), replySentence(CONTACT));
   assert.deepEqual(tagged(tagged(one(main, "id", "next").inner, "ol")[0].inner, "li").map((li) => text(li.inner)), CONTACT.whatNext);
-  assert.deepEqual(tagged(one(main, "id", "elsewhere").inner, "a").map((a) => a.attrs.href), CONTACT.deflection.map((d) => `mailto:${d.email}`));
+  // The shared mailbox, then the Careers item's link to /careers/ (careers spec §4.7).
+  const elsewhere = one(main, "id", "elsewhere");
+  assert.deepEqual(tagged(elsewhere.inner, "h3").map((h) => text(h.inner)), ["Security, privacy and media", "Careers"]);
+  assert.deepEqual(tagged(elsewhere.inner, "a").map((a) => a.attrs.href), ["mailto:admin@techsider.com.au", "/careers/"]);
+  assert.deepEqual(tagged(elsewhere.inner, "a").map((a) => text(a.inner)), ["admin@techsider.com.au", "See the roles"]);
+  assert.deepEqual(
+    withClass(elsewhere.inner, "contact-deflect-body").map((p) => text(p.inner)),
+    CONTACT.deflection.map((d) => d.body),
+  );
 });
 
 test("the reply time is written once and shared by the contact and confirmation pages", () => {
